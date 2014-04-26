@@ -1,8 +1,13 @@
 #!/usr/bin/perl
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
 # This script parses the bowtie output of the EXSK (A priori, simplex exon skipping) mapping.
-use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+
+use Cwd qw(abs_path);
+$cwd = abs_path($0);
+($dir)=$cwd=~/(.+)\/bin/;
 
 ($sp,$length)=$ARGV[0]=~/(.{3})EXSK\-(\d+?)\-/; # input file format
 
@@ -33,8 +38,8 @@ close MAPPABILITY;
 
 #### parses the bowtie output file for the EEJ sequences
 ($root)=$file=~/(.+\-$length\-.+?)\-e/;
-open (I, $file);
-while (<I>){
+$I = openFileHandle ($file);
+while (<$I>){
     chomp;
     @t=split(/\t/);
 
@@ -56,7 +61,7 @@ while (<I>){
     $previous_read=$read; 
     $previous_event=$event;
 }
-close I;
+close $I;
 
 open (O, ">$root.exskX"); #file with PSI and read counts per event.
 ### Temporary output format needed for Step 2
@@ -100,5 +105,3 @@ foreach $event (sort (keys %eff)){
 	print O "$pre_data{$event}\t$PSI\t$rE\t$rI1\t$rI2\t$all_reads_event\t.\t$COMPLEX{$event}\t$E\t$I1\t$I2\t.\t.\t.\t$NAME{$event}\n";
     }
 }
-
-system "gzip $file";

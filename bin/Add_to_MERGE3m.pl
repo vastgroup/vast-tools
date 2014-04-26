@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
 use Cwd;
 $cwd = getcwd;
 ($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;

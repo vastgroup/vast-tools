@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
 # This script is to calculate PSIs for MIC and produce a table with them for all samples.
 use Cwd;
 $cwd = getcwd;

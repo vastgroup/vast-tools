@@ -2,6 +2,9 @@
 # This scripts splits reads into two X-nt reads. 
 # If the length of the original reads is < 2X, it splits in an overlapping manner.
 
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
 ($root)=$ARGV[0]=~/(.+?)\.f/;
 $length=$ARGV[1];
 die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
@@ -17,9 +20,9 @@ $del=$/;
 
 ### Parses the original reads
 open (OUTPUT, ">$root-$length.fq");
-open (INPUT, $ARGV[0]);
-<INPUT>; #invalid bit
-while (<INPUT>){
+$INPUT = openFileHandle ($ARGV[0]);
+<$INPUT>; #invalid bit
+while (<$INPUT>){
     /\n(.+?)\n(.+?)\n(.+?)\n/;
     $name=$`;
     $seq=$1;
@@ -39,6 +42,7 @@ while (<INPUT>){
         $total_reads_accepted++;
     }
 }
+close $INPUT;
 
 print "Total processed reads: $total_reads\n";
 print "Total valid reads: $total_reads_accepted\n";

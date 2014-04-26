@@ -1,8 +1,12 @@
 #!/usr/bin/perl
 # This script parses the bowtie output against the EEJ for MULTIEX events (a priori complex events).
-use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
+use Cwd qw(abs_path);
+$cwd = abs_path($0);
+($dir)=$cwd=~/(.+)\/bin/;
 
 ($sp,$length)=$ARGV[0]=~/(.{3})MULTI\-(\d+?)\-/; # uniform format
 ($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output
@@ -36,8 +40,8 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 ### Loads and counts raw reads
-open (INPUT, $file);
-while (<INPUT>){
+$INPUT = openFileHandle($file);
+while (<$INPUT>){
     chomp;
     @t=split(/\t/);
 
@@ -59,7 +63,7 @@ while (<INPUT>){
     $previous_read=$read;
     $previous_event=$event;
 }
-close INPUT;
+close $INPUT;
 
 ($root)=$file=~/(.+\-$length\-.+?)\-e/;
 open (O, ">$root.MULTI3X");
@@ -152,6 +156,3 @@ foreach $event_root (sort (keys %eff)){
 	print O "$EXCL{$i}=$RrefE{$i}=$refE{$i}\t$I1{$i}=$RrefI1{$i}=$refI1{$i}\t$I2{$i}=$RrefI2{$i}=$refI2{$i}\t$Q\t$post_data{$event_F}\n";	    
     }
 }
-
-system "gzip $file";
-

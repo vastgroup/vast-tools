@@ -1,6 +1,10 @@
 #!/usr/bin/perl
 # This script takes an a posteriori template and uses it to get PSIs for exactly those events. 
 # It does NOT do a new call for AS events
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
 use Cwd;
 $cwd = getcwd;
 ($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;

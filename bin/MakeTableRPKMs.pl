@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 # This script puts all cRPKMs together in two tables (one alone, the other one with the raw read counts for each sample).
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
 use Cwd;
 $cwd = getcwd;
 ($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;

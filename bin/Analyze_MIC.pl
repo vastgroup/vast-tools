@@ -1,8 +1,13 @@
 #!/usr/bin/perl
 # this script analyzes the bowtie output for the microexon (MIC) junctions; EEJs and EEEJs
-use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+# comment
+
+BEGIN {push @INC, '../lib'}
+use FuncBasics qw(:all);
+
+use Cwd qw(abs_path);
+$cwd = abs_path($0);
+($dir)=$cwd=~/(.+)\/bin/;
 
 $file=$ARGV[0];
 
@@ -24,15 +29,15 @@ while (<EFF>){ #loads the effective length in the hash \%eff
 close EFF;
 
 ### Loads bowtie output file and does the read count
-open (INPUT, $file) || die "Needs the bowtie output for MIC file\n";
-while (<INPUT>){
+$INPUT = openFileHandle ($file) || die "Needs the bowtie output for MIC file\n";
+while (<$INPUT>){
     chomp;
     @t=split(/\t/);
     ($event,$coord,$inc_exc,$n)=$t[2]=~/(.+)\.(.+?)\.(.+?)\.(\d+)/;
     $eej="$coord=$n";
     $reads{$event}{$inc_exc}{$eej}++;
 }
-close INPUT;
+close $INPUT;
 
 ### Loads the template information (first 6 columns)
 open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.MIC.Template.txt") || die "Can't find the Template for MIC\n";
@@ -169,5 +174,3 @@ foreach $event (sort (keys %eff)){
 	}
     }
 }
-
-system "gzip $file";
