@@ -4,8 +4,9 @@ use File::Which;
 use Cwd qw(abs_path);
 use Getopt::Long;
 
-# INITIALIZE
+# INITIALIZE PATH AND FLAGS--TSW
 my $binPath = abs_path($0);
+$0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
 my $bowtie = "bowtie"; # by default;
@@ -22,10 +23,10 @@ my $legacyFlag = 0;
 my $verboseFlag = 0;
 
 GetOptions("bowtieProg=s" => \$bowtie,
-			  "sp|SP=s" => \$species,
-			  "db|DB=s" => \$dbDir,
+			  "sp=s" => \$species,
+			  "db=s" => \$dbDir,
 			  "c" => \$cores,
-			  "pe|PE" => \$pairedEnd,
+			  "pe" => \$pairedEnd,
 			  "expr" => \$runExprFlag,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
@@ -34,7 +35,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "verbose" => \$verboseFlag,
 			  "readLen=i" => \$readLength);
 
-# Use pigz if installed
+# Use pigz if installed  --KH
 my $zip = which('pigz');
 if ($zip eq '') {
     $zip = which('gzip');
@@ -42,11 +43,21 @@ if ($zip eq '') {
         die "Error: need gzip or pigz\n";
     }
 } else {
-    print "Found pigz...";
+    print STDERR "[vastdb align] Found pigz...";
     $zip .= " -fp $cores ";
 }
 
+# Set up output directory structure
+unless($legacyFlag) {
+  mkdir("align_out") unless (-e "align_out");
+  mkdir("expr_out") unless (-e "expr_out");
+  mkdir("align_out/$species") unless (-e "align_out/$species");
+  mkdir("expr_out/$species") unless (-e "align_out/$species");
+}
+
 # Command line flags here
+if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $helpFlag = 1; }
+
 
 if (!$ARGV[0] or $helpFlag){
     print "\nCommand: \nvastdb align fastq_file_1 [fastq_file_2] -sp Mmu/Hsa [-expr/-exprONLY -trim once/twice -pe -c 1 -bowtieProg bowtie]\n\n";
@@ -78,7 +89,7 @@ else {
     if ($pairedEnd){
 	($root,$length)=$file=~/(.+?)\_1\-(.+?)\.(fastq|fq)(\.gz)?/;
 	$fq1=$&;
-	$fq2=$file2;
+	$fq2=$ARGV[1];
     #$fq2=~s/\.gz//;
 	$fq="$root-$length.fq";
     }
@@ -110,9 +121,9 @@ die "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
 if (!$genome_sub){
 #### Expression analysis (it maps only the first $le nucleotides of the read)
  if ($runExprFlag || $onlyExprFlag){
-     print "Mapping reads against mRNA sequences\n";
+     print STDERR "[vastdb align] Mapping reads against mRNA sequences\n";
 
-     my $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - $dbDir/EXPRESSION/OUTs/$species"."mRNA-$le-$root.out";
+     my $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."mRNA-$le-$root.out";
 
      if (!$pairedEnd) {
          $cmd = "$fq | $cmd";
@@ -127,8 +138,8 @@ if (!$genome_sub){
      }
 
      system $cmd;
-     print "Calculating cRPKMs\n";
-     system "$binPath/expr_RPKM.pl $dbDir/EXPRESSION/$species"."mRNA-$le-$root.out $dbDir/EXPRESSION/OUTs/$species"."_mRNA-$le.eff"; 
+     print STDERR "[vastdb align] Calculating cRPKMs\n";
+     system "$binPath/expr_RPKM.pl $dbDir/EXPRESSION/$species"."mRNA-$le-$root.out expr_out/$species"."_mRNA-$le.eff"; 
  }
  if ($onlyExprFlag){
      #print "Compressing raw fastq files\n";
@@ -140,7 +151,7 @@ if (!$genome_sub){
 
 #### Merge PE
  if ($pairedEnd){
-     print "Concatenating paired end reads\n";
+     print STDERR "[vastdb align] Concatenating paired end reads\n";
      system "cat $fq1 $fq2 > $fq";
      #system "gzip $fq1 $fq2";
  }
@@ -150,69 +161,69 @@ if (!$genome_sub){
      if ($trim eq "twice" || !$trim){
 	 if ($length > ($le*2)+10){
 	     $half_length=sprintf("%.0f",$length/2);
-	     print "\nTrimming and splitting fastq sequences from $length to $half_length nt\n";
+	     print STDERR "[vastdb align] \nTrimming and splitting fastq sequences from $length to $half_length nt\n";
 	     system "$binPath/Trim-twiceOVER.pl $fq $half_length";
-	     print "Trimming and splitting fastq sequences to $le nt sequences\n";
+	     print STDERR "[vastdb align] Trimming and splitting fastq sequences to $le nt sequences\n";
 	     system "$binPath/Trim-twiceOVER.pl $root-$length-$half_length.fq $le";
 	     system "rm $root-$length-$half_length.fq";
 	     system "mv $root-$length-$half_length-$le.fq $root-$le.fq";
 	 }
 	 else {
-	     print "\nTrimming and splitting fastq sequences to $le nt sequences\n";
+	     print STDERR "[vastdb align] \nTrimming and splitting fastq sequences to $le nt sequences\n";
 	     system "$binPath/Trim-twiceOVER.pl $fq $le";
 	     system "mv $root-$length-$le.fq $root-$le.fq";
 	 }
      }
      elsif ($trim eq "once"){
-	 print "\nTrimming fastq sequences to $le nt sequences\n";
+	 print STDERR "[vastdb align] \nTrimming fastq sequences to $le nt sequences\n";
 	 system "$binPath/Trim-once.pl $fq $le";
 	 system "mv $root-$length-$le.fq $root-$le.fq";
      }
  }
- print "Compressing raw fastq file\n" unless $length==50 || $length==36;
+ print STDERR "[vastdb align] Compressing raw fastq file\n" unless $length==50 || $length==36;
  #system "gzip $fq" unless $length==50 || $length==36;
 ####
  
 #### Get effective reads (i.e. genome substraction).
- print "\nDoing genome substraction\n";
+ print STDERR "[vastdb align] \nDoing genome substraction\n";
  system "$bowtie -p $cores -m 1 -v 2 --un $root-$le-e.fq --max /dev/null $dbDir/FILES/gDNA $root-$le.fq /dev/null";
- print "Compressing trimmed reads\n";
+ print STDERR "[vastdb align] Compressing trimmed reads\n";
  system "$zip $root-$le.fq";
 ####
 }
 
 #### Map to the EEJ:
-print "\nMapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library\n";
-system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > $dbDir/OUTs/$species"."COMBI-M-$le-$root-e_s.out";
-print "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library\n";
-system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > $dbDir/OUTs/$species"."EXSK-$le-$root-e_s.out";  
-print "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library\n";
-system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > $dbDir/OUTs/$species"."MULTI-$le-$root-e.out";
-print "Mapping reads to microexon EEJ library\n";
+print STDERR "[vastdb align] \nMapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library\n";
+system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."COMBI-M-$le-$root-e_s.out";
+print STDERR "[vastdb align] Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library\n";
+system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."EXSK-$le-$root-e_s.out";  
+print STDERR "[vastdb align] Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library\n";
+system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e.out";
+print STDERR "[vastdb align] Mapping reads to microexon EEJ library\n";
 system "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq $species"."MIC-$le-$root-e.bam";
-print "Compressing genome-substracted reads\n";
+print STDERR "[vastdb align] Compressing genome-substracted reads\n";
 system "$zip $root-$le-e.fq";
 ####
 
 ## Analyze MIC
-print "\nStarting EEJ analyses:\n";
-print "Analyzing microexons\n";
-system "$binPath/Analyze_MIC.pl $dbDir/OUTs/$species"."MIC-$le-$root-e.out";
+print STDERR "[vastdb align] \nStarting EEJ analyses:\n";
+print STDERR "[vastdb align] Analyzing microexons\n";
+system "$binPath/Analyze_MIC.pl align_out/$species"."MIC-$le-$root-e.out";
 
 ## Analyze MULTI and EXSK (A priori pipeline)
 #print "Sorting a priori outputs\n";
-#system "$binPath/sort_outs.pl $dbDir/OUTs/$species"."MULTI-$le-$root-e.out";
-#system "$binPath/sort_outs.pl $dbDir/OUTs/$species"."EXSK-$le-$root-e.out";
-print "Analyzing a priori outputs\n";
-system "$binPath/Analyze_EXSK.pl $dbDir/OUTs/$species"."EXSK-$le-$root-e_s.out";
-system "$binPath/Analyze_MULTI.pl $dbDir/OUTs/$species"."MULTI-$le-$root-e_s.out";
+#system "$binPath/sort_outs.pl align_out/$species"."MULTI-$le-$root-e.out";
+#system "$binPath/sort_outs.pl align_out/$species"."EXSK-$le-$root-e.out";
+print STDERR "[vastdb align] Analyzing a priori outputs\n";
+system "$binPath/Analyze_EXSK.pl align_out/$species"."EXSK-$le-$root-e_s.out";
+system "$binPath/Analyze_MULTI.pl align_out/$species"."MULTI-$le-$root-e_s.out";
 
 ## Analyze a posteriori pipeline
 #print "Sorting a posteriori output\n";
-#system "$binPath/sort_outs.pl $dbDir/OUTs/$species"."COMBI-M-$le-$root-e.out";
-print "Analyzing a posteriori output for exon skippings\n";
-system "$binPath/Analyze_COMBI.pl $dbDir/OUTs/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
+#system "$binPath/sort_outs.pl align_out/$species"."COMBI-M-$le-$root-e.out";
+print STDERR "[vastdb align] Analyzing a posteriori output for exon skippings\n";
+system "$binPath/Analyze_COMBI.pl align_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
 ##
 
-system "$zip $dbDir/OUTs/$species/*.out";
+system "$zip align_out/$species/*.out";
 
