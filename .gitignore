@@ -1,0 +1,9 @@
+# Files
+*.ebwt
+*.gz
+*.eff*
+
+# Directories
+Hsa
+Mmu
+Conservation
