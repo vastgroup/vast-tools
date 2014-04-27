@@ -19,8 +19,8 @@ close TEMP;
 $del=$/;
 
 ### Parses the original reads
-open (OUTPUT, ">$root-$length.fq");
-$INPUT = open ($ARGV[0]);
+#open (STDOUT, ">$root-$length.fq");
+$INPUT = openFileHandle($ARGV[0]);
 <$INPUT>; #invalid line
 while (<$INPUT>){
     /\n(.+?)\n(.+?)\n(.+?)\n/;
@@ -35,12 +35,12 @@ while (<$INPUT>){
     if (length($seq)>=$length && length($rest)>=$length) { #make sure the length of the sequence AND quality scores are >= length
         ($S1)=$seq=~/^(.{$length})/;
         ($R1)=$rest=~/^(.{$length})/;
-        print OUTPUT "$del$name-1\n$S1\n$name2-1\n$R1\n";
+        print STDOUT "$del$name-1\n$S1\n$name2-1\n$R1\n";
         $total_reads_accepted++;
     }
 }
 close $INPUT;
 
-print "Total processed reads: $total_reads\n";
-print "Total valid reads: $total_reads_accepted\n";
+print STDERR "[vastdb align trim]: Total processed reads: $total_reads\n";
+print STDERR "[vastdb align trim]: Total valid reads: $total_reads_accepted\n";
 
