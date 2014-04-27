@@ -146,8 +146,7 @@ if (!$genome_sub){
 
      sysErrMsg $cmd;
      print STDERR "[vastdb align] Calculating cRPKMs\n";
-     not sysErrMsg "$binPath/expr_RPKM.pl $dbDir/EXPRESSION/$species"."mRNA-$le-$root.out expr_out/$species"."_mRNA-$le.eff"
-					or die "expr_RPKM.pl failed!\n"; 
+     sysErrMsg "$binPath/expr_RPKM.pl $dbDir/EXPRESSION/$species"."mRNA-$le-$root.out expr_out/$species"."_mRNA-$le.eff"; 
  }
  if ($onlyExprFlag){
      #print "Compressing raw fastq files\n";
