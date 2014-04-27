@@ -63,17 +63,16 @@ if ($zip eq '') {
     $zip = which('gzip');
     if ($zip eq '') {
         die "Error: need gzip or pigz\n";
-    }
+    } 
 } else {
-    verbPrint "Found pigz...";
     $zip .= " -fp $cores ";
 }
+verbPrint "Found $zip...";
 
 # Command line flags here
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $helpFlag = 1; }
 
-
-if (!$ARGV[0] or $helpFlag){
+if (!defined($ARGV[0]) or $helpFlag){
     print "\nCommand: \nvastdb align fastq_file_1 [fastq_file_2] -sp Mmu/Hsa [-expr/-exprONLY -trim once/twice -pe -c 1 -bowtieProg bowtie]\n\n";
     
     print ">> fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq\n";
@@ -93,39 +92,48 @@ die "Needs species\n" if !$species;
 
 
 ### Getting sample name and length:
-$file=$ARGV[0];
-my $zipped = ($file =~ /\.gz$/) ? 1 : 0;
-if ($file=~/\-e\.f/){
+my $fq1 = $ARGV[0];
+my $fq2;
+my $fileName1 = $fq1;
+my $fileName2;
+my $zipped = ($fq1 =~ /\.gz$/) ? 1 : 0;
+
+my($root, $length);
+
+$fileName1 =~ s/^.*\///g;
+
+if ($fileName1 =~ /\-e\.f/){
     $genome_sub=1;
-    ($root,$length)=$file=~/(.+?)\-(.+?)\-e\.(fastq|fq)(\.gz)?/;
+    ($root,$length)=$fileName1=~/(.+?)\-(.+?)\-e\.(fastq|fq)(\.gz)?/;
     $fq=$&;
     die "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
-}
-else {
+} else {
+    # allow readlength to be given by -readLen x --TSW
+    if($readLength) {
+         $length = $readLength;
+         $fileName1 =~ /(.+?)\.(fastq|fq)(\.gz)?/;
+         $root = $1;
+    } else { # default behavior by --MI
+         ($root,$length)=$fileName1=~/(.+?)\_{0,1}1{0,1}\-(.+?)\.(fastq|fq)(\.gz)?/;
+    }
     if ($pairedEnd){
-	($root,$length)=$file=~/(.+?)\_1\-(.+?)\.(fastq|fq)(\.gz)?/;
-	$fq1=$&;
-	$fq2=$ARGV[1];
-    #$fq2=~s/\.gz//;
-	$fq="$root-$length.fq";
-    }
-    else {
-	($root,$length)=$file=~/(.+?)\-(.+?)\.(fastq|fq)(\.gz)?/;
-	$fq=$&;
+		$fq2 = $ARGV[1];
+		$fileName2 = $fq2;
+      $fileName2 =~ s/^.*\///g;
     }
 }
+
+#verbPrint "$fileName1\n$fq1\n;"; die "";
 ###
 
 #length options:
 if ($length>=50){
     $difLE=$length-50;
     $le=50;
-}
-elsif ($length>=36){
+} elsif ($length>=36){
     $difLE=$length-36;
     $le=36;
-}
-else {
+} else {
     die "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
 }
 die "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
@@ -139,16 +147,18 @@ if (!$genome_sub){
  if ($runExprFlag || $onlyExprFlag){
      verbPrint "Mapping reads against mRNA sequences\n";
 
-     my $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."mRNA-$le-$root.out";
+     my $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
 
-     if (!$pairedEnd) {
-         $cmd = "$fq | $cmd";
+     if ($pairedEnd) {
+         $cmd = "$fq1 $fq2 | $cmd";  # altered this to cat both for/rev reads into bowtie.
      } else {
          $cmd = "$fq1 | $cmd";
      }
 
      if ($zipped) {
-         $cmd = "gzip -dc $cmd";
+			$cmd = "zcat $cmd";
+	 # Is zcat a better choice?  --TSW
+    #     $cmd = "gzip -dc $cmd";
      } else {
          $cmd = "cat $cmd";
      }
@@ -161,40 +171,41 @@ if (!$genome_sub){
      #print "Compressing raw fastq files\n";
      #sysErrMsg "gzip $fq" if !$pairedEnd;
      #sysErrMsg "gzip $fq1 $fq2" if $pairedEnd;
-     die "Expression analysis done\n";
+     print STDERR "Expression analysis done\n";
+     exit(1);
  }
 ###
 
 #### Merge PE
  if ($pairedEnd){
      verbPrint "Concatenating paired end reads\n";
-     sysErrMsg "cat $fq1 $fq2 > $fq";
+     sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well?
      #sysErrMsg "gzip $fq1 $fq2";
+ } else {
+   $fq = $fq1;
  }
  
 #### Trimming
- if ($difLE>=10){
-     if ($trim eq "twice" || !$trim){
-	 if ($length > ($le*2)+10){
-	     $half_length=sprintf("%.0f",$length/2);
+ if ($difLE >= 10){
+   if ($trim eq "twice" || !$trim){
+	  if ($length > ($le*2)+10){
+	     $half_length = sprintf("%.0f", $length / 2);
 	     verbPrint "Trimming and splitting fastq sequences from $length to $half_length nt\n";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $half_length";
+	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $half_length > $root-$length-$half_length.fq";
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences\n";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $root-$length-$half_length.fq $le";
+	     sysErrMsg "$binPath/Trim-twiceOVER.pl $root-$length-$half_length.fq $le > $root-$le.fq";
 	     sysErrMsg "rm $root-$length-$half_length.fq";
-	     sysErrMsg "mv $root-$length-$half_length-$le.fq $root-$le.fq";
-	 }
-	 else {
+	     #sysErrMsg "mv $root-$length-$half_length-$le.fq $root-$le.fq";  #piping to stdout removes need for this --TSW
+	  } else {
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences\n";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $le";
-	     sysErrMsg "mv $root-$length-$le.fq $root-$le.fq";
-	 }
-     }
-     elsif ($trim eq "once"){
+	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $le > $root-$le.fq";
+	  #   sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
+	  }
+   } elsif ($trim eq "once"){
 	 verbPrint "Trimming fastq sequences to $le nt sequences\n";
-	 sysErrMsg "$binPath/Trim-once.pl $fq $le";
-	 sysErrMsg "mv $root-$length-$le.fq $root-$le.fq";
-     }
+	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
+	# sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
+   }
  }
  verbPrint "Compressing raw fastq file\n" unless $length==50 || $length==36;
  #sysErrMsg "gzip $fq" unless $length==50 || $length==36;
