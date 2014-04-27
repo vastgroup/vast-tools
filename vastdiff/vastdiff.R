@@ -45,7 +45,7 @@ if ( is.null(opt$verbose ) ) { opt$verbose = FALSE }
 if ( is.null(opt$plotSig ) ) { opt$plotSig = FALSE }
 
 if(opt$plotSig) {
-  dir.create("pdf")
+  dir.create("diff_out")
   q()
 }
 

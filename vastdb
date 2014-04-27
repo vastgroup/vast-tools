@@ -39,17 +39,19 @@ my $cores = 1; # by Default
 
 my $legacyFlag = 0; # Use old input and output... Not by default.
 my $helpFlag = 0;
+my $cleanFlag = 0;
 
-my $output_dir; # Not defined by default
+my $output_dir = "vastdb_out";
 
-my $subCommand = shift @ARGV;
+my $subCommand = shift @ARGV or $helpFlag = 1;
 
 my @args = @ARGV;
 
 Getopt::Long::Configure("pass_through");
 GetOptions("help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
-			  "outputDir=s" => \$output_dir);
+			  "outputDir=s" => \$output_dir,
+			  "clean" => \$cleanFlag);
 
 
 if($helpFlag and 
@@ -67,15 +69,22 @@ Usage: $0 sub-commands [options]
 
 [global options]
 	-h,--help	:	Print this message
+	--output	:	-o outputDir (default vastdb_out)
 	--legacy	:	Use old input/output styles
 	--verbose	:	Print stderr
 "
 }
 
-if(defined($output_dir)) {
-	chdir($output_dir);
+
+# this may need to be altered later --TSW
+if($cleanFlag) {
+  #system("rm -rf $output_dir");
+} else {
+  mkdir($output_dir) unless (-e $output_dir);
+  chdir($output_dir);
 }
 
+## Nuts and Bolts...
 if($subCommand eq "align") {
   system("$path/bin/RunDBS_1.pl @args");
 } elsif($subCommand eq "combine") {
@@ -84,4 +93,4 @@ if($subCommand eq "align") {
   system("$path/vastdiff/vastdiff.R @args");
 }
 
-1;
+exit 1;
