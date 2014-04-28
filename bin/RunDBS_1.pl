@@ -227,7 +227,7 @@ sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cu
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e.out";
 verbPrint "Mapping reads to microexon EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq $species"."MIC-$le-$root-e.out";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MIC-$le-$root-e.out";
 verbPrint "Compressing genome-substracted reads\n";
 sysErrMsg "$zip $root-$le-e.fq";
 ####
@@ -235,15 +235,15 @@ sysErrMsg "$zip $root-$le-e.fq";
 ## Analyze MIC
 verbPrint "Starting EEJ analyses:\n";
 verbPrint "Analyzing microexons\n";
-sysErrMsg "$binPath/Analyze_MIC.pl align_out/$species"."MIC-$le-$root-e.out";
+sysErrMsg "$binPath/Analyze_MIC.pl align_out/$species"."MIC-$le-$root-e.out -dbDir=$dbDir";
 
 ## Analyze MULTI and EXSK (A priori pipeline)
 #print "Sorting a priori outputs\n";
 #sysErrMsg "$binPath/sort_outs.pl align_out/$species"."MULTI-$le-$root-e.out";
 #sysErrMsg "$binPath/sort_outs.pl align_out/$species"."EXSK-$le-$root-e.out";
 verbPrint "Analyzing a priori outputs\n";
-sysErrMsg "$binPath/Analyze_EXSK.pl align_out/$species"."EXSK-$le-$root-e_s.out";
-sysErrMsg "$binPath/Analyze_MULTI.pl align_out/$species"."MULTI-$le-$root-e_s.out";
+sysErrMsg "$binPath/Analyze_EXSK.pl align_out/$species"."EXSK-$le-$root-e_s.out -dbDir=$dbDir";
+sysErrMsg "$binPath/Analyze_MULTI.pl align_out/$species"."MULTI-$le-$root-e_s.out -dbDir=$dbDir";
 
 ## Analyze a posteriori pipeline
 #print "Sorting a posteriori output\n";
@@ -252,5 +252,5 @@ verbPrint "Analyzing a posteriori output for exon skippings\n";
 sysErrMsg "$binPath/Analyze_COMBI.pl align_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
 ##
 
-sysErrMsg "$zip align_out/$species/*.out";
+sysErrMsg "$zip align_out/$species/*.out";  #should this just clean up instead?
 

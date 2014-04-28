@@ -4,10 +4,15 @@ BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
 # This script parses the bowtie output of the EXSK (A priori, simplex exon skipping) mapping.
+use Getopt::Long;
 
 use Cwd qw(abs_path);
 $cwd = abs_path($0);
 ($dir)=$cwd=~/(.+)\/bin/;
+
+my $dbDir;
+
+GetOptions("dbDir=s" => \$dbDir);
 
 ($sp,$length)=$ARGV[0]=~/(.{3})EXSK\-(\d+?)\-/; # input file format
 
@@ -15,7 +20,7 @@ $cwd = abs_path($0);
 system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
 ### parses the general information for the events
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.EXSK.Template.1.txt") || die "No SIMPLE EXSK Template for $sp\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.EXSK.Template.1.txt") || die "No SIMPLE EXSK Template for $sp\n";
 while (<TEMPLATE>){
     chomp;
     @t=split(/\t/);
@@ -27,7 +32,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ### Loads mappability information
-open (MAPPABILITY, "$dir/$sp/FILES/EXSK-$length-gDNA.eff") || die "No Mappability for $sp\n";
+open (MAPPABILITY, "$dbDir/FILES/EXSK-$length-gDNA.eff") || die "No Mappability for $sp\n";
 while (<MAPPABILITY>){
     chomp;
     @t=split(/\t/);

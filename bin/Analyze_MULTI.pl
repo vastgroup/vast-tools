@@ -4,16 +4,22 @@
 BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
+use Getopt::Long;
+
 use Cwd qw(abs_path);
 $cwd = abs_path($0);
 ($dir)=$cwd=~/(.+)\/bin/;
+
+my $dbDir;
+
+GetOptions("dbDir=s" => \$dbDir);
 
 ($sp,$length)=$ARGV[0]=~/(.{3})MULTI\-(\d+?)\-/; # uniform format
 ($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output
 system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
 ### Loads template information
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.MULTI.Template.1.txt") || die "Can't find MULTI template 1\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.MULTI.Template.1.txt") || die "Can't find MULTI template 1\n";
 while (<TEMPLATE>){
     chomp;
     @t=split(/\t/);
@@ -30,7 +36,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ### Loads mappability for each EEJ
-open (MAPPABILITY, "$dir/$sp/FILES/MULTI-$length-gDNA.eff") || die "Can't find mappability file for MULTI\n";
+open (MAPPABILITY, "$dbDir/FILES/MULTI-$length-gDNA.eff") || die "Can't find mappability file for MULTI\n";
 while (<MAPPABILITY>){
     chomp;
     @t=split(/\t/);

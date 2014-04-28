@@ -11,7 +11,7 @@ my $dbDir;
 
 my $helpFlag;
 
-GetOptions("help" => \$helpFlag);
+GetOptions("help" => \$helpFlag, "dbDir=s" => \$dbDir);
 
 if (!$ARGV[0] || $helpFlag){
     print "\nCommand:\nRunDBS_2.pl Species (Hsa or Mmu)\n\n";

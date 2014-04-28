@@ -5,9 +5,15 @@
 BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
+use Getopt::Long;
+
 use Cwd qw(abs_path);
 $cwd = abs_path($0);
 ($dir)=$cwd=~/(.+)\/bin/;
+
+my $dbDir;
+
+GetOptions("dbDir=s" => \$dbDir);
 
 $file=$ARGV[0];
 
@@ -18,7 +24,7 @@ $file=~s/\.gz//;
 $root=$&;
 
 ### Loads mappability/effective lengths
-open (EFF, "$dir/$sp/FILES/$sp"."_MIC-$read_length-gDNA.eff2") || die "Needs file with effective length for each EEEJ\n";
+open (EFF, "$dbDir/FILES/$sp"."_MIC-$read_length-gDNA.eff2") || die "Needs file with effective length for each EEEJ\n";
 while (<EFF>){ #loads the effective length in the hash \%eff
     chomp;
     @t=split(/\t/);
@@ -40,7 +46,7 @@ while (<$INPUT>){
 close $INPUT;
 
 ### Loads the template information (first 6 columns)
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.MIC.Template.txt") || die "Can't find the Template for MIC\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.MIC.Template.txt") || die "Can't find the Template for MIC\n";
 $head=<TEMPLATE>;
 chomp($head);
 while (<TEMPLATE>){

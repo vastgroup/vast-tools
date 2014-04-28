@@ -3,10 +3,16 @@
 BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
+use Getopt::Long;
+
 # In this simplified version, it only aims to get an exon-exon junction (eej) read count. It does not identify cassette events.
 #use Cwd;
 #$cwd = getcwd;
 #($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+
+my $dbDir;
+
+GetOptions("dbDir=s" => \$dbDir);
 
 system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
