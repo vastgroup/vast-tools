@@ -14,7 +14,7 @@ die "Needs Species key\n" if !$ARGV[0];
 
 $COMB="M"; # Only available version
 
-@EEJ=glob("raw_incl/*-$COMB-*.ee*");
+@EEJ=glob("raw_incl/*-$COMB-*.ee*"); # is this right? --TSW
 @EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 

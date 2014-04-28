@@ -67,11 +67,11 @@ die "Some of the headings are not identical\n" if ($head1 ne $head2 || $head1 ne
 
 ### Output file
 ($sp,$N_samples)=$EXSK=~/\-(.{3})(\d+)\-n/;
-$output="$dir/$sp/SAMPLES/INCLUSION_LEVELS_MERGE3m-$sp$N_samples-n.tab";
+$output="INCLUSION_LEVELS_MERGE3m-$sp$N_samples-n.tab";
 open (OUTPUT, ">$output");
 
 # Loads the template 
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.MERGE3m.Template.txt") || die "Can't find the MERGE3m Template";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.MERGE3m.Template.txt") || die "Can't find the MERGE3m Template";
 $head=<TEMPLATE>;
 chomp($head);
 @t=split(/\t/,$head);
