@@ -11,12 +11,16 @@ $cwd = abs_path($0);
 ($dir)=$cwd=~/(.+)\/bin/;
 
 my $dbDir;
+my $sp;
+my $length;
+my $root;
 
-GetOptions("dbDir=s" => \$dbDir);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
+           "readLen=i" => \$length, "root=s" => \$root);
 
-($sp,$length)=$ARGV[0]=~/(\S{3})MULTI\-(\d+?)\-/; # uniform format
-($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output
-system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
+#($sp,$length)=$ARGV[0]=~/(\S{3})MULTI\-(\d+?)\-/; # uniform format
+#($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output    # DEPRECATED --TSW
+#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
 ### Loads template information
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.MULTI.Template.1.txt") || die "Can't find MULTI template 1\n";
@@ -46,8 +50,9 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 ### Loads and counts raw reads
-$INPUT = openFileHandle($ARGV[0]);
-while (<$INPUT>){
+#$INPUT = openFileHandle($ARGV[0]); # DEPRECATED --TSW
+
+while (<STDIN>){
     chomp;
     @t=split(/\t/);
 
@@ -69,9 +74,9 @@ while (<$INPUT>){
     $previous_read=$read;
     $previous_event=$event;
 }
-close $INPUT;
+#close $INPUT;
 
-($root)=$file=~/(.+\-$length\-.+?)\-e/;
+#($root)=$file=~/(.+\-$length\-.+?)\-e/;
 open (O, ">$root.MULTI3X");
 print O "Ensembl_ID\tA_coord\tStrand\tEvent_ID\tFullCoord\tType\tLength\tC1_coord\tC2_coord\tLength_Int1\tLength_Int2\t3n\t";
 print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_all_Reads\tRef_C1\tRef_C2\tExcl_reads(corr_all=raw_ref=corr_ref)\tInc1_reads(corr_all=raw_ref=corr_ref)\tInc2_reads(corr_all=raw_ref=corr_ref)\tComplexity\tPre_C1\tPre_C2\tGene_name\n";

@@ -57,12 +57,10 @@ sub verbPrint {
 }
 
 # Set up output directory structure
-unless($legacyFlag) {
-  mkdir("align_out") unless (-e "align_out");
-  mkdir("expr_out") unless (-e "expr_out");
-  mkdir("align_out/$species") unless (-e "align_out/$species");
-  mkdir("expr_out/$species") unless (-e "align_out/$species");
-}
+mkdir("align_out") unless (-e "align_out");
+mkdir("expr_out") unless (-e "expr_out");
+mkdir("align_out/$species") unless (-e "align_out/$species");
+mkdir("expr_out/$species") unless (-e "align_out/$species");
 
 # Use pigz if installed  --KH
 my $zip = which('pigz');
@@ -208,7 +206,7 @@ if (!$genome_sub){
  
 #### Trimming
  if ($difLE >= 10){
-   if ($trim eq "twice" || !$trim){
+   if (!defined($trim) or $trim eq "twice"){
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
 	     verbPrint "Trimming and splitting fastq sequences from $length to $half_length nt\n";
@@ -241,37 +239,45 @@ if (!$genome_sub){
 }
 
 #### Map to the EEJ:
-verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."COMBI-M-$le-$root-e_s.out";
-verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."EXSK-$le-$root-e_s.out";  
-verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e_s.out";
-verbPrint "Mapping reads to microexon EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MIC-$le-$root-e.out";
+verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."COMBI-M-$le-$root-e_s.out"; # DEPRECATED --TSW
+
+verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."EXSK-$le-$root-e_s.out"; # DEPRECATED --TSW
+
+verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e_s.out"; # DEPRECATED --TSW
+
+verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MIC-$le-$root-e.out"; # DEPRECATED --TSW
+
 verbPrint "Compressing genome-substracted reads\n";
 sysErrMsg "$zip $root-$le-e.fq";
 ####
 
 ## Analyze MIC
-verbPrint "Starting EEJ analyses:\n";
-verbPrint "Analyzing microexons\n";
-sysErrMsg "$binPath/Analyze_MIC.pl align_out/$species"."MIC-$le-$root-e.out -dbDir=$dbDir";
+#verbPrint "Starting EEJ analyses:\n";
+#verbPrint "Analyzing microexons\n";
+#sysErrMsg "$binPath/Analyze_MIC.pl align_out/$species"."MIC-$le-$root-e.out -dbDir=$dbDir";
 
 ## Analyze MULTI and EXSK (A priori pipeline)
 #print "Sorting a priori outputs\n";
 #sysErrMsg "$binPath/sort_outs.pl align_out/$species"."MULTI-$le-$root-e.out";
 #sysErrMsg "$binPath/sort_outs.pl align_out/$species"."EXSK-$le-$root-e.out";
-verbPrint "Analyzing a priori outputs\n";
-sysErrMsg "$binPath/Analyze_EXSK.pl align_out/$species"."EXSK-$le-$root-e_s.out -dbDir=$dbDir";
-sysErrMsg "$binPath/Analyze_MULTI.pl align_out/$species"."MULTI-$le-$root-e_s.out -dbDir=$dbDir";
+#verbPrint "Analyzing a priori outputs\n";
+#sysErrMsg "$binPath/Analyze_EXSK.pl align_out/$species"."EXSK-$le-$root-e_s.out -dbDir=$dbDir";
+#sysErrMsg "$binPath/Analyze_MULTI.pl align_out/$species"."MULTI-$le-$root-e_s.out -dbDir=$dbDir";
 
 ## Analyze a posteriori pipeline
 #print "Sorting a posteriori output\n";
 #sysErrMsg "$binPath/sort_outs.pl align_out/$species"."COMBI-M-$le-$root-e.out";
-verbPrint "Analyzing a posteriori output for exon skippings\n";
-sysErrMsg "$binPath/Analyze_COMBI.pl align_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
+#verbPrint "Analyzing a posteriori output for exon skippings\n";
+#sysErrMsg "$binPath/Analyze_COMBI.pl align_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
 ##
 
-sysErrMsg "$zip align_out/$species/*.out";  #should this just clean up instead?
+sysErrMsg "$zip align_out/$species/*.out";  #should this just clean up instead?  --TSW
 

@@ -11,19 +11,24 @@ use Getopt::Long;
 #($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 my $dbDir;
+my $sp;
+my $length;
+my $root;
 
-GetOptions("dbDir=s" => \$dbDir);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
+           "readLen=i" => \$length, "root=s" => \$root);
 
-system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
+# ARGV[0] is now a dummy variable.
+#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
 ### it accepts both bowtie outputs and summarySAMs
-($input)=$ARGV[0]=~/(.+\.out)/;
+#($input)=$ARGV[0]=~/(.+\.out)/;
 
-$INPUT = openFileHandle ($input) || die "Needs a bowtie COMBI output\n";
-($root)=$ARGV[0]=~/(.+?COMBI\-.+?\-\d+?\-.+?)\-e/; # analysis of a combination of boundaries (COMBI)
+#$INPUT = openFileHandle ($input) || die "Needs a bowtie COMBI output\n";
+#($root)=$ARGV[0]=~/(.+?COMBI\-.+?\-\d+?\-.+?)\-e/; # analysis of a combination of boundaries (COMBI)   DEPRECATED --TSW
 
 ### Parsesread counts
-while (<$INPUT>) {
+while (<STDIN>) {
     $read="";
     @t=split(/\t/);
     
@@ -45,7 +50,7 @@ while (<$INPUT>) {
     }
     $previous_read=$read;
 }
-close $INPUT;
+#close $INPUT;
 
 ### Prints the read counts
 open (OUTPUT, ">$root.eej2"); # read counts for all EEJ

@@ -12,16 +12,22 @@ $cwd = abs_path($0);
 ($dir)=$cwd=~/(.+)\/bin/;
 
 my $dbDir;
+my $sp;
+my $read_length;
+my $root;
 
-GetOptions("dbDir=s" => \$dbDir);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
+			  "readLen=i" => \$read_length, "root=s" => \$root);
 
-$file=$ARGV[0];
+### DEPRECATED --TSW
+#$file=$ARGV[0];
 
-system "gunzip $file" if $file=~/\.gz/;
-$file=~s/\.gz//;
+#system "gunzip $file" if $file=~/\.gz/;
+#$file=~s/\.gz//;
 
-($sp,$read_length)=$file=~/.+\/(.+?)MIC\-(\d+)\-[^\-]+/;
-$root=$&;
+#($sp,$read_length)=$file=~/.+\/(.+?)MIC\-(\d+)\-[^\-]+/;
+#$root=$&;
+
 
 ### Loads mappability/effective lengths
 open (EFF, "$dbDir/FILES/$sp"."_MIC-$read_length-gDNA.eff2") || die "Needs file with effective length for each EEEJ\n";
@@ -35,15 +41,15 @@ while (<EFF>){ #loads the effective length in the hash \%eff
 close EFF;
 
 ### Loads bowtie output file and does the read count
-$INPUT = openFileHandle ($file) || die "Needs the bowtie output for MIC file\n";
-while (<$INPUT>){
+#$INPUT = openFileHandle ($file) || die "Needs the bowtie output for MIC file\n";
+while (<STDIN>){
     chomp;
     @t=split(/\t/);
     ($event,$coord,$inc_exc,$n)=$t[2]=~/(.+)\.(.+?)\.(.+?)\.(\d+)/;
     $eej="$coord=$n";
     $reads{$event}{$inc_exc}{$eej}++;
 }
-close $INPUT;
+#close STDIN;
 
 ### Loads the template information (first 6 columns)
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.MIC.Template.txt") || die "Can't find the Template for MIC\n";

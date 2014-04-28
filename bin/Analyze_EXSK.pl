@@ -11,13 +11,18 @@ $cwd = abs_path($0);
 ($dir)=$cwd=~/(.+)\/bin/;
 
 my $dbDir;
+my $sp;
+my $length;
+my $root;
 
-GetOptions("dbDir=s" => \$dbDir);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
+           "readLen=i" => \$length, "root=s" => \$root);
 
-($sp,$length)=$ARGV[0]=~/(.{3})EXSK\-(\d+?)\-/; # input file format
 
-($file)=$ARGV[0]=~/(.+?\.out)/;
-system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
+#($sp,$length)=$ARGV[0]=~/(.{3})EXSK\-(\d+?)\-/; # input file format
+
+#($file)=$ARGV[0]=~/(.+?\.out)/;
+#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
 ### parses the general information for the events
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.EXSK.Template.1.txt") || die "No SIMPLE EXSK Template for $sp\n";
@@ -42,9 +47,9 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 #### parses the bowtie output file for the EEJ sequences
-($root)=$file=~/(.+\-$length\-.+?)\-e/;
-$I = openFileHandle ($file);
-while (<$I>){
+#($root)=$file=~/(.+\-$length\-.+?)\-e/;
+#$I = openFileHandle ($file); # DEPRECATED --TSW
+while (<STDIN>){
     chomp;
     @t=split(/\t/);
 
@@ -66,7 +71,7 @@ while (<$I>){
     $previous_read=$read; 
     $previous_event=$event;
 }
-close $I;
+#close $I;
 
 open (O, ">$root.exskX"); #file with PSI and read counts per event.
 ### Temporary output format needed for Step 2
