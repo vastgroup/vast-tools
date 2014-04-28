@@ -151,7 +151,7 @@ OPTIONS:
 
 NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
 
-"
+";
   exit $EXIT_STATUS;
 }
 

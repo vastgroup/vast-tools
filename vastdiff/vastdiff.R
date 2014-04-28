@@ -63,7 +63,7 @@ psiSecond <- vector("list", secondRepN)
 
 inputFile <- file( opt$repA, 'r' ) 
 
-while (length(lines <- readLines(inputFile, n=5)) > 0){ 
+while (length(lines <- readLines(inputFile, n=1000)) > 0){ 
   for (i in 1:length(lines)){ 
     #?
     writeLines(lines[i])
