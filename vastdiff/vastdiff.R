@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript --vanilla
 
-# Copyright (C) 2014 Tim Sterne-Weiler & Kevin Ha
+# Copyright (C) 2014 Tim Sterne-Weiler
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the "Software"), 
@@ -30,7 +30,9 @@ argv <- commandArgs(TRUE)
 spec = matrix(c(
 	'verbose', 'v', 0, "logical",
 	'help', 'h', 0, "logical",
-	'plotSig', 'p', 0, "logical"
+	'plotSig', 'p', 0, "logical",
+	'repA', 'a', 1, "character",
+	'repB', 'b', 1, "character"
 ), byrow=TRUE, ncol=4)
 
 opt = getopt(spec)
@@ -56,6 +58,20 @@ secondRepN <- 2
 
 psiFirst <- vector("list", firstRepN)
 psiSecond <- vector("list", secondRepN)
+
+### READ INPUT ###
+
+inputFile <- file( opt$repA, 'r' ) 
+
+while (length(lines <- readLines(inputFile, n=5)) > 0){ 
+  for (i in 1:length(lines)){ 
+    #?
+    writeLines(lines[i])
+  } 
+}
+
+q()
+### END READ INPUT ###
 
 #sample here from rbeta(N, alpha, beta)
 

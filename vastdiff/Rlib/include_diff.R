@@ -1,10 +1,11 @@
 #!/usr/bin/Rscript
 
 # calculate the probability that the first dist is > than second
-#  P(psi1 > psi2) when alpha=0; more generally we determining the probability
+#  P(psi1 > psi2) when alpha=0; more generally we are determining the probability
 #  that Psi1 is greater than Psi2 by alpha.. eg. P((psi1 - psi2) > alpha) = 
 ## IMPORTANT: run this function as sample(firstDist, length(firstDist)) AND
-##								   sample(secondDist, length(secondDist))
+##								           sample(secondDist, length(secondDist))
+## UNLESS you have paired data, then don't sample.
 pDiff  <- function(firstDist, secondDist, alpha=0.15) {
 	N <- length(firstDist)	
 	err <- length( which( (firstDist - secondDist) > alpha  ) )

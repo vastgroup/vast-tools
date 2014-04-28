@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript
-
-##  Install/loading of required Packages.
+#
+#
+#  Install/loading of required Packages.
 toLoad <- c("getopt", "RColorBrewer", "reshape2", "ggplot2", "grid")
 
 for(i in toLoad) {
@@ -14,7 +15,7 @@ for(i in toLoad) {
     }   
   }
 }
-##
+#
 
 multiplot <- function(..., plotlist=NULL, cols) {
     require(grid)

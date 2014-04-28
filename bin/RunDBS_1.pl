@@ -15,7 +15,7 @@ my $dbDir = "$binPath/../$species"; #default
 my $pairedEnd = 0; # no by default
 my $runExprFlag = 0; # no by default
 my $onlyExprFlag = 0; # no by default
-my $trim = "once"; # 1 by default
+my $trim;
 my $cores = 1; #default
 my $readLength; 
 
@@ -35,10 +35,17 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "verbose" => \$verboseFlag,
 			  "readLen=i" => \$readLength);
 
+our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
   my $sysCommand = shift;
   not system($sysCommand) or die "[vastdb align error]: $sysCommand Failed in $0!";
+}
+
+sub errPrint {
+  my $errMsg = shift;
+  print STDERR "[vastdb align error]: $errMsg\n";
+  $EXIT_STATUS = 1; 
 }
 
 sub verbPrint {
@@ -62,33 +69,15 @@ my $zip = which('pigz');
 if ($zip eq '') {
     $zip = which('gzip');
     if ($zip eq '') {
-        die "Error: need gzip or pigz\n";
+        errPrint "couldn't find gzip or pigz\n";
     } 
 } else {
     $zip .= " -fp $cores ";
 }
-verbPrint "Found $zip...";
+verbPrint "Found $zip..." unless $zip eq '';
 
 # Command line flags here
-if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $helpFlag = 1; }
-
-if (!defined($ARGV[0]) or $helpFlag){
-    print "\nCommand: \nvastdb align fastq_file_1 [fastq_file_2] -sp Mmu/Hsa [-expr/-exprONLY -trim once/twice -pe -c 1 -bowtieProg bowtie]\n\n";
-    
-    print ">> fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq\n";
-    print ">>>> Only underscores (\"_\") are allowed in the Sample name. No dashes, dots, spaces, etc.\n";
-    print ">>>> If running with the paired end option (\"\-PE\"), they must be called: Sample_1-length.fq Sample_2-length.fq\n";
-    print ">> The process can be started with \"genome substracted\" samples if a Sample-lenght-e.fq is used\n";
-    print ">> Species implemented: Human (hg19) or Mouse (mm9)\n";
-    print ">> For expression analyses: -expr (PSIs plus cRPKM calculations) OR -exprONLY (only cRPKMs) OR none\n";
-    print ">> For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner).\n";
-    print ">>>> If nothing is provided, the program will decide based on the length of the reads (Default is twice if length>50)\n";
-    print ">> -c N: Number of threds used when running bowtie (default=1).\n";
-    die ">> Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB\n\n";
-}
-
-die "Needs species\n" if !$species;
-
+if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
 
 
 ### Getting sample name and length:
@@ -106,7 +95,7 @@ if ($fileName1 =~ /\-e\.f/){
     $genome_sub=1;
     ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
-    die "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
+    errPrint "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
 } else {
     # allow readlength to be given by -readLen x --TSW
     if($readLength) {
@@ -115,6 +104,9 @@ if ($fileName1 =~ /\-e\.f/){
          $root = $1;
     } else { # default behavior by --MI
          ($root,$length)=$fileName1=~/(\S+?)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
+			if(!defined($length) or $length eq "") { 
+  				errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
+			}
     }
     if ($pairedEnd){
 		$fq2 = $ARGV[1];
@@ -123,21 +115,62 @@ if ($fileName1 =~ /\-e\.f/){
     }
 }
 
-#verbPrint "$fileName1\n$fq1\n;"; die "";
+
+#verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
 ###
 
 #length options:
-if ($length>=50){
-    $difLE=$length-50;
-    $le=50;
-} elsif ($length>=36){
-    $difLE=$length-36;
+if ($length >= 50){
+    $difLE = $length-50;
+    $le = 50;
+} elsif ($length >= 36){
+    $difLE = $length-36;
     $le=36;
 } else {
-    die "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
+    errPrint "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
 }
-die "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
+errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
 #####
+
+# move this.
+if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
+    print "\nUsage:
+
+vastdb align fastq_file_1 [fastq_file_2] [options]
+
+OPTIONS:
+	-sp Mmu/Hsa	:	Three letter code for the database (default Hsa)
+	-dbDir db	:	Database directory (default vastdb_curVer/Hsa)
+	-pe	:	Paired end data? (defaults to off)
+	-readLen i	:	Optional read length, otherwise fastq file naming convention enforced (see README)
+	-c i	:	# of cores to use for bowtie and pigz (default 1)
+	-trim once/twice	:	For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner). (default is twice if length > 50)
+	-expr	:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
+	-exprONLY	:	For expression analyses: -exprONLY (only cRPKMs) (default off)
+	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
+
+NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
+
+"
+  exit $EXIT_STATUS;
+}
+
+#
+# Move this to README --TSW
+#
+#    print ">> fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq\n";
+#    print ">>>> Only underscores (\"_\") are allowed in the Sample name. No dashes, dots, spaces, etc.\n";
+#    print ">>>> If running with the paired end option (\"\-PE\"), they must be called: Sample_1-length.fq Sample_2-length.fq\n";
+#    print ">> The process can be started with \"genome substracted\" samples if a Sample-lenght-e.fq is used\n#";
+#    print ">> Species implemented: Human (hg19) or Mouse (mm9)\n";
+#    print ">> For expression analyses: -expr (PSIs plus cRPKM calculations) OR -exprONLY (only cRPKMs) OR none\n";
+#    print ">> For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner).\n";
+#    print ">>>> If nothing is provided, the program will decide based on the length of the reads (Default is twice if length>50)\n";
+#    print ">> -c N: Number of threds used when running bowtie (default=1).\n";
+#    die ">> Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB\n\n";
+
+die "Needs species\n" if !$species;
+
 
 #sysErrMsg "gunzip $file" if $file=~/\.gz/;
 #sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
