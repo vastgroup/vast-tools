@@ -81,6 +81,12 @@ if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1;
 ## Getting sample name and length:
 my $fq1 = $ARGV[0];
 my $fq2;
+
+if(!defined($fq1)) {
+  errPrint "No Fastq file given!";
+  $fq1 = "";
+}
+
 my $fileName1 = $fq1;
 my $fileName2;
 my $zipped = ($fq1 =~ /\.gz$/) ? 1 : 0;
