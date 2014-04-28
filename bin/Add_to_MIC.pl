@@ -11,7 +11,7 @@ $cwd = getcwd;
 $sp=$ARGV[0];
 die "Needs the 3-letter species key\n" if !$sp;
 
-@files=glob("$dir/$sp/SAMPLES/$sp*micX");
+@files=glob("$dbDir/SAMPLES/$sp*micX");
 
 $head_counts=$head_PSI="GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX";
 foreach $file (@files){
@@ -54,8 +54,8 @@ foreach $file (@files){
     close INPUT;
 }
 $N=$#files+1;
-open (PSIs, ">$dir/$sp/SAMPLES/INCLUSION_LEVELS_MIC-$sp$N-n.tab");
-open (COUNTs, ">$dir/$sp/RAW_READS/RAW_READS_MIC-$sp$N-n.tab");
+open (PSIs, ">raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab");
+open (COUNTs, ">raw_reads/RAW_READS_MIC-$sp$N-n.tab");
 
 print PSIs "$head_PSI\n";
 print COUNTs "$head_counts\n";

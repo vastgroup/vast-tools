@@ -26,8 +26,8 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("$dir/$sp/SAMPLES/$sp"."COMBI-$COMB*.ee*");
-@EFF=glob("$dir/$sp/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
+@EEJ=glob("$dbDir/SAMPLES/$sp"."COMBI-$COMB*.ee*");
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 
 print "Loading Effective files:\n";
@@ -70,8 +70,8 @@ foreach $file (@EEJ){
 
 # Output files
 $NUM=$#EEJ+1;
-open (PSIs, ">$dir/$sp/SAMPLES/INCLUSION_LEVELS_ALT5-$sp$NUM-n.tab");
-open (COUNTs, ">$dir/$sp/RAW_READS/RAW_READS_ALT5-$sp$NUM-n.tab");
+open (PSIs, ">raw_incl/INCLUSION_LEVELS_ALT5-$sp$NUM-n.tab");
+open (COUNTs, ">raw_reads/RAW_READS_ALT5-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 

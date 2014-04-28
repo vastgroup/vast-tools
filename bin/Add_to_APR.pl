@@ -4,19 +4,30 @@
 BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
+use Getopt::Long;
+
 use Cwd;
 $cwd = getcwd;
 ($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
-$sp=$ARGV[0];
-$type=$ARGV[1];
+#$sp=$ARGV[0]; # DEPRECATED --TSW
+#$type=$ARGV[1];
+
+my $sp;
+my $type;
+my $dbDir;
+
+GetOptions("sp=s" => \$sp, "type=s" => \$type,
+			  "dbDir=s" => \$dbDir);
+
 
 die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
 
 $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
-@EXSK=glob("spli_out/$sp*$type");
+#@EXSK=glob("spli_out/$sp*$type");
+@EXSK=glob("$dbDir/SAMPLES/$sp*$type");  # not sure what to do with this.  TEST PLZ --TSW
 
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
 $head=<TEMPLATE>;
@@ -81,7 +92,7 @@ foreach $file (@EXSK){
 
 $NUM=$#EXSK+1;
 
-open (PSIs, ">inc_level/INCLUSION_LEVELS_$type_of_template-$sp$NUM-n.tab");
+open (PSIs, ">raw_incl/INCLUSION_LEVELS_$type_of_template-$sp$NUM-n.tab"); # change output directories --TSW
 open (COUNTs, ">raw_reads/RAW_READS_$type_of_template-$sp$NUM-n.tab");
 
 print PSIs "$head\n";
