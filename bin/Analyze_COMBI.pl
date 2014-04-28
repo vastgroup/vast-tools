@@ -53,7 +53,7 @@ while (<STDIN>) {
 #close $INPUT;
 
 ### Prints the read counts
-open (OUTPUT, ">$root.eej2"); # read counts for all EEJ
+open (OUTPUT, ">spli_out/$root.eej2"); # read counts for all EEJ
 foreach $gene (keys %EEJ) {  
     foreach $eej (sort {$a<=>$b}(keys %{$EEJ{$gene}})){
 	$p_p="";

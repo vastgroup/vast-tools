@@ -77,7 +77,7 @@ while (<STDIN>){
 #close $INPUT;
 
 #($root)=$file=~/(.+\-$length\-.+?)\-e/;
-open (O, ">$root.MULTI3X");
+open (O, ">spli_out/$root.MULTI3X");
 print O "Ensembl_ID\tA_coord\tStrand\tEvent_ID\tFullCoord\tType\tLength\tC1_coord\tC2_coord\tLength_Int1\tLength_Int2\t3n\t";
 print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_all_Reads\tRef_C1\tRef_C2\tExcl_reads(corr_all=raw_ref=corr_ref)\tInc1_reads(corr_all=raw_ref=corr_ref)\tInc2_reads(corr_all=raw_ref=corr_ref)\tComplexity\tPre_C1\tPre_C2\tGene_name\n";
 

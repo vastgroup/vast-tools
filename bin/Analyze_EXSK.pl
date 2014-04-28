@@ -73,7 +73,7 @@ while (<STDIN>){
 }
 #close $I;
 
-open (O, ">$root.exskX"); #file with PSI and read counts per event.
+open (O, ">spli_out/$root.exskX"); #file with PSI and read counts per event.
 ### Temporary output format needed for Step 2
 print O "Ensembl_ID\tA_coord\tStrand\tEvent_ID\tFullCoord\tType\tLength\tC1_coord\tC2_coord\tLength_Int1\tLength_Int2\t3n\t";
 print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_of_reads\t.\tComplexity\tCorrected_Exc\tCorrected_Inc1\tCorrected_Inc2\t.\t.\t.\tGene_name\n";

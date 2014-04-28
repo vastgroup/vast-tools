@@ -39,12 +39,12 @@ our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
   my $sysCommand = shift;
-  not system($sysCommand) or die "[vastdb align error]: $sysCommand Failed in $0!";
+  not system($sysCommand) or die "[vast align error]: $sysCommand Failed in $0!";
 }
 
 sub errPrint {
   my $errMsg = shift;
-  print STDERR "[vastdb align error]: $errMsg\n";
+  print STDERR "[vast align error]: $errMsg\n";
   $EXIT_STATUS = 1; 
 }
 
@@ -52,15 +52,15 @@ sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
     chomp($verbMsg);
-    print STDERR "[vastdb align]: $verbMsg\n";
+    print STDERR "[vast align]: $verbMsg\n";
   }
 }
 
 # Set up output directory structure
-mkdir("align_out") unless (-e "align_out");
+mkdir("spli_out") unless (-e "spli_out");
 mkdir("expr_out") unless (-e "expr_out");
-mkdir("align_out/$species") unless (-e "align_out/$species");
-mkdir("expr_out/$species") unless (-e "align_out/$species");
+#mkdir("spli_out/$species") unless (-e "spli_out/$species"); # DEP -TSW
+#mkdir("expr_out/$species") unless (-e "spli_out/$species"); # DEP --TSW
 
 # Use pigz if installed  --KH
 my $zip = which('pigz');
@@ -78,7 +78,7 @@ verbPrint "Found $zip..." unless $zip eq '';
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
 
 
-### Getting sample name and length:
+## Getting sample name and length:
 my $fq1 = $ARGV[0];
 my $fq2;
 my $fileName1 = $fq1;
@@ -241,19 +241,19 @@ if (!$genome_sub){
 #### Map to the EEJ:
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."COMBI-M-$le-$root-e_s.out"; # DEPRECATED --TSW
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > spli_out/$species"."COMBI-M-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."EXSK-$le-$root-e_s.out"; # DEPRECATED --TSW
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > spli_out/$species"."EXSK-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e_s.out"; # DEPRECATED --TSW
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MULTI-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MIC-$le-$root-e.out"; # DEPRECATED --TSW
+#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MIC-$le-$root-e.out"; # DEPRECATED --TSW
 
 verbPrint "Compressing genome-substracted reads\n";
 sysErrMsg "$zip $root-$le-e.fq";
@@ -262,22 +262,22 @@ sysErrMsg "$zip $root-$le-e.fq";
 ## Analyze MIC
 #verbPrint "Starting EEJ analyses:\n";
 #verbPrint "Analyzing microexons\n";
-#sysErrMsg "$binPath/Analyze_MIC.pl align_out/$species"."MIC-$le-$root-e.out -dbDir=$dbDir";
+#sysErrMsg "$binPath/Analyze_MIC.pl spli_out/$species"."MIC-$le-$root-e.out -dbDir=$dbDir";
 
 ## Analyze MULTI and EXSK (A priori pipeline)
 #print "Sorting a priori outputs\n";
-#sysErrMsg "$binPath/sort_outs.pl align_out/$species"."MULTI-$le-$root-e.out";
-#sysErrMsg "$binPath/sort_outs.pl align_out/$species"."EXSK-$le-$root-e.out";
+#sysErrMsg "$binPath/sort_outs.pl spli_out/$species"."MULTI-$le-$root-e.out";
+#sysErrMsg "$binPath/sort_outs.pl spli_out/$species"."EXSK-$le-$root-e.out";
 #verbPrint "Analyzing a priori outputs\n";
-#sysErrMsg "$binPath/Analyze_EXSK.pl align_out/$species"."EXSK-$le-$root-e_s.out -dbDir=$dbDir";
-#sysErrMsg "$binPath/Analyze_MULTI.pl align_out/$species"."MULTI-$le-$root-e_s.out -dbDir=$dbDir";
+#sysErrMsg "$binPath/Analyze_EXSK.pl spli_out/$species"."EXSK-$le-$root-e_s.out -dbDir=$dbDir";
+#sysErrMsg "$binPath/Analyze_MULTI.pl spli_out/$species"."MULTI-$le-$root-e_s.out -dbDir=$dbDir";
 
 ## Analyze a posteriori pipeline
 #print "Sorting a posteriori output\n";
-#sysErrMsg "$binPath/sort_outs.pl align_out/$species"."COMBI-M-$le-$root-e.out";
+#sysErrMsg "$binPath/sort_outs.pl spli_out/$species"."COMBI-M-$le-$root-e.out";
 #verbPrint "Analyzing a posteriori output for exon skippings\n";
-#sysErrMsg "$binPath/Analyze_COMBI.pl align_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
+#sysErrMsg "$binPath/Analyze_COMBI.pl spli_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
 ##
 
-sysErrMsg "$zip align_out/$species/*.out";  #should this just clean up instead?  --TSW
+#sysErrMsg "$zip spli_out/$species/*.out";  # DEPRECATED --TSW
 

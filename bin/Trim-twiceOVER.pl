@@ -43,7 +43,7 @@ while (<$INPUT>){
 }
 close $INPUT;
 
-print STDERR "[vastdb align trim]: Total processed reads: $total_reads\n";
-print STDERR "[vastdb align trim]: Total valid reads: $total_reads_accepted\n";
+print STDERR "[vast align trim]: Total processed reads: $total_reads\n";
+print STDERR "[vast align trim]: Total valid reads: $total_reads_accepted\n";
 
 if($total_reads <= 1 or $total_reads_accepted <= 1) { exit 1; }
