@@ -20,7 +20,7 @@ my $cores = 1; #default
 my $readLength; 
 
 my $legacyFlag = 0;
-my $verboseFlag = 0;
+my $verboseFlag = 1;  # on for debugging 
 
 GetOptions("bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
@@ -100,26 +100,26 @@ my $zipped = ($fq1 =~ /\.gz$/) ? 1 : 0;
 
 my($root, $length);
 
-$fileName1 =~ s/^.*\///g;
+$fileName1 =~ s/^.*\///g; # strip path
 
 if ($fileName1 =~ /\-e\.f/){
     $genome_sub=1;
-    ($root,$length)=$fileName1=~/(.+?)\-(.+?)\-e\.(fastq|fq)(\.gz)?/;
+    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     die "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
 } else {
     # allow readlength to be given by -readLen x --TSW
     if($readLength) {
          $length = $readLength;
-         $fileName1 =~ /(.+?)\.(fastq|fq)(\.gz)?/;
+         $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
          $root = $1;
     } else { # default behavior by --MI
-         ($root,$length)=$fileName1=~/(.+?)\_{0,1}1{0,1}\-(.+?)\.(fastq|fq)(\.gz)?/;
+         ($root,$length)=$fileName1=~/(\S+?)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
     }
     if ($pairedEnd){
 		$fq2 = $ARGV[1];
 		$fileName2 = $fq2;
-      $fileName2 =~ s/^.*\///g;
+      $fileName2 =~ s/^.*\///g; # strip path
     }
 }
 
@@ -172,7 +172,7 @@ if (!$genome_sub){
      #sysErrMsg "gzip $fq" if !$pairedEnd;
      #sysErrMsg "gzip $fq1 $fq2" if $pairedEnd;
      print STDERR "Expression analysis done\n";
-     exit(1);
+     exit 0;
  }
 ###
 
@@ -227,7 +227,7 @@ sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cu
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e.out";
 verbPrint "Mapping reads to microexon EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq $species"."MIC-$le-$root-e.bam";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq $species"."MIC-$le-$root-e.out";
 verbPrint "Compressing genome-substracted reads\n";
 sysErrMsg "$zip $root-$le-e.fq";
 ####
