@@ -1,7 +1,7 @@
 VASTDB
 ======
 
-**Current version**: ____
+Current version: ____
 
 Summary
 -------
@@ -9,6 +9,17 @@ VASTDB is a tool for profiling alternative splicing events in RNA-Seq data.
 
 Installation
 ------------
+
+VASTDB requires the following software:
+    * bowtie (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
+    * samtools (Li et al., 2009), http://samtools.sourceforge.net 
+
+Optional software:
+    * pigz - a parallel implementation of gzip, http://zlib.net/pigz/
+       
+If pigz is installed, VASTDB will use the user-specified number of cores 
+(see usage) to carry out file compression. This will help speed up the runtime.
+
 
 Quick Usage
 -----------
@@ -29,3 +40,14 @@ Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the g
 Citation
 --------
 Coming soon...
+
+References
+----------
+
+Langmead, B., Trapnell, C., Pop, M., Salzberg, S.L., 2009. Ultrafast and
+memory-efficient alignment of short DNA sequences to the human genome. Genome
+Biol. 10, R25.
+
+Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G.,
+Abecasis, G., Durbin, R., 2009. The Sequence Alignment/Map format and SAMtools.
+Bioinformatics 25, 2078–9.
