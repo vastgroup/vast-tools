@@ -16,9 +16,9 @@ die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
 $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
-@EXSK=glob("$dir/$sp/SAMPLES/$sp*$type");
+@EXSK=glob("spli_out/$sp*$type");
 
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
 $head=<TEMPLATE>;
 chomp($head);
 $head_reads=$head;
@@ -81,13 +81,13 @@ foreach $file (@EXSK){
 
 $NUM=$#EXSK+1;
 
-open (PSIs, ">$dir/$sp/SAMPLES/INCLUSION_LEVELS_$type_of_template-$sp$NUM-n.tab");
-open (COUNTs, ">$dir/$sp/RAW_READS/RAW_READS_$type_of_template-$sp$NUM-n.tab");
+open (PSIs, ">inc_level/INCLUSION_LEVELS_$type_of_template-$sp$NUM-n.tab");
+open (COUNTs, ">raw_reads/RAW_READS_$type_of_template-$sp$NUM-n.tab");
 
 print PSIs "$head\n";
 print COUNTs "$head_reads\n";
 
-print "Parsing info and getting Quality scores (Q) for $type_of_template\n";
+print STDERR "Parsing info and getting Quality scores (Q) for $type_of_template\n";
 foreach $event (sort keys %ALL){
     print PSIs "$ALL{$event}";
     print COUNTs "$ALL{$event}";

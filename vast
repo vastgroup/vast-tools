@@ -81,8 +81,10 @@ Usage: $0 sub-commands [options]
 if($cleanFlag) {
   #system("rm -rf $output_dir");
 } else {
-  mkdir($output_dir) unless (-e $output_dir);
-  chdir($output_dir);
+  unless($helpFlag or !defined($ARGV[0])) { 
+    mkdir($output_dir) unless (-e $output_dir);
+    chdir($output_dir);
+  }
 }
 
 ## Nuts and Bolts...

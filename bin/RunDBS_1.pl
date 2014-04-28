@@ -56,12 +56,6 @@ sub verbPrint {
   }
 }
 
-# Set up output directory structure
-mkdir("spli_out") unless (-e "spli_out");
-mkdir("expr_out") unless (-e "expr_out");
-#mkdir("spli_out/$species") unless (-e "spli_out/$species"); # DEP -TSW
-#mkdir("expr_out/$species") unless (-e "spli_out/$species"); # DEP --TSW
-
 # Use pigz if installed  --KH
 my $zip = which('pigz');
 if ($zip eq '') {
@@ -161,6 +155,9 @@ NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to
 
 die "Needs species\n" if !$species;
 
+# Set up output directory structure
+mkdir("spli_out") unless (-e "spli_out");
+mkdir("expr_out") unless (-e "expr_out");
 
 #sysErrMsg "gunzip $file" if $file=~/\.gz/;
 #sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
