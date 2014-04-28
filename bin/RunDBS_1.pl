@@ -155,20 +155,6 @@ NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to
   exit $EXIT_STATUS;
 }
 
-#
-# Move this to README --TSW
-#
-#    print ">> fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq\n";
-#    print ">>>> Only underscores (\"_\") are allowed in the Sample name. No dashes, dots, spaces, etc.\n";
-#    print ">>>> If running with the paired end option (\"\-PE\"), they must be called: Sample_1-length.fq Sample_2-length.fq\n";
-#    print ">> The process can be started with \"genome substracted\" samples if a Sample-lenght-e.fq is used\n#";
-#    print ">> Species implemented: Human (hg19) or Mouse (mm9)\n";
-#    print ">> For expression analyses: -expr (PSIs plus cRPKM calculations) OR -exprONLY (only cRPKMs) OR none\n";
-#    print ">> For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner).\n";
-#    print ">>>> If nothing is provided, the program will decide based on the length of the reads (Default is twice if length>50)\n";
-#    print ">> -c N: Number of threds used when running bowtie (default=1).\n";
-#    die ">> Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB\n\n";
-
 die "Needs species\n" if !$species;
 
 
@@ -212,7 +198,9 @@ if (!$genome_sub){
 #### Merge PE
  if ($pairedEnd){
      verbPrint "Concatenating paired end reads\n";
-     sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well?
+     sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
+                                       # $fq is used in trimming below. but we
+                                       # can pipe into it. KH
      #sysErrMsg "gzip $fq1 $fq2";
  } else {
    $fq = $fq1;

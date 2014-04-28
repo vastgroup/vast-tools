@@ -1,1 +1,31 @@
-# Vignette here?
+VASTDB
+======
+
+**Current version**: ____
+
+Summary
+-------
+VASTDB is a tool for profiling alternative splicing events in RNA-Seq data. 
+
+Installation
+------------
+
+Quick Usage
+-----------
+
+# From MI - need to revise
+fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq
+Only underscores (\"_\") are allowed in the Sample name. No dashes, dots, spaces, etc.
+If running with the paired end option (\"\-PE\"), they must be called: Sample_1-length.fq Sample_2-length.fq
+The process can be started with \"genome substracted\" samples if a Sample-lenght-e.fq is used
+Species implemented: Human (hg19) or Mouse (mm9)
+For expression analyses: -expr (PSIs plus cRPKM calculations) OR -exprONLY (only cRPKMs) OR none
+For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner).
+If nothing is provided, the program will decide based on the length of the reads (Default is twice if length>50)
+-c N: Number of threds used when running bowtie (default=1).
+Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
+###
+
+Citation
+--------
+Coming soon...
