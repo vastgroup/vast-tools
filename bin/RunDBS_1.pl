@@ -225,7 +225,7 @@ sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $roo
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > align_out/$species"."EXSK-$le-$root-e_s.out";  
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e.out";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MULTI-$le-$root-e_s.out";
 verbPrint "Mapping reads to microexon EEJ library\n";
 sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > align_out/$species"."MIC-$le-$root-e.out";
 verbPrint "Compressing genome-substracted reads\n";

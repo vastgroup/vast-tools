@@ -14,7 +14,7 @@ my $dbDir;
 
 GetOptions("dbDir=s" => \$dbDir);
 
-($sp,$length)=$ARGV[0]=~/(.{3})MULTI\-(\d+?)\-/; # uniform format
+($sp,$length)=$ARGV[0]=~/(\S{3})MULTI\-(\d+?)\-/; # uniform format
 ($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output
 system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
@@ -46,7 +46,7 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 ### Loads and counts raw reads
-$INPUT = openFileHandle($file);
+$INPUT = openFileHandle($ARGV[0]);
 while (<$INPUT>){
     chomp;
     @t=split(/\t/);
