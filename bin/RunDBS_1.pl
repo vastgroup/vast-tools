@@ -139,14 +139,14 @@ if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
 vastdb align fastq_file_1 [fastq_file_2] [options]
 
 OPTIONS:
-	-sp Mmu/Hsa	:	Three letter code for the database (default Hsa)
-	-dbDir db	:	Database directory (default vastdb_curVer/Hsa)
-	-pe	:	Paired end data? (defaults to off)
-	-readLen i	:	Optional read length, otherwise fastq file naming convention enforced (see README)
-	-c i	:	# of cores to use for bowtie and pigz (default 1)
+	-sp Mmu/Hsa		:	Three letter code for the database (default Hsa)
+	-dbDir db		:	Database directory (default vastdb_curVer/Hsa)
+	-pe			:	Paired end data? (defaults to off)
+	-readLen i		:	Optional read length, otherwise fastq file naming convention enforced (see README)
+	-c i			:	# of cores to use for bowtie and pigz (default 1)
 	-trim once/twice	:	For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner). (default is twice if length > 50)
-	-expr	:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
-	-exprONLY	:	For expression analyses: -exprONLY (only cRPKMs) (default off)
+	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
+	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
 
 NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
