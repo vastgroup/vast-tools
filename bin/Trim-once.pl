@@ -11,12 +11,14 @@ my ($root)=$ARGV[0]=~/(\S+?)\.f/; #fixed regex -TSW
 my $length=$ARGV[1];
 die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
 
+my $stdPrefix = '[vast align trim]:';
+
 my $file=$ARGV[0];
 
 ### Obtains the begining of the read to set \$/
-my $TMP;
-# Not using openFileHandle to avoid broken pipe warning -KH
-open($TMP, "gunzip -c $file | head -1 |");
+print STDERR "$stdPrefix Checking first read... \n";
+print STDERR "$stdPrefix Ignore gzip broken pipe warning, if present";
+my $TMP = openFileHandle($file);
 my $head=<$TMP>;
 close $TMP;
 ($/)=$head=~/(\@.{3})/;
@@ -54,8 +56,8 @@ while (<$INPUT>){
 }
 close $INPUT;
 
-print STDERR "[vast align trim]: Total processed reads: $total_reads\n";
-print STDERR "[vast align trim]: Total valid reads: $total_reads_accepted\n";
+print STDERR "$stdPrefix Total processed reads: $total_reads\n";
+print STDERR "$stdPrefix Total valid reads: $total_reads_accepted\n";
 
 if($total_reads <= 1 or $total_reads_accepted <= 1) { exit 1; }
 
