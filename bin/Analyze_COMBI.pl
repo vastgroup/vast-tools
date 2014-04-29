@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-BEGIN {push @INC, '../lib'}
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 use Getopt::Long;

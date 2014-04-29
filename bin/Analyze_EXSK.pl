@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-BEGIN {push @INC, '../lib'}
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 # This script parses the bowtie output of the EXSK (A priori, simplex exon skipping) mapping.
