@@ -13,7 +13,7 @@ $binPath =~ s/\/$0$//;
 my $helpFlag = 0;
 my $bowtie = "bowtie"; # by default;
 my $species = "Hsa"; # by default;
-my $dbDir = "$binPath/../$species"; #default
+my $dbDir; #default
 my $pairedEnd = 0; # no by default
 my $runExprFlag = 0; # no by default
 my $onlyExprFlag = 0; # no by default
@@ -38,6 +38,11 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "verbose" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
               "outdir=s" => \$outdir);
+
+unless(defined($dbDir)) {
+  $dbDir = "$binPath/../$species";
+}
+$dbDir = abs_path($dbDir);
 
 our $EXIT_STATUS = 0;
 
@@ -96,11 +101,6 @@ if ($zip eq '') {
 }
 verbPrint "Found $zip..." unless $zip eq '';
 
-### Set up output directory structure
-mkdir("spli_out") unless (-e "spli_out");
-mkdir("expr_out") unless (-e "expr_out");
-#mkdir("spli_out/$species") unless (-e "spli_out/$species"); # DEP -TSW
-#mkdir("expr_out/$species") unless (-e "spli_out/$species"); # DEP --TSW
 
 # Command line flags here
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
@@ -157,6 +157,8 @@ if ($fileName1 =~ /\-e\.f/){
 
 # change directories
 chdir($outdir);
+mkdir("spli_out") unless (-e "spli_out");
+mkdir("expr_out") unless (-e "expr_out");
 
 #length options:
 my ($le, $half_length);

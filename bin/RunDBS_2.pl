@@ -9,10 +9,10 @@ $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
 my $sp = "Hsa"; #species Hsa by default
-my $dbDir = "$binPath/../$sp";
+my $dbDir;
 
-my $verboseFlag;
-my $helpFlag;
+my $verboseFlag = 1;
+my $helpFlag = 0;
 
 my $outdir;
 
@@ -21,6 +21,11 @@ GetOptions("help" => \$helpFlag,
 			  "sp=s" => \$sp,
 			  "verbose" => \$verboseFlag,
 			  "outdir=s" => \$outdir);
+
+if(!defined($dbDir)) {
+  $dbDir = "$binPath/../$sp";
+}
+$dbDir = abs_path($dbDir);
 
 chdir($outDir);
 
