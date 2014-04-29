@@ -22,7 +22,7 @@ die "Needs Species key\n" if !defined($sp);
 
 $COMB="M"; # Only available version
 
-@EEJ=glob("raw_incl/*-$COMB-*.ee*"); # is this right? --TSW
+@EEJ=glob("spli_out/*-$COMB-*.ee*"); # is this right? --TSW
 @EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 
