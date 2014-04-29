@@ -14,9 +14,7 @@ die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
 my $file=$ARGV[0];
 
 ### Obtains the begining of the read to set \$/
-my $TMP;
-# Not using openFileHandle to avoid broken pipe warning -KH
-open($TMP, "gunzip -c $file | head -1 |");
+my $TMP = openFileHandle($file);
 my $head=<$TMP>;
 close $TMP;
 ($/)=$head=~/(\@.{3})/;
