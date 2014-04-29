@@ -13,8 +13,6 @@ die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
 
 my $file=$ARGV[0];
 
-print STDERR "$0\t$ARGV[0]\tbefore TMP\n";
-
 ### Obtains the begining of the read to set \$/
 my $TMP;
 # Not using openFileHandle to avoid broken pipe warning -KH
@@ -23,8 +21,6 @@ my $head=<$TMP>;
 close $TMP;
 ($/)=$head=~/(\@.{3})/;
 my $del=$/;
-
-print STDERR "after TMP\n";
 
 ### Initialize variables
 my $total_reads = 0;
