@@ -33,12 +33,12 @@ our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
   my $sysCommand = shift;
-  not system($sysCommand) or die "[vast align error]: $sysCommand Failed in $0!";
+  not system($sysCommand) or die "[vast combine error]: $sysCommand Failed in $0!";
 }
 
 sub errPrint {
   my $errMsg = shift;
-  print STDERR "[vast align error]: $errMsg\n";
+  print STDERR "[vast combine error]: $errMsg\n";
   $EXIT_STATUS = 1;
 }
 
@@ -46,7 +46,7 @@ sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
     chomp($verbMsg);
-    print STDERR "[vast align]: $verbMsg\n";
+    print STDERR "[vast combine]: $verbMsg\n";
   }
 }
 

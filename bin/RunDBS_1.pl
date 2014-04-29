@@ -129,7 +129,7 @@ $fileName1 =~ s/^.*\///g; # strip path
 my $genome_sub = 0;
 if ($fileName1 =~ /\-e\.f/){
     $genome_sub=1;
-    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
+    ($root,$length)=$fileName1=~/(\S+)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     errPrint "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
 } else {
@@ -139,7 +139,7 @@ if ($fileName1 =~ /\-e\.f/){
          $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
          $root = $1;
     } else { # default behavior by --MI
-         ($root,$length)=$fileName1=~/(\S+?)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
+         ($root,$length)=$fileName1=~/(\S+)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
 			if(!defined($length) or $length eq "") { 
   				errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
 			}
