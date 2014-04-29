@@ -4,15 +4,15 @@ BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 $sp=$ARGV[0];
 die "Needs 3-letter species key\n" if !$sp;
 $COMB="M"; # only version implemented.
 
 print "Parsing Template file\n";
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.ALT5.Template.txt") || die "Can't find the ALT5 template for $sp\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.ALT5.Template.txt") || die "Can't find the ALT5 template for $sp\n";
 $head=<TEMPLATE>;
 chomp($head);
 $head_PSIs=$head_ReadCounts=$head; # setting headings for both output files
@@ -26,7 +26,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("$dbDir/SAMPLES/$sp"."COMBI-$COMB*.ee*");
+@EEJ=glob("spli_out/$sp"."COMBI-$COMB*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 

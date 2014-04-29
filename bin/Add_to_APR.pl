@@ -27,7 +27,7 @@ $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
 #@EXSK=glob("spli_out/$sp*$type");
-@EXSK=glob("$dbDir/SAMPLES/$sp*$type");  # not sure what to do with this.  TEST PLZ --TSW
+@EXSK=glob("spli_out/$sp*$type");  # not sure what to do with this.  TEST PLZ --TSW
 
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
 $head=<TEMPLATE>;

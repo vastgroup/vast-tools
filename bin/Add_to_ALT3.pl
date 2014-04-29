@@ -4,8 +4,8 @@ BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 $sp=$ARGV[0];
 die "Needs 3-letter species key\n" if !$sp;
@@ -26,7 +26,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("$dbDir/SAMPLES/$sp"."COMBI-$COMB*.ee*");
+@EEJ=glob("spli_out/$sp"."COMBI-$COMB*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 

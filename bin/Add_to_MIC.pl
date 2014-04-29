@@ -5,13 +5,13 @@ use FuncBasics qw(:all);
 
 # This script is to calculate PSIs for MIC and produce a table with them for all samples.
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 $sp=$ARGV[0];
 die "Needs the 3-letter species key\n" if !$sp;
 
-@files=glob("$dbDir/SAMPLES/$sp*micX");
+@files=glob("spli_out/$sp*micX");
 
 $head_counts=$head_PSI="GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX";
 foreach $file (@files){

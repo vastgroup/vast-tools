@@ -6,8 +6,8 @@ BEGIN {push @INC, '../lib'}
 use FuncBasics qw(:all);
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 $sp=$ARGV[0];
 die "Needs Species key\n" if !$ARGV[0];
@@ -40,7 +40,7 @@ foreach $file (@EFF){
 
 ###
 print "Parsing Template file\n";
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.COMBI.Template.txt") || die "Can't find the template file for COMBI\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.COMBI.Template.txt") || die "Can't find the template file for COMBI\n";
 $head=<TEMPLATE>;
 chomp($head);
 $head_PSIs=$head_ReadCounts=$head; # setting headings for both output files
@@ -76,8 +76,8 @@ foreach $file (@EEJ){
 
 ### Setting output files
 $NUM=$#EEJ+1; # number of samples
-open (PSIs, ">$dir/$sp/SAMPLES/INCLUSION_LEVELS_COMBI-$sp$NUM-n.tab");
-open (COUNTs, ">$dir/$sp/RAW_READS/RAW_READS_COMBI-$sp$NUM-n.tab");
+open (PSIs, ">raw_incl/INCLUSION_LEVELS_COMBI-$sp$NUM-n.tab");
+open (COUNTs, ">raw_reads/RAW_READS_COMBI-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
