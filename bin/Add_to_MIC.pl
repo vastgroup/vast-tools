@@ -8,9 +8,16 @@ use FuncBasics qw(:all);
 use Cwd;
 #$cwd = getcwd;
 #($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+use Getopt::Long;
 
-$sp=$ARGV[0];
-die "Needs the 3-letter species key\n" if !$sp;
+my $dbDir;
+my $sp;
+
+GetOptions("dbDir=s" =>\$dbDir, "sp=s" => \$sp);
+
+
+#$sp=$ARGV[0];
+die "Needs the 3-letter species key\n" if !defined($sp);
 
 @files=glob("spli_out/$sp*micX");
 

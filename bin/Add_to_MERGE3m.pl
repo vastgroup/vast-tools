@@ -5,8 +5,8 @@ use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 $EXSK=$ARGV[0]; # Cassette
 $MULTI=$ARGV[1]; # MULTI

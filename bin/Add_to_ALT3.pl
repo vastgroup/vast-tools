@@ -8,8 +8,15 @@ use Cwd;
 #$cwd = getcwd;
 #($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
-$sp=$ARGV[0];
-die "Needs 3-letter species key\n" if !$sp;
+use Getopt::Long;
+
+my $dbDir;
+my $sp;
+
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
+
+#$sp=$ARGV[0];
+die "Needs 3-letter species key\n" if !defined($sp);
 $COMB="M"; # only version implemented.
 
 print "Parsing Template file\n";

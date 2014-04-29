@@ -14,13 +14,13 @@ my $dbDir;
 my $verboseFlag = 1;
 my $helpFlag = 0;
 
-my $outdir;
+my $outDir;
 
 GetOptions("help" => \$helpFlag, 
 			  "dbDir=s" => \$dbDir,
 			  "sp=s" => \$sp,
 			  "verbose" => \$verboseFlag,
-			  "outdir=s" => \$outdir);
+			  "outdir=s" => \$outDir);
 
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../$sp";
@@ -68,30 +68,30 @@ die "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be b
 $N=$#files+1;
 
 ### Gets the PSIs for the events in the a posteriori pipeline
-verbPrint "\nBuilding Table for COMBI (a posteriori pipeline)\n";
+verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
 sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir";
 
 ### Gets the PSIs for the a priori, SIMPLE
-verbPrint "\nBuilding Table for EXSK (a priori pipeline, single)\n";
+verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
 sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir";
 
 ### Gets the PSIs for the a priori, COMPLEX
-verbPrint "\nBuilding Table for MULTI (a priori pipeline, multiexon)\n";
+verbPrint "Building Table for MULTI (a priori pipeline, multiexon)\n";
 sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir";
 
 ### Gets the PSIs for the MIC pipeline
-verbPrint "\nBuilding Table for MIC (microexons)\n";
+verbPrint "Building Table for MIC (microexons)\n";
 sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir";
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
-verbPrint "\nBuilding non-redundant PSI table (MERGE3m)\n";  # FIXED?? --TSW
+verbPrint "Building non-redundant PSI table (MERGE3m)\n";  # FIXED?? --TSW
 sysErrMsg "$binPath/Add_to_MERGE3m.pl raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab";
 
 ### Gets PSIs for ALT5ss and adds them to the general database
-verbPrint "\nBuilding Table for Alternative 5'ss choice events\n";
+verbPrint "Building Table for Alternative 5'ss choice events\n";
 sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir";
 
 ### Gets PSIs for ALT3ss and adds them to the general database
-verbPrint "\nBuilding Table for Alternative 3'ss choice events\n";
+verbPrint "Building Table for Alternative 3'ss choice events\n";
 sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir";
 

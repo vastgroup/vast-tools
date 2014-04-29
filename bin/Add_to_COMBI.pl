@@ -6,12 +6,19 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
-use Cwd;
+#use Cwd;
 #$cwd = getcwd;
 #($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
-$sp=$ARGV[0];
-die "Needs Species key\n" if !$ARGV[0];
+use Getopt::Long;
+
+my $dbDir;
+my $sp;
+
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
+
+#$sp=$ARGV[0];
+die "Needs Species key\n" if !defined($sp);
 
 $COMB="M"; # Only available version
 

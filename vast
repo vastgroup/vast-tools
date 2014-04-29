@@ -28,6 +28,8 @@ use FuncBasics qw(:all);
 use Getopt::Long;
 use Cwd qw(abs_path);
 
+our $EXIT_STATUS = 0;
+
 # INITIALIZE
 my $path = abs_path($0);
 $0 =~ s/^.*\///;
@@ -90,11 +92,11 @@ if($cleanFlag) {
 
 ## Nuts and Bolts...
 if($subCommand eq "align") {
-  system("$path/bin/RunDBS_1.pl @args -outdir=$output_dir");
+  $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args -outdir=$output_dir");
 } elsif($subCommand eq "combine") {
-  system("$path/bin/RunDBS_2.pl @args -outdir=$output_dir");
+  $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args -outdir=$output_dir");
 } elsif($subCommand eq "diff") {
-  system("$path/vastdiff/vastdiff.R @args");
+  $EXIT_STATUS = system("$path/vastdiff/vastdiff.R @args");
 }
 
-exit 0;
+exit $EXIT_STATUS;

@@ -8,8 +8,8 @@ use FuncBasics qw(:all);
 use Getopt::Long;
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
 #$sp=$ARGV[0]; # DEPRECATED --TSW
 #$type=$ARGV[1];
@@ -22,7 +22,7 @@ GetOptions("sp=s" => \$sp, "type=s" => \$type,
 			  "dbDir=s" => \$dbDir);
 
 
-die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
+#die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
 
 $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
