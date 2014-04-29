@@ -13,7 +13,7 @@ die "Needs 3-letter species key\n" if !$sp;
 $COMB="M"; # only version implemented.
 
 print "Parsing Template file\n";
-open (TEMPLATE, "$dir/$sp/TEMPLATES/$sp.ALT3.Template.txt") || die "Can't find the ALT3 template for $sp\n";
+open (TEMPLATE, "$dbDir/TEMPLATES/$sp.ALT3.Template.txt") || die "Can't find the ALT3 template for $sp\n";
 $head=<TEMPLATE>;
 chomp($head);
 $head_PSIs=$head_ReadCounts=$head; # setting headings for both output files
@@ -27,8 +27,8 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("$dir/$sp/SAMPLES/$sp"."COMBI-$COMB*.ee*");
-@EFF=glob("$dir/$sp/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
+@EEJ=glob("$dbDir/SAMPLES/$sp"."COMBI-$COMB*.ee*");
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 
 print "Loading Effective files:\n";
@@ -71,8 +71,8 @@ foreach $file (@EEJ){
 
 # Output files
 $NUM=$#EEJ+1;
-open (PSIs, ">$dir/$sp/SAMPLES/INCLUSION_LEVELS_ALT3-$sp$NUM-n.tab");
-open (COUNTs, ">$dir/$sp/RAW_READS/RAW_READS_ALT3-$sp$NUM-n.tab");
+open (PSIs, ">raw_incl/INCLUSION_LEVELS_ALT3-$sp$NUM-n.tab"); #change output directories --TSW
+open (COUNTs, ">raw_reads/RAW_READS_ALT3-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
