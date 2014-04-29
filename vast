@@ -21,7 +21,8 @@
 
 use strict;
 
-BEGIN {push @INC, 'lib'}
+use FindBin;
+use lib "$FindBin::Bin/lib";
 use FuncBasics qw(:all);
 
 use Getopt::Long;
@@ -82,14 +83,13 @@ if($cleanFlag) {
   #system("rm -rf $output_dir");
 } else {
   mkdir($output_dir) unless (-e $output_dir);
-  chdir($output_dir);
 }
 
 ## Nuts and Bolts...
 if($subCommand eq "align") {
-  system("$path/bin/RunDBS_1.pl @args");
+  system("$path/bin/RunDBS_1.pl @args -outdir=$output_dir");
 } elsif($subCommand eq "combine") {
-  system("$path/bin/RunDBS_2.pl @args");
+  system("$path/bin/RunDBS_2.pl @args -outdir=$output_dir");
 } elsif($subCommand eq "diff") {
   system("$path/vastdiff/vastdiff.R @args");
 }
