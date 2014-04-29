@@ -77,6 +77,7 @@ OPTIONS:
 	-readLen i		:	Optional read length, otherwise fastq file naming convention enforced (see README)
 	-c i			:	# of cores to use for bowtie and pigz (default 1)
 	-trim once/twice	:	For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner). (default is twice if length > 50)
+    -outdir         :   Output directory (default <current working directory>)
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
@@ -110,8 +111,6 @@ if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1;
 my $fq1 = abs_path($ARGV[0]);
 my $fq2;
 my $fq;
-
-#die "$fq1";
 
 if(!defined($fq1)) {
   errPrint "No FASTQ file given!";
