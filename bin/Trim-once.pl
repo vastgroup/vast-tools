@@ -2,21 +2,34 @@
 # This scripts trims reads into one X-nt read. 
 # Discards shorter reads, if any
 
-BEGIN {push @INC, '../lib'}
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
-($root)=$ARGV[0]=~/(\S+?)\.f/; #fixed regex -TSW
-$length=$ARGV[1];
+my ($root)=$ARGV[0]=~/(\S+?)\.f/; #fixed regex -TSW
+my $length=$ARGV[1];
 die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
 
-$file=$ARGV[0];
+my $file=$ARGV[0];
 
 ### Obtains the begining of the read to set \$/
-my $TMP = openFileHandle($ARGV[0]);
-$head=<$TMP>;
+my $TMP;
+# Not using openFileHandle to avoid broken pipe warning -KH
+open($TMP, "gunzip -c $file | head -1 |");
+my $head=<$TMP>;
 close $TMP;
 ($/)=$head=~/(\@.{3})/;
-$del=$/;
+my $del=$/;
+
+### Initialize variables
+my $total_reads = 0;
+my $total_reads_accepted = 0;
+my $name;
+my $name2;
+my $seq;
+my $rest;
+my ($S1, $R1);
 
 ### Parses the original reads
 #open (STDOUT, ">$root-$length.fq");

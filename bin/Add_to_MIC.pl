@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-BEGIN {push @INC, '../lib'}
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 # This script is to calculate PSIs for MIC and produce a table with them for all samples.

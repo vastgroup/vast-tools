@@ -2,24 +2,41 @@
 # This scripts splits reads into two X-nt reads. 
 # If the length of the original reads is < 2X, it splits in an overlapping manner.
 
-BEGIN {push @INC, '../lib'}
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
-($root)=$ARGV[0]=~/(.+?)\.f/;
-$length=$ARGV[1];
+my ($root)=$ARGV[0]=~/(.+?)\.f/;
+my $length=$ARGV[1];
 die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
 
-$file=$ARGV[0];
+my $file=$ARGV[0];
+
+print STDERR "$0\t$ARGV[0]\tbefore TMP\n";
 
 ### Obtains the begining of the read to set \$/
-my $TMP = openFileHandle($file);
-$head=<$TMP>;
+my $TMP;
+# Not using openFileHandle to avoid broken pipe warning -KH
+open($TMP, "gunzip -c $file | head -1 |");
+my $head=<$TMP>;
 close $TMP;
 ($/)=$head=~/(\@.{3})/;
-$del=$/;
+my $del=$/;
+
+print STDERR "after TMP\n";
+
+### Initialize variables
+my $total_reads = 0;
+my $total_reads_accepted = 0;
+my $name;
+my $name2;
+my $seq;
+my $rest;
+my ($S1, $S2, $R1, $R2);
 
 ### Parses the original reads
-$INPUT = openFileHandle ($ARGV[0]);
+my $INPUT = openFileHandle ($ARGV[0]);
 <$INPUT>; #invalid bit
 while (<$INPUT>){
     /\n(.+?)\n(.+?)\n(.+?)\n/;

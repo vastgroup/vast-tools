@@ -2,7 +2,8 @@
 # this script analyzes the bowtie output for the microexon (MIC) junctions; EEJs and EEEJs
 # comment
 
-BEGIN {push @INC, '../lib'}
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 use Getopt::Long;

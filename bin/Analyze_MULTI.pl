@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 # This script parses the bowtie output against the EEJ for MULTIEX events (a priori complex events).
 
-BEGIN {push @INC, '../lib'}
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 use Getopt::Long;
