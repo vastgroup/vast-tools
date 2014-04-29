@@ -17,7 +17,7 @@ my $file=$ARGV[0];
 
 ### Obtains the begining of the read to set \$/
 print STDERR "$stdPrefix Checking first read... \n";
-print STDERR "$stdPrefix Ignore gzip broken pipe warning, if present";
+print STDERR "$stdPrefix Ignore gzip broken pipe warning, if present\n";
 my $TMP = openFileHandle($file);
 my $head=<$TMP>;
 close $TMP;
