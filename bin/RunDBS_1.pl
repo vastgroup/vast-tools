@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+use strict;
 use File::Which;
 use Cwd qw(abs_path);
 use Getopt::Long;
@@ -9,6 +10,7 @@ my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
+my $helpFlag = 0;
 my $bowtie = "bowtie"; # by default;
 my $species = "Hsa"; # by default;
 my $dbDir = "$binPath/../$species"; #default
@@ -18,6 +20,7 @@ my $onlyExprFlag = 0; # no by default
 my $trim;
 my $cores = 1; #default
 my $readLength; 
+my $outdir;
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
@@ -33,7 +36,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
-			  "readLen=i" => \$readLength);
+			  "readLen=i" => \$readLength,
+              "outdir=s" => \$outdir);
 
 our $EXIT_STATUS = 0;
 
@@ -56,87 +60,6 @@ sub verbPrint {
   }
 }
 
-# Set up output directory structure
-mkdir("spli_out") unless (-e "spli_out");
-mkdir("expr_out") unless (-e "expr_out");
-#mkdir("spli_out/$species") unless (-e "spli_out/$species"); # DEP -TSW
-#mkdir("expr_out/$species") unless (-e "spli_out/$species"); # DEP --TSW
-
-# Use pigz if installed  --KH
-my $zip = which('pigz');
-if ($zip eq '') {
-    $zip = which('gzip');
-    if ($zip eq '') {
-        errPrint "couldn't find gzip or pigz\n";
-    } 
-} else {
-    $zip .= " -fp $cores ";
-}
-verbPrint "Found $zip..." unless $zip eq '';
-
-# Command line flags here
-if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
-
-
-## Getting sample name and length:
-my $fq1 = $ARGV[0];
-my $fq2;
-
-if(!defined($fq1)) {
-  errPrint "No Fastq file given!";
-  $fq1 = "";
-}
-
-my $fileName1 = $fq1;
-my $fileName2;
-my $zipped = ($fq1 =~ /\.gz$/) ? 1 : 0;
-
-my($root, $length);
-
-$fileName1 =~ s/^.*\///g; # strip path
-
-if ($fileName1 =~ /\-e\.f/){
-    $genome_sub=1;
-    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
-    $fq=$&;
-    errPrint "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
-} else {
-    # allow readlength to be given by -readLen x --TSW
-    if($readLength) {
-         $length = $readLength;
-         $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
-         $root = $1;
-    } else { # default behavior by --MI
-         ($root,$length)=$fileName1=~/(\S+?)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
-			if(!defined($length) or $length eq "") { 
-  				errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
-			}
-    }
-    if ($pairedEnd){
-		$fq2 = $ARGV[1];
-		$fileName2 = $fq2;
-      $fileName2 =~ s/^.*\///g; # strip path
-    }
-}
-
-
-#verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
-###
-
-#length options:
-if ($length >= 50){
-    $difLE = $length-50;
-    $le = 50;
-} elsif ($length >= 36){
-    $difLE = $length-36;
-    $le=36;
-} else {
-    errPrint "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
-}
-errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
-#####
-
-# move this.
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage:
 
@@ -161,6 +84,95 @@ NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to
 
 die "Needs species\n" if !$species;
 
+# Use pigz if installed  --KH
+my $zip = which('pigz');
+if ($zip eq '') {
+    $zip = which('gzip');
+    if ($zip eq '') {
+        errPrint "couldn't find gzip or pigz\n";
+    } 
+} else {
+    $zip .= " -fp $cores ";
+}
+verbPrint "Found $zip..." unless $zip eq '';
+
+### Set up output directory structure
+mkdir("spli_out") unless (-e "spli_out");
+mkdir("expr_out") unless (-e "expr_out");
+#mkdir("spli_out/$species") unless (-e "spli_out/$species"); # DEP -TSW
+#mkdir("expr_out/$species") unless (-e "spli_out/$species"); # DEP --TSW
+
+# Command line flags here
+if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
+
+
+## Getting sample name and length:
+my $fq1 = abs_path($ARGV[0]);
+my $fq2;
+my $fq;
+
+#die "$fq1";
+
+if(!defined($fq1)) {
+  errPrint "No FASTQ file given!";
+  $fq1 = "";
+}
+
+my $fileName1 = $fq1;
+my $fileName2;
+my $zipped = ($fq1 =~ /\.gz$/) ? 1 : 0;
+
+my($root, $length);
+
+$fileName1 =~ s/^.*\///g; # strip path
+
+my $genome_sub = 0;
+if ($fileName1 =~ /\-e\.f/){
+    $genome_sub=1;
+    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
+    $fq=$&;
+    errPrint "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
+} else {
+    # allow readlength to be given by -readLen x --TSW
+    if($readLength) {
+         $length = $readLength;
+         $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
+         $root = $1;
+    } else { # default behavior by --MI
+         ($root,$length)=$fileName1=~/(\S+?)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
+			if(!defined($length) or $length eq "") { 
+  				errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
+			}
+    }
+    if ($pairedEnd){
+		$fq2 = abs_path($ARGV[1]);
+		$fileName2 = $fq2;
+        $fileName2 =~ s/^.*\///g; # strip path
+    }
+    $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq";
+}
+
+#verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
+###
+
+# change directories
+chdir($outdir);
+
+#length options:
+my ($le, $half_length);
+my $difLE;
+
+if ($length >= 50){
+    $difLE = $length-50;
+    $le = 50;
+} elsif ($length >= 36){
+    $difLE = $length-36;
+    $le=36;
+} else {
+    errPrint "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
+}
+errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
+#####
 
 #sysErrMsg "gunzip $file" if $file=~/\.gz/;
 #sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
