@@ -103,7 +103,7 @@ if($subCommand eq "align") {
 } elsif($subCommand eq "combine") {
   $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args");
 } elsif($subCommand eq "diff") {
-  $EXIT_STATUS = system("$path/vastdiff/vastdiff.R @args");
+  $EXIT_STATUS = system("$path/R/vastdiff.R @args");
 }
 
 exit $EXIT_STATUS;
