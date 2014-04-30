@@ -62,7 +62,8 @@ if($helpFlag and
 	!defined($subCommand) or
    (($subCommand eq "align" or
 	  $subCommand eq "combine" or
-	  $subCommand eq "diff") ? 0 : 1)) {
+	  $subCommand eq "diff" or
+      $subCommand eq "plot") ? 0 : 1)) {
   die "
 Usage: $0 sub-commands [options]
 
@@ -70,6 +71,7 @@ Usage: $0 sub-commands [options]
 	align
 	combine
 	diff
+	plot
 
 [global options]
 	-h,--help	:	Print this message
@@ -104,6 +106,8 @@ if($subCommand eq "align") {
   $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args");
 } elsif($subCommand eq "diff") {
   $EXIT_STATUS = system("$path/vastdiff/vastdiff.R @args");
+} elsif($subCommand eq "plot") {
+  $EXIT_STATUS = system("$path/bin/PSI_Plotter.R @args");
 }
 
 exit $EXIT_STATUS;
