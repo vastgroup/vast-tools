@@ -56,6 +56,7 @@ Getopt::Long::Configure("pass_through", "no_auto_abbrev");
 GetOptions("help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "output=s" => \$outdir,
+              "o=s" => \$outdir,
 			  "clean" => \$cleanFlag);
 
 if($helpFlag and 
@@ -73,7 +74,7 @@ Usage: $0 sub-commands [options]
 
 [global options]
 	-h,--help	:	Print this message
-	--output	:	Output directory (default vast_out)
+	-o,--output	:	Output directory (default vast_out)
 	--legacy	:	Use old input/output styles
 	--verbose	:	Print stderr
 
