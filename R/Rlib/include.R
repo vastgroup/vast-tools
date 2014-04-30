@@ -2,18 +2,22 @@
 #
 #
 #  Install/loading of required Packages.
-toLoad <- c("getopt", "RColorBrewer", "reshape2", "ggplot2", "grid")
+packs <- c("getopt", "RColorBrewer", "reshape2", "ggplot2", "grid")
+loadPackages(packs)
 
-for(i in toLoad) {
-  if(!require(toString(i), character.only=T)){
-    print(sprintf("%s did not load correctly! Now trying to install..", i)) 
-    install.packages(i, , repos='http://cran.us.r-project.org')
-    if(require(toString(i), character.only=T)){
-      print(sprintf("%s has been installed and loaded by vastdiff.R!", i)) 
-    } else {
-      stop(sprintf("vastdiff.R quitting!!! I could not install %s for you!", i)) 
-    }   
+loadPackages <- function(toLoad) {
+  for(i in toLoad) {
+    if(!require(toString(i), character.only=T)){
+      print(sprintf("%s did not load correctly! Now trying to install..", i)) 
+      install.packages(i, , repos='http://cran.us.r-project.org')
+      if(require(toString(i), character.only=T)){
+        print(sprintf("%s has been installed and loaded by vastdiff.R!", i)) 
+      } else {
+        stop(sprintf("quitting!!! I could not install %s for you!", i)) 
+      }   
+    }
   }
+
 }
 #
 

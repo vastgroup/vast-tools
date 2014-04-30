@@ -19,6 +19,8 @@ my $type;
 my $dbDir;
 my $samLen;
 my $verboseFlag = 1;
+my $legacyFlag = 0;
+
 
 GetOptions("sp=s" => \$sp, "type=s" => \$type,
 			  "dbDir=s" => \$dbDir, "len=i" => \$samLen, "verbose=i" => \$verboseFlag);
@@ -262,6 +264,21 @@ foreach $event (sort keys %ALL){
 #### Score 5: Complexity score (S<C1<C2<C3)	
 	$Q.=",S" if $type eq "exskX";
 	$Q.=",$complexity{$event}{$sample}" if $type eq "MULTI3X";
+
+   ### DIFF OUTPUT ADDITION TO QUAL SCORE!
+   ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+   ### These values are added to the qual score and used to infer the posterior distribution
+   unless($legacyFlag) {
+     my $totalN = $Rexc{$event}{$sample} + $Rinc1{$event}{$sample} + $Rinc2{$event}{$sample};
+     my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+     unless($PSI eq "NA" or $totalN = < 2) {
+       $pPSI = $PSI / 100;
+       $exValOfInc = $pPSI * $totalN;
+   	 $exValOfExc = (1-$pPSI) * $totalN;
+     }
+     # ALTER QUAL OUTPUT HERE>>
+	  $Q .= "\@$exValOfInc,$exValOfExc";
+   }
 	
 	# Print out data
 	print PSIs "\t$PSI\t$Q";

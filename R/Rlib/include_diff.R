@@ -8,8 +8,8 @@
 ## UNLESS you have paired data, then don't sample.
 pDiff  <- function(firstDist, secondDist, alpha=0.15) {
 	N <- length(firstDist)	
-	err <- length( which( (firstDist - secondDist) > alpha  ) )
-	err / N
+	pass <- length( which( (firstDist - secondDist) > alpha  ) )
+	pass / N
 }
 
 #  This function finds the maximum difference between psi1 and psi2 given
