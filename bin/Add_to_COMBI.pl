@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl 
 # This script takes an a posteriori template and uses it to get PSIs for exactly those events. 
 # It does NOT do a new call for AS events
 
@@ -14,15 +14,16 @@ use Getopt::Long;
 
 my $dbDir;
 my $sp;
+my $samLen;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen);
 
 #$sp=$ARGV[0];
 die "Needs Species key\n" if !defined($sp);
 
 $COMB="M"; # Only available version
 
-@EEJ=glob("spli_out/*-$COMB-*.ee*"); # is this right? --TSW
+@EEJ=glob("spli_out/*.ee*"); # is this right? --TSW
 @EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 
@@ -63,7 +64,10 @@ close TEMPLATE;
 ###
 print "Loading EEJ read counts data\n";
 foreach $file (@EEJ){
-    ($sample)=$file=~/COMBI\-[A-Z]\-\d+?\-(.+)\./;
+	  my $fname = $file;
+     $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
+#    ($sample)=$file=~/COMBI\-[A-Z]\-\d+?\-(.+)\./;
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-ReC\t$sample-Ri1C\t$sample-Ri2C\t$sample-Q";
 
@@ -111,7 +115,11 @@ foreach $event (sort (keys %ALL)){
     ($donor_coord,$acceptor_coord)=$DATA[2]=~/\:(\d+?)\-(\d+)/ if $strand eq "-";
 
     foreach $file (@EEJ){
-	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;
+#	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;
+     my $fname = $file;
+    $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
+     $length = $samLen;
 	$exc=$inc1=$inc2=$Rexc=$Rinc1=$Rinc2=0; # empty temporary variables for read counts
 	
 	# data from the reference EEJ (C1A, AC2, C1C2)

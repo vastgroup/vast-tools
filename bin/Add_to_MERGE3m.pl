@@ -8,6 +8,15 @@ use Cwd;
 #$cwd = getcwd;
 #($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 
+use Getopt::Long;
+
+my $dbDir;
+my $sp;
+my $samLen;
+
+GetOptions("sp=s" => \$sp, "dbDir=s" => \$dbDir, "len=i" => \$samLen);
+
+
 $EXSK=$ARGV[0]; # Cassette
 $MULTI=$ARGV[1]; # MULTI
 $COMBI=$ARGV[2]; # COMBI

@@ -12,18 +12,22 @@ use Getopt::Long;
 
 my $dbDir;
 my $sp;
+my $samLen;
 
-GetOptions("dbDir=s" =>\$dbDir, "sp=s" => \$sp);
+GetOptions("dbDir=s" =>\$dbDir, "sp=s" => \$sp, "len=i" => \$samLen);
 
 
 #$sp=$ARGV[0];
 die "Needs the 3-letter species key\n" if !defined($sp);
 
-@files=glob("spli_out/$sp*micX");
+@files=glob("spli_out/*micX");
 
 $head_counts=$head_PSI="GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX";
 foreach $file (@files){
-    ($sample)=$file=~/MIC\-\d+?\-(.+)\./;
+ #   ($sample)=$file=~/MIC\-\d+?\-(.+)\./;
+    my $fname = $file;
+    $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
     $head_PSI.="\t$sample\t$sample-Q";
     $head_counts.="\t$sample-Rexc\t$sample-Rinc\t$sample-exc\t$sample-inc\tPSI=Q";
     open (INPUT, $file);

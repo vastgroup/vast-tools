@@ -34,7 +34,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("spli_out/$sp"."COMBI-$COMB*.ee*");
+@EEJ=glob("spli_out/*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 
@@ -55,8 +55,13 @@ foreach $file (@EFF){
 
 print "Loading EEJ data for ALT3\n";
 foreach $file (@EEJ){
-    ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./;
-    
+#    ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./;
+#     ($sample)=$file=~/^(.*)\..*$/;   
+     my $fname = $file;
+    $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
+     $length = $samLen; # replacement --TSW
+
     # generates headings
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Ri\t$sample-Rtot\t$sample-Q";
@@ -66,7 +71,7 @@ foreach $file (@EEJ){
     while (<EEJ>){
         chomp;
         @t=split(/\t/);
-	$gene=$t[0];
+ 	$gene=$t[0];
 	$eej=$t[1];
         $gene_eej="$gene-$t[1]";
         $reads{$sample}{$gene_eej}=$t[2];
@@ -98,7 +103,12 @@ foreach $event_root (sort (keys %ALL)){
     }
     
     foreach $file (@EEJ){
-	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;   
+#	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;   
+     my $fname = $file;
+    $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
+     $length = $samLen;  #replacement --TSW
+
 	# Emptying variables and arrays with read counts per sample
 	$total_raw_reads_S=$total_corr_reads_S=0; # total simple reads
 	$total_raw_reads_ALL=$total_corr_reads_ALL=0; # total complex and simple reads

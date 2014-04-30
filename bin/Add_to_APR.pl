@@ -17,9 +17,10 @@ use Cwd;
 my $sp;
 my $type;
 my $dbDir;
+my $samLen;
 
 GetOptions("sp=s" => \$sp, "type=s" => \$type,
-			  "dbDir=s" => \$dbDir);
+			  "dbDir=s" => \$dbDir, "len=i" => \$samLen);
 
 
 #die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
@@ -28,7 +29,9 @@ $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
 #@EXSK=glob("spli_out/$sp*$type");
-@EXSK=glob("spli_out/$sp*$type");  # not sure what to do with this.  TEST PLZ --TSW
+my(@EXSK) = glob("spli_out/*$type");  # not sure what to do with this.  TEST PLZ --TSW
+
+#die "@EXSK";
 
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
 $head=<TEMPLATE>;
@@ -43,8 +46,10 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 print "Loading and parsing data for each sample for $type_of_template\n";
-foreach $file (@EXSK){
-    ($sample)=$file=~/$sp.+?\-\d+?\-(.+?)\./;
+foreach my $file (@EXSK){
+	 my $fname = $file;
+	 $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
     $head.="\t$sample\t$sample-Q";
     $head_reads.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-e\t$sample-i1\t$sample-i2\t$sample-Q";
 
@@ -105,7 +110,11 @@ foreach $event (sort keys %ALL){
     print COUNTs "$ALL{$event}";
     
     foreach $file (@EXSK){
-	($sample)=$file=~/$sp.+?\-\d+?\-(.+?)\./;
+	#($sample)=$file=~/$sp.+?\-\d+?\-(.+?)\./;
+    my $fname = $file;
+    $fname =~ s/^.*\///;
+    ($sample)=$fname=~/^(.*)\..*$/;
+
 	$PSI=sprintf("%.2f",$PSI{$event}{$sample});
 	$total_raw_reads=$Rexc{$event}{$sample}+$Rinc1{$event}{$sample}+$Rinc2{$event}{$sample};
 	$total_corr_reads=$exc{$event}{$sample}+$inc1{$event}{$sample}+$inc2{$event}{$sample};
