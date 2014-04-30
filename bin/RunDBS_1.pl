@@ -228,6 +228,7 @@ if (!$genome_sub){
  }
  
 #### Trimming
+ my $trimmed = 0;    # flag determining whether trimming occurred
  if ($difLE >= 10){
    if (!defined($trim) or $trim eq "twice"){
 	  if ($length > ($le*2)+10){
@@ -249,6 +250,7 @@ if (!$genome_sub){
 	# sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
    }
    $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
+   $trimmed = 1;
  }
  #verbPrint "Compressing raw fastq file\n" unless $length==50 || $length==36;
 ####
@@ -259,10 +261,12 @@ if (!$genome_sub){
  $cmd = "$bowtie -p $cores -m 1 -v 2 --un $root-$le-e.fq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
  if ($fq =~ /\.gz$/) {
      sysErrMsg "gzip -dc $fq | $cmd";
-     verbPrint "Compressing trimmed reads";
-     sysErrMsg "$zip $root-$le.fq";
  } else {
      sysErrMsg "cat $fq | $cmd";
+     if ($trimmed) {
+         verbPrint "Compressing trimmed reads";
+         sysErrMsg "$zip $fq";
+     }
  }
 ####
 }
