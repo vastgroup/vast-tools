@@ -12,14 +12,25 @@ use Getopt::Long;
 
 my $dbDir;
 my $sp;
+my $verboseFlag;
+my $samLen;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "verbose=i" => \$verboseFlag,
+			  "len=i" => \$samLen);
+
+sub verbPrint {
+  my $verbMsg = shift;
+  if($verboseFlag) {
+    chomp($verbMsg);
+    print STDERR "[vast combine alt3]: $verbMsg\n";
+  }
+}
 
 #$sp=$ARGV[0];
-die "Needs 3-letter species key\n" if !defined($sp);
+die "[vast combine alt3]: Needs 3-letter species key\n" if !defined($sp);
 $COMB="M"; # only version implemented.
 
-print "Parsing Template file\n";
+verbPrint "Parsing Template file\n";
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.ALT3.Template.txt") || die "Can't find the ALT3 template for $sp\n";
 $head=<TEMPLATE>;
 chomp($head);
@@ -36,12 +47,12 @@ close TEMPLATE;
 
 @EEJ=glob("spli_out/*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
-die "Needs effective\n" if !@EFF;
+die "[vast combine alt3]: Needs effective from database!\n" if !@EFF;
 
-print "Loading Effective files:\n";
+verbPrint "Loading Effective files:\n";
 foreach $file (@EFF){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
-    print "Loading: $file\tLength: $length\n";
+    verbPrint "Loading: $file\tLength: $length\n";
     open (MAPPABILITY, $file);
     while (<MAPPABILITY>){
 	chomp;
@@ -53,7 +64,7 @@ foreach $file (@EFF){
     close MAPPABILITY;
 }
 
-print "Loading EEJ data for ALT3\n";
+verbPrint "Loading EEJ data for ALT3\n";
 foreach $file (@EEJ){
 #    ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./;
 #     ($sample)=$file=~/^(.*)\..*$/;   
@@ -88,7 +99,7 @@ open (COUNTs, ">raw_reads/RAW_READS_ALT3-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
-print "Starting PSI quantification\n";
+verbPrint "Starting PSI quantification\n";
 foreach $event_root (sort (keys %ALL)){
     ($gene,$junctions)=$event_root=~/(.+?)\-(.+)/;
     @junctions=split(/\,/,$junctions);

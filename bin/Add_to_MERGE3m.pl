@@ -13,8 +13,19 @@ use Getopt::Long;
 my $dbDir;
 my $sp;
 my $samLen;
+my $verboseFlag;
 
-GetOptions("sp=s" => \$sp, "dbDir=s" => \$dbDir, "len=i" => \$samLen);
+GetOptions("sp=s" => \$sp, "dbDir=s" => \$dbDir, "len=i" => \$samLen,
+			  "verbose=i" => \$verboseFlag);
+
+
+sub verbPrint {
+  my $verbMsg = shift;
+  if($verboseFlag) {
+    chomp($verbMsg);
+    print STDERR "[vast combine merge]: $verbMsg\n";
+  }
+}
 
 
 $EXSK=$ARGV[0]; # Cassette
@@ -28,7 +39,7 @@ open (I2, $MULTI) || die "Can't find the MULTI file\n";
 open (I3, $COMBI) || die "Can't find the exsk5 file\n";
 open (I4, $MIC) || die "Can't find the micX file\n";
 
-print "Loading EXSK data\n";
+verbPrint "Loading EXSK data\n";
 $head1=<I1>;
 @head1=split(/\t/,$head1);
 $head1=join("\t",@head1[6..$#head1]);
@@ -39,7 +50,7 @@ while (<I1>){
 }
 close I1;
 
-print "Loading MULTI data\n";
+verbPrint "Loading MULTI data\n";
 $head2=<I2>;
 @head2=split(/\t/,$head2);
 $head2=join("\t",@head2[6..$#head2]);
@@ -50,7 +61,7 @@ while (<I2>){
 }
 close I2;
 
-print "Loading COMBI data\n";
+verbPrint "Loading COMBI data\n";
 $head3=<I3>;
 @head3=split(/\t/,$head3);
 $head3=join("\t",@head3[6..$#head3]);
@@ -61,7 +72,7 @@ while (<I3>){
 }
 close I3;
 
-print "Loading MIC data\n";
+verbPrint "Loading MIC data\n";
 $head4=<I4>;
 @head4=split(/\t/,$head4);
 $head4=join("\t",@head4[6..$#head4]);
@@ -73,7 +84,7 @@ while (<I4>){
 close I4;
 
 # Checks that all four files have the same samples in the same order
-die "Some of the headings are not identical\n" if ($head1 ne $head2 || $head1 ne $head3 || $head1 ne $head4);
+die "[vast combine merge error]: Some of the headings are not identical!\n" if ($head1 ne $head2 || $head1 ne $head3 || $head1 ne $head4);
 
 ### Output file
 ($sp,$N_samples)=$EXSK=~/\-(.{3})(\d+)\-n/;

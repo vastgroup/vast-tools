@@ -13,14 +13,24 @@ use Getopt::Long;
 my $dbDir;
 my $sp;
 my $samLen;
+my $verboseFlag;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
+			  "verbose=i" => \$verboseFlag);
+
+sub verbPrint {
+  my $verbMsg = shift;
+  if($verboseFlag) {
+    chomp($verbMsg);
+    print STDERR "[vast combine alt5]: $verbMsg\n";
+  }
+}
 
 #$sp=$ARGV[0];
-die "Needs 3-letter species key\n" if !defined($sp);
+die "[vast combine alt5]: Needs 3-letter species key\n" if !defined($sp);
 $COMB="M"; # only version implemented.
 
-print "Parsing Template file\n";
+verbPrint "Parsing Template file\n";
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.ALT5.Template.txt") || die "Can't find the ALT5 template for $sp\n";
 $head=<TEMPLATE>;
 chomp($head);
@@ -39,10 +49,10 @@ close TEMPLATE;
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 
-print "Loading Effective files:\n";
+verbPrint "Loading Effective files:\n";
 foreach $file (@EFF){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
-    print "Loading: $file\tLength: $length\n";
+    verbPrint "Loading: $file\tLength: $length\n";
     open (MAPPABILITY, $file);
     while (<MAPPABILITY>){
 	chomp;
@@ -54,7 +64,7 @@ foreach $file (@EFF){
     close MAPPABILITY;
 }
 
-print "Loading EEJ data for ALT5\n";
+verbPrint "Loading EEJ data for ALT5\n";
 foreach $file (@EEJ){
    # ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./; DEPRECATED --TSW
    #($sample)=$file=~/^(.*)\..*$/;
@@ -88,7 +98,7 @@ open (COUNTs, ">raw_reads/RAW_READS_ALT5-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
-print "Starting PSI quantifications\n";
+verbPrint "Starting PSI quantifications\n";
 foreach $event_root (sort keys %ALL){
     ($gene,$junctions)=$event_root=~/(.+?)\-(.+)/;
     @junctions=split(/\,/,$junctions);

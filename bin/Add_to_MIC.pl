@@ -14,11 +14,19 @@ my $dbDir;
 my $sp;
 my $samLen;
 
-GetOptions("dbDir=s" =>\$dbDir, "sp=s" => \$sp, "len=i" => \$samLen);
+GetOptions("dbDir=s" =>\$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
+			  "verbose=i" => \$verboseFlag);
 
+sub verbPrint {
+  my $verbMsg = shift;
+  if($verboseFlag) {
+    chomp($verbMsg);
+    print STDERR "[vast combine micro]: $verbMsg\n";
+  }
+}
 
 #$sp=$ARGV[0];
-die "Needs the 3-letter species key\n" if !defined($sp);
+die "[vast combine micro]: Needs the 3-letter species key\n" if !defined($sp);
 
 @files=glob("spli_out/*micX");
 

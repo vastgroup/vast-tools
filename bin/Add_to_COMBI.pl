@@ -15,8 +15,18 @@ use Getopt::Long;
 my $dbDir;
 my $sp;
 my $samLen;
+my $verboseFlag;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
+			  "verbose=i" => \$verboseFlag);
+
+sub verbPrint {
+  my $verbMsg = shift;
+  if($verboseFlag) {
+    chomp($verbMsg);
+    print STDERR "[vast combine combi]: $verbMsg\n";
+  }
+}
 
 #$sp=$ARGV[0];
 die "Needs Species key\n" if !defined($sp);
@@ -25,13 +35,13 @@ $COMB="M"; # Only available version
 
 @EEJ=glob("spli_out/*.ee*"); # is this right? --TSW
 @EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
-die "Needs effective\n" if !@EFF;
+die "[vast combine combi error] Needs effective from database!\n" if !@EFF;
 
 ###
-print "Loading Mappability for each EEJ and length:\n";
+verbPrint "Loading Mappability for each EEJ and length:\n";
 foreach $file (@EFF){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
-    print "Loading: $file\tLength: $length\n";
+    verbPrint "Loading: $file\tLength: $length\n";
     open (MAPPABILITY, $file);
     while (<MAPPABILITY>){
 	chomp;
@@ -48,7 +58,7 @@ foreach $file (@EFF){
 }
 
 ###
-print "Parsing Template file\n";
+verbPrint "Parsing Template file\n";
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.COMBI.Template.txt") || die "Can't find the template file for COMBI\n";
 $head=<TEMPLATE>;
 chomp($head);
@@ -62,7 +72,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ###
-print "Loading EEJ read counts data\n";
+verbPrint "Loading EEJ read counts data\n";
 foreach $file (@EEJ){
 	  my $fname = $file;
      $fname =~ s/^.*\///;
@@ -93,7 +103,7 @@ open (COUNTs, ">raw_reads/RAW_READS_COMBI-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
-print "Quantifying PSIs\n";
+verbPrint "Quantifying PSIs\n";
 foreach $event (sort (keys %ALL)){
     print PSIs "$ALL{$event}" if $event;
     print COUNTs "$ALL{$event}" if $event;

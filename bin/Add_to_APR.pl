@@ -18,10 +18,18 @@ my $sp;
 my $type;
 my $dbDir;
 my $samLen;
+my $verboseFlag = 1;
 
 GetOptions("sp=s" => \$sp, "type=s" => \$type,
-			  "dbDir=s" => \$dbDir, "len=i" => \$samLen);
+			  "dbDir=s" => \$dbDir, "len=i" => \$samLen, "verbose=i" => \$verboseFlag);
 
+sub verbPrint {
+  my $verbMsg = shift;
+  if($verboseFlag) {
+    chomp($verbMsg);
+    print STDERR "[vast combine apr]: $verbMsg\n";
+  }
+}
 
 #die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
 
@@ -45,7 +53,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-print "Loading and parsing data for each sample for $type_of_template\n";
+verbPrint "Loading and parsing data for each sample for $type_of_template\n";
 foreach my $file (@EXSK){
 	 my $fname = $file;
 	 $fname =~ s/^.*\///;
@@ -104,7 +112,7 @@ open (COUNTs, ">raw_reads/RAW_READS_$type_of_template-$sp$NUM-n.tab");
 print PSIs "$head\n";
 print COUNTs "$head_reads\n";
 
-print STDERR "Parsing info and getting Quality scores (Q) for $type_of_template\n";
+verbPrint "Parsing info and getting Quality scores (Q) for $type_of_template\n";
 foreach $event (sort keys %ALL){
     print PSIs "$ALL{$event}";
     print COUNTs "$ALL{$event}";
