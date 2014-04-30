@@ -28,6 +28,8 @@ use FuncBasics qw(:all);
 use Getopt::Long;
 use Cwd qw(abs_path);
 
+use constant DEFAULT_OUTDIR => 'vast_out';
+
 our $EXIT_STATUS = 0;
 
 # INITIALIZE
@@ -44,18 +46,17 @@ my $legacyFlag = 0; # Use old input and output... Not by default.
 my $helpFlag = 0;
 my $cleanFlag = 0;
 
-my $output_dir = "vast_out";
+my $outdir = undef;
 
 my $subCommand = shift @ARGV or $helpFlag = 1;
 
 my @args = @ARGV;
 
-Getopt::Long::Configure("pass_through");
+Getopt::Long::Configure("pass_through", "no_auto_abbrev");
 GetOptions("help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
-			  "outputDir=s" => \$output_dir,
+			  "output=s" => \$outdir,
 			  "clean" => \$cleanFlag);
-
 
 if($helpFlag and 
 	!defined($subCommand) or
@@ -72,29 +73,35 @@ Usage: $0 sub-commands [options]
 
 [global options]
 	-h,--help	:	Print this message
-	--output	:	-o outputDir (default vast_out)
+	--output	:	Output directory (default vast_out)
 	--legacy	:	Use old input/output styles
 	--verbose	:	Print stderr
 
 "
 }
 
+# Check if output directory option was specified --KH
+# If not, set the default and add to @args
+if (! defined $outdir) {
+    $outdir = DEFAULT_OUTDIR;
+    push @args, "--output=$outdir";
+}
 
 # this may need to be altered later --TSW
 if($cleanFlag) {
-  #system("rm -rf $output_dir");
+  #system("rm -rf $outdir");
 } else {
   unless($helpFlag or !defined($ARGV[0])) { 
-    mkdir($output_dir) unless (-e $output_dir);
-    #chdir($output_dir);
+    mkdir($outdir) unless (-e $outdir);
+    #chdir($outdir);
   }
 }
 
 ## Nuts and Bolts...
 if($subCommand eq "align") {
-  $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args -outdir=$output_dir");
+  $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args");
 } elsif($subCommand eq "combine") {
-  $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args -outdir=$output_dir");
+  $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args");
 } elsif($subCommand eq "diff") {
   $EXIT_STATUS = system("$path/vastdiff/vastdiff.R @args");
 }
