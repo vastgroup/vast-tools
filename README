@@ -24,6 +24,8 @@ If pigz is installed, VASTDB will use the user-specified number of cores
 Quick Usage
 -----------
 
+
+**Alignment:**
 # From MI - need to revise
 fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq
 Only underscores (\"_\") are allowed in the Sample name. No dashes, dots, spaces, etc.
@@ -36,6 +38,23 @@ If nothing is provided, the program will decide based on the length of the reads
 -c N: Number of threds used when running bowtie (default=1).
 Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
 ###
+
+**Combining Results:**
+
+**Plotting:**
+
+VAST comes with some basic plotting scripts written in R. The scripts can be found
+in the 'plot' subdirectory. To execute from VAST, use the subcommand "plot".
+
+e.g.
+
+> vast plot psi_values.tab
+
+The input format follows the same format from the "combine" step described
+above. The output is a pdf of scatterplots (one per AS event) of PSI values. It
+is recommended to filter the input file to a subset of events of interest before
+using this plotting function. Otherwise, the resulting pdf file will be very
+large.
 
 Citation
 --------
