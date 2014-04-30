@@ -28,6 +28,8 @@ use FuncBasics qw(:all);
 use Getopt::Long;
 use Cwd qw(abs_path);
 
+use constant DEFAULT_OUTDIR => 'vast_out';
+
 our $EXIT_STATUS = 0;
 
 # INITIALIZE
@@ -44,7 +46,7 @@ my $legacyFlag = 0; # Use old input and output... Not by default.
 my $helpFlag = 0;
 my $cleanFlag = 0;
 
-my $output_dir = "vast_out";
+my $output_dir = undef;
 
 my $subCommand = shift @ARGV or $helpFlag = 1;
 
@@ -53,7 +55,7 @@ my @args = @ARGV;
 Getopt::Long::Configure("pass_through");
 GetOptions("help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
-			  "outputDir=s" => \$output_dir,
+			  "output=s" => \$output_dir,
 			  "clean" => \$cleanFlag);
 
 
@@ -72,13 +74,19 @@ Usage: $0 sub-commands [options]
 
 [global options]
 	-h,--help	:	Print this message
-	--output	:	-o outputDir (default vast_out)
+	--outputDir	:	Output directory (default vast_out)
 	--legacy	:	Use old input/output styles
 	--verbose	:	Print stderr
 
 "
 }
 
+# Check if output directory option was specified --KH
+# If not, set the default and add to @args
+if (! defined $output_dir) {
+    $output_dir = DEFAULT_OUTDIR;
+    push @args, "--output=$output_dir";
+}
 
 # this may need to be altered later --TSW
 if($cleanFlag) {
@@ -92,9 +100,9 @@ if($cleanFlag) {
 
 ## Nuts and Bolts...
 if($subCommand eq "align") {
-  $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args -outdir=$output_dir");
+  $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args");
 } elsif($subCommand eq "combine") {
-  $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args -outdir=$output_dir");
+  $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args");
 } elsif($subCommand eq "diff") {
   $EXIT_STATUS = system("$path/vastdiff/vastdiff.R @args");
 }
