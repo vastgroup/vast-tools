@@ -25,10 +25,11 @@ my $outdir;
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
 
+Getopt::Long::Configure("no_auto_abbrev");
 GetOptions("bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
 			  "db=s" => \$dbDir,
-			  "c" => \$cores,
+			  "c=i" => \$cores,
 			  "pe" => \$pairedEnd,
 			  "expr" => \$runExprFlag,
 			  "exprONLY" => \$onlyExprFlag,
@@ -38,11 +39,6 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "verbose" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
               "output=s" => \$outdir);
-
-unless(defined($dbDir)) {
-  $dbDir = "$binPath/../$species";
-}
-$dbDir = abs_path($dbDir);
 
 our $EXIT_STATUS = 0;
 
@@ -64,6 +60,13 @@ sub verbPrint {
     print STDERR "[vast align]: $verbMsg\n";
   }
 }
+
+# Check database directory
+unless(defined($dbDir)) {
+  $dbDir = "$binPath/../$species";
+}
+$dbDir = abs_path($dbDir);
+errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage:
@@ -88,7 +91,7 @@ NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to
   exit $EXIT_STATUS;
 }
 
-die "Needs species\n" if !$species;
+errPrint "Needs species\n" if !$species;
 
 # Use pigz if installed  --KH
 my $zip = which('pigz');
@@ -155,7 +158,9 @@ if ($fileName1 =~ /\-e\.f/){
 ###
 
 # change directories
+errPrint "The output directory \"$outdir\" does not exist" unless (-e $outdir);
 chdir($outdir);
+verbPrint "Setting output directory to $outdir";
 mkdir("spli_out") unless (-e "spli_out");
 mkdir("expr_out") unless (-e "expr_out");
 
@@ -182,7 +187,7 @@ if (!$genome_sub){
  my $cmd;
 #### Expression analysis (it maps only the first $le nucleotides of the read)
  if ($runExprFlag || $onlyExprFlag){
-     verbPrint "Mapping reads against mRNA sequences\n";
+     verbPrint "Mapping reads against mRNA sequences";
 
      $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
 
@@ -213,7 +218,7 @@ if (!$genome_sub){
 
 #### Merge PE
  if ($pairedEnd){
-     verbPrint "Concatenating paired end reads\n";
+     verbPrint "Concatenating paired end reads";
      sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
                                        # $fq is used in trimming below. but we
                                        # can pipe into it. KH
@@ -227,19 +232,19 @@ if (!$genome_sub){
    if (!defined($trim) or $trim eq "twice"){
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
-	     verbPrint "Trimming and splitting fastq sequences from $length to $half_length nt\n";
+	     verbPrint "Trimming and splitting fastq sequences from $length to $half_length nt";
 	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $half_length > $root-$length-$half_length.fq";
-	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences\n";
+	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
 	     sysErrMsg "$binPath/Trim-twiceOVER.pl $root-$length-$half_length.fq $le > $root-$le.fq";
 	     sysErrMsg "rm $root-$length-$half_length.fq";
 	     #sysErrMsg "mv $root-$length-$half_length-$le.fq $root-$le.fq";  #piping to stdout removes need for this --TSW
 	  } else {
-	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences\n";
+	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
 	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $le > $root-$le.fq";
 	  #   sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
 	  }
    } elsif ($trim eq "once"){
-	 verbPrint "Trimming fastq sequences to $le nt sequences\n";
+	 verbPrint "Trimming fastq sequences to $le nt sequences";
 	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
 	# sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
    }
@@ -254,7 +259,7 @@ if (!$genome_sub){
  $cmd = "$bowtie -p $cores -m 1 -v 2 --un $root-$le-e.fq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
  if ($fq =~ /\.gz$/) {
      sysErrMsg "gzip -dc $fq | $cmd";
-     verbPrint "Compressing trimmed reads\n";
+     verbPrint "Compressing trimmed reads";
      sysErrMsg "$zip $root-$le.fq";
  } else {
      sysErrMsg "cat $fq | $cmd";
