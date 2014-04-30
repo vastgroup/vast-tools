@@ -126,7 +126,7 @@ if (length(args) < 1) {
   print_help()
   stop("Missing arguments")
 }
-if (args[1] == "--help") {
+if (args[1] %in% c("-h", "--help", "-help")) {
   print_help()
   stop("Terminating")
 }
