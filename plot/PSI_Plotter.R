@@ -2,10 +2,14 @@
 #
 # PSI Plotter script
 
-source("preprocess_sample_colors.R")
+MAX_ENTRIES <- 1000
+
+args <- commandArgs(trailingOnly = F)
+scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
+source(file.path(scriptPath, "preprocess_sample_colors.R"))
 
 version <- function() {
-  return("0.4")
+  return("0.4_vast")
 }
 
 print_help <- function() {
@@ -105,11 +109,17 @@ format_table <- function(m) {
   return(psi)
 }
 
+# Perform some checks #########################################################
 if (!grepl("^GENE", colnames(all_events)[1])) {
   stop("Invalid column names. Does your input file contain the correct header?")
 }
-write("// Brewing some coffee...", stderr())
 
+if (nrow(all_events) > MAX_ENTRIES) {
+  warning(paste("Too many entries in input file. Plotting only the first",
+      MAX_ENTRIES, ". Try splitting your input file into smaller files."))
+}
+
+# Format input data ###########################################################
 write("// Formatting input data for plotting...", stderr())
 PSIs <- format_table(all_events)
 # Call function to re-order columns of PSI data
@@ -137,7 +147,8 @@ outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", file)
 
 pdf(outfile, width = 8.5, height = 5.5)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
-for (i in 1:nrow(PSIs)) {
+nplot <- min(nrow(PSIs), MAX_ENTRIES)
+for (i in 1:nplot) {
   plot(as.numeric(PSIs[i,]),
        col=supercolors,
        pch=20,
@@ -168,5 +179,5 @@ for (i in 1:nrow(PSIs)) {
 dev.off()
 
 write("// Done!\n", stderr())
-write(paste("//", nrow(PSIs), "plots are saved in:", outfile), stderr())
+write(paste("//", nplot, "plots are saved in:", outfile), stderr())
 ####
