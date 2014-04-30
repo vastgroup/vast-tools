@@ -19,11 +19,16 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
 argv <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 
+# Source Rlib.
 source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
+
+# custom install from include.R
+loadPackages(c("getopt", "RColorBrewer", "reshape2", "ggplot2", "grid"))
 
 argv <- commandArgs(TRUE)
 
@@ -38,7 +43,7 @@ spec = matrix(c(
 opt = getopt(spec)
 
 if ( !is.null(opt$help) ) {
-	cat(getopt(spec, command="vastdb diff", usage=TRUE))
+	cat(getopt(spec, command="vast diff", usage=TRUE))
 	q(status=1)
 }
 
