@@ -110,7 +110,7 @@ if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1;
 ## Getting sample name and length:
 my $fq1 = abs_path($ARGV[0]);
 my $fq2;
-my $fq;
+my $fq;     # takes the fastq file to be processed at each step
 
 if(!defined($fq1)) {
   errPrint "No FASTQ file given!";
@@ -128,7 +128,7 @@ $fileName1 =~ s/^.*\///g; # strip path
 my $genome_sub = 0;
 if ($fileName1 =~ /\-e\.f/){
     $genome_sub=1;
-    ($root,$length)=$fileName1=~/(\S+)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
+    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     errPrint "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
 } else {
@@ -138,7 +138,7 @@ if ($fileName1 =~ /\-e\.f/){
          $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
          $root = $1;
     } else { # default behavior by --MI
-         ($root,$length)=$fileName1=~/(\S+)\_{0,1}1{0,1}\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
+         ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
 			if(!defined($length) or $length eq "") { 
   				errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
 			}
@@ -179,11 +179,12 @@ errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa"
 #sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
 
 if (!$genome_sub){
+ my $cmd;
 #### Expression analysis (it maps only the first $le nucleotides of the read)
  if ($runExprFlag || $onlyExprFlag){
      verbPrint "Mapping reads against mRNA sequences\n";
 
-     my $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
+     $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
 
      if ($pairedEnd) {
          $cmd = "$fq1 $fq2 | $cmd";  # altered this to cat both for/rev reads into bowtie.
@@ -192,9 +193,7 @@ if (!$genome_sub){
      }
 
      if ($zipped) {
-			$cmd = "zcat $cmd";
-	 # Is zcat a better choice?  --TSW
-    #     $cmd = "gzip -dc $cmd";
+         $cmd = "gzip -dc $cmd";
      } else {
          $cmd = "cat $cmd";
      }
@@ -244,16 +243,22 @@ if (!$genome_sub){
 	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
 	# sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
    }
+   $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
  }
- verbPrint "Compressing raw fastq file\n" unless $length==50 || $length==36;
- #sysErrMsg "gzip $fq" unless $length==50 || $length==36;
+ #verbPrint "Compressing raw fastq file\n" unless $length==50 || $length==36;
 ####
  
 #### Get effective reads (i.e. genome substraction).
  verbPrint "Doing genome substraction\n";
- sysErrMsg "$bowtie -p $cores -m 1 -v 2 --un $root-$le-e.fq --max /dev/null $dbDir/FILES/gDNA $root-$le.fq /dev/null";
- verbPrint "Compressing trimmed reads\n";
- sysErrMsg "$zip $root-$le.fq";
+ # Updated genome subtraction command to handle trimmed or untrimmed input files
+ $cmd = "$bowtie -p $cores -m 1 -v 2 --un $root-$le-e.fq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+ if ($fq =~ /\.gz$/) {
+     sysErrMsg "gzip -dc $fq | $cmd";
+     verbPrint "Compressing trimmed reads\n";
+     sysErrMsg "$zip $root-$le.fq";
+ } else {
+     sysErrMsg "cat $fq | $cmd";
+ }
 ####
 }
 
