@@ -54,9 +54,10 @@ my @args = @ARGV;
 
 Getopt::Long::Configure("pass_through", "no_auto_abbrev");
 GetOptions("help" => \$helpFlag,
+			  "h" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "output=s" => \$outdir,
-              "o=s" => \$outdir,
+           "o=s" => \$outdir,
 			  "clean" => \$cleanFlag);
 
 if($helpFlag and 
