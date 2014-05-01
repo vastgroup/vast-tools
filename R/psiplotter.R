@@ -1,16 +1,29 @@
 #!/usr/bin/env Rscript
 #
-# PSI Plotter script
+# Copyright (C) 2014 Kevin Ha
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the "Software"), 
+# to deal in the Software without restriction, including without limitation 
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+# and/or sell copies of the Software, and to permit persons to whom the Software 
+# is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in 
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 MAX_ENTRIES <- 1000
 
 args <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
-source(file.path(scriptPath, "preprocess_sample_colors.R"))
-
-version <- function() {
-  return("0.4_vast")
-}
+source(file.path(scriptPath, "Rlib", "preprocess_sample_colors.R"))
 
 print_help <- function() {
   text <- "**** PSI Plotter ****
@@ -36,8 +49,6 @@ Test run:
     test_data/Tissues.Mmu.txt
 "
   writeLines(text, stderr())
-  write(paste("Version:", version()), stderr())
-  write("Updated: 2014-04-30", stderr())
 }
 
 #### Arguments #################################################################
@@ -72,7 +83,9 @@ if (length(args) == 2) {
 
 write(paste("PSI Plotter - Version", version()), stderr())
 write(paste("\n// Input file:", file), stderr())
-write(paste("// Tissue Group file:", tissueFile), stderr())
+write(paste("// Tissue Group file:", 
+    ifelse(is.null(tissueFile), "Did not provide", tissueFile)), 
+    stderr())
 
 #### Format input data #########################################################
 
@@ -130,11 +143,10 @@ PSIs <- format_table(all_events)
 #   group.index - list of indices for each sample group (e.g. ESC, Neural, etc.)
 #   group.col   - corresponding color for sample group
 reordered.PSI <- preprocess_sample_colors(PSIs, tissueFile)
+write(paste("//", ncol(reordered.PSI$data), "out of", ncol(PSIs), "samples detected"), stderr())
 PSIs <- as.matrix(reordered.PSI$data)
 ALLev <- row.names(PSIs)
 samples <- colnames(PSIs)
-
-write(paste("//", ncol(PSIs), "samples detected"), stderr())
 
 #### Prepare plotting ##########################################################
 write("// Plotting...", stderr())

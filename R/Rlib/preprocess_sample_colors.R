@@ -28,7 +28,7 @@ preprocess_sample_colors <- function(psi, database) {
 
    R <- list()
 
-   if (is.null(tissueFile)) {
+   if (is.null(database)) {
         mycols <- rep("black", ncol(psi))
         R <- list(data=psi, col=mycols, group.index=NULL, group.col=NULL)
    } else {
@@ -41,12 +41,12 @@ preprocess_sample_colors <- function(psi, database) {
        }
        
        # check if all samples in input data is in the database
-       unk.samples <- colnames(psi) %in% db$SampleName
-       if (!all(unk.samples)) {
-         s <- colnames(psi)[!unk.samples]
-         stop(paste("The following samples are not in the tissues database:", 
-                    paste(s, collapse=", ")))
-       }
+       #unk.samples <- colnames(psi) %in% db$SampleName
+       #if (!all(unk.samples)) {
+         #s <- colnames(psi)[!unk.samples]
+         #stop(paste("The following samples are not in the tissues database:", 
+                    #paste(s, collapse=", ")))
+       #}
       
        # keep only tissue groups that are present in input data
        # (to take into account samples that might have been excluded)
