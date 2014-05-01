@@ -47,29 +47,34 @@ Output:
   A PDF file will be created with one PSI plot per page.
 
 Customizing plots [optional]:
-  The color and ordering of samples can be customized by supplying a samples
-  database file. This file is tab-delimited and in the following format:
+  The color and ordering of samples can be customized by supplying a plot
+  configuration file. This file is tab-delimited and in the following format:
   Order    SampleName    GroupName    RColorCode
   1        Ooctye        EarlyDev     36
   2        Embr_2C       EarlyDev     36
   etc..
  
-  Order <- The ordering of the samples from left to right.
-  SampleName <- Name of the sample. MUST match sample name in input table.
-  GroupName <- Group name. Use for plotting the average PSI of samples
+  Order 		: The ordering of the samples from left to right.
+  SampleName 	: Name of the sample. MUST match sample name in input table.
+  GroupName		: Group name. Use for plotting the average PSI of samples
       belonging to the same group. Currently supports grouping of ESC, Muscle,
       Neural, and Tissues. Everything else is ignored.
-  RColorCode <- Color value corresponding to the index of the vector produced by
+  RColorCode	: Color value corresponding to the index of the vector produced by
       colors(). For example, RColorCode = 36 corresponds to:
         > cols <- colors()
         > mycolour <- cols[36]
+
+  Only the samples listed in the config file will be represented in the 
+  resulting plots. Other samples in the PSI table but not in the config 
+  file will be ignored. This may be useful if you want to customize the 
+  type of samples in your plots.
 "
 
 option.list <- list(
         make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
             help="Enable verbose [%default]"),
-        make_option(c("-d", "--db"), type = "character", default = NULL,
-            help = "Samples database file. Used for customizing order and color
+        make_option(c("-c", "--config"), type = "character", default = NULL,
+            help = "Plot configuration file. Used for customizing order and color
             [%default]"),
         make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
             help = "Maximum number of AS events to plot [first %default]"),
@@ -90,7 +95,7 @@ file <- opt$args[1]
 if (!file.exists(file))
   stop(paste("Input PSI file", file, "doesn't exist!"))
 
-tissueFile <- opt$options$db
+tissueFile <- opt$options$config
 if (!(is.null(tissueFile) || file.exists(tissueFile)))
   stop(paste("Tissue Group file", tissueFile, "doesn't exist!"))
 
