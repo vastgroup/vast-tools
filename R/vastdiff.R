@@ -42,25 +42,35 @@ option.list <- list(
         help = "Required, SampleA@SampleB@SampleC etc.. [first %default]"),
     make_option(c("-b", "--replicateB"), type = "character", default = NULL,
         help = "Required, SampleA@SampleB@SampleC etc.. [first %default]"),
+    make_option(c("--sampleNameA"), type = "character", default = NULL,
+        help = "Name of the replicate set A, defaults to first element of --replicateA"),
+    make_option(c("--sampleNameB"), type = "character", default = NULL,
+        help = "Name of the replicate set B, defaults to first element of --replicateB"),
     make_option(c("-f", "--filter"), type = "logical", default = TRUE,
         help = "Filter output for differential events only [first %default]"),
-    make_option(c("-p", "--plot"), type = "logical", default = FALSE,
-        help = "Plot visual output for differential events [first %default]"),
+    make_option(c("-d", "--pdf"), type = "logical", default = TRUE,
+        help = "Plot visual output (pdf) for differential events [first %default]"),
+    make_option(c("-s", "--size"), type = "integer", default = 100000,
+        help = "Size of the posterior emperical distribution over psi [first %default]"),
+    make_option(c("-p", "--paired"), type = "logical", default = FALSE,
+        help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [first %default]"),
+    make_option(c("-r", "--prob"), type = "numeric", default = 0.9,
+        help = "Probability cutoff for P( (psi1 - psi2) > x ) > cutoff [first %default]"),
+    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.05,
+        help = "Diff cutoff for min diff where P( (psi1 - psi2) > diff ) > --prob [first %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
         help = "Output directory, passed from vast [%default]")
 )
-
-print(option.list)
 
 parser <- OptionParser(option_list = option.list,
             usage = "usage: %prog -a SampleA@..@SampleD -b SampleF@..@SampleG [options]")
 optpar <- parse_args(parser, argv, positional_arguments = TRUE)
 opt <- optpar$options
 
-# move to output directory
+## move to output directory
 setwd(opt$output)
 
-# try and find the input file if they aren't exact
+## try and find the input file if they aren't exact
 if(!file.exists(opt$input)) {
   potentialFiles <- Sys.glob( paste(c("*",opt$input,"*"), collapse="") )
   if( length( potentialFiles ) >= 1) { 
@@ -69,32 +79,44 @@ if(!file.exists(opt$input)) {
     opt$input <- potentialFiles_sort[1]
   } else {
     # Still can't find input after searching...
+	 print_help(parser)
     stop("[vast diff error]: No input file given!")
   }
 }
 
-# Setting input files.
+## Setting input files.
 inputFile <- file( opt$input, 'r' )
 
-if(opt$plot) {
-  dir.create(paste(c(opt$output, "/diff_out"), collapse=""))
-  q()
+## Make plot directory
+if(opt$pdf) {
+  #dir.create(paste(c(opt$output, "/diff_out"), collapse=""))
 }
-
-
-print_help <- function() {
-  text <- ""
-  writeLines(text, stderr())
-  write("Updated: 2014-04-09", stderr())
-}
-
 
 #-replicatesA=name1@name2@name3 -replicatesB=name4@name5
 firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "@" ))
 secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "@" ))
 
+if( length(firstRepSet) <= 0 || 
+	 length(secondRepSet) <= 0) { 
+  print_help(parser) 
+  stop("[vast diff error]: No replicate sample names given!!! -a sampA@sampB -b sampC@sampD")
+}
+
+# Set number of replicates
 firstRepN <- length(firstRepSet)
 secondRepN <- length(secondRepSet)
+
+# Make sure there are sample names
+if(is.null( opt$sampleNameA ) ) {
+  opt$sampleNameA <- firstRepSet[1]
+}
+if(is.null( opt$sampleNameB ) ) {
+  opt$sampleNameB <- secondRepSet[1]
+}
+# Set output sample names for plot
+sampOneName <- paste(c(substr(opt$sampleNameA, 1, 4), "(n=", as.character(firstRepN), ")"), collapse="")
+sampTwoName <- paste(c(substr(opt$sampleNameB, 1, 4), "(n=", as.character(secondRepN), ")"), collapse="")
+
 
 ## INITIALIZE LISTS ##
 shapeFirst <- vector("list", firstRepN)
@@ -103,27 +125,27 @@ shapeSecond <- vector("list", secondRepN)
 psiFirst <- vector("list", firstRepN)
 psiSecond <- vector("list", secondRepN)
 
-### READ INPUT ###
-
 # Get header
 head <- readLines( inputFile, n=1 )
-head_n <- unlist( strsplit( head, "\t" ))
+head_n <- unlist( strsplit( head, "\t" ) )
 
-#print(head_n)
-#print(firstRepSet)
+# check if header is correct..  TODO
 
 # Indexes of samples of interest
 repAind <- which( head_n %in% firstRepSet  )
 repBind <- which( head_n %in% secondRepSet )
 
-#print(repAind)
-
 # Indexes of Quals
 repA.qualInd <- repAind + 1
 repB.qualInd <- repBind + 1
 
-#write(repA.qualInd, stdout())
-#q()
+# make sure this succeeded  TODO
+
+# CONST
+alphaList <- seq(0,1,0.01)
+
+### TMP OUT
+pdf("plotDiff.pdf", width=7, height=3)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 1000 lines at a time to reduce overhead/memory
@@ -131,52 +153,68 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
   for(i in 1:length(lines)) { 
     tabLine <- unlist( strsplit( lines[i], "\t" ) )
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
-		 First <- lapply(
-								
-							 )	  
-  } 
-}
-
-q()
-### END READ INPUT ###
-
-#sample here from rbeta(N, alpha, beta)
-
-psiFirstComb <- do.call(c, psiFirst)
-psiSecondComb <- do.call(c, psiSecond)
-
-shuffOne <- shuffle(psiFirstComb)  #unless paired=T
-shuffTwo <- shuffle(psiSecondComb) # unless paired=T
+	
+	 # Posterior parameters
+	 shapeFirst <- lapply( tabLine[repA.qualInd], parseQual )
+	 shapeSecond <- lapply( tabLine[repB.qualInd], parseQual )
 
 
-#GET FROM INPUT
-Sample_1_Name <- "repA"
-Sample_2_Name <- "repB"
+	 # Sample Posterior Distributions
+	 psiFirst <- lapply( shapeFirst, function(x) {
+      #sample here from rbeta(N, alpha, beta)
+      rbeta(opt$size, shape1=x[1], shape2=x[2])
+    })
+	 psiSecond <- lapply( shapeSecond, function(x) {
+      #sample here from rbeta(N, alpha, beta)
+      rbeta(opt$size, shape1=x[1], shape2=x[2])
+    })
 
-sampOneName <- paste(c(substr(Sample_1_Name, 1, 4), "(n=", as.character(firstRepN), ")"), collapse="")
-sampTwoName <- paste(c(substr(Sample_2_Name, 1, 4), "(n=", as.character(secondRepN), ")"), collapse="")
+	 # Create non-parametric Joint Distributions
+	 psiFirstComb <- do.call(c, psiFirst)
+    psiSecondComb <- do.call(c, psiSecond)
 
-# calculate the probability that the first dist is > than second
-distPlot <- ggplot(melt(as.data.frame(
-			do.call(cbind,list(psiFirstComb, psiSecondComb))
-			)), aes(fill=variable, x=value))+
-			geom_histogram(aes(y=..density..),alpha=0.5, col="grey", position="identity")+
-			theme_bw()+xlim(c(0,1))+xlab(expression(hat(Psi)))+
-			scale_fill_manual(values=cbb[2:3], labels=c(sampOneName, sampTwoName), name="Samples")
+    print(length(psiFirstComb))
 
+    # if they aren't paired, then shuffle the joint distributions...
+    if( !opt$paired ) {
+      psiFirstComb <- shuffle(psiFirstComb)
+	   psiSecondComb <- shuffle(psiSecondComb)
+    }
 
-probPlot <- ggplot(as.data.frame(cbind(seq(0,1,0.01), 
-				unlist(lapply(seq(0,1,0.01), function(x) { 
-					pDiff(shuffTwo, shuffOne, x) 
-				})))), aes(x=V1, y=V2))+
-				geom_line()+theme_bw()+
-				geom_vline(x=maxDiff(shuffTwo, shuffOne), lty="dashed")+
-				ylab(expression(P((hat(Psi)[1]-hat(Psi)[2]) > x)))+
-				xlab(expression(x))+
-				geom_text(x=maxDiff(shuffTwo, shuffOne), y=-0.1, label=maxDiff(shuffTwo, shuffOne))
+	 # get emperical posterior median of psi
+    medOne <- median(psiFirstComb)
+    medTwo <- median(psiSecondComb)
 
-pdf(sprintf("%s_%d_mer.pdf", argv[3], n), width=7, height=6)
-multiplot(distPlot, probPlot, cols=2)
+    # look for a max difference...
+    if(medOne > medTwo) {
+      max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob)
+    } else {
+      max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
+    }
+    # check for significant difference
+    if(max < opt$minDiff) { next }
+
+    # SIGNIFICANT from here on out:
+	 if( opt$filter ) { 
+		writeLines(lines[i], stdout())
+    }
+
+    eventTitle <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
+ 
+	 # Print visual output to pdf;    
+    if( opt$pdf ) {
+      if( medOne > medTwo ) {
+        plotDiff(eventTitle, psiFirstComb, psiSecondComb, max, medOne, medTwo, opt$sampleNameA, opt$sampleNameB )
+      } else {
+        plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, opt$sampleNameB, opt$sampleNameA )
+      }
+    }
+    
+
+  } #End For
+} #End While
+
 dev.off()
 
 q(status=0)
+
