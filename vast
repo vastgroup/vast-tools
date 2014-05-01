@@ -108,7 +108,7 @@ if($subCommand eq "align") {
 } elsif($subCommand eq "diff") {
   $EXIT_STATUS = system("$path/R/vastdiff.R @args");
 } elsif($subCommand eq "plot") {
-  $EXIT_STATUS = system("$path/R/PSI_Plotter.R @args");
+  $EXIT_STATUS = system("$path/R/psiplotter.R @args");
 }
 
 exit $EXIT_STATUS;
