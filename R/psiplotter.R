@@ -58,62 +58,52 @@ Customizing plots [optional]:
   SampleName <- Name of the sample. MUST match sample name in input table.
   GroupName <- Group name. Use for plotting the average PSI of samples
       belonging to the same group. Currently supports grouping of ESC, Muscle,
-      and Neural. Everythign else 
+      Neural, and Tissues. Everything else is ignored.
   RColorCode <- Color value corresponding to the index of the vector produced by
       colors(). For example, RColorCode = 36 corresponds to:
         > cols <- colors()
         > mycolour <- cols[36]
- 
 "
+
 option.list <- list(
         make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
             help="Enable verbose [%default]"),
-        make_option(c("-h", "--help"), type = "logical", default = FALSE,
-            help = "Print this help message"),
         make_option(c("-d", "--db"), type = "character", default = NULL,
             help = "Samples database file. Used for customizing order and color
             [%default]"),
         make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
-            help = "Maximum number of AS events to plot [first %default]")
-        make_option(c("-o", "--output"), type = "character", 
-            default = "Same location as input file",
+            help = "Maximum number of AS events to plot [first %default]"),
+        make_option(c("-o", "--output"), type = "character", default = NULL,
             help = "Output directory [%default]")
 )
 parser <- OptionParser(option_list = option.list,
+                        desc = desc,
                         usage = "usage: %prog [options] INCLUSION_LEVELS.tab")
 opt <- parse_args(parser, args = args, positional_arguments = TRUE)
-if (length(opt$args) == 0)
-    stop(print_help(parser))
 
-if (length(args) < 1) {
-  print_help()
-  stop("Missing arguments")
-}
-if (args[1] %in% c("-h", "--help", "-help")) {
-  print_help()
-  stop("Terminating")
-}
-if (args[1] == "--version") {
-  write(paste("Version:", version()), stderr())
-  stop("Terminating")
+if (length(opt$args) == 0) {
+    print_help(parser)
+    stop("Missing arguments")
 }
 
-file <- args[1]
+file <- opt$args[1]
 if (!file.exists(file))
   stop(paste("Input PSI file", file, "doesn't exist!"))
 
-tissueFile <- NULL
-if (length(args) == 2) {
-    tissueFile <- args[2]
-    if (!file.exists(tissueFile))
-      stop(paste("Tissue Group file", tissueFile, "doesn't exist!"))
+tissueFile <- opt$options$db
+if (!(is.null(tissueFile) || file.exists(tissueFile)))
+  stop(paste("Tissue Group file", tissueFile, "doesn't exist!"))
+
+verbPrint <- function(s) {
+    if (opt$options$verbose) {
+        write(s, stderr()) 
+    }
 }
 
-write(paste("PSI Plotter - Version", version()), stderr())
-write(paste("\n// Input file:", file), stderr())
-write(paste("// Tissue Group file:", 
-    ifelse(is.null(tissueFile), "Did not provide", tissueFile)), 
-    stderr())
+verbPrint(paste("PSI Plotter"))
+verbPrint(paste("\n// Input file:", file))
+verbPrint(paste("// Tissue Group file:", 
+    ifelse(is.null(tissueFile), "Did not provide", tissueFile)))
 
 #### Format input data #########################################################
 
@@ -155,13 +145,13 @@ if (!grepl("^GENE", colnames(all_events)[1])) {
   stop("Invalid column names. Does your input file contain the correct header?")
 }
 
-if (nrow(all_events) > MAX_ENTRIES) {
+if (nrow(all_events) > opt$options$max) {
   warning(paste("Too many entries in input file. Plotting only the first",
-      MAX_ENTRIES, ". Try splitting your input file into smaller files."))
+      opt$optiosn$max, ". Try splitting your input file into smaller files."))
 }
 
 # Format input data ###########################################################
-write("// Formatting input data for plotting...", stderr())
+verbPrint("// Formatting input data for plotting...")
 PSIs <- format_table(all_events)
 # Call function to re-order columns of PSI data
 #
@@ -171,23 +161,33 @@ PSIs <- format_table(all_events)
 #   group.index - list of indices for each sample group (e.g. ESC, Neural, etc.)
 #   group.col   - corresponding color for sample group
 reordered.PSI <- preprocess_sample_colors(PSIs, tissueFile)
-write(paste("//", ncol(reordered.PSI$data), "out of", ncol(PSIs), "samples detected"), stderr())
+verbPrint(paste("//", ncol(reordered.PSI$data), "out of", ncol(PSIs), "samples detected"))
 PSIs <- as.matrix(reordered.PSI$data)
 ALLev <- row.names(PSIs)
 samples <- colnames(PSIs)
 
 #### Prepare plotting ##########################################################
-write("// Plotting...", stderr())
+verbPrint("// Plotting...")
 
 # assign list of colors
 supercolors <- reordered.PSI$col
 
 # Set output file
-outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", file)
+outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
+
+# Check if output directory was specified
+if (is.null(opt$options$output)) {
+    outfile <- file.path(dirname(file), outfile)
+} else {
+    # Create directory if necessary
+    if (!file.exists(opt$options$output))
+        dir.create(opt$options$output, recursive = TRUE) 
+    outfile <- file.path(opt$options$output, outfile)
+}
 
 pdf(outfile, width = 8.5, height = 5.5)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
-nplot <- min(nrow(PSIs), MAX_ENTRIES)
+nplot <- min(nrow(PSIs), opt$options$max)
 for (i in 1:nplot) {
   plot(as.numeric(PSIs[i,]),
        col=supercolors,
@@ -218,6 +218,6 @@ for (i in 1:nplot) {
 }
 dev.off()
 
-write("// Done!\n", stderr())
-write(paste("//", nplot, "plots are saved in:", outfile), stderr())
+verbPrint("// Done!\n")
+verbPrint(paste("//", nplot, "plots are saved in:", outfile))
 ####
