@@ -35,43 +35,84 @@ argv <- commandArgs(TRUE)
 spec = matrix(c(
 	'verbose', 'v', 0, "logical",
 	'help', 'h', 0, "logical",
+	'output', 'o', 1, "character",
 	'plotSig', 'p', 0, "logical",
 	'repA', 'a', 1, "character",
-	'repB', 'b', 1, "character"
+	'repB', 'b', 1, "character",
+	'input', 'i', 1, "character",
+	'filter', 'f', 0, "logical"
 ), byrow=TRUE, ncol=4)
 
 opt = getopt(spec)
 
 if ( !is.null(opt$help) ) {
-	cat(getopt(spec, command="vast diff", usage=TRUE))
-	q(status=1)
+   cat(getopt(spec, command="vast diff", usage=TRUE))
+   q(status=1)
 }
 
-#set some defaults for the options
+# set some defaults for the options
 if ( is.null(opt$verbose ) ) { opt$verbose = FALSE }
 if ( is.null(opt$plotSig ) ) { opt$plotSig = FALSE }
+if ( is.null(opt$input   ) ) { opt$input = "INCLUSION-LEVELS" }
+
+# try and find the input file if they aren't exact
+if(!file.exists(opt$input)) {
+  potentialFiles <- Sys.glob(paste(c("*",opt$input,"*"), collapse=""))
+  if(!is.null(potentialFiles)) { 
+	 # now sort and take the one with the 'biggest' number of samples
+    potentialFiles_sort <- rev(sort(potentialFiles))
+    opt$input <- potentialFiles_sort[1]
+  } else {
+    stop("[vast diff error]: No input file given!")
+  }
+} 
+inputFile <- file( opt$input, 'r' )
+# done setting input.
+
+q()
 
 if(opt$plotSig) {
-  dir.create("diff_out")
+  dir.create(paste(c(opt$output, "/diff_out"), collapse=""))
   q()
 }
 
-#-replicatesA=name1@name2@name3 -replicatesB=name4@name5
 
-firstRepN <- 2
-secondRepN <- 2
+print_help <- function() {
+  text <- ""
+  writeLines(text, stderr())
+  write("Updated: 2014-04-09", stderr())
+}
+
+
+#-replicatesA=name1@name2@name3 -replicatesB=name4@name5
+firstRepSet <- unlist(strsplit( opt$recA , "@" ))
+secondRepSet <- unlist(strsplit( opt$recB, "@" ))
+
+firstRepN <- length(firstRepSet)
+secondRepN <- length(secondRepSet)
 
 psiFirst <- vector("list", firstRepN)
 psiSecond <- vector("list", secondRepN)
 
 ### READ INPUT ###
 
-inputFile <- file( opt$repA, 'r' ) 
+# Get header
+head <- readLines( inputFile, n=1 )
+head_n <- unlist( strsplit(head, "\t" ))
 
+# Indexes of samples of interest
+repAind <- which( head_n %in% firstRepSet  )
+repBind <- which( head_n %in% secondRepSet )
+
+# Indexes of Quals
+repA.qualInd <- repAind + 1
+repB.qualInd <- repBind + 1
+
+# Iterate through input, 1000 lines at a time to reduce overhead/memory
 while (length(lines <- readLines(inputFile, n=1000)) > 0){ 
   for (i in 1:length(lines)){ 
-    #?
-    writeLines(lines[i])
+    tabLine <- unlist(strsplit(lines[i], "\t"))
+     
   } 
 }
 
@@ -87,10 +128,9 @@ shuffOne <- shuffle(psiFirstComb)  #unless paired=T
 shuffTwo <- shuffle(psiSecondComb) # unless paired=T
 
 
-
 #GET FROM INPUT
-Sample_1_Name <- "SamA"
-Sample_2_Name <- "SamB"
+Sample_1_Name <- "repA"
+Sample_2_Name <- "repB"
 
 sampOneName <- paste(c(substr(Sample_1_Name, 1, 4), "(n=", as.character(firstRepN), ")"), collapse="")
 sampTwoName <- paste(c(substr(Sample_2_Name, 1, 4), "(n=", as.character(secondRepN), ")"), collapse="")
