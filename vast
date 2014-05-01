@@ -57,7 +57,7 @@ GetOptions("help" => \$helpFlag,
 			  "h" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "output=s" => \$outdir,
-           "o=s" => \$outdir,
+			"o=s" => \$outdir,
 			  "clean" => \$cleanFlag);
 
 if($helpFlag and 
@@ -70,10 +70,10 @@ if($helpFlag and
 Usage: $0 sub-commands [options]
 
 [sub-commands]
-	align
-	combine
-	diff
-	plot
+	align		:	Align RNA-Seq reads to exon-exon junctions and quantify AS
+	combine		:	Combine two or more 'aligned' RNA-Seq samples into summary tables
+	diff		:	 
+	plot		:	Utility application to plot PSI scatterplots
 
 [global options]
 	-h,--help	:	Print this message
