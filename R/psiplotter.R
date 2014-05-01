@@ -38,7 +38,7 @@ desc <- "Script for generating PSI plots (scatterplot) across samples.
 
 Input:
   PSI data - one AS event per row - using the standard PSI format
-      e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1_PSI Tissue1_Q ... 
+      e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1 Tissue1_Q ... 
   Recommended to use only a subset of AS events instead of the full table
   otherwise the resulting PDF file will be very large. See options for customizing
   the maximum number of plots to generate.
