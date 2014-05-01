@@ -28,50 +28,55 @@ source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 # custom install from include.R
-loadPackages(c("getopt", "RColorBrewer", "reshape2", "ggplot2", "grid"))
+loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid"))
 
 argv <- commandArgs(TRUE)
 
-spec = matrix(c(
-	'verbose', 'v', 0, "logical",
-	'help', 'h', 0, "logical",
-	'output', 'o', 1, "character",
-	'plotSig', 'p', 0, "logical",
-	'repA', 'a', 1, "character",
-	'repB', 'b', 1, "character",
-	'input', 'i', 1, "character",
-	'filter', 'f', 0, "logical"
-), byrow=TRUE, ncol=4)
+# optparse..
+option.list <- list(
+    make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
+        help="Enable verbose [%default]"),
+    make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
+        help = "Exact or Partial match to PSI table in output directory [%default]"),
+    make_option(c("-a", "--replicateA"), type = "character", default = NULL,
+        help = "Required, SampleA@SampleB@SampleC etc.. [first %default]"),
+    make_option(c("-b", "--replicateB"), type = "character", default = NULL,
+        help = "Required, SampleA@SampleB@SampleC etc.. [first %default]"),
+    make_option(c("-f", "--filter"), type = "logical", default = TRUE,
+        help = "Filter output for differential events only [first %default]"),
+    make_option(c("-p", "--plot"), type = "logical", default = FALSE,
+        help = "Plot visual output for differential events [first %default]"),
+    make_option(c("-o", "--output"), type = "character", default = NULL,
+        help = "Output directory, passed from vast [%default]")
+)
 
-opt = getopt(spec)
+print(option.list)
 
-if ( !is.null(opt$help) ) {
-   cat(getopt(spec, command="vast diff", usage=TRUE))
-   q(status=1)
-}
+parser <- OptionParser(option_list = option.list,
+            usage = "usage: %prog -a SampleA@..@SampleD -b SampleF@..@SampleG [options]")
+optpar <- parse_args(parser, argv, positional_arguments = TRUE)
+opt <- optpar$options
 
-# set some defaults for the options
-if ( is.null(opt$verbose ) ) { opt$verbose = FALSE }
-if ( is.null(opt$plotSig ) ) { opt$plotSig = FALSE }
-if ( is.null(opt$input   ) ) { opt$input = "INCLUSION-LEVELS" }
+# move to output directory
+setwd(opt$output)
 
 # try and find the input file if they aren't exact
 if(!file.exists(opt$input)) {
-  potentialFiles <- Sys.glob(paste(c("*",opt$input,"*"), collapse=""))
-  if(!is.null(potentialFiles)) { 
+  potentialFiles <- Sys.glob( paste(c("*",opt$input,"*"), collapse="") )
+  if( length( potentialFiles ) >= 1) { 
 	 # now sort and take the one with the 'biggest' number of samples
-    potentialFiles_sort <- rev(sort(potentialFiles))
+    potentialFiles_sort <- rev( sort( potentialFiles ) )
     opt$input <- potentialFiles_sort[1]
   } else {
+    # Still can't find input after searching...
     stop("[vast diff error]: No input file given!")
   }
-} 
+}
+
+# Setting input files.
 inputFile <- file( opt$input, 'r' )
-# done setting input.
 
-q()
-
-if(opt$plotSig) {
+if(opt$plot) {
   dir.create(paste(c(opt$output, "/diff_out"), collapse=""))
   q()
 }
@@ -85,11 +90,15 @@ print_help <- function() {
 
 
 #-replicatesA=name1@name2@name3 -replicatesB=name4@name5
-firstRepSet <- unlist(strsplit( opt$recA , "@" ))
-secondRepSet <- unlist(strsplit( opt$recB, "@" ))
+firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "@" ))
+secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "@" ))
 
 firstRepN <- length(firstRepSet)
 secondRepN <- length(secondRepSet)
+
+## INITIALIZE LISTS ##
+shapeFirst <- vector("list", firstRepN)
+shapeSecond <- vector("list", secondRepN)
 
 psiFirst <- vector("list", firstRepN)
 psiSecond <- vector("list", secondRepN)
@@ -98,21 +107,33 @@ psiSecond <- vector("list", secondRepN)
 
 # Get header
 head <- readLines( inputFile, n=1 )
-head_n <- unlist( strsplit(head, "\t" ))
+head_n <- unlist( strsplit( head, "\t" ))
+
+#print(head_n)
+#print(firstRepSet)
 
 # Indexes of samples of interest
 repAind <- which( head_n %in% firstRepSet  )
 repBind <- which( head_n %in% secondRepSet )
 
+#print(repAind)
+
 # Indexes of Quals
 repA.qualInd <- repAind + 1
 repB.qualInd <- repBind + 1
 
+#write(repA.qualInd, stdout())
+#q()
+
+### BEGIN READ INPUT ###
 # Iterate through input, 1000 lines at a time to reduce overhead/memory
-while (length(lines <- readLines(inputFile, n=1000)) > 0){ 
-  for (i in 1:length(lines)){ 
-    tabLine <- unlist(strsplit(lines[i], "\t"))
-     
+while(length( lines <- readLines(inputFile, n=1000) ) > 0) { 
+  for(i in 1:length(lines)) { 
+    tabLine <- unlist( strsplit( lines[i], "\t" ) )
+	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
+		 First <- lapply(
+								
+							 )	  
   } 
 }
 
