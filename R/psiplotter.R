@@ -24,38 +24,66 @@ MAX_ENTRIES <- 1000
 args <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
 source(file.path(scriptPath, "Rlib", "preprocess_sample_colors.R"))
+source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 
-print_help <- function() {
-  text <- "**** PSI Plotter ****
-Script for generating PSI plots across samples (aka Nuno plots).
-
-Usage: ./PSI_Plotter.R PSI_Input.tab[.gz] [Tissue_Groups.txt]
-
-Arguments:
-  1) Input PSI data - one AS event per row - using the standard PSI format
-    e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1_PSI Tissue1_Q ... 
-  2) [optional] Tissue group file or species (currently supports Hsa or Mmu)
-    Use for customizing the order and colors of the scatter plot.
-
-Options:
-  --version     Display the version    
-  --help        This help message
-
-Output:
-  A PDF file will be created with one PSI plot per page.
-
-Test run:
-  ./PSI_Plotter.R test_data/INCLUSION_LEVELS-ALL3m-Mmu89-SELECTED.test.tab \\
-    test_data/Tissues.Mmu.txt
-"
-  writeLines(text, stderr())
-}
+loadPackages(c("optparse"))
 
 #### Arguments #################################################################
 # - Input file
 # - Tissue group or Species
 
 args <- commandArgs(TRUE)
+
+desc <- "Script for generating PSI plots (scatterplot) across samples.
+
+Input:
+  PSI data - one AS event per row - using the standard PSI format
+      e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1_PSI Tissue1_Q ... 
+  Recommended to use only a subset of AS events instead of the full table
+  otherwise the resulting PDF file will be very large. See options for customizing
+  the maximum number of plots to generate.
+
+Output:
+  A PDF file will be created with one PSI plot per page.
+
+Customizing plots [optional]:
+  The color and ordering of samples can be customized by supplying a samples
+  database file. This file is tab-delimited and in the following format:
+  Order    SampleName    GroupName    RColorCode
+  1        Ooctye        EarlyDev     36
+  2        Embr_2C       EarlyDev     36
+  etc..
+ 
+  Order <- The ordering of the samples from left to right.
+  SampleName <- Name of the sample. MUST match sample name in input table.
+  GroupName <- Group name. Use for plotting the average PSI of samples
+      belonging to the same group. Currently supports grouping of ESC, Muscle,
+      and Neural. Everythign else 
+  RColorCode <- Color value corresponding to the index of the vector produced by
+      colors(). For example, RColorCode = 36 corresponds to:
+        > cols <- colors()
+        > mycolour <- cols[36]
+ 
+"
+option.list <- list(
+        make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
+            help="Enable verbose [%default]"),
+        make_option(c("-h", "--help"), type = "logical", default = FALSE,
+            help = "Print this help message"),
+        make_option(c("-d", "--db"), type = "character", default = NULL,
+            help = "Samples database file. Used for customizing order and color
+            [%default]"),
+        make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
+            help = "Maximum number of AS events to plot [first %default]")
+        make_option(c("-o", "--output"), type = "character", 
+            default = "Same location as input file",
+            help = "Output directory [%default]")
+)
+parser <- OptionParser(option_list = option.list,
+                        usage = "usage: %prog [options] INCLUSION_LEVELS.tab")
+opt <- parse_args(parser, args = args, positional_arguments = TRUE)
+if (length(opt$args) == 0)
+    stop(print_help(parser))
 
 if (length(args) < 1) {
   print_help()
