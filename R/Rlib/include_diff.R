@@ -35,7 +35,7 @@ maxDiff <- function(firstDist, secondDist, acceptProb=0.9) {
 
 
 ### MAKE VISUAL OUTPUT
-plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoName ) {
+plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoName, rever ) {
 #  dput(inpOne)
 #  dput(inpTwo)
 #  dput(maxD)
@@ -43,6 +43,12 @@ plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneNam
 #  dput(medTwo)
 #  dput(sampOneName)
 #  dput(sampTwoName)
+  if(rever) {
+    curCol <- cbb[3:2]
+  } else {
+    curCol <- cbb[2:3]
+  }
+
   distPlot <- ggplot(melt(as.data.frame(
          do.call(cbind,list(inpOne, inpTwo))
          )), aes(fill=variable, x=value))+
@@ -50,7 +56,7 @@ plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneNam
 #         geom_vline(x=medTwo, col=cbb[3])+
          geom_histogram(aes(y=..density..),alpha=0.5, col="grey", position="identity")+
          theme_bw()+xlim(c(0,1))+xlab(expression(hat(Psi)))+
-         scale_fill_manual(values=cbb[2:3], labels=c(sampOneName, sampTwoName), name="Samples")
+         scale_fill_manual(values=curCol, labels=c(sampOneName, sampTwoName), name="Samples")
 
   probPlot <- ggplot(as.data.frame(cbind(seq(0,1,0.01),
             unlist(lapply(alphaList, function(x) {

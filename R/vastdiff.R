@@ -185,14 +185,14 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
     medOne <- median(psiFirstComb)
     medTwo <- median(psiSecondComb)
 
-    # look for a max difference...
+    # look for a max difference given prob cutoff...
     if(medOne > medTwo) {
       max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob)
     } else {
       max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
     }
     # check for significant difference
-    if(max < opt$minDiff) { next }
+    if(max < opt$minDiff) { next } # or continue...
 
     # SIGNIFICANT from here on out:
 	 if( opt$filter ) { 
@@ -201,15 +201,14 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
 
     eventTitle <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
  
-	 # Print visual output to pdf;    
+	 # Print visual output to pdf;
     if( opt$pdf ) {
       if( medOne > medTwo ) {
-        plotDiff(eventTitle, psiFirstComb, psiSecondComb, max, medOne, medTwo, opt$sampleNameA, opt$sampleNameB )
+        plotDiff(eventTitle, psiFirstComb, psiSecondComb, max, medOne, medTwo, opt$sampleNameA, opt$sampleNameB , FALSE)
       } else {
-        plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, opt$sampleNameB, opt$sampleNameA )
+        plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, opt$sampleNameB, opt$sampleNameA , TRUE)
       }
     }
-    
 
   } #End For
 } #End While
