@@ -16,9 +16,10 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
+my $legacyFlag;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-			  "verbose=i" => \$verboseFlag);
+			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
 
 sub verbPrint {
   my $verbMsg = shift;
@@ -83,11 +84,11 @@ foreach $file (@EEJ){
 
     open (EEJ, $file);
     while (<EEJ>){
-	chomp;
-	@t=split(/\t/);
-	$gene=$t[0];
-	$eej=$t[1];
-	$event="$gene-$eej";
+		chomp;
+		@t=split(/\t/);
+		$gene=$t[0];
+		$eej=$t[1];
+		$event="$gene-$eej";
 
         $reads{$sample}{$event}=$t[2];
         ($donor,$acceptor)=$eej=~/(\d+?)\-(\d+)/;
@@ -330,9 +331,24 @@ foreach $event (sort (keys %ALL)){
         else {$Q.=",S";}
 ###
 
-### Final PSI value	
-	$PSI_complex=sprintf ("%.2f", (100*($inc1F+$inc2F))/($inc1F+$inc2F+(2*$excF))) if ($inc1F+$inc2F+(2*$excF))>0;
-	$PSI_complex="NA" if ($inc1F+$inc2F+(2*$excF))==0;
+### Final PSI value  
+   $PSI_complex=sprintf ("%.2f", (100*($inc1F+$inc2F))/($inc1F+$inc2F+(2*$excF))) if ($inc1F+$inc2F+(2*$excF))>0;
+   $PSI_complex="NA" if ($inc1F+$inc2F+(2*$excF))==0;
+
+   ### DIFF OUTPUT ADDITION TO QUAL SCORE!
+   ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+   ### These values are added to the qual score and used to infer the posterior distribution
+   unless($legacyFlag) {
+     my $totalN = $total_reads; # no point in re-assigning really.
+     my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+     unless($PSI_complex eq "NA" or $totalN < 2) {
+       $pPSI = $PSI_complex / 100;
+       $exValOfInc = $pPSI * $totalN;
+       $exValOfExc = (1-$pPSI) * $totalN;
+     }
+     # ALTER QUAL OUTPUT HERE>>
+     $Q .= "\@$exValOfInc,$exValOfExc";
+   } 
 
 	print PSIs "\t$PSI_complex\t$Q" if $event;
 	print COUNTs "\t$Rexc\t$Rinc1\t$Rinc2\t$RexcC\t$Rinc1C\t$Rinc2C\t$PSI_complex=$Q" if $event;
