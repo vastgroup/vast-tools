@@ -81,8 +81,8 @@ foreach $file (@EEJ){
     while (<EEJ>){
         chomp;
         @t=split(/\t/);
-	$gene=$t[0];
-	$eej=$t[1];
+	     $gene=$t[0];
+	     $eej=$t[1];
         $gene_eej="$gene-$t[1]";
         $reads{$sample}{$gene_eej}=$t[2];
         ($donor,$acceptor)=$eej=~/(\d+?)\-(\d+)/;
@@ -147,22 +147,22 @@ foreach $event_root (sort keys %ALL){
 	
 #### QUALITY SCORES
         $Q="";
-	### Score 1
-	$Q="SOK" if $total_raw_reads_ALL >= 100;
-	$Q="OK" if $total_raw_reads_ALL >= 40 && $total_raw_reads_ALL < 100;
+		  ### Score 1
+		  $Q="SOK" if $total_raw_reads_ALL >= 100;
+		  $Q="OK" if $total_raw_reads_ALL >= 40 && $total_raw_reads_ALL < 100;
         $Q="LOW" if $total_raw_reads_ALL >= 20 && $total_raw_reads_ALL < 40;
         $Q="VLOW" if $total_raw_reads_ALL >= 10 && $total_raw_reads_ALL < 20;
         $Q="N" if $total_raw_reads_ALL < 10;
         ### Score 2
         $Q.=",SOK" if $total_corr_reads_ALL >= 100;
         $Q.=",OK" if $total_corr_reads_ALL >= 40 && $total_corr_reads_ALL < 100;
-	$Q.=",LOW" if $total_corr_reads_ALL >= 20 && $total_corr_reads_ALL < 40;
+		  $Q.=",LOW" if $total_corr_reads_ALL >= 20 && $total_corr_reads_ALL < 40;
         $Q.=",VLOW" if $total_corr_reads_ALL >= 10 && $total_corr_reads_ALL < 20;
         $Q.=",N" if $total_corr_reads_ALL < 10;
         ### Score 3 (instead of Score 4, read count)
         $Q.=",SOK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 100;
         $Q.=",OK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 40 && $total_raw_reads_S < 100;
-	$Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 20 && $total_raw_reads_S < 40;
+		  $Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 20 && $total_raw_reads_S < 40;
         $Q.=",VLOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 10 && $total_raw_reads_S < 20;
         $Q.=",N,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S < 10;
 
@@ -170,13 +170,13 @@ foreach $event_root (sort keys %ALL){
         $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
         $from_S=$total_corr_reads_S;
 
-	if ($from_C > ($from_C+$from_S)/2) {$Q.=",C3"; $Qs.=",C3";}
+		  if ($from_C > ($from_C+$from_S)/2) {$Q.=",C3"; $Qs.=",C3";}
         elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q.=",C2";$Qs.=",C2";}
         elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q.=",C1";$Qs.=",C1";}
-	else {$Q.=",S"; $Qs.=",S";}
+		  else {$Q.=",S"; $Qs.=",S";}
         ####### 
 
-	for $i (0..$#junctions){
+		for $i (0..$#junctions){
 	    $PSI[$i]=sprintf("%.2f",100*$corr_inc_reads_ALL[$i]/$total_corr_reads_ALL) if $total_corr_reads_ALL>0;
 	    $PSI[$i]="NA" if $total_corr_reads_ALL==0;
 
@@ -184,16 +184,16 @@ foreach $event_root (sort keys %ALL){
 	    $event="$event_root-$ind/$ALL{$event_root}";
 	    $TPC1[$i].="$PSI[$i]\t$Q\t";
 	    $TPC2[$i].="\t$raw_inc_reads_ALL[$i]\t$total_raw_reads_ALL\t$PSI[$i]=$Q";
-	}
+		}
     }
     
     for $i (0..$#junctions){
-	$ind=$i+1;
-        $event="$event_root-$ind/$ALL{$event_root}";
-	if ($pre_data{$event}){
+		$ind=$i+1;
+      $event="$event_root-$ind/$ALL{$event_root}";
+		if ($pre_data{$event}){
 	    print PSIs "$TPC1[$i]\n";
 	    print COUNTs "$TPC2[$i]\n";
-	}
+		}
     }
 }
 close PSIs;

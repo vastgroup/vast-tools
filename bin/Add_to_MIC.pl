@@ -47,7 +47,7 @@ foreach $file (@files){
 	$pre_data{$event}=join("\t",@t[0..5]) if !$pre_data{$event};
 
 	# Quality scores (only coverage)
-	$Q="";i
+	$Q="";
    my $raw_reads_exc=$t[7];
    my $raw_reads_inc=$t[8];
    my $corr_reads_exc=$t[9];
