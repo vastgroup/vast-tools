@@ -50,7 +50,7 @@ sub sysErrMsg {
 sub errPrint {
   my $errMsg = shift;
   print STDERR "[vast align error]: $errMsg\n";
-  $EXIT_STATUS = 1; 
+  $EXIT_STATUS++; 
 }
 
 sub verbPrint {
@@ -182,6 +182,10 @@ errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa"
 
 #sysErrMsg "gunzip $file" if $file=~/\.gz/;
 #sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
+
+if ($EXIT_STATUS) {
+    exit $EXIT_STATUS;
+}
 
 if (!$genome_sub){
  my $cmd;
