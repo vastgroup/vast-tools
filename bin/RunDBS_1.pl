@@ -38,7 +38,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
-           "output=s" => \$outdir);
+           "output=s" => \$outdir,
+			  "o=s" => \$outdir);
 
 our $EXIT_STATUS = 0;
 
@@ -80,7 +81,7 @@ OPTIONS:
 	-readLen i		:	Optional read length, otherwise fastq file naming convention enforced (see README)
 	-c i			:	# of cores to use for bowtie and pigz (default 1)
 	-trim once/twice	:	For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner). (default is twice if length > 50)
-	-output			:	Output directory (default <current working directory>)
+	-output OUTPUT, -o			:	Output directory (default <current working directory>)
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)

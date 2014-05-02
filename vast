@@ -84,14 +84,14 @@ Usage: $0 sub-commands [options]
 "
 }
 
+$outdir = abs_path($outdir);
+
 # Check if output directory option was specified --KH
 # If not, set the default and add to @args
 if (! defined $outdir) {
     $outdir = DEFAULT_OUTDIR;
     push @args, "--output=$outdir";
 }
-
-$outdir = abs_path($outdir);
 
 # this may need to be altered later --TSW
 if($cleanFlag) {
