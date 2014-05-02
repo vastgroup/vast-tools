@@ -295,7 +295,7 @@ sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $subtractedFq | cu
 #sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MULTI-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $substractedFq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $subtractedFq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 #sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MIC-$le-$root-e.out"; # DEPRECATED --TSW
 
 verbPrint "Compressing genome-substracted reads\n";
