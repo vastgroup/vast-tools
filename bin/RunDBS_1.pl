@@ -238,12 +238,14 @@ if (!$genome_sub){
    if (!defined($trim) or $trim eq "twice"){
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
-	     verbPrint "Trimming and splitting fastq sequences from $length to $half_length nt";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $half_length > $root-$length-$half_length.fq";
-	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $root-$length-$half_length.fq $le > $root-$le.fq";
-	     sysErrMsg "rm $root-$length-$half_length.fq";
+         #verbPrint "Trimming and splitting fastq sequences from $length to $half_length nt";
+         #sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $half_length > $root-$length-$half_length.fq";
+         verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
+         #sysErrMsg "$binPath/Trim-twiceOVER.pl $root-$length-$half_length.fq $le > $root-$le.fq";
+         #sysErrMsg "rm $root-$length-$half_length.fq";
 	     #sysErrMsg "mv $root-$length-$half_length-$le.fq $root-$le.fq";  #piping to stdout removes need for this --TSW
+
+         sysErrMsg "cat $fq | $binPath/Trim-twiceOver.pl - $half_length | $binPath/Trim-twiceOver.pl - $le > $root-$le.fq";
 	  } else {
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
 	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $le > $root-$le.fq";

@@ -34,9 +34,9 @@ my $rest;
 my ($S1, $S2, $R1, $R2);
 
 ### Parses the original reads
-my $INPUT = openFileHandle ($ARGV[0]);
-<$INPUT>; #invalid bit
-while (<$INPUT>){
+#my $INPUT = openFileHandle ($ARGV[0]);
+#<$INPUT>; #invalid bit
+while (<STDIN>){
     /\n(.+?)\n(.+?)\n(.+?)\n/;
     $name=$`;
     $seq=$1;
@@ -56,7 +56,7 @@ while (<$INPUT>){
         $total_reads_accepted++;
     }
 }
-close $INPUT;
+#close $INPUT;
 
 print STDERR "$stdPrefix Total processed reads: $total_reads\n";
 print STDERR "$stdPrefix Total valid reads: $total_reads_accepted\n";
