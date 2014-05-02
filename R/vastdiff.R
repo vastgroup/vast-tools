@@ -34,32 +34,44 @@ argv <- commandArgs(TRUE)
 
 # optparse..
 option.list <- list(
-    make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
-        help="Enable verbose [%default]"),
+    make_option(c("-a", "--replicateA"), type = "character", default = NULL, metavar = "SampleA@SampleB@SampleC",
+        help = "Required, 1:n sample names separated by @ [mandatory!]"),
+    make_option(c("-b", "--replicateB"), type = "character", default = NULL, metavar = "SampleA@SampleB@SampleC",
+        help = "Required, 1:n sample names separated by @ [mandatory!]\n
+
+[input options]"),
+    make_option(c("--sampleNameA"), type = "character", default = NULL, metavar = "string",
+        help = "Name of the replicate set A, [default is first element of --replicateA]"),
+    make_option(c("--sampleNameB"), type = "character", default = NULL, metavar = "string",
+        help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
-        help = "Exact or Partial match to PSI table in output directory [%default]"),
-    make_option(c("-a", "--replicateA"), type = "character", default = NULL,
-        help = "Required, SampleA@SampleB@SampleC etc.. [first %default]"),
-    make_option(c("-b", "--replicateB"), type = "character", default = NULL,
-        help = "Required, SampleA@SampleB@SampleC etc.. [first %default]"),
-    make_option(c("--sampleNameA"), type = "character", default = NULL,
-        help = "Name of the replicate set A, defaults to first element of --replicateA"),
-    make_option(c("--sampleNameB"), type = "character", default = NULL,
-        help = "Name of the replicate set B, defaults to first element of --replicateB"),
-    make_option(c("-f", "--filter"), type = "logical", default = TRUE,
-        help = "Filter output for differential events only [first %default]"),
-    make_option(c("-d", "--pdf"), type = "logical", default = TRUE,
-        help = "Plot visual output (pdf) for differential events [first %default]"),
-    make_option(c("-s", "--size"), type = "integer", default = 100000,
-        help = "Size of the posterior emperical distribution over psi [first %default]"),
+        help = "Exact or Partial match to PSI table in output directory [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
-        help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [first %default]"),
-    make_option(c("-r", "--prob"), type = "numeric", default = 0.9,
-        help = "Probability cutoff for P( (psi1 - psi2) > x ) > cutoff [first %default]"),
-    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.05,
-        help = "Diff cutoff for min diff where P( (psi1 - psi2) > diff ) > --prob [first %default]"),
+        help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [default %default]\n
+
+[output options]"),
+    make_option(c("-f", "--filter"), type = "logical", default = TRUE,
+        help = "Filter output for differential events only [default %default]"),
+    make_option(c("-d", "--pdf"), type = "logical", default = TRUE,
+        help = "Plot visual output (pdf) for differential events [default %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
-        help = "Output directory, passed from vast [%default]")
+        help = "Output directory, [default vast_out]\n
+
+[statistical options]"),
+    make_option(c("-r", "--prob"), type = "numeric", default = 0.9,
+        help = "Probability threshold for P( (psi1 - psi2) > x ) > threshold [default %default]"),
+    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.05,
+        help = "Threshold for min diff where P( (psi1 - psi2) > threshold ) > --prob [default %default]"),
+    make_option(c("--alpha"), type = "numeric", default = 1,
+        help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
+    make_option(c("--beta"), type = "numeric", default = 1,
+        help = "Second shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
+    make_option(c("-s", "--size"), type = "integer", default = 100000,
+        help = "Size of the posterior emperical distribution over psi [default %default]\n
+
+[general options]"),
+    make_option(c("-v", "--verbose"), type = "logical", default = TRUE, metavar=NULL,
+        help="Enable verbose [default %default]")
 )
 
 parser <- OptionParser(option_list = option.list,
@@ -154,9 +166,13 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
     tabLine <- unlist( strsplit( lines[i], "\t" ) )
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
 	
-	 # Posterior parameters
-	 shapeFirst <- lapply( tabLine[repA.qualInd], parseQual )
-	 shapeSecond <- lapply( tabLine[repB.qualInd], parseQual )
+	 # Posterior parameters... Prior given from command line --alpha, --beta
+	 shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
+										parseQual(x, opt$alpha, opt$beta) 
+								} )
+	 shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
+										parseQual(x, opt$alpha, opt$beta)
+								} )
 
 
 	 # Sample Posterior Distributions
@@ -173,7 +189,7 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
 	 psiFirstComb <- do.call(c, psiFirst)
     psiSecondComb <- do.call(c, psiSecond)
 
-    print(length(psiFirstComb))
+#    print(length(psiFirstComb))
 
     # if they aren't paired, then shuffle the joint distributions...
     if( !opt$paired ) {
@@ -204,9 +220,9 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
 	 # Print visual output to pdf;
     if( opt$pdf ) {
       if( medOne > medTwo ) {
-        plotDiff(eventTitle, psiFirstComb, psiSecondComb, max, medOne, medTwo, opt$sampleNameA, opt$sampleNameB , FALSE)
+        plotDiff(eventTitle, psiFirstComb, psiSecondComb, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
       } else {
-        plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, opt$sampleNameB, opt$sampleNameA , TRUE)
+        plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
     }
 

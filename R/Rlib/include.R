@@ -18,7 +18,6 @@ loadPackages <- function(toLoad) {
   }
 
 }
-#
 
 ### DEPRECATED..
 multiplot <- function(..., plotlist=NULL, cols) {

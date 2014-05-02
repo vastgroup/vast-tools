@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 #
+# Author: Tim Sterne-Weiler, 2014
+# tim.sterne.weiler@utoronto.ca
 
 #  This function takes a qual and returns c(post_alpha, post_beta)
 #  Increments by prior alpha and prior distribution beta, uniform by default
@@ -31,6 +33,20 @@ maxDiff <- function(firstDist, secondDist, acceptProb=0.9) {
 	probs <- unlist(lapply(alphaSet, function(x) { pDiff(firstDist, secondDist, x) }))
     ind <- max(c(which(probs > acceptProb), 1))
     alphaSet[ind]
+}
+
+#
+#  return the beta variance
+betaVar <- function(alpha, beta) {
+  var <- alpha*beta / (
+		 ((alpha + beta) ** 2) * (alpha + beta + 1)
+  )
+  var
+}
+
+# 
+betaCI <- function(betaDist, percentile) {
+  quantile(betaDist, p=c(0.05, 0.95))
 }
 
 
