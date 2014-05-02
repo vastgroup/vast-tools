@@ -205,7 +205,7 @@ if (!$genome_sub){
 
      sysErrMsg $cmd;
      verbPrint "Calculating cRPKMs\n";
-     sysErrMsg "$binPath/expr_RPKM.pl $dbDir/EXPRESSION/$species"."mRNA-$le-$root.out expr_out/$species"."_mRNA-$le.eff"; 
+     sysErrMsg "$binPath/expr_RPKM.pl expr_out/$species"."_mRNA-$le-$root.out $dbDir/EXPRESSION/$species"."_mRNA-$le.eff"; 
  }
  if ($onlyExprFlag){
      #print "Compressing raw fastq files\n";

@@ -5,8 +5,15 @@ use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+
+use Getopt::Long;
+
+my $sp;
+my $dbDir;
+
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
 
 if ($ARGV[0] eq "--help" || !$ARGV[0]){
     print "expr_RPKM.pl mRNA.out mRNA.eff\n\n";

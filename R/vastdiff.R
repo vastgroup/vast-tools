@@ -66,8 +66,8 @@ option.list <- list(
         help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
     make_option(c("--beta"), type = "numeric", default = 1,
         help = "Second shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
-    make_option(c("-s", "--size"), type = "integer", default = 100000,
-        help = "Size of the posterior emperical distribution over psi [default %default]\n
+    make_option(c("-s", "--size"), type = "integer", default = 5000,
+        help = "Size of the posterior emperical distribution over psi, lower = faster... [default %default]\n
 
 [general options]"),
     make_option(c("-v", "--verbose"), type = "logical", default = TRUE, metavar=NULL,

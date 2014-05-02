@@ -59,7 +59,8 @@ plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneNam
 #  dput(medTwo)
 #  dput(sampOneName)
 #  dput(sampTwoName)
-  if(rever) {
+
+  if(rever) {   #write this better. ;-)
     curCol <- cbb[3:2]
   } else {
     curCol <- cbb[2:3]

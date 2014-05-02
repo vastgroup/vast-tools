@@ -6,8 +6,15 @@ use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
 
 use Cwd;
-$cwd = getcwd;
-($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+#$cwd = getcwd;
+#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
+use Getopt::Long;
+
+my $dbDir;
+my $sp;
+
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
+
 
 $sp=$ARGV[0];
 die "Needs Species\n" if !$sp;
@@ -18,7 +25,7 @@ $index=$#files+1;
 open (OUTPUT, ">$sp"."_cRPKMs-$index.tab");
 open (RPKM, ">$sp"."_cRPKMs_only-$index.tab");
 
-open (NAMES, "$dir/$sp/FILES/$sp.ID.names.txt");
+open (NAMES, "$dbDir/FILES/$sp.ID.names.txt");
 while (<NAMES>){
     chomp;
     @t=split(/\t/);
