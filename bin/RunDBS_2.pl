@@ -53,10 +53,18 @@ sub verbPrint {
 }
 
 if ($helpFlag){
-    print "\nCommand:\nRunDBS_2.pl Species (Hsa or Mmu)\n\n";
-    print ">> It will add all the samples that are in the running folder (=SAMPLES)\n";
-    print ">>>> Root names for each sample must be identical (they will if coming from RunDBS_1)\n";
-    die ">> Not yet for IR\n\n";
+    errPrint "Usage:
+
+vast combine -o OUTPUTDIR [options]
+
+OPTIONS:
+	-o OUTPUTDIR, --output OUTPUTDIR	:	output directory to combine samples from... [default vast_out]
+	-dbDir DBDIR				:	Database directory
+	-sp Hsa/Mmu				:	Species selection
+	-v, --verbose				:	Verbose messages
+	-h, --help				:	Print this message
+";
+  exit $EXIT_STATUS;
 }
 
 mkdir("raw_incl") unless (-e "raw_incl"); # make new output directories.  --TSW
