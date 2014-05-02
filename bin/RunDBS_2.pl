@@ -22,7 +22,8 @@ GetOptions("help" => \$helpFlag,
 			  "dbDir=s" => \$dbDir,
 			  "sp=s" => \$sp,
 			  "verbose" => \$verboseFlag,
-			  "output=s" => \$outDir);
+			  "output=s" => \$outDir,
+			  "o=s" => \$outDir);
 
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../$sp";
