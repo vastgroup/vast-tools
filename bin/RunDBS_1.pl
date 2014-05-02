@@ -149,7 +149,7 @@ if ($fileName1 =~ /\-e\.f/){
     if ($pairedEnd){
 		$fq2 = abs_path($ARGV[1]);
 		$fileName2 = $fq2;
-        $fileName2 =~ s/^.*\///g; # strip path
+      $fileName2 =~ s/^.*\///g; # strip path
     }
     $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq";
 }
