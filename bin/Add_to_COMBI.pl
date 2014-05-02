@@ -335,7 +335,7 @@ foreach $event (sort (keys %ALL)){
    $PSI_complex=sprintf ("%.2f", (100*($inc1F+$inc2F))/($inc1F+$inc2F+(2*$excF))) if ($inc1F+$inc2F+(2*$excF))>0;
    $PSI_complex="NA" if ($inc1F+$inc2F+(2*$excF))==0;
 
-   ### DIFF OUTPUT ADDITION TO QUAL SCORE!
+   ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
    ### These values are added to the qual score and used to infer the posterior distribution
    unless($legacyFlag) {

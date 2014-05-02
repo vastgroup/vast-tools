@@ -265,7 +265,7 @@ foreach $event (sort keys %ALL){
 	$Q.=",S" if $type eq "exskX";
 	$Q.=",$complexity{$event}{$sample}" if $type eq "MULTI3X";
 
-   ### DIFF OUTPUT ADDITION TO QUAL SCORE!
+   ### DIFF OUTPUT ADDITION TO QUAL SCORE!   --TSW
    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
    ### These values are added to the qual score and used to infer the posterior distribution
    unless($legacyFlag) {
