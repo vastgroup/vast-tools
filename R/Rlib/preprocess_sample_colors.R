@@ -23,67 +23,68 @@ preprocess_sample_colors <- function(data, database) {
    #    database: filename of the samples database in tab-delimited format
    #
    # Returns:
-   #    A list containing the re-ordered data.frame ("data") and a sequence of
-   #    corresponding color codes ("col")
+   #    A list containing the re-ordered data.frame of PSI ("data"), re-ordered 
+   #    data.frame of quality scores ("qual"), and a sequence of corresponding 
+   #    color codes ("col")
 
    R <- list()
 
    if (is.null(database)) {
-        mycols <- rep("black", ncol(data) / 2)
-        R <- list(data=data[, seq(1, ncol(data), 2)], 
-                    qual=data[, seq(2, ncol(data), 2)], 
-                    col=mycols, group.index=NULL, group.col=NULL)
+     mycols <- rep("black", ncol(data) / 2)
+     R <- list(data=data[, seq(1, ncol(data), 2)], 
+               qual=data[, seq(2, ncol(data), 2)], 
+               col=mycols, group.index=NULL, group.col=NULL)
    } else {
-       db <- read.csv(database, sep="\t")
-       
-       # check input file
-       if (ncol(db) < 4) {
-         stop("The tissues database file is not formatted correctly. Please
+     db <- read.csv(database, sep="\t")
+     
+     # check input file
+     if (ncol(db) < 4) {
+       stop("The tissues database file is not formatted correctly. Please
           double check")
-       }
-       
-       # check if all samples in input data is in the database
-       #unk.samples <- colnames(data) %in% db$SampleName
-       #if (!all(unk.samples)) {
-         #s <- colnames(data)[!unk.samples]
-         #stop(paste("The following samples are not in the tissues database:", 
-                    #paste(s, collapse=", ")))
-       #}
-      
-       # keep only tissue groups that are present in input data
-       # (to take into account samples that might have been excluded)
-       db <- db[db$SampleName %in% colnames(data),]
-       
-       # Re-order the PSI table
-       db <- db[order(db$Order),]
-       db$Order <- 1:nrow(db)
-       new.column.idx <- sapply(db$SampleName, 
-                                function(x) which(colnames(data) == x))
-       
-       data.new <- data[,new.column.idx]
-       
-       # Generate a corresponding color code sequence
-       mycols <- colors()[db$RColorCode]
-       names(mycols) <- db$SampleName
-       
-       # Store indices of columns for each group
-       groups <- unique(db$GroupName)
-       mygroups <- list()
-       mygroupcol <- rep(NA, length(groups))
-       for (i in 1:length(groups)) {
-          mygroups[[i]] <- which(colnames(data.new) %in%  
-                                     db[db$GroupName == groups[i],"SampleName"])
-          mygroupcol[i] <- colors()[unique(db[db$GroupName == groups[i], 
-                                              "RColorCode"])]
-       }
-       names(mygroups) <- groups
-       names(mygroupcol) <- groups
-
-       qual.new <- data[,new.column.idx + 1]
-       R <- list(data=data.new, 
-                    qual=qual.new, 
-                    col=mycols, 
-                    group.index=mygroups, group.col=mygroupcol)
+     }
+     
+     # check if all samples in input data is in the database
+     #unk.samples <- colnames(data) %in% db$SampleName
+     #if (!all(unk.samples)) {
+     #s <- colnames(data)[!unk.samples]
+     #stop(paste("The following samples are not in the tissues database:", 
+     #paste(s, collapse=", ")))
+     #}
+     
+     # keep only tissue groups that are present in input data
+     # (to take into account samples that might have been excluded)
+     db <- db[db$SampleName %in% colnames(data),]
+     
+     # Re-order the PSI table
+     db <- db[order(db$Order),]
+     db$Order <- 1:nrow(db)
+     new.column.idx <- sapply(db$SampleName, 
+                              function(x) which(colnames(data) == x))
+     
+     data.new <- data[,new.column.idx]
+     
+     # Generate a corresponding color code sequence
+     mycols <- colors()[db$RColorCode]
+     names(mycols) <- db$SampleName
+     
+     # Store indices of columns for each group
+     groups <- unique(db$GroupName)
+     mygroups <- list()
+     mygroupcol <- rep(NA, length(groups))
+     for (i in 1:length(groups)) {
+       mygroups[[i]] <- which(colnames(data.new) %in%  
+                                db[db$GroupName == groups[i],"SampleName"])
+       mygroupcol[i] <- colors()[unique(db[db$GroupName == groups[i], 
+                                           "RColorCode"])]
+     }
+     names(mygroups) <- groups
+     names(mygroupcol) <- groups
+     
+     qual.new <- data[,new.column.idx + 1]
+     R <- list(data=data.new, 
+               qual=qual.new, 
+               col=mycols, 
+               group.index=mygroups, group.col=mygroupcol)
    }
    
    return(R)
