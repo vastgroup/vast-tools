@@ -62,6 +62,17 @@ sub verbPrint {
   }
 }
 
+sub isZipped {
+  my $file = shift;
+  return $file =~ /\.(gz)$/;
+}
+
+sub getPrefixCmd {
+  my $file = shift;
+  my $prefix = isZipped($file) ? "gzip -dc $file" : "cat $file";
+  return $prefix;
+}
+
 # Check database directory
 unless(defined($dbDir)) {
   $dbDir = "$binPath/../$species";
@@ -81,7 +92,7 @@ OPTIONS:
 	-readLen i		:	Optional read length, otherwise fastq file naming convention enforced (see README)
 	-c i			:	# of cores to use for bowtie and pigz (default 1)
 	-trim once/twice	:	For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner). (default is twice if length > 50)
-	-output OUTPUT, -o			:	Output directory (default <current working directory>)
+	-output OUTPUT, -o	:	Output directory (default <current working directory>)
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
@@ -123,7 +134,7 @@ if(!defined($fq1)) {
 
 my $fileName1 = $fq1;
 my $fileName2;
-my $zipped = ($fq1 =~ /\.gz$/) ? 1 : 0;
+my $zipped = isZipped($fq1);
 my $subtractedFq;
 
 my($root, $length);
@@ -196,19 +207,14 @@ if (!$genome_sub){
  if ($runExprFlag || $onlyExprFlag){
      verbPrint "Mapping reads against mRNA sequences";
 
-     $cmd = "$bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
-
      if ($pairedEnd) {
-         $cmd = "$fq1 $fq2 | $cmd";  # altered this to cat both for/rev reads into bowtie.
+         $cmd = "$fq1 $fq2";  # altered this to cat both for/rev reads into bowtie.
      } else {
-         $cmd = "$fq1 | $cmd";
+         $cmd = "$fq1";
      }
 
-     if ($zipped) {
-         $cmd = "gzip -dc $cmd";
-     } else {
-         $cmd = "cat $cmd";
-     }
+     $cmd = getPrefixCmd($cmd);
+     $cmd .= " | $bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
 
      sysErrMsg $cmd;
      verbPrint "Calculating cRPKMs\n";
@@ -263,38 +269,40 @@ if (!$genome_sub){
  verbPrint "Doing genome substraction\n";
  $subtractedFq = "$root-$le-e.fq";
  # Updated genome subtraction command to handle trimmed or untrimmed input files
- $cmd = "$bowtie -p $cores -m 1 -v 2 --un $subtractedFq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
- if ($fq =~ /\.gz$/) {
-     sysErrMsg "gzip -dc $fq | $cmd";
- } else {
-     sysErrMsg "cat $fq | $cmd";
-     if ($trimmed) {
-         verbPrint "Compressing trimmed reads";
-         sysErrMsg "$zip $fq";
-     }
+ $cmd = getPrefixCmd($fq);
+ $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un $subtractedFq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+ sysErrMsg $cmd;
+ if ($trimmed) {
+     verbPrint "Compressing trimmed reads";
+     sysErrMsg "$zip $fq";
  }
+ 
 ####
 }
 
 #### Map to the EEJ:
+my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $subtractedFq | cut -f 1-4,8 - | sort -u -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 #sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > spli_out/$species"."COMBI-M-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $subtractedFq | cut -f 1-4,8 - | sort -u -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
 #sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > spli_out/$species"."EXSK-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $subtractedFq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 #sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MULTI-$le-$root-e_s.out"; # DEPRECATED --TSW
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $subtractedFq | cut -f 1-4,8 - | sort -u -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 #sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MIC-$le-$root-e.out"; # DEPRECATED --TSW
 
-verbPrint "Compressing genome-substracted reads\n";
-sysErrMsg "$zip $root-$le-e.fq";
+if (!isZipped($subtractedFq)) {
+    verbPrint "Compressing genome-substracted reads\n";
+    sysErrMsg "$zip $root-$le-e.fq";
+}
+
 ####
 
 ## Analyze MIC
