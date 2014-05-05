@@ -1,23 +1,23 @@
-VASTDB
+VASTX-TOOLS
 ======
 
-Current version: ____
+Current version: 0.0.1
 
 Summary
 -------
-VASTDB is a tool for profiling alternative splicing events in RNA-Seq data. 
+VASTX-TOOLS is a toolset for profiling alternative splicing events in RNA-Seq data. 
 
 Installation
 ------------
 
-VASTDB requires the following software:
+VASTX requires the following software:
     * bowtie (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
     * samtools (Li et al., 2009), http://samtools.sourceforge.net 
 
 Optional software:
     * pigz - a parallel implementation of gzip, http://zlib.net/pigz/
        
-If pigz is installed, VASTDB will use the user-specified number of cores 
+If pigz is installed, VASTX will use the user-specified number of cores 
 (see usage) to carry out file compression. This will help speed up the runtime.
 
 
@@ -41,14 +41,16 @@ Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the g
 
 **Combining Results:**
 
+**Differential Splicing Analysis**
+
 **Plotting:**
 
-VAST comes with some basic plotting scripts written in R. The scripts can be found
+VASTX comes with some basic plotting scripts written in R. The scripts can be found
 in the 'plot' subdirectory. To execute from VAST, use the subcommand "plot".
 
 e.g.
 
-> vast plot psi_values.tab
+> vastx-tools plot psi_values.tab
 
 The input format follows the same format from the "combine" step described
 above. The output is a pdf of scatterplots (one per AS event) of PSI values. It

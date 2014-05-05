@@ -75,7 +75,7 @@ option.list <- list(
 )
 
 parser <- OptionParser(option_list = option.list,
-            usage = "usage: %prog -a SampleA@..@SampleD -b SampleF@..@SampleG [options]")
+            usage = "vastx-tools diff -a SampleA@..@SampleD -b SampleF@..@SampleG [options]\n\nAuthor: Tim Sterne-Weiler\nQuestions? OR Bug Reports: tim.sterne.weiler@utoronto.ca")
 optpar <- parse_args(parser, argv, positional_arguments = TRUE)
 opt <- optpar$options
 
@@ -92,7 +92,7 @@ if(!file.exists(opt$input)) {
   } else {
     # Still can't find input after searching...
 	 print_help(parser)
-    stop("[vast diff error]: No input file given!")
+    stop("[vastx diff error]: No input file given!")
   }
 }
 
@@ -111,7 +111,7 @@ secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "@" ))
 if( length(firstRepSet) <= 0 || 
 	 length(secondRepSet) <= 0) { 
   print_help(parser) 
-  stop("[vast diff error]: No replicate sample names given!!! -a sampA@sampB -b sampC@sampD")
+  stop("[vastx diff error]: No replicate sample names given!!! -a sampA@sampB -b sampC@sampD")
 }
 
 # Set number of replicates
