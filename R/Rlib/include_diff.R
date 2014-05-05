@@ -45,8 +45,18 @@ betaVar <- function(alpha, beta) {
 }
 
 # 
-betaCI <- function(betaDist, percentile) {
-  quantile(betaDist, p=c(0.05, 0.95))
+betaCI <- function(betaDist, percentile = c(0.05, 0.95)) {
+  quantile(betaDist, p=percentile, na.rm = T)
+}
+
+# Extention of betaCI function that includes the sampling step
+betaCISample <- function(alpha, beta, n = 5000) {
+  if (is.na(alpha) || is.na(beta)) {
+    sample <- NA 
+  } else {
+    sample <- rbeta(n, alpha, beta)
+  }
+  return(betaCI(sample))
 }
 
 
