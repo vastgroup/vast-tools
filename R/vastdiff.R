@@ -159,9 +159,16 @@ alphaList <- seq(0,1,0.01)
 ### TMP OUT
 pdf("plotDiff.pdf", width=7, height=3)
 
+nLines <- 100
+
 ### BEGIN READ INPUT ###
 # Iterate through input, 1000 lines at a time to reduce overhead/memory
-while(length( lines <- readLines(inputFile, n=1000) ) > 0) { 
+while(length( lines <- readLines(inputFile, n=nLines) ) > 0) { 
+
+  # use parallel computing to store plots in plotLists
+  # then print them to the pdf afterwards before next chunk of nLines from file.
+  plotLists <- vector("list", nLines)
+
   for(i in 1:length(lines)) { 
     tabLine <- unlist( strsplit( lines[i], "\t" ) )
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
@@ -225,8 +232,8 @@ while(length( lines <- readLines(inputFile, n=1000) ) > 0) {
         plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
     }
-
   } #End For
+  # PRINT LIST OF PLOTS.
 } #End While
 
 dev.off()

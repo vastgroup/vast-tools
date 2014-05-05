@@ -36,12 +36,12 @@ our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
   my $sysCommand = shift;
-  not system($sysCommand) or die "[vast combine error]: $sysCommand Failed in $0!";
+  not system($sysCommand) or die "[vastx combine error]: $sysCommand Failed in $0!";
 }
 
 sub errPrint {
   my $errMsg = shift;
-  print STDERR "[vast combine error]: $errMsg\n";
+  print STDERR "[vastx combine error]: $errMsg\n";
   $EXIT_STATUS = 1;
 }
 
@@ -49,14 +49,14 @@ sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
     chomp($verbMsg);
-    print STDERR "[vast combine]: $verbMsg\n";
+    print STDERR "[vastx combine]: $verbMsg\n";
   }
 }
 
 if ($helpFlag){
     errPrint "Usage:
 
-vast combine -o OUTPUTDIR [options]
+vastx-tools combine -o OUTPUTDIR [options]
 
 OPTIONS:
 	-o OUTPUTDIR, --output OUTPUTDIR	:	output directory to combine samples from... [default vast_out]

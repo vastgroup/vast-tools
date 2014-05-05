@@ -45,12 +45,12 @@ our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
   my $sysCommand = shift;
-  not system($sysCommand) or die "[vast align error]: $sysCommand Failed in $0!";
+  not system($sysCommand) or die "[vastx align error]: $sysCommand Failed in $0!";
 }
 
 sub errPrint {
   my $errMsg = shift;
-  print STDERR "[vast align error]: $errMsg\n";
+  print STDERR "[vastx align error]: $errMsg\n";
   $EXIT_STATUS++; 
 }
 
@@ -58,7 +58,7 @@ sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
     chomp($verbMsg);
-    print STDERR "[vast align]: $verbMsg\n";
+    print STDERR "[vastx align]: $verbMsg\n";
   }
 }
 
@@ -83,7 +83,7 @@ errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage:
 
-vastdb align fastq_file_1 [fastq_file_2] [options]
+vastx-tools align fastq_file_1 [fastq_file_2] [options]
 
 OPTIONS:
 	-sp Mmu/Hsa		:	Three letter code for the database (default Hsa)
