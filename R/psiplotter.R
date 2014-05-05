@@ -25,6 +25,7 @@ args <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
 source(file.path(scriptPath, "Rlib", "preprocess_sample_colors.R"))
 source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
+source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 loadPackages(c("optparse"))
 
@@ -71,24 +72,24 @@ Customizing plots [optional]:
 "
 
 option.list <- list(
-        make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
-            help="Enable verbose [%default]"),
-        make_option(c("-c", "--config"), type = "character", default = NULL,
-            help = "Plot configuration file. Used for customizing order and color
+  make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
+              help="Enable verbose [%default]"),
+  make_option(c("-c", "--config"), type = "character", default = NULL,
+              help = "Plot configuration file. Used for customizing order and color
             [%default]"),
-        make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
-            help = "Maximum number of AS events to plot [first %default]"),
-        make_option(c("-o", "--output"), type = "character", default = NULL,
-            help = "Output directory [%default]")
+  make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
+              help = "Maximum number of AS events to plot [first %default]"),
+  make_option(c("-o", "--output"), type = "character", default = NULL,
+              help = "Output directory [%default]")
 )
 parser <- OptionParser(option_list = option.list,
-                        desc = desc,
-                        usage = "usage: %prog [options] INCLUSION_LEVELS.tab")
+                       desc = desc,
+                       usage = "usage: %prog [options] INCLUSION_LEVELS.tab")
 opt <- parse_args(parser, args = args, positional_arguments = TRUE)
 
 if (length(opt$args) == 0) {
-    print_help(parser)
-    stop("Missing arguments")
+  print_help(parser)
+  stop("Missing arguments")
 }
 
 file <- opt$args[1]
@@ -100,15 +101,15 @@ if (!(is.null(tissueFile) || file.exists(tissueFile)))
   stop(paste("Tissue Group file", tissueFile, "doesn't exist!"))
 
 verbPrint <- function(s) {
-    if (opt$options$verbose) {
-        write(s, stderr()) 
-    }
+  if (opt$options$verbose) {
+    write(s, stderr()) 
+  }
 }
 
 verbPrint(paste("PSI Plotter"))
 verbPrint(paste("\n// Input file:", file))
 verbPrint(paste("// Tissue Group file:", 
-    ifelse(is.null(tissueFile), "Did not provide", tissueFile)))
+                ifelse(is.null(tissueFile), "Did not provide", tissueFile)))
 
 #### Format input data #########################################################
 
@@ -120,7 +121,7 @@ convert_psi <- function(t) {
   # e.g. PSI=100, Coverage=N,N,N,OK,S ---> PSI=NA
   #
   # Input: original PSI plus quality scores WITHOUT the first 7 columns
-
+  
   stopifnot(ncol(t) %% 2 == 0)
   psi <- t
   
@@ -129,10 +130,26 @@ convert_psi <- function(t) {
     cov <- sapply(cov, "[", 1)
     
     na <- which(cov == "N")
-    if (length(na) > 0) 
+    if (length(na) > 0) {
       psi[na, i] <- NA
+      psi[na, i+1] <- NA
+    }
   }
-  return(psi[, seq(1, ncol(psi), 2)])
+  #return(psi[, seq(1, ncol(psi), 2)])
+  return(psi)
+}
+
+get_beta_ci <- function(q) {
+  # Helper function to filter and return confidence intervals based on beta
+  # distribution from Q scores
+  # 
+  # Input: original PSI plus quality scores WITHOUT the first 7 columns
+  
+  parameters <- sapply(q, function(x) parseQual(as.character(x)))
+  ci <- lapply(1:ncol(parameters), function(j) betaCISample(parameters[1,j], 
+                                                            parameters[2,j]))
+  ci <- do.call("rbind", ci) * 100
+  return(ci)
 }
 
 format_table <- function(m) {
@@ -140,9 +157,9 @@ format_table <- function(m) {
   id <- paste(m$COMPLEX, m$GENE, m$COORD, m$LENGTH, sep="=")
   
   # Extract PSIs
-  psi <- convert_psi(m[,7:ncol(m)])
-  rownames(psi) <- id
-  return(psi)
+  r <- convert_psi(m[,7:ncol(m)])
+  rownames(r) <- id
+  return(r)
 }
 
 # Perform some checks #########################################################
@@ -152,12 +169,12 @@ if (!grepl("^GENE", colnames(all_events)[1])) {
 
 if (nrow(all_events) > opt$options$max) {
   warning(paste("Too many entries in input file. Plotting only the first",
-      opt$optiosn$max, ". Try splitting your input file into smaller files."))
+                opt$optiosn$max, ". Try splitting your input file into smaller files."))
 }
 
 # Format input data ###########################################################
 verbPrint("// Formatting input data for plotting...")
-PSIs <- format_table(all_events)
+all_events_formatted <- format_table(all_events)
 # Call function to re-order columns of PSI data
 #
 # returns a list containing four elements:
@@ -165,61 +182,73 @@ PSIs <- format_table(all_events)
 #   col         - vector of colours that will be plotted
 #   group.index - list of indices for each sample group (e.g. ESC, Neural, etc.)
 #   group.col   - corresponding color for sample group
-reordered.PSI <- preprocess_sample_colors(PSIs, tissueFile)
-verbPrint(paste("//", ncol(reordered.PSI$data), "out of", ncol(PSIs), "samples detected"))
-PSIs <- as.matrix(reordered.PSI$data)
-ALLev <- row.names(PSIs)
+reordered <- preprocess_sample_colors(all_events_formatted, tissueFile)
+verbPrint(paste("//", ncol(reordered$data), "out of", 
+                ncol(all_events_formatted) / 2, "samples detected"))
+PSIs <- as.matrix(reordered$data)
+#ALLev <- row.names(PSIs)
 samples <- colnames(PSIs)
 
 #### Prepare plotting ##########################################################
 verbPrint("// Plotting...")
 
 # assign list of colors
-supercolors <- reordered.PSI$col
+supercolors <- reordered$col
 
 # Set output file
 outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
 
 # Check if output directory was specified
 if (is.null(opt$options$output)) {
-    outfile <- file.path(dirname(file), outfile)
+  outfile <- file.path(dirname(file), outfile)
 } else {
-    # Create directory if necessary
-    if (!file.exists(opt$options$output))
-        dir.create(opt$options$output, recursive = TRUE) 
-    outfile <- file.path(opt$options$output, outfile)
+  # Create directory if necessary
+  if (!file.exists(opt$options$output))
+    dir.create(opt$options$output, recursive = TRUE) 
+  outfile <- file.path(opt$options$output, outfile)
 }
 
 pdf(outfile, width = 8.5, height = 5.5)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
 nplot <- min(nrow(PSIs), opt$options$max)
 for (i in 1:nplot) {
-  plot(as.numeric(PSIs[i,]),
-       col=supercolors,
-       pch=20,
+  plot(NA,
        main=rownames(PSIs)[i],
        ylab="PSI", xlab="", xaxt="n",
-       ylim=c(1,100),
-       cex=0.8, cex.main=0.9, cex.axis=0.8)
+       ylim=c(1,100), xlim=c(1, ncol(PSIs)),
+       cex.main=0.9, cex.axis=0.8)
   axis(1, at=seq(1, ncol(PSIs), by=1), labels = FALSE)
   text(seq(1, ncol(PSIs), by=1), 
        par("usr")[3] - 3.5, 
        labels = samples, 
        srt = 45, adj=c(1,1), xpd = TRUE,cex=0.5)
   
+  
+  # Draw error bars
+  ci <- get_beta_ci(reordered$qual[i,])
+  
+  arrows(1:ncol(PSIs), ci[,1],
+         1:ncol(PSIs), ci[,2],
+         length = 0.025,
+         angle = 90,
+         code = 3)
+  
   if (!is.null(tissueFile)) {
-      abline(h=mean(PSIs[i, reordered.PSI$group.index[["ESC"]] ], na.rm=TRUE), 
-             col=reordered.PSI$group.col["ESC"], lwd=0.5)
-      abline(h=mean(PSIs[i, reordered.PSI$group.index[["Neural"]] ], na.rm=TRUE),
-             col=reordered.PSI$group.col["Neural"], lwd=0.5)
-      abline(h=mean(PSIs[i, reordered.PSI$group.index[["Muscle"]] ], na.rm=TRUE),
-             col=reordered.PSI$group.col["Muscle"], lwd=0.5)
-      abline(h=mean(PSIs[i, reordered.PSI$group.index[["Tissues"]] ], na.rm=TRUE),
-             col=reordered.PSI$group.col["Tissues"], lwd=0.5)
+    abline(h=mean(PSIs[i, reordered$group.index[["ESC"]] ], na.rm=TRUE), 
+           col=reordered$group.col["ESC"], lwd=0.5)
+    abline(h=mean(PSIs[i, reordered$group.index[["Neural"]] ], na.rm=TRUE),
+           col=reordered$group.col["Neural"], lwd=0.5)
+    abline(h=mean(PSIs[i, reordered$group.index[["Muscle"]] ], na.rm=TRUE),
+           col=reordered$group.col["Muscle"], lwd=0.5)
+    abline(h=mean(PSIs[i, reordered$group.index[["Tissues"]] ], na.rm=TRUE),
+           col=reordered$group.col["Tissues"], lwd=0.5)
   }
-
+  
   abline(v=1:ncol(PSIs), col="grey", lwd=0.3, lty=2)
   abline(h=seq(0,100,10), col="grey", lwd=0.3, lty=2)
+  
+  points(1:ncol(PSIs), as.numeric(PSIs[i,]), col=supercolors, pch=20,
+         cex = 1)
 }
 dev.off()
 
