@@ -11,7 +11,7 @@ my ($root)=$ARGV[0]=~/(\S+?)\.f/; #fixed regex -TSW
 my $length=$ARGV[1];
 die "You need to provide length as ARGV[1]\n" if !$ARGV[1];
 
-my $stdPrefix = '[vastx align trim]:';
+my $stdPrefix = '[vast align trim]:';
 
 my $file=$ARGV[0];
 
