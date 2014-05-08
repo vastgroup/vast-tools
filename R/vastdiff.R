@@ -102,9 +102,9 @@ if(!file.exists(opt$input)) {
 inputFile <- file( opt$input, 'r' )
 
 ## Make plot directory
-if(opt$pdf) {
+#if(opt$pdf) {
   #dir.create(paste(c(opt$output, "/diff_out"), collapse=""))
-}
+#}
 
 #-replicatesA=name1@name2@name3 -replicatesB=name4@name5
 firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "@" ))
@@ -150,7 +150,10 @@ repAind <- which( head_n %in% firstRepSet  )
 repBind <- which( head_n %in% secondRepSet )
 
 if(length(repAind) == 0 ||
-	length(repBind) == 0) { stop("[vast diff error]: Incorrect sampleNames given!!!\n") }
+	length(repBind) == 0) { 
+   print_help(parser)
+   stop("[vast diff error]: Incorrect sampleNames given, One or more do not exist!!!\n") 
+}
 
 # Indexes of Quals
 repA.qualInd <- repAind + 1
@@ -230,7 +233,7 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
     }
 
     eventTitle <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
-    eventTitleListed[[i]] <- eventTitle
+#    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
 
 	 # Print visual output to pdf;
     if( opt$pdf ) {
@@ -240,13 +243,13 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
         retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
     }
-	 return(retPlot)  #return of mclapply function
+	 return(list(retPlot, eventTitle))  #return of mclapply function
   }, mc.cores=opt$cores) #End For
 
   for(it in 1:length(lines)) {
   # PRINT LIST OF PLOTS.
-    if(is.null(plotListed[[it]])) { next; }
-    plotPrint(eventTitleListed[[it]], plotListed[[it]])
+    if(is.null(plotListed[[it]][[1]])) { next; }
+    plotPrint(plotListed[[it]][[2]], plotListed[[it]][[1]])
   }
 
 } #End While

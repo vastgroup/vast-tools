@@ -103,10 +103,10 @@ plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoN
   return(list(distPlot, probPlot))
 }
 
-plotPrint <- function(title, plotList) {
+plotPrint <- function(plotTitle, plotList) {
   grid.newpage()
   pushViewport(viewport(layout = grid.layout(2, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 5), "null"))))
-  grid.text(title,gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
+  grid.text(plotTitle,gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
   print(plotList[[1]], vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
   print(plotList[[2]], vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 }
