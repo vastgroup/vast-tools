@@ -303,6 +303,8 @@ if (!isZipped($subtractedFq)) {
     sysErrMsg "$zip $root-$le-e.fq";
 }
 
+exit $EXIT_STATUS
+
 ####
 
 ## Analyze MIC

@@ -61,7 +61,7 @@ betaCISample <- function(alpha, beta, n = 5000) {
 
 
 ### MAKE VISUAL OUTPUT
-plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoName, rever ) {
+plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoName, rever ) {
 #  dput(inpOne)
 #  dput(inpTwo)
 #  dput(maxD)
@@ -78,10 +78,10 @@ plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneNam
 
   distPlot <- ggplot(melt(as.data.frame(
          do.call(cbind,list(inpOne, inpTwo))
-         )), aes(fill=variable, x=value))+
+         ), measure.vars=c("V1","V2")), aes(fill=variable, x=value))+
 #         geom_vline(x=medOne, col=cbb[2])+
 #         geom_vline(x=medTwo, col=cbb[3])+
-         geom_histogram(aes(y=..density..),alpha=0.5, col="grey", position="identity")+
+         geom_histogram(aes(y=..density..), binwidth=0.03333,alpha=0.5, col="grey", position="identity")+
          theme_bw()+xlim(c(0,1))+xlab(expression(hat(Psi)))+
          scale_fill_manual(values=curCol, labels=c(sampOneName, sampTwoName), name="Samples")
 
@@ -95,12 +95,20 @@ plotDiff <- function(eventName, inpOne, inpTwo, maxD, medOne, medTwo, sampOneNam
             xlab(expression(x))+ylim(c(0,1))+
             annotate("text",x=(maxD+0.08), y=0.05, label=maxD, col=cbb[7])
 
+#  grid.newpage()
+#  pushViewport(viewport(layout = grid.layout(2, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 5), "null"))))
+#  grid.text(eventName,gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
+#  print(distPlot, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+#  print(probPlot, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+  return(list(distPlot, probPlot))
+}
+
+plotPrint <- function(title, plotList) {
   grid.newpage()
   pushViewport(viewport(layout = grid.layout(2, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 5), "null"))))
-  grid.text(eventName,gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
-  print(distPlot, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-  print(probPlot, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
-
+  grid.text(title,gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
+  print(plotList[[1]], vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+  print(plotList[[2]], vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 }
 
 # Shuffle...

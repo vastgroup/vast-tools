@@ -28,7 +28,7 @@ source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 # custom install from include.R
-loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid"))
+loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"))
 
 argv <- commandArgs(TRUE)
 
@@ -70,6 +70,8 @@ option.list <- list(
         help = "Size of the posterior emperical distribution over psi, lower = faster... [default %default]\n
 
 [general options]"),
+    make_option(c("-c", "--cores"), type = "integer", default = 1, metavar="int",
+        help="Number of cores to use for plot processing.. [default %default]"),
     make_option(c("-v", "--verbose"), type = "logical", default = TRUE, metavar=NULL,
         help="Enable verbose [default %default]")
 )
@@ -147,6 +149,9 @@ head_n <- unlist( strsplit( head, "\t" ) )
 repAind <- which( head_n %in% firstRepSet  )
 repBind <- which( head_n %in% secondRepSet )
 
+if(length(repAind) == 0 ||
+	length(repBind) == 0) { stop("[vast diff error]: Incorrect sampleNames given!!!\n") }
+
 # Indexes of Quals
 repA.qualInd <- repAind + 1
 repB.qualInd <- repBind + 1
@@ -157,19 +162,21 @@ repB.qualInd <- repBind + 1
 alphaList <- seq(0,1,0.01)
 
 ### TMP OUT
-pdf("plotDiff.pdf", width=7, height=3)
+pdf("test.pdf", width=7, height=3)
 
-nLines <- 100
+nLines <- 1000
 
 ### BEGIN READ INPUT ###
-# Iterate through input, 1000 lines at a time to reduce overhead/memory
+# Iterate through input, 'nLines' at a time to reduce overhead/memory
 while(length( lines <- readLines(inputFile, n=nLines) ) > 0) { 
 
-  # use parallel computing to store plots in plotLists
+  # use parallel computing to store plots in plotListed
   # then print them to the pdf afterwards before next chunk of nLines from file.
-  plotLists <- vector("list", nLines)
+  plotListed <- vector("list", length(lines))
+  eventTitleListed <- vector("list", length(lines))
 
-  for(i in 1:length(lines)) { 
+  plotListed <- mclapply(1:length(lines), function(i) {
+ 
     tabLine <- unlist( strsplit( lines[i], "\t" ) )
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
 	
@@ -215,7 +222,7 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
       max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
     }
     # check for significant difference
-    if(max < opt$minDiff) { next } # or continue...
+    if(max < opt$minDiff) { return(NULL) } # or continue...
 
     # SIGNIFICANT from here on out:
 	 if( opt$filter ) { 
@@ -223,20 +230,27 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
     }
 
     eventTitle <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
- 
+    eventTitleListed[[i]] <- eventTitle
+
 	 # Print visual output to pdf;
     if( opt$pdf ) {
       if( medOne > medTwo ) {
-        plotDiff(eventTitle, psiFirstComb, psiSecondComb, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
+        retPlot <- plotDiff(psiFirstComb, psiSecondComb, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
       } else {
-        plotDiff(eventTitle, psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
+        retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
     }
-  } #End For
+	 return(retPlot)  #return of mclapply function
+  }, mc.cores=opt$cores) #End For
+
+  for(it in 1:length(lines)) {
   # PRINT LIST OF PLOTS.
+    if(is.null(plotListed[[it]])) { next; }
+    plotPrint(eventTitleListed[[it]], plotListed[[it]])
+  }
+
 } #End While
 
 dev.off()
 
 q(status=0)
-
