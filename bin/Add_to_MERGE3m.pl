@@ -18,7 +18,6 @@ my $verboseFlag;
 GetOptions("sp=s" => \$sp, "dbDir=s" => \$dbDir, "len=i" => \$samLen,
 			  "verbose=i" => \$verboseFlag);
 
-
 sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
