@@ -1,7 +1,5 @@
 VAST-TOOLS
-======
-
-Current version: 0.0.1
+==========
 
 Summary
 -------
@@ -71,15 +69,20 @@ Manuel Irimia
 Kevin Ha
 Tim Sterne-Weiler
 
-Questions & Bugs
-----------------
-For questions or for bug reports please send the smallest example necessary to the in order to reproduce the error to the appropriate author!
+Questions 
+---------
+Send questions to mirimia@gmail.com.
 
-General Inquiries: Manuel Irimia, mirimia@gmail.com
+Please send the smallest example necessary to the in order to reproduce the error. 
 
 Regarding 'align' or 'combine': Author: Manuel Irimia, mirimia@gmail.com
 Regarding 'diff': Author: Tim Sterne-Weiler, tim.sterne.weiler@utoronto.ca
 Regarding 'plot': Author: Kevin Ha, k.ha@mail.utoronto.ca
+
+Issues
+------
+Please report all bugs and issues using the issue tracker on GitHub (<url>
+coming soon!)
 
 Citation
 --------
