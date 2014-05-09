@@ -8,30 +8,27 @@ VAST-TOOLS is a toolset for profiling alternative splicing events in RNA-Seq dat
 Installation
 ------------
 
-VAST requires the following software:
+VAST-TOOLS requires the following software:
     * bowtie (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
     * samtools (Li et al., 2009), http://samtools.sourceforge.net
 
 Optional software:
     * pigz - a parallel implementation of gzip, http://zlib.net/pigz/
 
-If pigz is installed, VAST will use the user-specified number of cores
+If pigz is installed, VAST-TOOLS will use the user-specified number of cores
 (see usage) to carry out file compression. This will help speed up the runtime.
 
 Quick Usage
 -----------
 
-vast-tools align input1.fq.gz -readLen 158 -o outputdir
-vast-tools align input2.fq.gz -readLen 158 -o outputdir
-
-vast-tools combine -o outputdir
-
-vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir --filter > significant_events.tab
-
-vast-tools plot significant_events.tab
+VAST-TOOLS contains four main sub-commands: align, combine, diff, and plot. The
+following provides a quick introduction on how to run the tool:
 
 **Alignment:**
-# From MI - need to revise
+> vast-tools align input1.fq.gz -readLen 158 -o outputdir
+> vast-tools align input2.fq.gz -readLen 158 -o outputdir
+
+#TODO From MI - need to revise
 fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq
 Only underscores (\"_\") are allowed in the Sample name. No dashes, dots, spaces, etc.
 If running with the paired end option (\"\-PE\"), they must be called: Sample_1-length.fq Sample_2-length.fq
@@ -45,29 +42,27 @@ Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the g
 ###
 
 **Combining Results:**
+#TODO description
+
+> vast-tools combine -o outputdir
 
 **Differential Splicing Analysis**
+#TODO description
+
+> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir --filter > significant_events.tab
 
 **Plotting:**
 
-VAST comes with some basic plotting scripts written in R. The scripts can be found
-in the 'plot' subdirectory. To execute from VAST, use the subcommand "plot".
-
-e.g.
-
-> vast-tools plot psi_values.tab
-
+VAST-TOOLS comes with a plotting script written in R (./R/psiplotter.R).
 The input format follows the same format from the "combine" step described
-above. The output is a pdf of scatterplots (one per AS event) of PSI values. It
-is recommended to filter the input file to a subset of events of interest before
-using this plotting function. Otherwise, the resulting pdf file will be very
-large.
+above. The output is a pdf of scatterplots (one per AS event) of PSI values.
+To execute from VAST-TOOLS, use the subcommand "plot":
 
-Authors
--------
-Manuel Irimia
-Kevin Ha
-Tim Sterne-Weiler
+> vast-tools plot significant_events.tab
+
+It is recommended to filter the input file to a subset of events of interest
+before plotting, such as those obtained from "vast-tools diff". Otherwise, the
+resulting pdf file will be very large.
 
 Questions 
 ---------
@@ -75,14 +70,16 @@ Send questions to mirimia@gmail.com.
 
 Please send the smallest example necessary to the in order to reproduce the error. 
 
-Regarding 'align' or 'combine': Author: Manuel Irimia, mirimia@gmail.com
-Regarding 'diff': Author: Tim Sterne-Weiler, tim.sterne.weiler@utoronto.ca
-Regarding 'plot': Author: Kevin Ha, k.ha@mail.utoronto.ca
-
 Issues
 ------
-Please report all bugs and issues using the issue tracker on GitHub (<url>
+Please report all bugs and issues using the issue tracker on GitHub (url
 coming soon!)
+
+Authors
+-------
+Manuel Irimia
+Kevin Ha
+Tim Sterne-Weiler
 
 Citation
 --------
