@@ -4,6 +4,8 @@
 *.eff*
 
 # Directories
+VASTDB
 Hsa
 Mmu
 Conservation
+vast_out
