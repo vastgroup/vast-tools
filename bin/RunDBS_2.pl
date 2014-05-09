@@ -26,13 +26,6 @@ GetOptions("help" => \$helpFlag,
 			  "output=s" => \$outDir,
 			  "o=s" => \$outDir);
 
-if(!defined($dbDir)) {
-  $dbDir = "$binPath/../$sp";
-}
-$dbDir = abs_path($dbDir);
-
-chdir($outDir);
-
 our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
@@ -53,6 +46,15 @@ sub verbPrint {
     print STDERR "[vast combine]: $verbMsg\n";
   }
 }
+
+if(!defined($dbDir)) {
+  $dbDir = "$binPath/../VASTDB";
+}
+$dbDir = abs_path($dbDir);
+$dbDir .= "/$sp";
+errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
+
+chdir($outDir);
 
 if ($helpFlag){
     errPrint "Usage:
