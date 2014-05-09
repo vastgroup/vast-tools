@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 # This pipeline takes PSI templates and adds PSIs from new samples.
+use strict;
 use Cwd qw(abs_path);
 use Getopt::Long;
 
@@ -75,8 +76,8 @@ mkdir("raw_reads") unless (-e "raw_reads"); # ^
 #$sp=$ARGV[0];
 die "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
 
-@files=glob("spli_out/*exskX"); #gathers all exskX files (a priori, simple).
-$N=$#files+1;
+my @files=glob("spli_out/*exskX"); #gathers all exskX files (a priori, simple).
+my $N=$#files+1;
 
 ### Gets the PSIs for the events in the a posteriori pipeline
 verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
@@ -95,8 +96,13 @@ verbPrint "Building Table for MIC (microexons)\n";
 sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
-verbPrint "Building non-redundant PSI table (MERGE3m)\n";  # FIXED?? --TSW
-sysErrMsg "$binPath/Add_to_MERGE3m.pl raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+verbPrint "Building non-redundant PSI table (MERGE3m)\n";  
+sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
+            "raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
+            "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
+            "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab " .
+            "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
+            "-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
 ### Gets PSIs for ALT5ss and adds them to the general database
 verbPrint "Building Table for Alternative 5'ss choice events\n";
@@ -105,4 +111,13 @@ sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbos
 ### Gets PSIs for ALT3ss and adds them to the general database
 verbPrint "Building Table for Alternative 3'ss choice events\n";
 sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+### Combine results into unified table
+verbPrint "Combining results into single table\n";
+my @input = ("raw_incl/INCLUSION_LEVELS_MERGE3m-$sp$N-n.tab",
+                "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
+                "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
+my $finalOutput = "INCLUSION_LEVELS_FINAL-$sp$N.tab";
+sysErrMsg "cat @input | $binPath/Convert_Event_IDs.pl -sp=$sp -dbDir=$dbDir " .
+            "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
 

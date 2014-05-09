@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 #
-# Convert old event IDs with new IDs.
-# Conversion table is found in the database directory: e.g. New_ID-Hsa.txt.gz or
-# New_ID-Mmu.txt.gz
+# Convert old event IDs with new IDs using the conversation table found in the
+# database directory.
+#
+# e.g. Hsa/FILES/New_ID-Hsa.txt.gz or Mmu/FILES/New_ID-Mmu.txt.gz
 
 use strict;
 use FindBin;
@@ -39,31 +40,28 @@ sub loadKeyVal {
   return(\%retHash);
 }
 
-### Load NEW IDs to memory
-my $newID = "$dbDir/$sp/FILES/New_ID-$sp.txt.gz";
+# Load conversation table file to memory
+my $newID = "$dbDir/FILES/New_ID-$sp.txt.gz";
 my %newIDs = %{loadKeyVal($newID)};
 
 
 my $header = undef;
 
-### Go through each line
 while (<STDIN>) {
   chomp;
   
   # Check headers
-  if (/^GENE/) {
+  if (/^GENE\tEVENT/) {
     if (! defined $header) {
       $header = $_;
       print STDOUT $header . "\n";
-    } elsif ($header ne $_) {
-      die "Found header but doesn't match what was first detected!\n";
     }   
     next;
   }
 
-  # Replace ID in column 2
   my @l = split(/\t/);
 
+  # Replace ID in column 2 in INCLUSION_LEVELS
   if (defined $newIDs{$l[1]}) {
     $l[1] = $newIDs{$l[1]};
   } else {
