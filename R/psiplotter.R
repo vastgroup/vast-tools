@@ -80,7 +80,10 @@ option.list <- list(
   make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
               help = "Maximum number of AS events to plot [first %default]"),
   make_option(c("-o", "--output"), type = "character", default = NULL,
-              help = "Output directory [%default]")
+              help = "Output directory [%default]"),
+  make_option(c("--noErrorBar"), type = "logical", default = FALSE,
+              dest = "noErrorBar",
+              help = "Do not plot error bars [%default]")
 )
 parser <- OptionParser(option_list = option.list,
                        desc = desc,
@@ -232,13 +235,15 @@ for (i in 1:nplot) {
   
   
   # Draw error bars
-  ci <- get_beta_ci(reordered$qual[i,])
-  
-  arrows(1:ncol(PSIs), ci[,1],
-         1:ncol(PSIs), ci[,2],
-         length = 0.025,
-         angle = 90,
-         code = 3)
+  if (! opt$options$noErrorBar) {
+    ci <- get_beta_ci(reordered$qual[i,])
+      
+    arrows(1:ncol(PSIs), ci[,1],
+           1:ncol(PSIs), ci[,2],
+           length = 0.025,
+           angle = 90,
+           code = 3)
+  }
   
   # Draw horizontal lines
   if (!is.null(tissueFile)) {
