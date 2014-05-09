@@ -26,9 +26,10 @@ GetOptions("help" => \$helpFlag,
 			  "o=s" => \$outDir);
 
 if(!defined($dbDir)) {
-  $dbDir = "$binPath/../$sp";
+  $dbDir = "$binPath/../VASTDB/$sp";
 }
-$dbDir = abs_path($dbDir);
+$dbDir = abs_path($dbDir) . "/$species";
+errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
 
 chdir($outDir);
 

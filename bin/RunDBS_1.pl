@@ -75,9 +75,9 @@ sub getPrefixCmd {
 
 # Check database directory
 unless(defined($dbDir)) {
-  $dbDir = "$binPath/../$species";
+  $dbDir = "$binPath/../VASTDB/$species";
 }
-$dbDir = abs_path($dbDir);
+$dbDir = abs_path($dbDir) . "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
