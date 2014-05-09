@@ -88,7 +88,7 @@ die "[vast combine merge error]: Some of the headings are not identical!\n" if (
 
 ### Output file
 ($sp,$N_samples)=$EXSK=~/\-(.{3})(\d+)\-n/;
-$output="INCLUSION_LEVELS_MERGE3m-$sp$N_samples-n.tab";
+$output="raw_incl/INCLUSION_LEVELS_MERGE3m-$sp$N_samples-n.tab";
 open (OUTPUT, ">$output");
 
 # Loads the template 
