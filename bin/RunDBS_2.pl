@@ -123,3 +123,4 @@ my $finalOutput = "INCLUSION_LEVELS_FINAL-$sp$N.tab";
 sysErrMsg "cat @input | $binPath/Convert_Event_IDs.pl -sp=$sp -dbDir=$dbDir " .
             "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
 
+verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
