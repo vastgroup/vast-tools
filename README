@@ -25,8 +25,8 @@ VAST-TOOLS contains four main sub-commands: align, combine, diff, and plot. The
 following provides a quick introduction on how to run the tool:
 
 **Alignment:**
-> vast-tools align input1.fq.gz -readLen 158 -o outputdir
-> vast-tools align input2.fq.gz -readLen 158 -o outputdir
+> vast-tools align input1.fq.gz -sp Hsa -readLen 158 -o outputdir
+> vast-tools align input2.fq.gz -sp Hsa -readLen 158 -o outputdir
 
 #TODO From MI - need to revise
 fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq
