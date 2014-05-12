@@ -18,13 +18,15 @@ my $helpFlag = 0;
 my $globalLen = 50; # testing? not file specific any longer --TSW
 
 my $outDir;
+my $compress = 0;
 
-GetOptions("help" => \$helpFlag, 
-			  "dbDir=s" => \$dbDir,
-			  "sp=s" => \$sp,
-			  "verbose" => \$verboseFlag,
-			  "output=s" => \$outDir,
-			  "o=s" => \$outDir);
+GetOptions("help"           => \$helpFlag, 
+			  "dbDir=s"     => \$dbDir,
+			  "sp=s"        => \$sp,
+			  "verbose"     => \$verboseFlag,
+			  "output=s"    => \$outDir,
+			  "o=s"         => \$outDir,
+              "z"           => \$compress);
 
 our $EXIT_STATUS = 0;
 
@@ -65,6 +67,7 @@ OPTIONS:
 	-o OUTPUTDIR, --output OUTPUTDIR	:	output directory to combine samples from... [default vast_out]
 	-dbDir DBDIR				:	Database directory
 	-sp Hsa/Mmu				:	Species selection
+	-z						:	Compress all output files using gzip   
 	-v, --verbose				:	Verbose messages
 	-h, --help				:	Print this message
 ";
@@ -98,13 +101,14 @@ verbPrint "Building Table for MIC (microexons)\n";
 sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
-verbPrint "Building non-redundant PSI table (MERGE3m)\n";  
-sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
-            "raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
-            "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
-            "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab " .
-            "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
-            "-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+# to be deprecated and replaced by Add_to_FULL (see below) --KH
+#verbPrint "Building non-redundant PSI table (MERGE3m)\n";  
+#sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
+#"raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
+#"raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
+#"raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab " .
+#"raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
+#"-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
 ### Gets PSIs for ALT5ss and adds them to the general database
 verbPrint "Building Table for Alternative 5'ss choice events\n";
@@ -114,13 +118,22 @@ sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbos
 verbPrint "Building Table for Alternative 3'ss choice events\n";
 sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
-### Combine results into unified table
+### Combine results into unified "FULL" table
 verbPrint "Combining results into single table\n";
-my @input = ("raw_incl/INCLUSION_LEVELS_MERGE3m-$sp$N-n.tab",
+my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
+                "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
+                "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
+                "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
-my $finalOutput = "INCLUSION_LEVELS_FINAL-$sp$N.tab";
-sysErrMsg "cat @input | $binPath/Convert_Event_IDs.pl -sp=$sp -dbDir=$dbDir " .
+my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
+sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
             "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
 
 verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
+
+### Compress intermediate files
+if ($compress) {
+  verbPrint "Compressing files\n";
+  sysErrMsg "gzip -v @input $finalOutput";
+}

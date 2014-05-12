@@ -1,9 +1,10 @@
 #!/usr/bin/perl
 #
-# Convert old event IDs with new IDs using the conversation table found in the
-# database directory.
+# Final "Add_to_*" script that combines all previous AS event type-specific PSI
+# tables into one final ("FULL") table.
 #
-# e.g. Hsa/FILES/New_ID-Hsa.txt.gz or Mmu/FILES/New_ID-Mmu.txt.gz
+# Event IDs are also converted to the "new" IDs, which are specified in the
+# library file "New_ID-*.txt.gz" in VASTDB/FILES/ directory
 
 use strict;
 use FindBin;
@@ -27,46 +28,72 @@ sub verbPrint {
   }
 }
 
-sub loadKeyVal {
-  my $fileName = shift;
-  my $hndl = openFileHandle($fileName);
-  my(%retHash);
-  while(my $l = <$hndl>) {
-    chomp($l);
-    my(@a) = split(/\t/, $l);
-    if(defined($retHash{$a[1]})) { die "non-unique key value pair!\n"; }
-    $retHash{$a[1]} = $a[0];
-  }
-  return(\%retHash);
-}
-
 # Load conversation table file to memory
-my $newID = "$dbDir/FILES/New_ID-$sp.txt.gz";
-my %newIDs = %{loadKeyVal($newID)};
+my $NEWID = openFileHandle("$dbDir/FILES/New_ID-$sp.txt.gz");
+my %newIDs;
+while (<$NEWID>) {
+  chomp;
+  my @l = split("\t");
+  if (defined $newIDs{$l[1]}) {
+      die "Non-unique key value pair!\n";
+  }
+  $newIDs{$l[1]} = $l[0];
+}
+close $NEWID;
 
+# Loads the template 
+my $TEMPLATE = openFileHandle("$dbDir/TEMPLATES/$sp.FULL.Template.txt.gz");
+my $h = <$TEMPLATE>;
+chomp $h;
+my @header = split(/\t/, $h);
+@header = @header[0..5];
 
-my $header = undef;
+my %template;
+while (<$TEMPLATE>){
+  chomp;
+  my @l = split(/\t/);
+  if (defined $template{$l[1]}) {
+    die "Non-unique key value pair!\n";
+  }
+  $template{$l[1]} = \@l;
+}
+close $TEMPLATE;
+
+# Load input data
+my %done;
+my $sawHeader = 0;
 
 while (<STDIN>) {
   chomp;
   
+  my @l = split(/\t/);
+
   # Check headers
   if (/^GENE\tEVENT/) {
-    if (! defined $header) {
-      $header = $_;
-      print STDOUT $header . "\n";
-    }   
+    if (!$sawHeader) {
+      push @header, @l[6..$#l];
+      $sawHeader = @l;  # store number of expected columns
+      print STDOUT join("\t", @header) . "\n";
+    } elsif ($sawHeader != @l) {
+      die "Number of columns in subsequent header does not match. Terminating!!\n";
+    }  
     next;
   }
 
-  my @l = split(/\t/);
+  # Check if input is found in template
+  if ($template{$l[1]}) {
+    
+    my @prefix = @{$template{$l[1]}};
 
-  # Replace ID in column 2 in INCLUSION_LEVELS
-  if (defined $newIDs{$l[1]}) {
-    $l[1] = $newIDs{$l[1]};
-  } else {
-    verbPrint "Could not finding matching ID for " . $l[1] . "\n";
+    if ($newIDs{$prefix[1]}) {
+
+      $prefix[1] = $newIDs{$prefix[1]};
+
+      print STDOUT join("\t", (@prefix, @l[6..$#l])) . "\n" 
+          unless $done{$l[2]};
+
+      $done{$l[2]} = 1;
+    }
   }
-
-  print STDOUT join("\t", @l)."\n";
 }
+
