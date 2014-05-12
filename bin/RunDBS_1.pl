@@ -304,6 +304,7 @@ if (!isZipped($subtractedFq)) {
     sysErrMsg "$zip $root-$le-e.fq";
 }
 
+verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
 
 ####

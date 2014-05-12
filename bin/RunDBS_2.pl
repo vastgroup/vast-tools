@@ -137,3 +137,5 @@ if ($compress) {
   verbPrint "Compressing files\n";
   sysErrMsg "gzip -v @input $finalOutput";
 }
+
+verbPrint "Completed " . localtime;
