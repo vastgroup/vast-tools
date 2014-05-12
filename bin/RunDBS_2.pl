@@ -135,7 +135,7 @@ verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
 ### Compress intermediate files
 if ($compress) {
   verbPrint "Compressing files\n";
-  sysErrMsg "gzip -v @input $finalOutput";
+  sysErrMsg "gzip -v raw_incl/*.tab raw_reads/*.tab $finalOutput";
 }
 
 verbPrint "Completed " . localtime;
