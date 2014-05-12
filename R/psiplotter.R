@@ -138,7 +138,6 @@ convert_psi <- function(t) {
       psi[na, i+1] <- NA
     }
   }
-  #return(psi[, seq(1, ncol(psi), 2)])
   return(psi)
 }
 
