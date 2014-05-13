@@ -46,14 +46,16 @@ option.list <- list(
         help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
         help = "Exact or Partial match to PSI table in output directory [default %default]"),
+    make_option(c("-n", "--nLines"), type = "integer", default = "100",
+        help = "Number of lines to read/process in parallel at a time... lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
         help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [default %default]\n
 
 [output options]"),
     make_option(c("-f", "--filter"), type = "logical", default = TRUE,
         help = "Filter output for differential events only [default %default]"),
-    make_option(c("-d", "--pdf"), type = "logical", default = TRUE,
-        help = "Plot visual output (pdf) for differential events [default %default]"),
+    make_option(c("-d", "--pdf"), type = "character", default = "plotDiff_out.pdf", metavar="FILE",
+        help = "Plot visual output (pdf) for differential events into FILE [default %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
         help = "Output directory, [default vast_out]\n
 
@@ -165,13 +167,11 @@ repB.qualInd <- repBind + 1
 alphaList <- seq(0,1,0.01)
 
 ### TMP OUT
-pdf("test.pdf", width=7, height=3)
-
-nLines <- 100
+pdf(paste(c(opt$pdf, ".pdf"), collapse=""), width=7, height=3)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
-while(length( lines <- readLines(inputFile, n=nLines) ) > 0) { 
+while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) { 
 
   # use parallel computing to store plots in plotListed
   # then print them to the pdf afterwards before next chunk of nLines from file.
@@ -243,6 +243,12 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
         retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
     }
+
+    rm(psiFirst)
+    rm(psiSecond)
+    rm(psiFirstComb)
+    rm(psiSecondComb)
+
 	 return(list(retPlot, eventTitle))  #return of mclapply function
   }, mc.cores=opt$cores) #End For
 
