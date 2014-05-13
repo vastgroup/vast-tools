@@ -196,9 +196,6 @@ if ($length >= 50){
 errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
 #####
 
-#sysErrMsg "gunzip $file" if $file=~/\.gz/;
-#sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
-
 if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
 }
@@ -223,9 +220,6 @@ if (!$genome_sub){
      sysErrMsg "$binPath/expr_RPKM.pl expr_out/$species"."_mRNA-$le-$root.out $dbDir/EXPRESSION/$species"."_mRNA-$le.eff"; 
  }
  if ($onlyExprFlag){
-     #print "Compressing raw fastq files\n";
-     #sysErrMsg "gzip $fq" if !$pairedEnd;
-     #sysErrMsg "gzip $fq1 $fq2" if $pairedEnd;
      print STDERR "Expression analysis done\n";
      exit 0;
  }
@@ -237,7 +231,6 @@ if (!$genome_sub){
      sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
                                        # $fq is used in trimming below. but we
                                        # can pipe into it. KH
-     #sysErrMsg "gzip $fq1 $fq2";
  } else {
    $fq = $fq1;
  }
@@ -264,7 +257,6 @@ if (!$genome_sub){
    $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
  }
- #verbPrint "Compressing raw fastq file\n" unless $length==50 || $length==36;
 ####
  
 #### Get effective reads (i.e. genome substraction).
