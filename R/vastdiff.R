@@ -60,7 +60,7 @@ option.list <- list(
 [statistical options]"),
     make_option(c("-r", "--prob"), type = "numeric", default = 0.9,
         help = "Probability threshold for P( (psi1 - psi2) > x ) > threshold [default %default]"),
-    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.05,
+    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.1,
         help = "Threshold for min diff where P( (psi1 - psi2) > threshold ) > --prob [default %default]"),
     make_option(c("--alpha"), type = "numeric", default = 1,
         help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
@@ -167,7 +167,7 @@ alphaList <- seq(0,1,0.01)
 ### TMP OUT
 pdf("test.pdf", width=7, height=3)
 
-nLines <- 1000
+nLines <- 100
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
