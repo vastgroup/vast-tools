@@ -145,6 +145,11 @@ psiSecond <- vector("list", secondRepN)
 head <- readLines( inputFile, n=1 )
 head_n <- unlist( strsplit( head, "\t" ) )
 
+# if we are to filter to stdout, then print header
+if( opt$filter ) {
+  writeLines(head, stdout())
+}
+
 # check if header is correct..  TODO
 
 # Indexes of samples of interest
@@ -260,6 +265,6 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
 } #End While
 
-dev.off()
+garbage <- dev.off()
 
 q(status=0)
