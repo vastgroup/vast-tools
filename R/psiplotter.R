@@ -80,7 +80,10 @@ option.list <- list(
   make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
               help = "Maximum number of AS events to plot [first %default]"),
   make_option(c("-o", "--output"), type = "character", default = NULL,
-              help = "Output directory [%default]")
+              help = "Output directory [%default]"),
+  make_option(c("--noErrorBar"), type = "logical", default = FALSE,
+              dest = "noErrorBar",
+              help = "Do not plot error bars [%default]")
 )
 parser <- OptionParser(option_list = option.list,
                        desc = desc,
@@ -135,7 +138,6 @@ convert_psi <- function(t) {
       psi[na, i+1] <- NA
     }
   }
-  #return(psi[, seq(1, ncol(psi), 2)])
   return(psi)
 }
 
@@ -212,8 +214,15 @@ pdf(outfile, width = 8.5, height = 5.5)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
 nplot <- min(nrow(PSIs), opt$options$max)
 for (i in 1:nplot) {
+  # Set plot title
+  event <- strsplit(rownames(PSIs)[i], split = "=")[[1]]
+  title <- sprintf("%s (position = %s, length = %s, type = %s)", 
+    event[2], event[3], event[4], event[1])
+
+
+  # Set up plot
   plot(NA,
-       main=rownames(PSIs)[i],
+       main=title,
        ylab="PSI", xlab="", xaxt="n",
        ylim=c(1,100), xlim=c(1, ncol(PSIs)),
        cex.main=0.9, cex.axis=0.8)
@@ -225,14 +234,17 @@ for (i in 1:nplot) {
   
   
   # Draw error bars
-  ci <- get_beta_ci(reordered$qual[i,])
+  if (! opt$options$noErrorBar) {
+    ci <- get_beta_ci(reordered$qual[i,])
+      
+    arrows(1:ncol(PSIs), ci[,1],
+           1:ncol(PSIs), ci[,2],
+           length = 0.025,
+           angle = 90,
+           code = 3)
+  }
   
-  arrows(1:ncol(PSIs), ci[,1],
-         1:ncol(PSIs), ci[,2],
-         length = 0.025,
-         angle = 90,
-         code = 3)
-  
+  # Draw horizontal lines
   if (!is.null(tissueFile)) {
     abline(h=mean(PSIs[i, reordered$group.index[["ESC"]] ], na.rm=TRUE), 
            col=reordered$group.col["ESC"], lwd=0.5)
@@ -244,9 +256,11 @@ for (i in 1:nplot) {
            col=reordered$group.col["Tissues"], lwd=0.5)
   }
   
+  # Draw grid lines
   abline(v=1:ncol(PSIs), col="grey", lwd=0.3, lty=2)
   abline(h=seq(0,100,10), col="grey", lwd=0.3, lty=2)
   
+  # Draw PSIs
   points(1:ncol(PSIs), as.numeric(PSIs[i,]), col=supercolors, pch=20,
          cex = 1)
 }

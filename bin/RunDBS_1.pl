@@ -75,9 +75,10 @@ sub getPrefixCmd {
 
 # Check database directory
 unless(defined($dbDir)) {
-  $dbDir = "$binPath/../$species";
+  $dbDir = "$binPath/../VASTDB";
 }
 $dbDir = abs_path($dbDir);
+$dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
@@ -136,6 +137,7 @@ my $fileName1 = $fq1;
 my $fileName2;
 my $zipped = isZipped($fq1);
 my $subtractedFq;
+my $galignedFq;
 
 my($root, $length);
 
@@ -194,9 +196,6 @@ if ($length >= 50){
 errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
 #####
 
-#sysErrMsg "gunzip $file" if $file=~/\.gz/;
-#sysErrMsg "gunzip $file2" if $file2=~/\.gz/ && $pairedEnd;
-
 if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
 }
@@ -221,9 +220,6 @@ if (!$genome_sub){
      sysErrMsg "$binPath/expr_RPKM.pl expr_out/$species"."_mRNA-$le-$root.out $dbDir/EXPRESSION/$species"."_mRNA-$le.eff"; 
  }
  if ($onlyExprFlag){
-     #print "Compressing raw fastq files\n";
-     #sysErrMsg "gzip $fq" if !$pairedEnd;
-     #sysErrMsg "gzip $fq1 $fq2" if $pairedEnd;
      print STDERR "Expression analysis done\n";
      exit 0;
  }
@@ -235,7 +231,6 @@ if (!$genome_sub){
      sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
                                        # $fq is used in trimming below. but we
                                        # can pipe into it. KH
-     #sysErrMsg "gzip $fq1 $fq2";
  } else {
    $fq = $fq1;
  }
@@ -262,15 +257,15 @@ if (!$genome_sub){
    $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
  }
- #verbPrint "Compressing raw fastq file\n" unless $length==50 || $length==36;
 ####
  
 #### Get effective reads (i.e. genome substraction).
  verbPrint "Doing genome substraction\n";
  $subtractedFq = "$root-$le-e.fq";
+ $galignedFq = "$root-$le-galigned.fq";
  # Updated genome subtraction command to handle trimmed or untrimmed input files
  $cmd = getPrefixCmd($fq);
- $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un $subtractedFq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+ $cmd .= " | $bowtie -p $cores -m 1 -v 2 --al $galignedFq --un $subtractedFq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
  sysErrMsg $cmd;
  if ($trimmed) {
      verbPrint "Compressing trimmed reads";
@@ -283,49 +278,26 @@ if (!$genome_sub){
 #### Map to the EEJ:
 my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > spli_out/$species"."COMBI-M-$le-$root-e_s.out"; # DEPRECATED --TSW
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le | cut -f 1-4,8 - | sort -Vu -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 - > spli_out/$species"."EXSK-$le-$root-e_s.out"; # DEPRECATED --TSW
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le - | cut -f 1-4,8 | sort -Vu -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MULTI-$le-$root-e_s.out"; # DEPRECATED --TSW
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le - | cut -f 1-4,8 | sort -Vu -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
-#sysErrMsg "$bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le $root-$le-e.fq | cut -f 1-4,8 - | sort -u -k 1,1 > spli_out/$species"."MIC-$le-$root-e.out"; # DEPRECATED --TSW
+
+# TODO Align to intron retention mapped reads here..
+#verbPrint "Mapping reads to intron retention library...\n";
+#sysErrMsg "$preCmd | $bowtie -p .... | cut -f 1-4,8 | sort -Vu -k 1,1 |
+##$binPath/MakeSummarySAM.pl <arguments>
 
 if (!isZipped($subtractedFq)) {
     verbPrint "Compressing genome-substracted reads\n";
     sysErrMsg "$zip $root-$le-e.fq";
 }
 
+verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
-
-####
-
-## Analyze MIC
-#verbPrint "Starting EEJ analyses:\n";
-#verbPrint "Analyzing microexons\n";
-#sysErrMsg "$binPath/Analyze_MIC.pl spli_out/$species"."MIC-$le-$root-e.out -dbDir=$dbDir";
-
-## Analyze MULTI and EXSK (A priori pipeline)
-#print "Sorting a priori outputs\n";
-#sysErrMsg "$binPath/sort_outs.pl spli_out/$species"."MULTI-$le-$root-e.out";
-#sysErrMsg "$binPath/sort_outs.pl spli_out/$species"."EXSK-$le-$root-e.out";
-#verbPrint "Analyzing a priori outputs\n";
-#sysErrMsg "$binPath/Analyze_EXSK.pl spli_out/$species"."EXSK-$le-$root-e_s.out -dbDir=$dbDir";
-#sysErrMsg "$binPath/Analyze_MULTI.pl spli_out/$species"."MULTI-$le-$root-e_s.out -dbDir=$dbDir";
-
-## Analyze a posteriori pipeline
-#print "Sorting a posteriori output\n";
-#sysErrMsg "$binPath/sort_outs.pl spli_out/$species"."COMBI-M-$le-$root-e.out";
-#verbPrint "Analyzing a posteriori output for exon skippings\n";
-#sysErrMsg "$binPath/Analyze_COMBI.pl spli_out/$species"."COMBI-M-$le-$root-e_s.out $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff";
-##
-
-#sysErrMsg "$zip spli_out/$species/*.out";  # DEPRECATED --TSW
-

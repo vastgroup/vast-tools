@@ -46,21 +46,23 @@ option.list <- list(
         help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
         help = "Exact or Partial match to PSI table in output directory [default %default]"),
+    make_option(c("-n", "--nLines"), type = "integer", default = "100",
+        help = "Number of lines to read/process in parallel at a time... lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
         help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [default %default]\n
 
 [output options]"),
     make_option(c("-f", "--filter"), type = "logical", default = TRUE,
         help = "Filter output for differential events only [default %default]"),
-    make_option(c("-d", "--pdf"), type = "logical", default = TRUE,
-        help = "Plot visual output (pdf) for differential events [default %default]"),
+    make_option(c("-d", "--pdf"), type = "character", default = "plotDiff_out.pdf", metavar="FILE",
+        help = "Plot visual output (pdf) for differential events into FILE [default %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
         help = "Output directory, [default vast_out]\n
 
 [statistical options]"),
     make_option(c("-r", "--prob"), type = "numeric", default = 0.9,
         help = "Probability threshold for P( (psi1 - psi2) > x ) > threshold [default %default]"),
-    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.05,
+    make_option(c("-m", "--minDiff"), type = "numeric", default = 0.1,
         help = "Threshold for min diff where P( (psi1 - psi2) > threshold ) > --prob [default %default]"),
     make_option(c("--alpha"), type = "numeric", default = 1,
         help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
@@ -143,6 +145,11 @@ psiSecond <- vector("list", secondRepN)
 head <- readLines( inputFile, n=1 )
 head_n <- unlist( strsplit( head, "\t" ) )
 
+# if we are to filter to stdout, then print header
+if( opt$filter ) {
+  writeLines(head, stdout())
+}
+
 # check if header is correct..  TODO
 
 # Indexes of samples of interest
@@ -165,13 +172,11 @@ repB.qualInd <- repBind + 1
 alphaList <- seq(0,1,0.01)
 
 ### TMP OUT
-pdf("test.pdf", width=7, height=3)
-
-nLines <- 1000
+pdf(paste(c(opt$pdf, ".pdf"), collapse=""), width=7, height=3)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
-while(length( lines <- readLines(inputFile, n=nLines) ) > 0) { 
+while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) { 
 
   # use parallel computing to store plots in plotListed
   # then print them to the pdf afterwards before next chunk of nLines from file.
@@ -243,6 +248,12 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
         retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
     }
+
+    rm(psiFirst)
+    rm(psiSecond)
+    rm(psiFirstComb)
+    rm(psiSecondComb)
+
 	 return(list(retPlot, eventTitle))  #return of mclapply function
   }, mc.cores=opt$cores) #End For
 
@@ -254,6 +265,6 @@ while(length( lines <- readLines(inputFile, n=nLines) ) > 0) {
 
 } #End While
 
-dev.off()
+garbage <- dev.off()
 
 q(status=0)
