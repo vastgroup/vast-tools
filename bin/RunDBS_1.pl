@@ -302,7 +302,7 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
             "$dbDir/FILES/$sp.Introns.sample.200 - | " .
             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
             "$binPath/MakeSummarySAM.pl | " .
-            "$binPath/RI_summarize.pl";
+            "$binPath/RI_summarize_introns.pl";
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
