@@ -4,8 +4,8 @@ $file=$ARGV[0];
 ($species,$rle,$sample)=$file=~/(.{3})INT\-(\d+?)\-(.+?)\_s\.out/;
 $sp=$species;
 
-$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES/IR";
-$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES/IR";
+$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES";
+$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES";
 
 my $maxcount = $rle - 15;
 
@@ -13,10 +13,10 @@ my $maxcount = $rle - 15;
 my %ucount;
 
 if ($sp eq 'Mmu') {
-    open (UC,"$dir2/MouseIntrons.sample.200.$rle.uniquecount.txt") || die "Can't find mappability for INT\n";
+    open (UC,"$dir2/$sp.Introns.sample.200.$rle.uniquecount.txt") || die "Can't find mappability for INT\n";
 } 
 elsif ($sp eq 'Hsa') {
-    open (UC, "$dir1/$sp/$sp.Introns.sample.200.$rle.uniquecount.txt") || die "Can't find mappability for INT\n";
+    open (UC, "$dir1/$sp.Introns.sample.200.$rle.uniquecount.txt") || die "Can't find mappability for INT\n";
 } 
 else {
     die "Unkown species\n";

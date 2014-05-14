@@ -18,10 +18,10 @@ if (!$ARGV[3]) {
 }
 ($sample,$readlength) = $sample1=~/(.+?)\-(.+?)\./;
 
-$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES/IR";
-$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES/IR";
+$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES";
+$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES";
 $dir3="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/bin";
-$outdir="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRcounts";
+$outdir="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/RAW_READS";
 
 $map_done=$ARGV[2];
 print "$sample1 $readlength $sp $cores\n\n";
@@ -40,10 +40,10 @@ if (!$map_done){ # check if there is a galigned file present
     else {  # create galigned file (SAM file with only reads that map to junctions or intron windows)
 	system "gunzip $sample1" if $sample1=~/\.gz/;
 	if ($sp eq "Mmu" ) {
-	    system "bowtie -m 1 -v 2 -p $cores --al $sample-$readlength-galigned.fq $dir2/mm9.EEJ.new.$readlength.8 $sample-$readlength.fq /dev/null";
+	    system "bowtie -m 1 -v 2 -p $cores --al $sample-$readlength-galigned.fq $dir2/$sp.EEJ.new.$readlength.8 $sample-$readlength.fq /dev/null";
 	} 
 	elsif ($sp eq "Hsa") {
-	    system "bowtie -m 1 -v 2 -p $cores --al $sample-$readlength-galigned.fq $dir1/$sp/$sp.EEJ.new.$readlength.8 $sample-$readlength.fq /dev/null";
+	    system "bowtie -m 1 -v 2 -p $cores --al $sample-$readlength-galigned.fq $dir1/$sp.EEJ.new.$readlength.8 $sample-$readlength.fq /dev/null";
 	}
 	else {
 	    die "Species not found\n";
@@ -53,8 +53,8 @@ if (!$map_done){ # check if there is a galigned file present
 
     # Map reads against junctions and intron internal windows
     if ($sp eq "Mmu" ) {
-	system "bowtie -m 1 -v 2 -p $cores $dir2/MouseIntronJunctions.new.$readlength.8 $sample-$readlength-galigned.fq /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample.out";    
-	system "bowtie -m 1 -v 2 -p $cores $dir2/MouseIntrons.sample.200 $sample-$readlength-galigned.fq /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."INT-$readlength-$sample.out";
+	system "bowtie -m 1 -v 2 -p $cores $dir2/$sp.IntronJunctions.new.$readlength.8 $sample-$readlength-galigned.fq /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample.out";    
+	system "bowtie -m 1 -v 2 -p $cores $dir2/$sp.Introns.sample.200 $sample-$readlength-galigned.fq /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."INT-$readlength-$sample.out";
     } 
     elsif ($sp eq "Hsa") {
 	system "bowtie -m 1 -v 2 -p $cores $dir1/$sp/$sp.IntronJunctions.new.$readlength.8 $sample-$readlength-galigned.fq /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample.out";

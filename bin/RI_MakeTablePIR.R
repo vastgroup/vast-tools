@@ -8,14 +8,15 @@
 ###
 ### Arguments:
 ###   sp           Absolute Path of the relevant species directory in vastDB, e.g. .../AS_PIPE_S/Hsa
-###   countDir     (optional) Directory of read count tables; default: "RAW_READS/"
-###   outDir       (optional) Directory for output; default: "spli_out/" in 'sp'
+###   countDir     (optional) Directory of read count tables; default: "RAW_READS/" in "sp"
+###   outDir       (optional) Directory for output; default: "spli_out/" in "sp"
 ###   rmHigh       (optional) TRUE/1 or FALSE/0; should introns that have a PIR > 95 in all non-NA samples be 
 ###                set to NA? Default: TRUE
 ###   verb         (optional) TRUE/1 or FALSE/0; Print status messages; default: FALSE
 ###
-### Returns coverage, balance and raw PIR tables as well as a 'clean' PIR table where 
-###   flagged introns and those that are always > 95 are removed, written to outDir.
+### Returns a single table with two columns for each sample:
+###   - PIR: filtered applying criteria
+###   - Q:   quality, format: coverage,balance-p.val@alpha,beta where alpha and beta are reassigned pseudocounts for ret/const
 ###
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
 ###
@@ -75,10 +76,12 @@ thresh.PIR <- 95    # Threshold for removing all-high introns (minimum PIR)
 
 
 ## prepare tables for coverage, balance and PIR
-cov <- as.data.frame(lapply(1:nrow(samples), FUN=function(x) {rep(NA, nrow(template))}))
-names(cov) <- samples$Sample
-bal <- cov
-pir <- cov
+pir <- as.data.frame(lapply(1:(2*nrow(samples)), FUN=function(x) {rep(NA, nrow(template))}))
+names(pir) <- paste(rep(samples$Sample, each=2), c("","-Q"), sep="")
+#cov <- as.data.frame(lapply(1:nrow(samples), FUN=function(x) {rep(NA, nrow(template))}))
+#names(cov) <- samples$Sample
+#bal <- cov
+#qal <- cov
 
 for (i in 1:nrow(samples)) {
     ## Read data for one sample
@@ -91,11 +94,13 @@ for (i in 1:nrow(samples)) {
     dat <- dat[dat$Event %in% template$juncID,]
     dat <- dat[!(dat$Event %in% dat$Event[duplicated(dat$Event)]),]  # should never be present
 
-    ### calculate PIR, coverage, balance
+    ## calculate PIR, coverage, balance
     pir.i <- 100 * (dat[,2] + dat[,3]) / (dat[,2] + dat[,3] + 2 * dat[,4])
-
     cov.i <- dat[,4] + apply(dat[,c(2,3,5)], MAR=1, FUN=median)
-
+    tot.i <- dat[,2] + dat[,3] + dat[,4]
+    alpha.i <- pir.i / 100 * tot.i
+    beta.i  <- (1 - pir.i / 100) * tot.i
+    
     xranges <- t(apply(dat[,c(2,3,5)], MAR=1, FUN=range))
     xranges <- apply(xranges, MAR=2, round)
     xranges[,2] <- xranges[,1] + xranges[,2]
@@ -105,38 +110,36 @@ for (i in 1:nrow(samples)) {
         binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value         
     })
 
+    ## make the 'quality' column: cov,bal@alpha,beta
+    qal.i <- paste(round(cov.i, 1), ",", signif(bal.i, 3), "@", alpha.i, ",", beta.i, sep="")
+
+    ## Remove values that do not pass criteria
+    pir.i[which(cov.i <= thresh.cov | bal.i < thresh.bal)] <- NA
+
     ## bring into correct order and populate tables
     datMerge <- data.frame(dat$Event, datInd = 1:nrow(dat))
     datMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), datMerge, by=1, all.x=TRUE)
     datMerge <- datMerge[order(datMerge[,1]),3]
 
-    pir[,i] <- pir.i[datMerge]
-    cov[,i] <- cov.i[datMerge]
-    bal[,i] <- bal.i[datMerge]
+    pir[,2*i - i] <- pir.i[datMerge]
+    pir[,2*i]     <- qal.i[datMerge]
+#    cov[,i]       <- cov.i[datMerge]
+#    bal[,i]       <- bal.i[datMerge]
 }
 
 ## Remove values that do not pass criteria
-cleanpir <- pir
-for (i in 1:ncol(cleanpir)) {cleanpir[which(cov[,i] <= thresh.cov | bal[,i] < thresh.bal), i] <- NA}
+#cleanpir <- pir
+#for (i in 1:nrow(samples)) {cleanpir[which(cov[,i] <= thresh.cov | bal[,i] < thresh.bal), i] <- NA}
 if (rmHigh) {
-    minpir <- suppressWarnings(apply(cleanpir, MAR=1, FUN=min, na.rm=T))
-    cleanpir[minpir > thresh.PIR,] <- NA
+    minpir <- suppressWarnings(apply(as.data.frame(pir[,seq(from=1, by=2, length.out=nrow(samples))]), MAR=1, FUN=min, na.rm=T))
+    pir[minpir > thresh.PIR, seq(from=1, by=2, length.out=nrow(samples))] <- NA
 }
 
 
-## Save all tables
-pir <- data.frame(template[,1:6],  pir)
-cleanpir <- data.frame(template[,1:6],  cleanpir)
-cov <- data.frame(template[,1:6],  cov)
-bal <- data.frame(template[,1:6],  bal)
+## Save table
+pir <- data.frame(template[,1:6], pir)
 
-write.table(pir, file=paste(outDir, "PIR.raw_", species, ".tab", sep=""),
-            row.names=F, col.names=T, quote=F, sep='\t')
-write.table(cov, file=paste(outDir, "Coverage_", species, ".tab", sep=""),
-            row.names=F, col.names=T, quote=F, sep='\t')
-write.table(bal, file=paste(outDir, "Balance-pval_", species, ".tab", sep=""),
-            row.names=F, col.names=T, quote=F, sep='\t')
-write.table(cleanpir, file=paste(outDir, "PIR_", species, ".tab", sep=""),
+write.table(pir, file=paste(outDir, "INCLUSION_LEVELS_IR-", species, nrow(samples), ".tab", sep=""),
             row.names=F, col.names=T, quote=F, sep='\t')
 
 if (verb) {cat("... done.\n\n")}

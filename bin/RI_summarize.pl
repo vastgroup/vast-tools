@@ -4,19 +4,19 @@ $file=$ARGV[0];
 ($species,$rle,$sample)=$file=~/(.{3})IJ\-(\d+?)\-(.+?)\_s\.out/;
 $sp=$species;
 
-$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES/IR";
-$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES/IR";
+$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES";
+$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES";
 
 my $maxcount = $rle - 15;
 
-# Getting mappability information (from output of uniquecount.IJ.pl)
+# Getting mappability inexit bash scriptformation (from output of uniquecount.IJ.pl)
 my %ucount;
 
 if ($sp eq 'Mmu') {
-    open (UC,"$dir2/MouseIntronJunctions.new.$rle.8.uniquecount.txt") || die "Can't find mappability for IJ ($dir2/MouseIntronJunctions.new.$rle.8.uniquecount.txt)\n";
+    open (UC, "$dir2/$sp.IntronJunctions.new.$rle.8.uniquecount.txt") || die "Can't find mappability for IJ ($dir2/$sp.IntronJunctions.new.$rle.8.uniquecount.txt)\n";
 }
 elsif ($sp eq 'Hsa') {
-    open (UC, "$dir1/$sp/$sp.IntronJunctions.new.$rle.8.uniquecount.txt") || die "Can't fined mappability for IJ (*$dir1/$sp/$sp.IntronJunctions.new.$rle.8.uniquecount.txt)\n";
+    open (UC, "$dir1/$sp.IntronJunctions.new.$rle.8.uniquecount.txt") || die "Can't find mappability for IJ (*$dir1/$sp.IntronJunctions.new.$rle.8.uniquecount.txt)\n";
 }
 else {
     die "Unkown species\n";
@@ -46,10 +46,10 @@ close RC;
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
 if ($sp eq "Mmu") {
-    open (ANOT,"$dir2/MouseIntronJunctions.new.annotation.txt") || die "Can't find annotations for IJ run\n";
+    open (ANOT,"$dir2/$sp.IntronJunctions.new.annotation.txt") || die "Can't find annotations for IJ run\n";
 }
 elsif ($sp eq "Hsa") {
-    open (ANOT, "$dir1/$sp/$sp.IntronJunctions.new.annotation.txt") || die "Can't find annotations for IJ run\n";
+    open (ANOT, "$dir1/$sp.IntronJunctions.new.annotation.txt") || die "Can't find annotations for IJ run\n";
 }
 
 my $outfile = "/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sample.summary.txt";
