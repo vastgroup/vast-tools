@@ -261,12 +261,13 @@ if (!$genome_sub){
  
 #### Get effective reads (i.e. genome substraction).
  verbPrint "Doing genome substraction\n";
- $subtractedFq = "$root-$le-e.fq";
+ $subtractedFq = "$root-$le-e.fq.gz";
  $galignedFq = "$root-$le-galigned.fq";
  # Updated genome subtraction command to handle trimmed or untrimmed input files
  $cmd = getPrefixCmd($fq);
- $cmd .= " | $bowtie -p $cores -m 1 -v 2 --al $galignedFq --un $subtractedFq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+ $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
  sysErrMsg $cmd;
+
  if ($trimmed) {
      verbPrint "Compressing trimmed reads";
      sysErrMsg "$zip $fq";
@@ -290,14 +291,18 @@ verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 
 # TODO Align to intron retention mapped reads here..
-#verbPrint "Mapping reads to intron retention library...\n";
-#sysErrMsg "$preCmd | $bowtie -p .... | cut -f 1-4,8 | sort -Vu -k 1,1 |
-##$binPath/MakeSummarySAM.pl <arguments>
-
-if (!isZipped($subtractedFq)) {
-    verbPrint "Compressing genome-substracted reads\n";
-    sysErrMsg "$zip $root-$le-e.fq";
-}
+verbPrint "Mapping reads to intron retention library...\n";
+$preCmd = getPrefixCmd("$fq.gz");
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+            "$dbDir/FILES/$sp.IntronJunctions.new.$le.8 - | " .
+            "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+            "$binPath/MakeSummarySAM.pl | " .
+            "$binPath/RI_summarize.pl";  
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+            "$dbDir/FILES/$sp.Introns.sample.200 - | " .
+            "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+            "$binPath/MakeSummarySAM.pl | " .
+            "$binPath/RI_summarize.pl";
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
