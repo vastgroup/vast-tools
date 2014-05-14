@@ -66,19 +66,19 @@ if (!$map_done){ # check if there is a galigned file present
     system "gzip $sample-$readlength-galigned.fq";
     
     # sort reads by name, remove duplicates, simplify
-    system "perl $dir3/sort_outs.pl TMP_$sample/$sp"."INT-$readlength-$sample.out";
-    system "perl $dir3/sort_outs.pl TMP_$sample/$sp"."IJ-$readlength-$sample.out";
+    system "perl $dir3/sort_outs.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."INT-$readlength-$sample.out";
+    system "perl $dir3/sort_outs.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample.out";
     
-    system "perl $dir3/MakeSummarySAM.pl TMP_$sample/$sp"."INT-$readlength-$sample"."_s.out";
-    system "perl $dir3/MakeSummarySAM.pl TMP_$sample/$sp"."IJ-$readlength-$sample"."_s.out";
+    system "perl $dir3/MakeSummarySAM.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."INT-$readlength-$sample"."_s.out";
+    system "perl $dir3/MakeSummarySAM.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample"."_s.out";
 }
 
 
-print "perl $dir3/RI_summarize.pl TMP_$sample/$sp"."IJ-$readlength-$sample"."_s.outsum\n";
-system "perl $dir3/RI_summarize.pl TMP_$sample/$sp"."IJ-$readlength-$sample"."_s.outsum";
+print "perl $dir3/RI_summarize.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample"."_s.outsum\n";
+system "perl $dir3/RI_summarize.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."IJ-$readlength-$sample"."_s.outsum";
 # --> produces a $sample/$sample.summary.txt as in the original 
-print "perl $dir3/RI_summarize_intron.pl TMP_$sample/$sp"."INT-$readlength-$sample"."_s.outsum\n";
-system "perl $dir3/RI_summarize_intron.pl TMP_$sample/$sp"."INT-$readlength-$sample"."_s.outsum";
+print "perl $dir3/RI_summarize_intron.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."INT-$readlength-$sample"."_s.outsum\n";
+system "perl $dir3/RI_summarize_intron.pl /home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sp"."INT-$readlength-$sample"."_s.outsum";
 
 # check if output dir exists and move result there
 unless (-e $outdir) { 
