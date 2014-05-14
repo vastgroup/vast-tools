@@ -54,7 +54,7 @@ option.list <- list(
 [output options]"),
     make_option(c("-f", "--filter"), type = "logical", default = TRUE,
         help = "Filter output for differential events only [default %default]"),
-    make_option(c("-d", "--pdf"), type = "character", default = "plotDiff_out.pdf", metavar="FILE",
+    make_option(c("-d", "--pdf"), type = "character", default = "plotDiff_out", metavar="FILE",
         help = "Plot visual output (pdf) for differential events into FILE [default %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
         help = "Output directory, [default vast_out]\n
@@ -249,10 +249,6 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
       }
     }
 
-    rm(psiFirst)
-    rm(psiSecond)
-    rm(psiFirstComb)
-    rm(psiSecondComb)
 
 	 return(list(retPlot, eventTitle))  #return of mclapply function
   }, mc.cores=opt$cores) #End For
