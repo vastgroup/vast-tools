@@ -37,6 +37,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
+			  "v" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
            "output=s" => \$outdir,
 			  "o=s" => \$outdir);
@@ -97,8 +98,7 @@ OPTIONS:
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
-
-";#NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
+";
 
 #";
   exit $EXIT_STATUS;
