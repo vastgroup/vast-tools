@@ -137,7 +137,6 @@ my $fileName1 = $fq1;
 my $fileName2;
 my $zipped = isZipped($fq1);
 my $subtractedFq;
-my $galignedFq;
 
 my($root, $length);
 
@@ -262,7 +261,6 @@ if (!$genome_sub){
 #### Get effective reads (i.e. genome substraction).
  verbPrint "Doing genome substraction\n";
  $subtractedFq = "$root-$le-e.fq.gz";
- $galignedFq = "$root-$le-galigned.fq";
  # Updated genome subtraction command to handle trimmed or untrimmed input files
  $cmd = getPrefixCmd($fq);
  $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
@@ -294,12 +292,12 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$l
 verbPrint "Mapping reads to intron retention library...\n";
 $preCmd = getPrefixCmd("$fq.gz");
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-            "$dbDir/FILES/$sp.IntronJunctions.new.$le.8 - | " .
+                "$dbDir/FILES/$sp.IntronJunctions.new.$le.8 - | " .
             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
             "$binPath/MakeSummarySAM.pl | " .
             "$binPath/RI_summarize.pl";  
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-            "$dbDir/FILES/$sp.Introns.sample.200 - | " .
+                "$dbDir/FILES/$sp.Introns.sample.200 - | " .
             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
             "$binPath/MakeSummarySAM.pl | " .
             "$binPath/RI_summarize_introns.pl";
