@@ -102,7 +102,7 @@ sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose
 
 ### TODO Gets the PIRs for the Intron Retention pipeline
 verbPrint "Building Table for intron retention\n";
-sysErrMsg "$binPath/RI_MakeTablePIR.R sp=$dbDir";
+sysErrMsg "$binPath/RI_MakeTablePIR.R sp=$dbDir -verbose=$verboseFlag";
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
 # to be deprecated and replaced by Add_to_FULL (see below) --KH
