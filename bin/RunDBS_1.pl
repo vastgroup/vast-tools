@@ -228,9 +228,10 @@ if (!$genome_sub){
 #### Merge PE
  if ($pairedEnd){
      verbPrint "Concatenating paired end reads";
-     sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
+     #sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
                                        # $fq is used in trimming below. but we
                                        # can pipe into it. KH
+     $fq = "$fq1 $fq2";
  } else {
    $fq = $fq1;
  }
@@ -241,37 +242,35 @@ if (!$genome_sub){
  my $trimmed = 0;    # flag determining whether trimming occurred
  if ($difLE >= 10){
    if (!defined($trim) or $trim eq "twice"){
+      $cmd = getPrefixCmd($fq);
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
          verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-         sysErrMsg "cat $fq | $binPath/Trim-twiceOver.pl - $half_length | $binPath/Trim-twiceOver.pl - $le > $root-$le.fq";
+         sysErrMsg "$cmd | $binPath/Trim-twiceOVER.pl - $half_length | " .
+                    "$binPath/Trim-twiceOVER.pl - $le | " .
+                    "gzip > $root-$le.fq.gz";
 	  } else {
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $le > $root-$le.fq";
+	     sysErrMsg "$cmd | $binPath/Trim-twiceOVER.pl - $le | " .
+                    "gzip > $root-$le.fq.gz";
 	  }
    } elsif ($trim eq "once"){
 	 verbPrint "Trimming fastq sequences to $le nt sequences";
 	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
-	# sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
    }
-   $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
+   $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
  }
 ####
  
 #### Get effective reads (i.e. genome substraction).
  verbPrint "Doing genome substraction\n";
- $subtractedFq = "$root-$le-e.fq";
- $galignedFq = "$root-$le-galigned.fq";
+ $subtractedFq = "$root-$le-e.fq.gz";
  # Updated genome subtraction command to handle trimmed or untrimmed input files
  $cmd = getPrefixCmd($fq);
- $cmd .= " | $bowtie -p $cores -m 1 -v 2 --al $galignedFq --un $subtractedFq --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+ $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
  sysErrMsg $cmd;
- if ($trimmed) {
-     verbPrint "Compressing trimmed reads";
-     sysErrMsg "$zip $fq";
- }
- 
+
 ####
 }
 
