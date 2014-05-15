@@ -246,17 +246,17 @@ if (!$genome_sub){
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
          verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-         sysErrMsg "$cmd | $binPath/Trim-twiceOVER.pl - $half_length | " .
-                    "$binPath/Trim-twiceOVER.pl - $le | " .
+         sysErrMsg "$cmd | $binPath/Trim.pl --trim \"twice\" - $half_length | " .
+                    "$binPath/Trim-twiceOVER.pl --trim \"twice\" - $le | " .
                     "gzip > $root-$le.fq.gz";
 	  } else {
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-	     sysErrMsg "$cmd | $binPath/Trim-twiceOVER.pl - $le | " .
+	     sysErrMsg "$cmd | $binPath/Trim.pl --trim \"twice\" - $le | " .
                     "gzip > $root-$le.fq.gz";
 	  }
    } elsif ($trim eq "once"){
 	 verbPrint "Trimming fastq sequences to $le nt sequences";
-	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
+	 sysErrMsg "$binPath/Trim.pl --trim \"once\" $fq $le | gzip > $root-$le.fq";
    }
    $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
