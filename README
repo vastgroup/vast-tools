@@ -13,12 +13,6 @@ VAST-TOOLS requires the following software:
     * samtools 0.1.19 (Li et al., 2009), http://samtools.sourceforge.net
     * R 3.0.1 or higher
 
-Optional software:
-    * pigz - a parallel implementation of gzip, http://zlib.net/pigz/
-
-If pigz is installed, VAST-TOOLS will use the user-specified number of cores
-(see usage) to carry out file compression. This will help speed up the runtime.
-
 Quick Usage
 -----------
 

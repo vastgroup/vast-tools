@@ -106,19 +106,6 @@ OPTIONS:
 
 errPrint "Needs species\n" if !$species;
 
-# Use pigz if installed  --KH
-my $zip = which('pigz');
-if ($zip eq '') {
-    $zip = which('gzip');
-    if ($zip eq '') {
-        errPrint "couldn't find gzip or pigz\n";
-    } 
-} else {
-    $zip .= " -fp $cores ";
-}
-verbPrint "Found $zip..." unless $zip eq '';
-
-
 # Command line flags here
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
 
@@ -246,8 +233,8 @@ if (!$genome_sub){
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
          verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-         sysErrMsg "$cmd | $binPath/Trim.pl --trim \"twice\" - $half_length | " .
-                    "$binPath/Trim-twiceOVER.pl --trim twice - $le | " .
+         sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $half_length | " .
+                    "$binPath/Trim.pl --trim twice - $le | " .
                     "gzip > $root-$le.fq.gz";
 	  } else {
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
@@ -292,11 +279,6 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$l
 #verbPrint "Mapping reads to intron retention library...\n";
 #sysErrMsg "$preCmd | $bowtie -p .... | cut -f 1-4,8 | sort -Vu -k 1,1 |
 ##$binPath/MakeSummarySAM.pl <arguments>
-
-if (!isZipped($subtractedFq)) {
-    verbPrint "Compressing genome-substracted reads\n";
-    sysErrMsg "$zip $root-$le-e.fq";
-}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
