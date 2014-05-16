@@ -20,7 +20,7 @@ my $maxcount = $rle - 15;
 # Getting mappability information (from output of uniquecount.IJ.pl)
 my %ucount;
 
-my $ucountFile = "$dbDir/FILES/$sp.Introns.sample.200.$rle.8.uniquecount.txt";
+my $ucountFile = "$dbDir/FILES/$sp.Introns.sample.200.$rle.uniquecount.txt";
 my $UC = openFileHandle($ucountFile);
 while(<$UC>){
     chomp($_);
@@ -45,7 +45,7 @@ close $RC;
 
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
-my $juncAnnotationFile = "$dbDir/FILES/$root.IR.summary.txt";
+my $juncAnnotationFile = "./spli_out/$root.IR.summary.txt";
 my $ANOT = openFileHandle($juncAnnotationFile);
 my $outfile = "./spli_out/$root.cReadcount.txt";
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
