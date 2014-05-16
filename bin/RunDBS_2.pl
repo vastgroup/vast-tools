@@ -49,15 +49,6 @@ sub verbPrint {
   }
 }
 
-if(!defined($dbDir)) {
-  $dbDir = "$binPath/../VASTDB";
-}
-$dbDir = abs_path($dbDir);
-$dbDir .= "/$sp";
-errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
-
-chdir($outDir);
-
 if ($helpFlag){
     errPrint "Usage:
 
@@ -73,6 +64,15 @@ OPTIONS:
 ";
   exit $EXIT_STATUS;
 }
+
+if(!defined($dbDir)) {
+  $dbDir = "$binPath/../VASTDB";
+}
+$dbDir = abs_path($dbDir);
+$dbDir .= "/$sp";
+errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
+
+chdir($outDir);
 
 mkdir("raw_incl") unless (-e "raw_incl"); # make new output directories.  --TSW
 mkdir("raw_reads") unless (-e "raw_reads"); # ^
@@ -102,9 +102,9 @@ sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose
 
 my($verbRFlag) = ($verboseFlag) ? "T" : "F";
 
-### TODO Gets the PIRs for the Intron Retention pipeline
+### Gets the PIRs for the Intron Retention pipeline
 verbPrint "Building Table for intron retention\n";
-sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verbRFlag --sp $dbDir";  # -sp gets dbDir.. consistent, I know... thanks Ulrich.. =/
+sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir"; 
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
 # to be deprecated and replaced by Add_to_FULL (see below) --KH
