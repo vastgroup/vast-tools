@@ -302,7 +302,7 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
             " cut -f 1-4,8 - | sort -Vu -k 1,1 | " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
-# TODO Align to intron retention mapped reads here..
+# Align to intron retention mapped reads here..
 verbPrint "Mapping reads to intron retention library...\n";
 $preCmd = getPrefixCmd("$fq.gz");
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
