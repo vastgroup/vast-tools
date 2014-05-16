@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w
-# This scripts splits reads into two X-nt reads. 
+# Script to trim reads
+#
+# Trim settings:
+# Once:
+# Trims reads into one X-nt read
+#
+# Twice:
+# Splits reads into two X-nt reads. 
 # If the length of the original reads is < 2X, it splits in an overlapping manner.
 
 use strict;
