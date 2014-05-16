@@ -28,7 +28,7 @@ opt.list <- list(
                 help="Species/collection name [default: %default]"),
     make_option(c("-c", "--countDir"), action="store",
                 default="spli_out",
-                help="Location of raw count tables [default: %default]"),
+                help="Location of raw count tables [default: <species>/%default]"),
     make_option(c("-o", "--outDir"),   action="store",
                 default="raw_incl",
                 help="Location of output [default: %default]"),
@@ -54,7 +54,7 @@ if (!file.exists(opt$species)) {
     dbDir <- sub("[^/]+$", "", opt$species)
     species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
 }
-#if (!exists("opt$countDir"))    {opt$countDir <- paste(opt$species, "RAW_READS/", sep="")}
+if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
 #if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
 #if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
@@ -74,7 +74,7 @@ if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthr
 ## Check which samples are there and load template
 #TODO Change cReadcount to .IR
 sampleFiles <- dir(countDir, pattern="*cReadcount")
-if (length(sampleFiles) == 0) {
+if (is.na(sampleFiles[1])) {
     stop("No IR samples found in ", countDir)
 } else {
     if (verb) {cat("Merging IR of", length(sampleFiles), "sample(s)...\n")}
