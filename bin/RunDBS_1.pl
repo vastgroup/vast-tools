@@ -28,7 +28,7 @@ my $verboseFlag = 1;  # on for debugging
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions("bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
-			  "db=s" => \$dbDir,
+			  "dbDir=s" => \$dbDir,
 			  "c=i" => \$cores,
 			  "pe" => \$pairedEnd,
 			  "expr" => \$runExprFlag,
@@ -44,8 +44,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
-  my $sysCommand = shift;
-  not system($sysCommand) or die "[vast align error]: $sysCommand Failed in $0!";
+  my @sysCommand = ("bash", "-c", shift);
+  not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
 sub errPrint {
@@ -128,9 +128,12 @@ my $fq1 = abs_path($ARGV[0]);
 my $fq2;
 my $fq;     # takes the fastq file to be processed at each step
 
-if(!defined($fq1)) {
-  errPrint "No FASTQ file given!";
-  $fq1 = "";
+if (!defined($fq1)) {
+  die "No FASTQ file given!";
+}
+
+if (! -e $fq1) {
+  die "$fq1 does not exist!";
 }
 
 my $fileName1 = $fq1;
@@ -251,7 +254,6 @@ if (!$genome_sub){
    } elsif ($trim eq "once"){
 	 verbPrint "Trimming fastq sequences to $le nt sequences";
 	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
-	# sysErrMsg "mv $root-$length-$le.fq $root-$le.fq"; #piping to stdout removes need for this --TSW
    }
    $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
@@ -259,12 +261,16 @@ if (!$genome_sub){
 ####
  
 #### Get effective reads (i.e. genome substraction).
- verbPrint "Doing genome substraction\n";
  $subtractedFq = "$root-$le-e.fq.gz";
- # Updated genome subtraction command to handle trimmed or untrimmed input files
- $cmd = getPrefixCmd($fq);
- $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
- sysErrMsg $cmd;
+ if (! -e $subtractedFq) {
+   verbPrint "Doing genome substraction\n";
+   # Updated genome subtraction command to handle trimmed or untrimmed input files
+   $cmd = getPrefixCmd($fq);
+   $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) $dbDir/FILES/gDNA - /dev/null";
+   sysErrMsg $cmd;
+ } else {
+   verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
+ }
 
  if ($trimmed) {
      verbPrint "Compressing trimmed reads";
@@ -274,12 +280,16 @@ if (!$genome_sub){
 ####
 }
 
+if ($EXIT_STATUS) {
+    exit $EXIT_STATUS;
+}
+
 #### Map to the EEJ:
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-                "$dbDir/FILES/$species"."_COMBI-M-$le | " .
+                "$dbDir/FILES/$species"."_COMBI-M-$le - | " .
              "cut -f 1-4,8 - | sort -Vu -k 1,1 - | " .
              "$binPath/Analyze_COMBI.pl deprecated " .
              "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
@@ -303,18 +313,22 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
 # Align to intron retention mapped reads here..
-verbPrint "Mapping reads to intron retention library...\n";
-$preCmd = getPrefixCmd("$fq.gz");
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-                "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
-            "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
-            "$binPath/MakeSummarySAM.pl | " .
-            "$binPath/RI_summarize.pl - $runArgs";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-                "$dbDir/FILES/$species.Introns.sample.200 - | " .
-            "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
-            "$binPath/MakeSummarySAM.pl | " .
-            "$binPath/RI_summarize_introns.pl - $runArgs";
+if (!$genome_sub) {
+  verbPrint "Mapping reads to intron retention library...\n";
+  $preCmd = getPrefixCmd($fq);
+  sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+                  "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
+              "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+              "$binPath/MakeSummarySAM.pl | " .
+              "$binPath/RI_summarize.pl - $runArgs";
+  sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+                  "$dbDir/FILES/$species.Introns.sample.200 - | " .
+              "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+              "$binPath/MakeSummarySAM.pl | " .
+              "$binPath/RI_summarize_introns.pl - $runArgs";
+} else {
+  verbPrint "Skipping intron retention step...\n";
+}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
