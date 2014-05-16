@@ -27,14 +27,14 @@ opt.list <- list(
     make_option(c("-s", "--species"),  action="store", default="Hsa",
                 help="Species/collection name [default: %default]"),
     make_option(c("-c", "--countDir"), action="store",
-                default="Hsa/RAW_READS",
+                default="spli_out",
                 help="Location of raw count tables [default: %default]"),
     make_option(c("-o", "--outDir"),   action="store",
-                default="Hsa/spli_out",
+                default="raw_incl",
                 help="Location of output [default: %default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
-    make_option(c("-v", "--verbose"),  action="store_true", default=FALSE,
+    make_option(c("-v", "--verbose"),  action="store", default = TRUE,
                 help="Print status messages? [default: %default]"),
     make_option(c("-P", "--PIRthresh"),  action="store", default=95, type="numeric",
                 help="Threshold for removal of events that are not below it in any sample [default: %default]"),
@@ -72,6 +72,7 @@ if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthr
 
 
 ## Check which samples are there and load template
+#TODO Change cReadcount to .IR
 sampleFiles <- dir(countDir, pattern="*cReadcount")
 if (length(sampleFiles) == 0) {
     stop("No IR samples found in ", countDir)
