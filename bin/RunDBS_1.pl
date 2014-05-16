@@ -266,7 +266,7 @@ if (!$genome_sub){
    verbPrint "Doing genome substraction\n";
    # Updated genome subtraction command to handle trimmed or untrimmed input files
    $cmd = getPrefixCmd($fq);
-   $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) $dbDir/FILES/gDNA - /dev/null";
+   $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
    sysErrMsg $cmd;
  } else {
    verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
