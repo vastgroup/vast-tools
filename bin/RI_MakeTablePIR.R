@@ -25,21 +25,23 @@ suppressPackageStartupMessages(require("optparse"))
 
 opt.list <- list(
     make_option(c("-s", "--species"),  action="store", default="Hsa",
-                help="Species/collection name [default: Hsa]"),
+                help="Species/collection name [default: %default]"),
     make_option(c("-c", "--countDir"), action="store",
-                help="Location of raw count tables [default: <species>/RAW_READS/]"),
+                default="Hsa/RAW_READS",
+                help="Location of raw count tables [default: %default]"),
     make_option(c("-o", "--outDir"),   action="store",
-                help="Location of output [default: <species>/spli_out/]"),
-    make_option(c("-r", "--rmHigh"),   action="store",
-                help="Remove values of events that are always above threshold? [default: TRUE]"),
+                default="Hsa/spli_out",
+                help="Location of output [default: %default]"),
+    make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
+                help="Remove values of events that are always above threshold?  [default: %default]"),
     make_option(c("-v", "--verbose"),  action="store_true", default=FALSE,
-                help="Print status messages? [default: FALSE]"),
+                help="Print status messages? [default: %default]"),
     make_option(c("-P", "--PIRthresh"),  action="store", default=95, type="numeric",
-                help="Threshold for removal of events that are not below it in any sample [default: 95]"),
+                help="Threshold for removal of events that are not below it in any sample [default: %default]"),
     make_option(c("-C", "--COVthresh"),  action="store", default=10, type="numeric",
-                help="Threshold for junction read count [default: 10]"),
+                help="Threshold for junction read count [default: %default]"),
     make_option(c("-B", "--BALthresh"),  action="store", default=0.05, type="numeric",
-                help="Threshold for p-value of balance binomial test [default: 0.05]")
+                help="Threshold for p-value of balance binomial test [default: %default]")
     )  
 opt <- parse_args(OptionParser(option_list=opt.list))
 
@@ -52,9 +54,9 @@ if (!file.exists(opt$species)) {
     dbDir <- sub("[^/]+$", "", opt$species)
     species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
 }
-if (!exists("opt$countDir"))    {opt$countDir <- paste(opt$species, "RAW_READS/", sep="")}
-if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
-if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
+#if (!exists("opt$countDir"))    {opt$countDir <- paste(opt$species, "RAW_READS/", sep="")}
+#if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
+#if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
 templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
 if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
