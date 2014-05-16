@@ -1,64 +1,65 @@
+#!/usr/bin/perl -w
 # This script gets, for each event, the normalized read counts for the three associated junctions in the sample
 
-$file=$ARGV[0];
-($species,$rle,$sample)=$file=~/(.{3})INT\-(\d+?)\-(.+?)\_s\.out/;
-$sp=$species;
+use strict;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use FuncBasics qw(:all);
+use Getopt::Long;
 
-$dir1="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/FILES";
-$dir2="/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Mmu/FILES";
+my $dbDir;
+my $sp;
+my $rle;
+my $root;
+
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
+           "readLen=i" => \$rle, "root=s" => \$root);
 
 my $maxcount = $rle - 15;
 
 # Getting mappability information (from output of uniquecount.IJ.pl)
 my %ucount;
 
-if ($sp eq 'Mmu') {
-    open (UC,"$dir2/$sp.Introns.sample.200.$rle.uniquecount.txt") || die "Can't find mappability for INT\n";
-} 
-elsif ($sp eq 'Hsa') {
-    open (UC, "$dir1/$sp.Introns.sample.200.$rle.uniquecount.txt") || die "Can't find mappability for INT\n";
-} 
-else {
-    die "Unkown species\n";
-}
-
-while(<UC>){
+my $ucountFile = "$dbDir/FILES/$sp.Introns.sample.200.$rle.8.uniquecount.txt";
+my $UC = openFileHandle($ucountFile);
+while(<$UC>){
     chomp($_);
     my($junction0,$count,$pos) = split(/\t/,$_);
     my($gene,$trans,$en,$l1,$l2) = split(/\:/,$junction0);
     my $junction = $gene.":".$trans.":".$en;
     $ucount{$junction} = $count;
 }
-close UC;
+close $UC;
 
 # Getting raw read counts
 my %rcount;
-open(RC,$file);
-while(<RC>){
+my $RC = openFileHandle($ARGV[0]);
+while(<$RC>){
     chomp($_);
     my($junction0,$count) = split(/\t/,$_);
     my($gene,$trans,$en,$l1,$l2) = split(/\:/,$junction0);
     my $junction = $gene.":".$trans.":".$en;
     $rcount{$junction} = $count;
 }
-close RC;
+close $RC;
 
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
-open(ANOT,"/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sample.summary.txt");
-my $outfile = "/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/$sp/IRtemp/TMP_$sample/$sample.cReadcount.txt";
-open(OUT,">$outfile");
-my $head = <ANOT>;
+my $juncAnnotationFile = "$dbDir/FILES/$root.IR.summary.txt";
+my $ANOT = openFileHandle($juncAnnotationFile);
+my $outfile = "./spli_out/$root.cReadcount.txt";
+open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
+my $head = <$ANOT>;
 print OUT "Event\tEIJ1\tEIJ2\tEEJ\tI\n";
-while(<ANOT>){
+while(<$ANOT>){
     chomp($_);
     my ($event,$C1A,$AC2,$C1C2) = split(/\t/,$_);
     my $I = 0;
 
-    if($rcount{$event} =~ /[0-9]/ && $ucount{$event} =~ /[0-9]/ && $ucount{$event} > 0){
+    if(defined $rcount{$event} && defined $ucount{$event} && $ucount{$event} > 0){
 	    $I = $rcount{$event} / $ucount{$event} * $maxcount;
     }
     print OUT "$event\t$C1A\t$AC2\t$C1C2\t$I\n";
 }
-close ANOT;
+close $ANOT;
 close OUT;
