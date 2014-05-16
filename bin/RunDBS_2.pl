@@ -100,9 +100,11 @@ sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$glob
 verbPrint "Building Table for MIC (microexons)\n";
 sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
+my($verbRFlag) = ($verboseFlag) ? "T" : "F";
+
 ### TODO Gets the PIRs for the Intron Retention pipeline
 verbPrint "Building Table for intron retention\n";
-sysErrMsg "$binPath/RI_MakeTablePIR.R sp=$dbDir -verbose=$verboseFlag";
+sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verbRFlag --sp $dbDir";  # -sp gets dbDir.. consistent, I know... thanks Ulrich.. =/
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
 # to be deprecated and replaced by Add_to_FULL (see below) --KH
