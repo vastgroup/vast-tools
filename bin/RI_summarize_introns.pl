@@ -47,7 +47,7 @@ close $RC;
 my %eventseen;
 my $juncAnnotationFile = "./spli_out/$root.IR.summary.txt";
 my $ANOT = openFileHandle($juncAnnotationFile);
-my $outfile = "./spli_out/$root.cReadcount.txt";
+my $outfile = "./spli_out/$root.IR";
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
 my $head = <$ANOT>;
 print OUT "Event\tEIJ1\tEIJ2\tEEJ\tI\n";
