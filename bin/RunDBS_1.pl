@@ -275,32 +275,46 @@ if (!$genome_sub){
 }
 
 #### Map to the EEJ:
+my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_COMBI-M-$le | cut -f 1-4,8 - | sort -Vu -k 1,1 - | $binPath/Analyze_COMBI.pl deprecated $dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+                "$dbDir/FILES/$species"."_COMBI-M-$le | " .
+             "cut -f 1-4,8 - | sort -Vu -k 1,1 - | " .
+             "$binPath/Analyze_COMBI.pl deprecated " .
+             "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/EXSK-$le - | cut -f 1-4,8 | sort -Vu -k 1,1 - | $binPath/Analyze_EXSK.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";  
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+                "$dbDir/FILES/EXSK-$le - | " .
+             "cut -f 1-4,8 | sort -Vu -k 1,1 - | " .
+             "$binPath/Analyze_EXSK.pl $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/MULTI-$le - | cut -f 1-4,8 | sort -Vu -k 1,1 | $binPath/Analyze_MULTI.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+                "$dbDir/FILES/MULTI-$le - | " .
+             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+             "$binPath/Analyze_MULTI.pl $runArgs";
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 $dbDir/FILES/$species"."_MIC-$le - | cut -f 1-4,8 - | sort -Vu -k 1,1 | $binPath/Analyze_MIC.pl -dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+                "$dbDir/FILES/$species"."_MIC-$le - | ".
+            " cut -f 1-4,8 - | sort -Vu -k 1,1 | " .
+            " $binPath/Analyze_MIC.pl $runArgs";
 
 # TODO Align to intron retention mapped reads here..
 verbPrint "Mapping reads to intron retention library...\n";
 $preCmd = getPrefixCmd("$fq.gz");
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-                "$dbDir/FILES/$sp.IntronJunctions.new.$le.8 - | " .
+                "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
             "$binPath/MakeSummarySAM.pl | " .
-            "$binPath/RI_summarize.pl";  
+            "$binPath/RI_summarize.pl - $runArgs";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
-                "$dbDir/FILES/$sp.Introns.sample.200 - | " .
+                "$dbDir/FILES/$species.Introns.sample.200 - | " .
             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
             "$binPath/MakeSummarySAM.pl | " .
-            "$binPath/RI_summarize_introns.pl";
+            "$binPath/RI_summarize_introns.pl - $runArgs";
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS
