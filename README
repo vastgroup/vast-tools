@@ -9,14 +9,9 @@ Installation
 ------------
 
 VAST-TOOLS requires the following software:
-    * bowtie (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
-    * samtools (Li et al., 2009), http://samtools.sourceforge.net
-
-Optional software:
-    * pigz - a parallel implementation of gzip, http://zlib.net/pigz/
-
-If pigz is installed, VAST-TOOLS will use the user-specified number of cores
-(see usage) to carry out file compression. This will help speed up the runtime.
+    * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
+    * samtools 0.1.19 (Li et al., 2009), http://samtools.sourceforge.net
+    * R 3.0.1 or higher
 
 Quick Usage
 -----------
@@ -25,8 +20,10 @@ VAST-TOOLS contains four main sub-commands: align, combine, diff, and plot. The
 following provides a quick introduction on how to run the tool:
 
 **Alignment:**
+~~~~
 > vast-tools align input1.fq.gz -sp Hsa -readLen 158 -o outputdir
 > vast-tools align input2.fq.gz -sp Hsa -readLen 158 -o outputdir
+~~~~
 
 #TODO From MI - need to revise
 fastq_file can be compressed or uncompressed. It MUST have this name format: Sample-readlength.fq
@@ -44,21 +41,27 @@ Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the g
 **Combining Results:**
 #TODO description
 
+~~~~
 > vast-tools combine -o outputdir
+~~~~
 
 **Differential Splicing Analysis**
 #TODO description
 
+~~~~
 > vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir --filter > significant_events.tab
+~~~~
 
 **Plotting:**
 
-VAST-TOOLS comes with a plotting script written in R (./R/psiplotter.R).
+VAST-TOOLS comes with a plotting script written in R.
 The input format follows the same format from the "combine" step described
 above. The output is a pdf of scatterplots (one per AS event) of PSI values.
 To execute from VAST-TOOLS, use the subcommand "plot":
 
+~~~~
 > vast-tools plot significant_events.tab
+~~~~
 
 It is recommended to filter the input file to a subset of events of interest
 before plotting, such as those obtained from "vast-tools diff". Otherwise, the

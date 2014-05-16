@@ -2,6 +2,7 @@
 *.ebwt
 *.gz
 *.eff*
+*.swp
 
 # Directories
 VASTDB

@@ -37,6 +37,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "help" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
+			  "v" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
            "output=s" => \$outdir,
 			  "o=s" => \$outdir);
@@ -97,27 +98,13 @@ OPTIONS:
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
-
-";#NOTE: Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the genome). For large files (~1 lane), >25GB
+";
 
 #";
   exit $EXIT_STATUS;
 }
 
 errPrint "Needs species\n" if !$species;
-
-# Use pigz if installed  --KH
-my $zip = which('pigz');
-if ($zip eq '') {
-    $zip = which('gzip');
-    if ($zip eq '') {
-        errPrint "couldn't find gzip or pigz\n";
-    } 
-} else {
-    $zip .= " -fp $cores ";
-}
-verbPrint "Found $zip..." unless $zip eq '';
-
 
 # Command line flags here
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
@@ -180,7 +167,7 @@ errPrint "The output directory \"$outdir\" does not exist" unless (-e $outdir);
 chdir($outdir) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $outdir";
 mkdir("spli_out") unless (-e "spli_out");
-mkdir("expr_out") unless (-e "expr_out");
+mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 
 #length options:
 my ($le, $half_length);
@@ -230,9 +217,10 @@ if (!$genome_sub){
 #### Merge PE
  if ($pairedEnd){
      verbPrint "Concatenating paired end reads";
-     sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
+     #sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
                                        # $fq is used in trimming below. but we
                                        # can pipe into it. KH
+     $fq = "$fq1 $fq2";
  } else {
    $fq = $fq1;
  }
@@ -242,20 +230,24 @@ if (!$genome_sub){
 # TODO: substitute all of this with gawk 'NR%2==0{print substr($1,5,55)}NR%2==1' INPUT.fq... style 
  my $trimmed = 0;    # flag determining whether trimming occurred
  if ($difLE >= 10){
+   $cmd = getPrefixCmd($fq);
    if (!defined($trim) or $trim eq "twice"){
 	  if ($length > ($le*2)+10){
 	     $half_length = sprintf("%.0f", $length / 2);
          verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-         sysErrMsg "cat $fq | $binPath/Trim-twiceOver.pl - $half_length | $binPath/Trim-twiceOver.pl - $le > $root-$le.fq";
+         sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $half_length | " .
+                    "$binPath/Trim.pl --trim twice - $le | " .
+                    "gzip > $root-$le.fq.gz";
 	  } else {
 	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-	     sysErrMsg "$binPath/Trim-twiceOVER.pl $fq $le > $root-$le.fq";
+	     sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $le | " .
+                    "gzip > $root-$le.fq.gz";
 	  }
    } elsif ($trim eq "once"){
 	 verbPrint "Trimming fastq sequences to $le nt sequences";
-	 sysErrMsg "$binPath/Trim-once.pl $fq $le > $root-$le.fq";
+	 sysErrMsg "$cmd | $binPath/Trim.pl --trim once - $le | gzip > $root-$le.fq.gz";
    }
-   $fq = "$root-$le.fq"; # set new $fq with trimmed reads --KH
+   $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
  }
 ####
@@ -272,11 +264,6 @@ if (!$genome_sub){
    verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
  }
 
- if ($trimmed) {
-     verbPrint "Compressing trimmed reads";
-     sysErrMsg "$zip $fq";
- }
- 
 ####
 }
 
