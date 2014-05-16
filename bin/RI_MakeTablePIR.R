@@ -55,7 +55,7 @@ if (!file.exists(opt$species)) {
 if (!exists("opt$countDir"))    {opt$countDir <- paste(opt$species, "RAW_READS/", sep="")}
 if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
 if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
-if (!file.exists(opt$outDir))   {dir.create(outDir, recursive=TRUE)}
+if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
 templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
 if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
 countDir  <- paste(sub("/$?", "", opt$countDir), "/", sep="")
