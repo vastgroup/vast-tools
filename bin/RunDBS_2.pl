@@ -31,8 +31,8 @@ GetOptions("help"           => \$helpFlag,
 our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
-  my $sysCommand = shift;
-  not system($sysCommand) or die "[vast combine error]: $sysCommand Failed in $0!";
+  my @sysCommand = ("bash", "-c", shift);
+  not system(@sysCommand) or die "[vast combine error]: @sysCommand Failed in $0!";
 }
 
 sub errPrint {
@@ -104,7 +104,7 @@ my($verbRFlag) = ($verboseFlag) ? "T" : "F";
 
 ### Gets the PIRs for the Intron Retention pipeline
 verbPrint "Building Table for intron retention\n";
-sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir"; 
+sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir -c " . abs_path("spli_out"); 
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
 # to be deprecated and replaced by Add_to_FULL (see below) --KH
@@ -131,7 +131,8 @@ my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
+                "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab",
+                "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
 my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
 sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
             "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
