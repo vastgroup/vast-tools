@@ -45,7 +45,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
 our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
-  my @sysCommand = ("bash", "-c", shift);
+  my @sysCommand = (shift);
   not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
@@ -256,8 +256,8 @@ if (!$genome_sub){
  $subtractedFq = "$root-$le-e.fq.gz";
  if (! -e $subtractedFq) {
    verbPrint "Doing genome substraction\n";
-   # Updated genome subtraction command to handle trimmed or untrimmed input files
-   $cmd = getPrefixCmd($fq);
+   # Force bash shell to support process substitution
+   $cmd = "bash -c " . getPrefixCmd($fq);
    $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
    sysErrMsg $cmd;
  } else {

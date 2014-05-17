@@ -31,7 +31,7 @@ GetOptions("help"           => \$helpFlag,
 our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
-  my @sysCommand = ("bash", "-c", shift);
+  my @sysCommand = (shift);
   not system(@sysCommand) or die "[vast combine error]: @sysCommand Failed in $0!";
 }
 
