@@ -257,8 +257,8 @@ if (!$genome_sub){
  if (! -e $subtractedFq) {
    verbPrint "Doing genome substraction\n";
    # Force bash shell to support process substitution
-   $cmd = "bash -c " . getPrefixCmd($fq);
-   $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+   $cmd = "bash -c \"" . getPrefixCmd($fq);
+   $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null\"";
    sysErrMsg $cmd;
  } else {
    verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
