@@ -22,7 +22,6 @@
 
 
 suppressPackageStartupMessages(require("optparse"))
-
 opt.list <- list(
     make_option(c("-s", "--species"),  action="store", default="Hsa",
                 help="Species/collection name [default: %default]"),
@@ -34,8 +33,9 @@ opt.list <- list(
                 help="Location of output [default: %default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
-    make_option(c("-v", "--verbose"),  action="store", default = TRUE,
-                help="Print status messages? [default: %default]"),
+    make_option(c("-v", "--verbose"),  action="store", type = "integer", 
+                default = 1,
+                help="Print status messages (0 - no/1 - yes)? [default: %default]"),
     make_option(c("-P", "--PIRthresh"),  action="store", default=95, type="numeric",
                 help="Threshold for removal of events that are not below it in any sample [default: %default]"),
     make_option(c("-C", "--COVthresh"),  action="store", default=10, type="numeric",
@@ -44,7 +44,6 @@ opt.list <- list(
                 help="Threshold for p-value of balance binomial test [default: %default]")
     )  
 opt <- parse_args(OptionParser(option_list=opt.list))
-
 
 ## Check input
 if (!file.exists(opt$species)) {
@@ -72,8 +71,7 @@ if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthr
 
 
 ## Check which samples are there and load template
-#TODO Change cReadcount to .IR
-sampleFiles <- dir(countDir, pattern="*cReadcount")
+sampleFiles <- dir(countDir, pattern="*\\.IR$")
 if (is.na(sampleFiles[1])) {
     stop("No IR samples found in ", countDir)
 } else {
