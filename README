@@ -5,16 +5,37 @@ Summary
 -------
 VAST-TOOLS is a toolset for profiling alternative splicing events in RNA-Seq data. 
 
-Installation
+Requirements
 ------------
 
 VAST-TOOLS requires the following software:
     * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
     * samtools 0.1.19 (Li et al., 2009), http://samtools.sourceforge.net
     * R 3.0.1 or higher
+    * Perl 5.10.1 or higher
 
-Quick Usage
------------
+VAST-TOOLS also requires species-specific library files (collectively known as
+VASTDB), which must be downloaded separately. VASTDB consists of pre-made Bowtie
+indices, annotation, and template files.
+
+Installation
+------------
+The VAST-TOOLS software package can be downloaded, unpacked and run as is. It
+does not require any additional installation steps.
+
+VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
+directory, or in an external location. If the latter, the path of VASTDB must be
+supplied to `vast-tools` or alternatively, a symbolic link can be created in the
+root of VAST-TOOLS directory. By default, VAST-TOOLS looks for VASTDB
+inside its own directory (e.g. `~/vast-tools/VASTDB`).
+
+~~~~
+> cd ~/vast-tools/
+> ln -s <path to VASTDB> VASTDB
+~~~~
+
+Usage
+-----
 
 VAST-TOOLS contains four main sub-commands: align, combine, diff, and plot. The
 following provides a quick introduction on how to run the tool:
@@ -81,6 +102,9 @@ coming soon!)
 Authors
 -------
 Manuel Irimia
+Nuno Barbosa-Morais
+Ulrich Braunschweig
+Sandy Pan
 Kevin Ha
 Tim Sterne-Weiler
 
