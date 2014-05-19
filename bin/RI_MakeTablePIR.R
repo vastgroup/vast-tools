@@ -8,59 +8,74 @@
 ###
 ### Arguments:
 ###   sp           Absolute Path of the relevant species directory in vastDB, e.g. .../AS_PIPE_S/Hsa
-###   countDir     (optional) Directory of read count tables; default: "RAW_READS/"
-###   outDir       (optional) Directory for output; default: "spli_out/" in 'sp'
+###   countDir     (optional) Directory of read count tables; default: "RAW_READS/" in "sp"
+###   outDir       (optional) Directory for output; default: "spli_out/" in "sp"
 ###   rmHigh       (optional) TRUE/1 or FALSE/0; should introns that have a PIR > 95 in all non-NA samples be 
 ###                set to NA? Default: TRUE
 ###   verb         (optional) TRUE/1 or FALSE/0; Print status messages; default: FALSE
 ###
-### Returns coverage, balance and raw PIR tables as well as a 'clean' PIR table where 
-###   flagged introns and those that are always > 95 are removed, written to outDir.
+### Returns a single table with two columns for each sample:
+###   - PIR: filtered applying criteria
+###   - Q:   quality, format: coverage,balance-p.val@alpha,beta where alpha and beta are reassigned pseudocounts for ret/const
 ###
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
-###
-### Invoke like this from perl:
-###   system "Rscript ~/AS_PIPE_S_dev/bin/RI_MakeTablePIR.R \"sp='/home/blencowe/blencowe1/ulrich/AS_PIPE_S_dev/Hsa/'\" \"rmHigh=0\" \"verb=1\""
 
 
-cArgs <- commandArgs(TRUE)
-if (length(cArgs) < 1) {
-    cat("Usage: Rscript RI.MakeTablePIR.R "sp=<dir>" ["countDir=<dir>" "outDir=<dir>" "rmHigh=0/1" "verb=0/1"]\n")
-    stop("sp (species) not specified")
-} 
-
-for (i in 1:length(cArgs)) {
-    eval(parse(text=cArgs[[i]]))
-}
+suppressPackageStartupMessages(require("optparse"))
+opt.list <- list(
+    make_option(c("-s", "--species"),  action="store", default="Hsa",
+                help="Species/collection name [default: %default]"),
+    make_option(c("-c", "--countDir"), action="store",
+                default="spli_out",
+                help="Location of raw count tables [default: <species>/%default]"),
+    make_option(c("-o", "--outDir"),   action="store",
+                default="raw_incl",
+                help="Location of output [default: %default]"),
+    make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
+                help="Remove values of events that are always above threshold?  [default: %default]"),
+    make_option(c("-v", "--verbose"),  action="store", type = "integer", 
+                default = 1,
+                help="Print status messages (0 - no/1 - yes)? [default: %default]"),
+    make_option(c("-P", "--PIRthresh"),  action="store", default=95, type="numeric",
+                help="Threshold for removal of events that are not below it in any sample [default: %default]"),
+    make_option(c("-C", "--COVthresh"),  action="store", default=10, type="numeric",
+                help="Threshold for junction read count [default: %default]"),
+    make_option(c("-B", "--BALthresh"),  action="store", default=0.05, type="numeric",
+                help="Threshold for p-value of balance binomial test [default: %default]")
+    )  
+opt <- parse_args(OptionParser(option_list=opt.list))
 
 ## Check input
-if (!exists("sp") || !file.exists(sp)) {
-    stop("sp (species) not found")
+if (!file.exists(opt$species)) {
+    stop("species not found")
 } else {
-    sp <- paste(sub("/$?", "", sp), "/", sep="")  # make sure of trailing /
-    dbDir <- sub("[^/]+$", "", sp)
-    species <- sub("(.*/)?([^/]+)/$", "\\2", sp)
+    opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
+    dbDir <- sub("[^/]+$", "", opt$species)
+    species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
 }
-if (!exists("countDir"))     {countDir <- paste(sp, "RAW_READS/", sep="")}
-if (!exists("outDir"))       {outDir   <- paste(sp, "spli_out/", sep="")}
-if (!file.exists(outDir))    {dir.create(outDir, recursive=TRUE)}
-if (!exists("rmHigh"))       {rmHigh   <- TRUE}
-if (!exists("verb"))         {verb     <- FALSE}
-templFile <- paste(sp, "TEMPLATES/", species, ".IR.Template.txt", sep="")
-if (!file.exists(templFile)) {stop("Template file ", templFile, " not found")}
-countDir  <- paste(sub("/$?", "", countDir), "/", sep="")
-outDir    <- paste(sub("/$?", "", outDir), "/", sep="")
-rmHigh    <- as.logical(rmHigh)
-verb      <- as.logical(verb)
+if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+#if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
+#if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
+if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
+templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
+if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
+countDir  <- paste(sub("/$?", "", opt$countDir), "/", sep="")
+outDir    <- paste(sub("/$?", "", opt$outDir), "/", sep="")
+rmHigh    <- as.logical(opt$rmHigh)
+verb      <- as.logical(opt$verbose)
 
+if (is.na(rmHigh))                               {stop("Invalid value for rmHigh")}
+if (is.na(opt$PIRthresh) || opt$PIRthresh > 100) {stop("Invalid value for PIRthresh")}
+if (is.na(opt$COVthresh) || opt$COVthresh < 0)   {stop("Invalid value for COVthresh")}
+if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthresh")}
 
 
 ## Check which samples are there and load template
-sampleFiles <- dir(countDir, pattern="*cReadcount")
-if (length(sampleFiles) == 0) {
+sampleFiles <- dir(countDir, pattern="*\\.IR$")
+if (is.na(sampleFiles[1])) {
     stop("No IR samples found in ", countDir)
 } else {
-    if (verb) {cat("Merging IR of", length(sampleFiles), "samples...\n")}
+    if (verb) {cat("Merging IR of", length(sampleFiles), "sample(s)...\n")}
 }
 samples <- data.frame(Sample = sub("\\.cReadcount.*", "", sampleFiles),
                       File   = sampleFiles,
@@ -68,17 +83,9 @@ samples <- data.frame(Sample = sub("\\.cReadcount.*", "", sampleFiles),
 template <- read.delim(templFile)
 
 
-## Hard-coded parameters
-thresh.cov <- 10    # Threshold for coverage (# of reads)
-thresh.bal <- 0.05  # Threshold for balance p.value of binom.test()
-thresh.PIR <- 95    # Threshold for removing all-high introns (minimum PIR)
-
-
 ## prepare tables for coverage, balance and PIR
-cov <- as.data.frame(lapply(1:nrow(samples), FUN=function(x) {rep(NA, nrow(template))}))
-names(cov) <- samples$Sample
-bal <- cov
-pir <- cov
+pir <- as.data.frame(lapply(1:(2*nrow(samples)), FUN=function(x) {rep(NA, nrow(template))}))
+names(pir) <- paste(rep(samples$Sample, each=2), c("","-Q"), sep="")
 
 for (i in 1:nrow(samples)) {
     ## Read data for one sample
@@ -91,11 +98,13 @@ for (i in 1:nrow(samples)) {
     dat <- dat[dat$Event %in% template$juncID,]
     dat <- dat[!(dat$Event %in% dat$Event[duplicated(dat$Event)]),]  # should never be present
 
-    ### calculate PIR, coverage, balance
+    ## calculate PIR, coverage, balance
     pir.i <- 100 * (dat[,2] + dat[,3]) / (dat[,2] + dat[,3] + 2 * dat[,4])
-
     cov.i <- dat[,4] + apply(dat[,c(2,3,5)], MAR=1, FUN=median)
-
+    tot.i <- dat[,2] + dat[,3] + dat[,4]
+    alpha.i <- pir.i / 100 * tot.i
+    beta.i  <- (1 - pir.i / 100) * tot.i
+    
     xranges <- t(apply(dat[,c(2,3,5)], MAR=1, FUN=range))
     xranges <- apply(xranges, MAR=2, round)
     xranges[,2] <- xranges[,1] + xranges[,2]
@@ -105,38 +114,32 @@ for (i in 1:nrow(samples)) {
         binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value         
     })
 
+    ## make the 'quality' column: cov,bal@alpha,beta
+    qal.i <- paste(round(cov.i, 1), ",", signif(bal.i, 3), "@", alpha.i, ",", beta.i, sep="")
+
+    ## Remove values that do not pass criteria
+    pir.i[which(cov.i <= opt$COVthresh | bal.i < opt$BALthresh)] <- NA
+
     ## bring into correct order and populate tables
     datMerge <- data.frame(dat$Event, datInd = 1:nrow(dat))
     datMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), datMerge, by=1, all.x=TRUE)
     datMerge <- datMerge[order(datMerge[,1]),3]
 
-    pir[,i] <- pir.i[datMerge]
-    cov[,i] <- cov.i[datMerge]
-    bal[,i] <- bal.i[datMerge]
+    pir[,2*i - i] <- pir.i[datMerge]
+    pir[,2*i]     <- qal.i[datMerge]
 }
 
-## Remove values that do not pass criteria
-cleanpir <- pir
-for (i in 1:ncol(cleanpir)) {cleanpir[which(cov[,i] <= thresh.cov | bal[,i] < thresh.bal), i] <- NA}
+## Remove values from events that are never below PIRthresh
 if (rmHigh) {
-    minpir <- suppressWarnings(apply(cleanpir, MAR=1, FUN=min, na.rm=T))
-    cleanpir[minpir > thresh.PIR,] <- NA
+    minpir <- suppressWarnings(apply(as.data.frame(pir[,seq(from=1, by=2, length.out=nrow(samples))]), MAR=1, FUN=min, na.rm=T))
+    pir[minpir > opt$PIRthresh, seq(from=1, by=2, length.out=nrow(samples))] <- NA
 }
 
 
-## Save all tables
-pir <- data.frame(template[,1:6],  pir)
-cleanpir <- data.frame(template[,1:6],  cleanpir)
-cov <- data.frame(template[,1:6],  cov)
-bal <- data.frame(template[,1:6],  bal)
+## Save table
+pir <- data.frame(template[,1:6], pir)
 
-write.table(pir, file=paste(outDir, "PIR.raw_", species, ".tab", sep=""),
-            row.names=F, col.names=T, quote=F, sep='\t')
-write.table(cov, file=paste(outDir, "Coverage_", species, ".tab", sep=""),
-            row.names=F, col.names=T, quote=F, sep='\t')
-write.table(bal, file=paste(outDir, "Balance-pval_", species, ".tab", sep=""),
-            row.names=F, col.names=T, quote=F, sep='\t')
-write.table(cleanpir, file=paste(outDir, "PIR_", species, ".tab", sep=""),
+write.table(pir, file=paste(outDir, "INCLUSION_LEVELS_IR-", species, nrow(samples), ".tab", sep=""),
             row.names=F, col.names=T, quote=F, sep='\t')
 
 if (verb) {cat("... done.\n\n")}

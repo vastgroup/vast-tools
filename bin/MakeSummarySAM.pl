@@ -1,16 +1,24 @@
 #!/usr/bin/perl
 
-($r)=$ARGV[0]=~/(.+?)\.out/;# if $ARGV[0]!~/\//;
-$sam=$&;
+use strict;
 
-system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
+#($r)=$ARGV[0]=~/(.+?)\.out/;# if $ARGV[0]!~/\//;
+#$sam=$&;
 
-open (I, $sam);
-open (O, ">$r.outsum");
+#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
 
-while (<I>){
-    $read="";
-    @t=split(/\t/);
+#open (I, $sam);
+#open (O, ">$r.outsum");
+
+my $reB;
+my $hitB;
+my %tally;
+my %POS;
+my %EJ;
+
+while (<STDIN>){
+    my $read="";
+    my @t=split(/\t/);
     
     ($read)=$t[0]=~/(.+) /;
     ($read)=$t[0]=~/(.+)\#/ if !$read;
@@ -19,7 +27,7 @@ while (<I>){
     ($read)=$t[0]=~/(.+?)\-/ if !$read;
     $read=$t[0] if !$read;
     
-    $hit=$t[2];
+    my $hit=$t[2];
     
     if ($read ne $reB){
         $tally{$hit}++;
@@ -30,15 +38,15 @@ while (<I>){
     $hitB=$hit;
 }
 
-foreach $hit (sort (keys %tally)){
-    $p_p="";
-    foreach $POS (sort {$a<=>$b}(keys %{$POS{$hit}})){
-	$p_p.="$POS:$POS{$hit}{$POS},";
+foreach my $hit (sort (keys %tally)){
+    my $p_p="";
+    foreach my $pos (sort {$a<=>$b} (keys %{$POS{$hit}})){
+	$p_p.="$pos:$POS{$hit}{$pos},";
     }
     chop($p_p);
 
-    print O "$hit\t$tally{$hit}\t$p_p\n";
+    print STDOUT "$hit\t$tally{$hit}\t$p_p\n";
 }
 
-system "rm $sam";
+#system "rm $sam";
 #system "gzip $r.outsum";
