@@ -1,5 +1,8 @@
 #!/usr/bin/Rscript --vanilla
 
+# Author: Tim Sterne-Weiler, 2014
+# tim.sterne.weiler@utoronto.ca
+
 # Copyright (C) 2014 Tim Sterne-Weiler
 #
 # Permission is hereby granted, free of charge, to any person obtaining
