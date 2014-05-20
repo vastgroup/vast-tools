@@ -84,6 +84,11 @@ die "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be b
 my @files=glob("spli_out/*exskX"); #gathers all exskX files (a priori, simple).
 my $N=$#files+1;
 
+if ($N == 0) { 
+    errPrint "Could not find any samples in $outDir/spli_out.\n";
+    exit $EXIT_STATUS;
+}
+
 ### Gets the PSIs for the events in the a posteriori pipeline
 verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
 sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";

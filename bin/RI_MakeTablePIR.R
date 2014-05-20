@@ -53,7 +53,7 @@ if (!file.exists(opt$species)) {
     dbDir <- sub("[^/]+$", "", opt$species)
     species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
 }
-if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+#if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
 #if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
 #if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}

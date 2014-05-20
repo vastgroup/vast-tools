@@ -111,6 +111,7 @@ errPrint "Needs species\n" if !$species;
 # Command line flags here
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
 
+if (defined $ARGV[1]) { $pairedEnd = 1; }
 
 ## Getting sample name and length:
 my $fq1 = abs_path($ARGV[0]);
