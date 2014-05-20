@@ -15,7 +15,7 @@ loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "paral
 if(system("which bowtie") > 0) {
   stop("Cannot find 'bowtie' in path!!!  Please install this properly (e.x. /usr/bin/ ) or supply -bowtieProg flag to vast-tools!");
 } else {
-  writeLines("Found bowtie...");
+  writeLines("Found bowtie... Everything looks --OK");
 }
 
 q(status=0)
