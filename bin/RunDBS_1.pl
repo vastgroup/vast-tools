@@ -21,6 +21,7 @@ my $trim;
 my $cores = 1; #default
 my $readLength; 
 my $outdir;
+my $noIRflag = 0;
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
@@ -40,7 +41,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "v" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
            "output=s" => \$outdir,
-			  "o=s" => \$outdir);
+			  "o=s" => \$outdir,
+			  "noIR" => \$noIRflag);
 
 our $EXIT_STATUS = 0;
 
@@ -301,7 +303,7 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
 # Align to intron retention mapped reads here..
-if (!$genome_sub) {
+if (!$genome_sub or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
   $preCmd = getPrefixCmd($fq);
   sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
