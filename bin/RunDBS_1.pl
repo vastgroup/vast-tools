@@ -2,7 +2,6 @@
 
 
 use strict;
-use File::Which;
 use Cwd qw(abs_path);
 use Getopt::Long;
 
