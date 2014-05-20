@@ -11,7 +11,11 @@ Requirements
 VAST-TOOLS requires the following software:
     * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
     * samtools 0.1.19 (Li et al., 2009), http://samtools.sourceforge.net
-    * R 3.0.1 or higher
+    * R 3.0.1 or higher, with the following packages installed:
+        * optparse
+        * RColorBrewer
+        * reshape2
+        * ggplot2
     * Perl 5.10.1 or higher
 
 VAST-TOOLS also requires species-specific library files (collectively known as
