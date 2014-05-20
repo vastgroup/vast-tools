@@ -29,10 +29,10 @@ opt.list <- list(
     make_option(c("-s", "--species"),  action="store",
                 help="Path of the vastdb branch that contains the current analysis, e.g. ~/vastdb/Hsa"),
     make_option(c("-c", "--countDir"), action="store",
-#                default="spli_out",
+                default="spli_out",
                 help="Location of raw count tables [default: <species>/%default]"),
     make_option(c("-o", "--outDir"),   action="store",
-#                default="raw_incl",
+                default="raw_incl",
                 help="Location of output [default: <species>/%default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
@@ -54,14 +54,14 @@ opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of t
 dbDir <- paste(dirname(opt$species), "/", sep="")
 species <- basename(opt$species)
 
-if (!exists("opt$countDir"))    {opt$countDir <- paste(opt$species, "spli_out/", sep="")}
-if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "raw_incl/", sep="")}
-
+if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+if (opt$outDir   == opt.list[[3]]@default) {opt$outDir   <- paste(opt$species, opt$outDir, sep="")}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
-templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
-if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
 countDir  <- paste(sub("/$?", "", opt$countDir), "/", sep="")
 outDir    <- paste(sub("/$?", "", opt$outDir), "/", sep="")
+
+templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
+if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
 rmHigh    <- as.logical(opt$rmHigh)
 verb      <- as.logical(opt$verbose)
 
