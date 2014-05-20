@@ -29,11 +29,11 @@ opt.list <- list(
     make_option(c("-s", "--species"),  action="store",
                 help="Path of the vastdb branch that contains the current analysis, e.g. ~/vastdb/Hsa"),
     make_option(c("-c", "--countDir"), action="store",
-                default="spli_out",
+#                default="spli_out",
                 help="Location of raw count tables [default: <species>/%default]"),
     make_option(c("-o", "--outDir"),   action="store",
-                default="raw_incl",
-                help="Location of output [default: %default]"),
+#                default="raw_incl",
+                help="Location of output [default: <species>/%default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
     make_option(c("-v", "--verbose"),  action="store", type = "integer", 
@@ -49,25 +49,14 @@ opt.list <- list(
 opt <- parse_args(OptionParser(option_list=opt.list))
 
 ## Check input
-<<<<<<< HEAD
 if (!file.exists(opt$species)) stop("Species/collection ", opt$species, " not found")
 opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
 dbDir <- paste(dirname(opt$species), "/", sep="")
 species <- basename(opt$species)
 
-if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
-=======
-if (!file.exists(opt$species)) {
-    stop("species not found")
-} else {
-    opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
-    dbDir <- sub("[^/]+$", "", opt$species)
-    species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
-}
-#if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
->>>>>>> 72f0b321ae1c5541a06dfe79fbca8fce600991aa
-#if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
-#if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
+if (!exists("opt$countDir"))    {opt$countDir <- paste(opt$species, "spli_out/", sep="")}
+if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "raw_incl/", sep="")}
+
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
 templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
 if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
