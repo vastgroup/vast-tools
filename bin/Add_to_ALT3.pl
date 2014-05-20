@@ -45,7 +45,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("spli_out/*.ee*");
+@EEJ=glob("to_combine/*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "[vast combine alt3]: Needs effective from database!\n" if !@EFF;
 

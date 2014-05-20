@@ -47,7 +47,7 @@ close $RC;
 my %eventseen;
 my $juncAnnotationFile = "$dbDir/FILES/$sp.IntronJunctions.new.annotation.txt";
 my $ANOT = openFileHandle($juncAnnotationFile);
-my $outfile = "./spli_out/$root.IR.summary.txt";
+my $outfile = "./to_combine/$root.IR.summary.txt";
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
 my $head = <$ANOT>;
 print OUT "Event\tEIJ1\tEIJ2\tEEJ\n";

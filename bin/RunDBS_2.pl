@@ -81,11 +81,11 @@ mkdir("raw_reads") unless (-e "raw_reads"); # ^
 #$sp=$ARGV[0];
 die "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
 
-my @files=glob("spli_out/*exskX"); #gathers all exskX files (a priori, simple).
+my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
 my $N=$#files+1;
 
 if ($N == 0) { 
-    errPrint "Could not find any samples in $outDir/spli_out.\n";
+    errPrint "Could not find any samples in $outDir/to_combine.\n";
     exit $EXIT_STATUS;
 }
 
@@ -109,7 +109,7 @@ sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose
 
 ### Gets the PIRs for the Intron Retention pipeline
 verbPrint "Building Table for intron retention\n";
-sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir -c " . abs_path("spli_out"); 
+sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir -c " . abs_path("to_combine"); 
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
 # to be deprecated and replaced by Add_to_FULL (see below) --KH

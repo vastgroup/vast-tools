@@ -29,7 +29,7 @@ opt.list <- list(
     make_option(c("-s", "--species"),  action="store",
                 help="Path of the vastdb branch that contains the current analysis, e.g. ~/vastdb/Hsa"),
     make_option(c("-c", "--countDir"), action="store",
-                default="spli_out",
+                default="to_combine",
                 help="Location of raw count tables [default: <species>/%default]"),
     make_option(c("-o", "--outDir"),   action="store",
                 default="raw_incl",

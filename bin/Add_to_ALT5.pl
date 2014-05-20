@@ -45,7 +45,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("spli_out/*.ee*");
+@EEJ=glob("to_combine/*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs effective\n" if !@EFF;
 

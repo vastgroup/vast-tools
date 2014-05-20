@@ -63,7 +63,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-open (O, ">spli_out/$root.micX"); # summary info (output)
+open (O, ">to_combine/$root.micX"); # summary info (output)
 print O "GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX\tPSI\tRaw_reads_exc\tRaw_reads_inc\tCorr_reads_exc\tCorr_reads_inc\n";
 
 ### Calculates the PSIs

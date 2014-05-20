@@ -34,7 +34,7 @@ die "Needs Species key\n" if !defined($sp);
 
 $COMB="M"; # Only available version
 
-@EEJ=glob("spli_out/*.ee*"); # is this right? --TSW
+@EEJ=glob("to_combine/*.ee*"); # is this right? --TSW
 @EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
 die "[vast combine combi error] Needs effective from database!\n" if !@EFF;
 

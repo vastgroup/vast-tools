@@ -45,9 +45,9 @@ close $RC;
 
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
-my $juncAnnotationFile = "./spli_out/$root.IR.summary.txt";
+my $juncAnnotationFile = "./to_combine/$root.IR.summary.txt";
 my $ANOT = openFileHandle($juncAnnotationFile);
-my $outfile = "./spli_out/$root.IR";
+my $outfile = "./to_combine/$root.IR";
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
 my $head = <$ANOT>;
 print OUT "Event\tEIJ1\tEIJ2\tEEJ\tI\n";

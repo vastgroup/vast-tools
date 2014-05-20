@@ -29,7 +29,7 @@ sub verbPrint {
 #$sp=$ARGV[0];
 die "[vast combine micro]: Needs the 3-letter species key\n" if !defined($sp);
 
-@files=glob("spli_out/*micX");
+@files=glob("to_combine/*micX");
 
 $head_counts=$head_PSI="GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX";
 foreach $file (@files){

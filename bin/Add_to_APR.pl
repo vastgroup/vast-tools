@@ -38,8 +38,8 @@ sub verbPrint {
 $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
-#@EXSK=glob("spli_out/$sp*$type");
-my(@EXSK) = glob("spli_out/*$type");  # not sure what to do with this.  TEST PLZ --TSW
+#@EXSK=glob("to_combine/$sp*$type");
+my(@EXSK) = glob("to_combine/*$type");  # not sure what to do with this.  TEST PLZ --TSW
 
 #die "@EXSK";
 

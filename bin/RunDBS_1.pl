@@ -170,7 +170,7 @@ if ($fileName1 =~ /\-e\.f/){
 errPrint "The output directory \"$outdir\" does not exist" unless (-e $outdir);
 chdir($outdir) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $outdir";
-mkdir("spli_out") unless (-e "spli_out");
+mkdir("to_combine") unless (-e "to_combine");
 mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 
 #length options:
