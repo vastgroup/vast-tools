@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+
 use strict;
 use File::Which;
 use Cwd qw(abs_path);
@@ -21,6 +22,7 @@ my $trim;
 my $cores = 1; #default
 my $readLength; 
 my $outdir;
+my $noIRflag = 0;
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
@@ -40,7 +42,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "v" => \$verboseFlag,
 			  "readLen=i" => \$readLength,
            "output=s" => \$outdir,
-			  "o=s" => \$outdir);
+			  "o=s" => \$outdir,
+			  "noIR" => \$noIRflag);
 
 our $EXIT_STATUS = 0;
 
@@ -109,6 +112,7 @@ errPrint "Needs species\n" if !$species;
 # Command line flags here
 if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
 
+if (defined $ARGV[1]) { $pairedEnd = 1; }
 
 ## Getting sample name and length:
 my $fq1 = abs_path($ARGV[0]);
@@ -300,7 +304,7 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
 # Align to intron retention mapped reads here..
-if (!$genome_sub) {
+if (!$genome_sub or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
   $preCmd = getPrefixCmd($fq);
   sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .

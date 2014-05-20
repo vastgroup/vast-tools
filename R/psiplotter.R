@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
-#
+
+# Author: Kevin Ha, 2014
+# k.ha@mail.utoronto.ca
+
 # Copyright (C) 2014 Kevin Ha
 #
 # Permission is hereby granted, free of charge, to any person obtaining

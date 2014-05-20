@@ -49,12 +49,23 @@ opt.list <- list(
 opt <- parse_args(OptionParser(option_list=opt.list))
 
 ## Check input
+<<<<<<< HEAD
 if (!file.exists(opt$species)) stop("Species/collection ", opt$species, " not found")
 opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
 dbDir <- paste(dirname(opt$species), "/", sep="")
 species <- basename(opt$species)
 
 if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+=======
+if (!file.exists(opt$species)) {
+    stop("species not found")
+} else {
+    opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
+    dbDir <- sub("[^/]+$", "", opt$species)
+    species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
+}
+#if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+>>>>>>> 72f0b321ae1c5541a06dfe79fbca8fce600991aa
 #if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
 #if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}

@@ -10,8 +10,11 @@ Requirements
 
 VAST-TOOLS requires the following software:
     * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
-    * samtools 0.1.19 (Li et al., 2009), http://samtools.sourceforge.net
-    * R 3.0.1 or higher
+    * R 3.0.1 or higher, with the following packages installed:
+        * optparse
+        * RColorBrewer
+        * reshape2
+        * ggplot2
     * Perl 5.10.1 or higher
 
 VAST-TOOLS also requires species-specific library files (collectively known as
@@ -118,7 +121,3 @@ References
 Langmead, B., Trapnell, C., Pop, M., Salzberg, S.L., 2009. Ultrafast and
 memory-efficient alignment of short DNA sequences to the human genome. Genome
 Biol. 10, R25.
-
-Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G.,
-Abecasis, G., Durbin, R., 2009. The Sequence Alignment/Map format and SAMtools.
-Bioinformatics 25, 2078–9.
