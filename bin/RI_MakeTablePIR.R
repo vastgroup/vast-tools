@@ -1,18 +1,9 @@
 #!/usr/bin/Rscript
 
 ### Generate PIR (percent intron retention) tables from normalized count files containing
-### EIJ1, EIJ2, EEJ, I read counts and a table giving sample names and files.
+### EIJ1, EIJ2, EEJ, I read counts. All such files in the given collection will be merged.
 ### Also required is a template containing the introns to be merged to.
-### Note that thresholds on junction coverage/balance are currently hard-coded!
-### Which samples are combined depends on which files *.cReadcount* are found in countDir
-###
-### Arguments:
-###   sp           Absolute Path of the relevant species directory in vastDB, e.g. .../AS_PIPE_S/Hsa
-###   countDir     (optional) Directory of read count tables; default: "RAW_READS/" in "sp"
-###   outDir       (optional) Directory for output; default: "spli_out/" in "sp"
-###   rmHigh       (optional) TRUE/1 or FALSE/0; should introns that have a PIR > 95 in all non-NA samples be 
-###                set to NA? Default: TRUE
-###   verb         (optional) TRUE/1 or FALSE/0; Print status messages; default: FALSE
+### Which samples are combined depends on which files *.IR are found in countDir
 ###
 ### Returns a single table with two columns for each sample:
 ###   - PIR: filtered applying criteria
@@ -21,16 +12,28 @@
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
 
 
+argv <- commandArgs(trailingOnly = TRUE)
+if (any(grepl("^-s$", argv)) & any(grepl("--species=", argv))) stop("Species/collection specified multiple times")
+if (any(grepl("^-s$", argv))) {
+    scriptPath <- dirname(argv[grep("^-s$", argv) + 1])
+} else {
+    if (!any(grepl("--species=", argv))) stop("Species/collection is required")
+    scriptPath <- dirname(sub("--species=","",argv[grep("--species",argv)]))
+}
+source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
+loadPackages("optparse")
+
+
 suppressPackageStartupMessages(require("optparse"))
 opt.list <- list(
-    make_option(c("-s", "--species"),  action="store", default="Hsa",
-                help="Species/collection name [default: %default]"),
+    make_option(c("-s", "--species"),  action="store",
+                help="Path of the vastdb branch that contains the current analysis, e.g. ~/vastdb/Hsa"),
     make_option(c("-c", "--countDir"), action="store",
                 default="spli_out",
                 help="Location of raw count tables [default: <species>/%default]"),
     make_option(c("-o", "--outDir"),   action="store",
                 default="raw_incl",
-                help="Location of output [default: %default]"),
+                help="Location of output [default: <species>/%default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
     make_option(c("-v", "--verbose"),  action="store", type = "integer", 
@@ -46,21 +49,19 @@ opt.list <- list(
 opt <- parse_args(OptionParser(option_list=opt.list))
 
 ## Check input
-if (!file.exists(opt$species)) {
-    stop("species not found")
-} else {
-    opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
-    dbDir <- sub("[^/]+$", "", opt$species)
-    species <- sub("(.*/)?([^/]+)/$", "\\2", opt$species)
-}
-#if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
-#if (!exists("opt$outDir"))      {opt$outDir   <- paste(opt$species, "spli_out/", sep="")}
-#if (!exists("opt$rmHigh"))      {opt$rmHigh   <- TRUE}
+if (!file.exists(opt$species)) stop("Species/collection ", opt$species, " not found")
+opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
+dbDir <- paste(dirname(opt$species), "/", sep="")
+species <- basename(opt$species)
+
+if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+if (opt$outDir   == opt.list[[3]]@default) {opt$outDir   <- paste(opt$species, opt$outDir, sep="")}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
-templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
-if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
 countDir  <- paste(sub("/$?", "", opt$countDir), "/", sep="")
 outDir    <- paste(sub("/$?", "", opt$outDir), "/", sep="")
+
+templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
+if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
 rmHigh    <- as.logical(opt$rmHigh)
 verb      <- as.logical(opt$verbose)
 

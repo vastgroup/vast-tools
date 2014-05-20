@@ -105,7 +105,7 @@ sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$glob
 verbPrint "Building Table for MIC (microexons)\n";
 sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
-my($verbRFlag) = ($verboseFlag) ? "T" : "F";
+#my($verbRFlag) = ($verboseFlag) ? "T" : "F";
 
 ### Gets the PIRs for the Intron Retention pipeline
 verbPrint "Building Table for intron retention\n";
