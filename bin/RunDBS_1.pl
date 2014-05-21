@@ -1,5 +1,10 @@
 #!/usr/bin/perl -w
 
+# Authors:
+# Original Draft: Manuel Irimia, 2011?, 
+# 						mirimia@gmail.com
+# Reworked: Tim Sterne-Weiler & Kevin Ha, 2014
+# 				tim.sterne.weiler@utoronto.ca & k.ha@mail.utoronto.ca 
 
 use strict;
 use Cwd qw(abs_path);
@@ -21,7 +26,8 @@ my $trim;
 my $cores = 1; #default
 my $readLength; 
 my $outdir;
-my $noIRflag = 0;
+my $noIRflag = 0;  # don't run intron retention (for speed..)
+my $stringentIRflag = 0; # Run extra genome/eej subtraction step
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
@@ -42,7 +48,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "readLen=i" => \$readLength,
            "output=s" => \$outdir,
 			  "o=s" => \$outdir,
-			  "noIR" => \$noIRflag);
+			  "noIR" => \$noIRflag,
+			  "stringentIR" => \$stringentIR);
 
 our $EXIT_STATUS = 0;
 
@@ -100,6 +107,9 @@ OPTIONS:
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
 	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
+
+	-noIR			:	Don't run intron retention pipeline.. substantially increases speed, works with species without IR libraries (default off)
+	-stringentIR	:	Don't run first filtering step, this will increase speed, but perhaps also artifact potential (default off)
 ";
 
 #";
