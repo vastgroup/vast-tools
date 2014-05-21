@@ -49,7 +49,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
            "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
-			  "stringentIR" => \$stringentIR);
+			  "stringentIR" => \$stringentIRflag);
 
 our $EXIT_STATUS = 0;
 
