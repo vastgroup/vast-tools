@@ -28,7 +28,7 @@ does not require any additional installation steps.
 
 VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
 directory, or in an external location. If the latter, the path of VASTDB must be
-supplied to `vast-tools` or alternatively, a symbolic link can be created in the
+supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can be created in the
 root of VAST-TOOLS directory. By default, VAST-TOOLS looks for VASTDB
 inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
 
@@ -77,7 +77,7 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 VAST-TOOLS can be run as simply as:
 NOTE: Unless specified, all options are default, for example the output directory 
 is assumed to be 'vast_out', the database to be <path>/vast-tools-0.0.1/VASTDB, 
-and the species Hsa.. to change these use the --output, -dbDir and -sp flags!
+and the species Hsa.. to change these use the ``--output``, ``-dbDir`` and ``-sp`` flags!
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz -readLen 158
@@ -90,6 +90,17 @@ and the species Hsa.. to change these use the --output, -dbDir and -sp flags!
 > vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 --filter=T > INCLUSION-FILTERED.tab
 
 > vast-tools plot INCLUSION-FILTERED.tab
+~~~~
+
+You can speed up vast-tools significantly by allowing it to use multiple cores by running it on a cluster.
+The ``-c`` flag can be passed to both 'align' and 'diff' to improve performance.
+
+~~~~
+> vast-tools align tissueA-rep1.fq.gz -readLen 158 -c 8
+~~~~
+AND
+~~~~
+> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 --filter=T -c 8 > INCLUSION-FILTERED.tab
 ~~~~
 
 
@@ -110,7 +121,10 @@ Recommended to allow at least 15GB of RAM (~10GB are needed for mapping to the g
 
 **Combining Results:**
 
-Should be self explanatory.??
+Should be self explanatory... ``vast-tools combine`` will join all of the files sent to the same output directory found
+in <output_dir>/to_combine/, to form one final table in the main <output_dir> folder.  This is the file you give to 
+``diff`` in the case that you intend to compare multiple samples.  This output file contains a psi value and a qual column
+for each sample.
 
 ~~~~
 > vast-tools combine -o outputdir
@@ -124,7 +138,7 @@ joint emperical posterior distributions with respect to Psi.
 ``Author Inquiries: Tim Sterne-Weiler [tim dot sterne dot weiler at utoronto.ca](mailto:tim.sterne.weiler@utoronto.ca) [web](www.utoronto.ca/intron/sterne-weiler.html)``
 
 ~~~~
-> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir --filter=T > significant_events.tab
+> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > significant_events.tab
 ~~~~
 
 *Statistics Options*
