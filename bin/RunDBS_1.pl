@@ -313,7 +313,7 @@ sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
 # Align to intron retention mapped reads here..
-if (!$genome_sub or $noIRflag) {
+unless ($genome_sub or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
   $preCmd = getPrefixCmd($fq);
   sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .

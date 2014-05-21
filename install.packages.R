@@ -9,13 +9,12 @@ scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 # Source Rlib.
 source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
 
-writeLines("Setting permissions...", stderr())
-if(Sys.chmod(paste(c(scriptPath, "/vast-tools"), collapse=""), mode = "+x")) {
-  writeLines("Setting vast-tools permissions... success!", stderr());
-}
-
 # custom install from include.R
 loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"))
+
+if(Sys.chmod(paste(c(scriptPath, "/vast-tools"), collapse=""), mode = "755")) {
+  writeLines("Setting vast-tools permissions... success!", stderr());
+}
 
 if(system("which bowtie") > 0) {
   stop("Cannot find 'bowtie' in path!!!  Please install this properly (e.x. /usr/bin/ ) or supply -bowtieProg flag to vast-tools!");
