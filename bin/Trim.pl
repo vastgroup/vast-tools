@@ -10,18 +10,17 @@
 # If the length of the original reads is < 2X, it splits in an overlapping manner.
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-use FuncBasics qw(:all);
 use Getopt::Long;
 
-my $trim = "once";
 my $verboseFlag = 1;
+my $stepSize = 25;
+
+my $targetLength = 50;
 
 Getopt::Long::Configure("no_auto_abbrev");
-GetOptions("trim=s" => \$trim,
-		    "verbose" => \$verboseFlag,
-		    "v" => \$verboseFlag
+GetOptions("verbose" => \$verboseFlag,
+		    "v" => \$verboseFlag,
+			 "step=i" => \$stepSize
 );
 
 sub sysErrMsg {
@@ -37,12 +36,6 @@ sub verbPrint {
   }
 }
 
-if (! ($trim eq "once" || $trim eq "twice")) {
-  sysErrMsg "Invalid trim option\n";    
-}
-
-my $length=$ARGV[1];
-sysErrMsg "Not a valid length\n" if ($length !~ /^[0-9]+$/);
 
 ### Initialize variables
 my $total_reads = 0;
@@ -53,9 +46,8 @@ my $seq;
 my $rest;
 
 ### Parses the original reads
-my $INPUT = openFileHandle ($ARGV[0]);
 my $lineCounter = 1;
-while (<$INPUT>){
+while (<>){
   chomp;
 
   my $mod = $lineCounter % 4;
@@ -69,21 +61,19 @@ while (<$INPUT>){
       $rest = $_;
   
       $total_reads++;
-
-      if (length($seq)>=$length && length($rest)>=$length) { 
+    
+      my $trimNum = 1; 
+      for(my $off=0; length($seq) >= $off + $targetLength; $off += $stepSize) { 
           # make sure the length of the sequence AND quality scores are >= length
+ 
+          my ($S1) = substr($seq, $off, $targetLength);
+          my ($R1) = substr($rest, $off, $targetLength);
 
-          my ($S1)=$seq=~/^(.{$length})/;
-          my ($R1)=$rest=~/^(.{$length})/;
-          print STDOUT "$name-1\n$S1\n$name2-1\n$R1\n";
+          print STDOUT "$name-$trimNum\n$S1\n$name2-$trimNum\n$R1\n";
 
-          if ($trim eq "twice") {
-              my ($S2)=$seq=~/(.{$length})$/;
-              my ($R2)=$rest=~/(.{$length})$/;
-              print STDOUT "$name-2\n$S2\n$name2-2\n$R2\n";
-          }
-          $total_reads_accepted++;
+			 $trimNum++;
       }
+      $total_reads_accepted++;
   }
   $lineCounter++;
 }
