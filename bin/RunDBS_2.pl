@@ -141,7 +141,7 @@ my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab")
+                "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
 
 unless($noIRflag) { 
   push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab"); 
