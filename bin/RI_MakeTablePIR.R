@@ -12,7 +12,6 @@
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
 
 
-### FIXED --TSW
 argv <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 
@@ -22,18 +21,17 @@ source(paste(c(scriptPath,"/../R/Rlib/include.R"), collapse=""))
 loadPackages("optparse")
 
 
-### IS THIS CORRECT??
-argv <- commandArgs(trailingOnly = TRUE)
-if (any(grepl("^-s$", argv)) & any(grepl("--species=", argv))) stop("Species/collection specified multiple times")
-if (any(grepl("^-s$", argv))) {
-    scriptPath <- dirname(argv[grep("^-s$", argv) + 1])
-} else {
-    if (!any(grepl("--species=", argv))) stop("Species/collection is required")
-    scriptPath <- dirname(sub("--species=","",argv[grep("--species",argv)]))
-}
+### obsolete due to above changes and check below  --UB
+#argv <- commandArgs(trailingOnly = TRUE)
+#if (any(grepl("^-s$", argv)) & any(grepl("--species=", argv))) stop("Species/collection specified multiple times")
+#if (any(grepl("^-s$", argv))) {
+#    scriptPath <- dirname(argv[grep("^-s$", argv) + 1])
+#} else {
+#    if (!any(grepl("--species=", argv))) stop("Species/collection is required")
+#    scriptPath <- dirname(sub("--species=","",argv[grep("--species",argv)]))
+#}
+#suppressPackageStartupMessages(require("optparse"))
 
-
-suppressPackageStartupMessages(require("optparse"))
 opt.list <- list(
     make_option(c("-s", "--species"),  action="store",
                 help="Path of the vastdb branch that contains the current analysis, e.g. ~/vastdb/Hsa"),
@@ -58,6 +56,7 @@ opt.list <- list(
 opt <- parse_args(OptionParser(option_list=opt.list))
 
 ## Check input
+if (!exists("opt$species"))    stop("Species/collection is required")
 if (!file.exists(opt$species)) stop("Species/collection ", opt$species, " not found")
 opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
 dbDir <- paste(dirname(opt$species), "/", sep="")
