@@ -12,6 +12,17 @@
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
 
 
+### FIXED --TSW
+argv <- commandArgs(trailingOnly = F)
+scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
+
+# Source Rlib. --TSW
+source(paste(c(scriptPath,"/../R/Rlib/include.R"), collapse=""))
+
+loadPackages("optparse")
+
+
+### IS THIS CORRECT??
 argv <- commandArgs(trailingOnly = TRUE)
 if (any(grepl("^-s$", argv)) & any(grepl("--species=", argv))) stop("Species/collection specified multiple times")
 if (any(grepl("^-s$", argv))) {
@@ -20,8 +31,6 @@ if (any(grepl("^-s$", argv))) {
     if (!any(grepl("--species=", argv))) stop("Species/collection is required")
     scriptPath <- dirname(sub("--species=","",argv[grep("--species",argv)]))
 }
-source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
-loadPackages("optparse")
 
 
 suppressPackageStartupMessages(require("optparse"))
