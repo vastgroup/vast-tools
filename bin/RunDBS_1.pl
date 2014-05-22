@@ -24,7 +24,7 @@ my $runExprFlag = 0; # no by default
 my $onlyExprFlag = 0; # no by default
 my $trim;
 my $cores = 1; #default
-my $readLength; 
+my $readLength = 50; # default... deprecated. 
 my $outdir;
 my $noIRflag = 0;  # don't run intron retention (for speed..)
 my $stringentIRflag = 0; # Run extra genome/eej subtraction step
@@ -244,22 +244,23 @@ if (!$genome_sub){
  my $trimmed = 0;    # flag determining whether trimming occurred
  if ($difLE >= 10){
    $cmd = getPrefixCmd($fq);
-   if (!defined($trim) or $trim eq "twice"){
-	  if ($length > ($le*2)+10){
-	     $half_length = sprintf("%.0f", $length / 2);
-         verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-         sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $half_length | " .
-                    "$binPath/Trim.pl --trim twice - $le | " .
-                    "gzip > $root-$le.fq.gz";
-	  } else {
-	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
-	     sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $le | " .
-                    "gzip > $root-$le.fq.gz";
-	  }
-   } elsif ($trim eq "once"){
+#   if (!defined($trim) or $trim eq "twice"){
+#	  if ($length > ($le*2)+10){
+#	     $half_length = sprintf("%.0f", $length / 2);
+#         verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
+#         sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $half_length | " .
+#                    "$binPath/Trim.pl --trim twice - $le | " .
+#                    "gzip > $root-$le.fq.gz";
+#	  } else {
+#	     verbPrint "Trimming and splitting fastq sequences to $le nt sequences";
+#	     sysErrMsg "$cmd | $binPath/Trim.pl --trim twice - $le | " .
+#                    "gzip > $root-$le.fq.gz";
+#	  }
+#   } elsif ($trim eq "once"){
 	 verbPrint "Trimming fastq sequences to $le nt sequences";
-	 sysErrMsg "$cmd | $binPath/Trim.pl --trim once - $le | gzip > $root-$le.fq.gz";
-   }
+    sysErrMsg "$cmd | $binPath/Trim.pl | gzip > $root-$le.fq.gz";
+#	 sysErrMsg "$cmd | $binPath/Trim.pl --trim once - $le | gzip > $root-$le.fq.gz";
+ #  }
    $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
  }

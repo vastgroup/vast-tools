@@ -47,14 +47,14 @@ of vast-tools, OR vast-tools will try and install R packages on the fly when nec
 And of course you should add the vast-tools-0.0.1 directory to your PATH:
 IN bash
 ~~~~
->$ export PATH=~/bin/vast-tools-0.0.1:$PATH
->$ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
+$ export PATH=~/bin/vast-tools-0.0.1:$PATH
+$ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
 ~~~~
 
 OR IN csh
 ~~~~
->% setenv PATH ~/bin/vast-tools-0.0.1/:$PATH
->% echo 'setenv PATH ~/bin/vast-tools-0.0.1/:$PATH' >> ~/.cshrc
+% setenv PATH ~/bin/vast-tools-0.0.1/:$PATH
+% echo 'setenv PATH ~/bin/vast-tools-0.0.1/:$PATH' >> ~/.cshrc
 ~~~~
 
 

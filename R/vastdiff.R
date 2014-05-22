@@ -232,6 +232,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
     } else {
       max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
     }
+#    writeLines(lines[i], stderr()) ### DEBUGGING
     # check for significant difference
     if(max < opt$minDiff) { return(NULL) } # or continue...
 
