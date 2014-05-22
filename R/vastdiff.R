@@ -244,13 +244,13 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
 
 	 # Print visual output to pdf;
-    if( opt$pdf ) {
+#    if( opt$pdf ) {
       if( medOne > medTwo ) {
         retPlot <- plotDiff(psiFirstComb, psiSecondComb, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
       } else {
         retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
-    }
+#    }
 
 
 	 return(list(retPlot, eventTitle))  #return of mclapply function
