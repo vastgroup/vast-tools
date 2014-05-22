@@ -12,12 +12,11 @@
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
 
 
-argv <- commandArgs(trailingOnly = F)
+argv <- commandArgs(trailingOnly = FALSE)
 scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 
 # Source Rlib. --TSW
 source(paste(c(scriptPath,"/../R/Rlib/include.R"), collapse=""))
-
 loadPackages("optparse")
 
 
@@ -53,11 +52,11 @@ opt.list <- list(
     make_option(c("-B", "--BALthresh"),  action="store", default=0.05, type="numeric",
                 help="Threshold for p-value of balance binomial test [default: %default]")
     )  
-opt <- parse_args(OptionParser(option_list=opt.list))
+opt <- parse_args(OptionParser(option_list=opt.list), args=commandArgs(TRUE))
 
 ## Check input
-if (!exists("opt$species"))    stop("Species/collection is required")
-if (!file.exists(opt$species)) stop("Species/collection ", opt$species, " not found")
+if (!("species" %in% names(opt))) stop("Species/collection is required")
+if (!file.exists(opt$species))    stop("Species/collection ", opt$species, " not found")
 opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
 dbDir <- paste(dirname(opt$species), "/", sep="")
 species <- basename(opt$species)
