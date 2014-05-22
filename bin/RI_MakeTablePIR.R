@@ -19,6 +19,8 @@ scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 source(paste(c(scriptPath,"/../R/Rlib/include.R"), collapse=""))
 loadPackages("optparse")
 
+argv <- commandArgs(trailingOnly = TRUE)
+
 
 ### obsolete due to above changes and check below  --UB
 #argv <- commandArgs(trailingOnly = TRUE)
@@ -52,7 +54,7 @@ opt.list <- list(
     make_option(c("-B", "--BALthresh"),  action="store", default=0.05, type="numeric",
                 help="Threshold for p-value of balance binomial test [default: %default]")
     )  
-opt <- parse_args(OptionParser(option_list=opt.list), args=commandArgs(TRUE))
+opt <- parse_args(OptionParser(option_list=opt.list), args=argv)
 
 ## Check input
 if (!("species" %in% names(opt))) stop("Species/collection is required")
