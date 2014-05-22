@@ -134,7 +134,7 @@ for (i in 1:nrow(samples)) {
     datMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), datMerge, by=1, all.x=TRUE)
     datMerge <- datMerge[order(datMerge[,1]),3]
 
-    pir[,2*i - i] <- pir.i[datMerge]
+    pir[,2*i - 1] <- pir.i[datMerge]
     pir[,2*i]     <- qal.i[datMerge]
 }
 
