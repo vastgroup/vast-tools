@@ -6,16 +6,18 @@
 #  Install/loading of required Packages.
 
 
-loadPackages <- function(toLoad) {
+loadPackages <- function(toLoad, local.lib="Rlib/") {
   for(i in toLoad) {
-    if(!require(toString(i), character.only=T)){
-      print(sprintf("%s did not load correctly! Now trying to install..", i)) 
-      install.packages(i, , repos='http://cran.us.r-project.org')
-      if(require(toString(i), character.only=T)){
-        print(sprintf("%s has been installed and loaded by vastdiff.R!", i)) 
-      } else {
-        stop(sprintf("quitting!!! I could not install %s for you!", i)) 
-      }   
+    if(!require(toString(i), character.only=T) &&
+		 !require(toString(i), character.only=T, lib.loc=local.lib)){
+        print(sprintf("%s did not load correctly! Now trying to install..", i)) 
+        install.packages(i, , repos='http://cran.us.r-project.org', lib=local.lib)
+        if(require(toString(i), character.only=T, lib.loc=local.lib)) {
+          print(sprintf("%s has been installed locally in R/Rlib!", i))
+        } else {
+          stop(sprintf("quitting!!! I could not install %s for you!", i)) 
+		  }
+        
     }
   }
 

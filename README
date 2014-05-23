@@ -80,14 +80,14 @@ is assumed to be 'vast_out', the database to be <path>/vast-tools-0.0.1/VASTDB,
 and the species Hsa.. to change these use the ``--output``, ``-dbDir`` and ``-sp`` flags!
 
 ~~~~
-> vast-tools align tissueA-rep1.fq.gz -readLen 158
-> vast-tools align tissueA-rep2.fq.gz -readLen 158
-> vast-tools align tissueB-rep1.fq.gz -readLen 158
-> vast-tools align tissueB-rep2.fq.gz -readLen 158
+> vast-tools align tissueA-rep1.fq.gz
+> vast-tools align tissueA-rep2.fq.gz
+> vast-tools align tissueB-rep1.fq.gz
+> vast-tools align tissueB-rep2.fq.gz
 
 > vast-tools combine
 
-> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 --filter=T > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 > INCLUSION-FILTERED.tab
 
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
@@ -96,7 +96,7 @@ You can speed up vast-tools significantly by allowing it to use multiple cores b
 The ``-c`` flag can be passed to both 'align' and 'diff' to improve performance.
 
 ~~~~
-> vast-tools align tissueA-rep1.fq.gz -readLen 158 -c 8
+> vast-tools align tissueA-rep1.fq.gz -c 8
 ~~~~
 AND
 ~~~~

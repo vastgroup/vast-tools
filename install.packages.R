@@ -10,7 +10,7 @@ scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
 
 # custom install from include.R
-loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"))
+loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/R/Rlib/"), collapse=""))
 
 if(Sys.chmod(paste(c(scriptPath, "/vast-tools"), collapse=""), mode = "755")) {
   writeLines("Setting vast-tools permissions... success!", stderr());
