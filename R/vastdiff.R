@@ -31,7 +31,7 @@ source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 # custom install from include.R
-loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib/"), collapse=""))
+loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 argv <- commandArgs(TRUE)
 
