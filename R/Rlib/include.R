@@ -11,10 +11,10 @@ loadPackages <- function(toLoad, local.lib="Rlib/") {
     writeLines(sprintf("Trying to load required package: %s", toString(i)), stderr())
     if(!suppressWarnings(require(toString(i), character.only=T, quietly=T)) &&
 		 !suppressWarnings(require(toString(i), character.only=T, lib.loc=local.lib, quietly=T))){
-        print(sprintf("%s did not load correctly! Now trying to install..", i)) 
+        writeLines(sprintf("%s did not load correctly! Now trying to install..", i), stderr()) 
         install.packages(i, , repos='http://cran.us.r-project.org', lib=local.lib)
         if(require(toString(i), character.only=T, lib.loc=local.lib)) {
-          print(sprintf("%s has been installed locally in R/Rlib!", i))
+          writeLines(sprintf("%s has been installed locally in R/Rlib!", i), stderr())
         } else {
           stop(sprintf("quitting!!! I could not install %s for you!", i)) 
 		  }
