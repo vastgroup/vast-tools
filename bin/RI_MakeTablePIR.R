@@ -17,7 +17,7 @@ scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 
 # Source Rlib. --TSW
 source(paste(c(scriptPath,"/../R/Rlib/include.R"), collapse=""))
-loadPackages("optparse")
+loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/../R/Rlib"), collapse=""))
 
 argv <- commandArgs(trailingOnly = TRUE)
 

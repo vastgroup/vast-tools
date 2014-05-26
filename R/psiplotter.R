@@ -30,7 +30,7 @@ source(file.path(scriptPath, "Rlib", "preprocess_sample_colors.R"))
 source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
-loadPackages(c("optparse"))
+loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 #### Arguments #################################################################
 # - Input file
