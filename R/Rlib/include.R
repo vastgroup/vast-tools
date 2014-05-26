@@ -8,8 +8,9 @@
 
 loadPackages <- function(toLoad, local.lib="Rlib/") {
   for(i in toLoad) {
-    if(!suppressWarnings(require(toString(i), character.only=T)) &&
-		 !suppressWarnings(require(toString(i), character.only=T, lib.loc=local.lib))){
+    writeLines(sprintf("Trying to load required package: %s", toString(i)), stderr())
+    if(!suppressWarnings(require(toString(i), character.only=T, quietly=T)) &&
+		 !suppressWarnings(require(toString(i), character.only=T, lib.loc=local.lib, quietly=T))){
         print(sprintf("%s did not load correctly! Now trying to install..", i)) 
         install.packages(i, , repos='http://cran.us.r-project.org', lib=local.lib)
         if(require(toString(i), character.only=T, lib.loc=local.lib)) {
