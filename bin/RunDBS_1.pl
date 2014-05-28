@@ -242,7 +242,7 @@ if (!$genome_sub){
 #
 # TODO: substitute all of this with gawk 'NR%2==0{print substr($1,5,55)}NR%2==1' INPUT.fq... style 
  my $trimmed = 0;    # flag determining whether trimming occurred
- if ($difLE >= 10){
+# if ($difLE >= 10){
    $cmd = getPrefixCmd($fq);
 #   if (!defined($trim) or $trim eq "twice"){
 #	  if ($length > ($le*2)+10){
@@ -263,7 +263,7 @@ if (!$genome_sub){
  #  }
    $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
    $trimmed = 1;
- }
+# }
 ####
  
 #### Get effective reads (i.e. genome substraction).
