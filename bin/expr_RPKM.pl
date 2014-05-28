@@ -30,29 +30,23 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 ### Read count
-$file=$ARGV[0]; #Output from bowtie
-system "gunzip $file" if $file=~/\.gz/;
-$file=~s/\.gz//;
-open (INPUT, $file) || die "Can't find the input file\n"; 
-
-while (<INPUT>){ #analyzes the bowtie output
+while (<>){ #analyzes the bowtie output
     chomp;
     @d=split(/\t/);
     $gene=$d[2];
     $tally{$gene}++;
     $total_mapped++;
 }
-close INPUT;
 
 ### Calculating cRPKMs and finalizing
 ($root)=$file=~/(.+?)\.out/;
-open (OUTPUT, ">$root"."_exprRPKM.txt"); #output file (cRPKM per gene)
+#open (OUTPUT, ">$root"."_exprRPKM.txt"); #output file (cRPKM per gene)
 
 foreach $gene (sort (keys %effective_length)){
     $cRPKM="ne";
     $cRPKM=sprintf("%.2f",1000000*(1000*$tally{$gene}/$effective_length{$gene})/$total_mapped) if $effective_length{$gene};
-    print OUTPUT "$gene\t$cRPKM\t$tally{$gene}\n" if $gene;
+    print STDOUT "$gene\t$cRPKM\t$tally{$gene}\n" if $gene;
 }
-close OUTPUT;
+#close OUTPUT;
 
-system "gzip $file";
+#system "gzip $file";

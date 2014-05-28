@@ -215,11 +215,11 @@ if (!$genome_sub){
      }
 
      $cmd = getPrefixCmd($cmd);
-     $cmd .= " | $bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA - expr_out/$species"."_mRNA-$le-$root.out";
+     $cmd .= " | $bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA -";
 
-     sysErrMsg $cmd;
      verbPrint "Calculating cRPKMs\n";
-     sysErrMsg "$binPath/expr_RPKM.pl expr_out/$species"."_mRNA-$le-$root.out $dbDir/EXPRESSION/$species"."_mRNA-$le.eff"; 
+     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff > expr_out/$root\_exprRPKM.txt";
+#     sysErrMsg "$binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff >expr_out/$root\_exprRPKM.txt"; 
  }
  if ($onlyExprFlag){
      print STDERR "Expression analysis done\n";
