@@ -199,6 +199,11 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 										parseQual(x, opt$alpha, opt$beta)
 								} )
 
+    # if no data, next;
+    if(shapeFirst[1] + shapeFirst[2] == 2 &&
+		 shapeSecond[1] + shapeSecond[2] == 2) {
+		next
+	 }
 
 	 # Sample Posterior Distributions
 	 psiFirst <- lapply( shapeFirst, function(x) {

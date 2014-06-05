@@ -81,8 +81,10 @@ foreach $file (@files){
      my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
      unless($t[6] eq "NA" or $totalN < 2) {
        $pPSI = $t[6] / 100;
-       $exValOfInc = $pPSI * $totalN;
-       $exValOfExc = (1-$pPSI) * $totalN;
+       #$exValOfInc = $pPSI * $totalN;
+       #$exValOfExc = (1-$pPSI) * $totalN;
+       $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+       $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
      }
      # ALTER QUAL OUTPUT HERE>>
      $Q .= "\@$exValOfInc,$exValOfExc";
