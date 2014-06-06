@@ -144,7 +144,7 @@ qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qual
 legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
 
 for (i in 1:nrow(samples)) {
-    pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", , pir[,i * 2]) 
+    pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", pir[,i * 2]), sep="")
 }
 
 ## Remove values from events that are never below PIRthresh
