@@ -9,7 +9,7 @@
 ###   - PIR: filtered applying criteria
 ###   - Q:   quality, format: coverage,balance-p.val@alpha,beta where alpha and beta are reassigned pseudocounts for ret/const
 ###
-### U. Braunschweig, The Donnelly Centre, University of Toronto - 05/2014
+### U. Braunschweig, The Donnelly Centre, University of Toronto - 06/2014
 
 
 argv <- commandArgs(trailingOnly = FALSE)
@@ -21,21 +21,11 @@ loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/../R/Rlib"), collapse
 
 argv <- commandArgs(trailingOnly = TRUE)
 
-
-### obsolete due to above changes and check below  --UB
-#argv <- commandArgs(trailingOnly = TRUE)
-#if (any(grepl("^-s$", argv)) & any(grepl("--species=", argv))) stop("Species/collection specified multiple times")
-#if (any(grepl("^-s$", argv))) {
-#    scriptPath <- dirname(argv[grep("^-s$", argv) + 1])
-#} else {
-#    if (!any(grepl("--species=", argv))) stop("Species/collection is required")
-#    scriptPath <- dirname(sub("--species=","",argv[grep("--species",argv)]))
-#}
-#suppressPackageStartupMessages(require("optparse"))
-
 opt.list <- list(
     make_option(c("-s", "--species"),  action="store",
                 help="Path of the vastdb branch that contains the current analysis, e.g. ~/vastdb/Hsa"),
+    make_option(c("-q", "--quality"),  action="store",  # legacy qualities --UB
+                help="Path of the file containing legacy quality scores for IR [no default]"),
     make_option(c("-c", "--countDir"), action="store",
                 default="to_combine",
                 help="Location of raw count tables [default: <species>/%default]"),
@@ -56,12 +46,16 @@ opt.list <- list(
     )  
 opt <- parse_args(OptionParser(option_list=opt.list), args=argv)
 
+
 ## Check input
-if (!("species" %in% names(opt))) stop("Species/collection is required")
-if (!file.exists(opt$species))    stop("Species/collection ", opt$species, " not found")
+if (is.null(opt$species))       stop("Species/collection is required")
+if (!file.exists(opt$species))  stop("Species/collection ", opt$species, " not found")
 opt$species <- paste(sub("/$?", "", opt$species), "/", sep="")  # make sure of trailing /
 dbDir <- paste(dirname(opt$species), "/", sep="")
 species <- basename(opt$species)
+
+if (is.null(opt$quality))       stop("Quality file is required")  # Legacy qualities --UB
+if (!file.exists(opt$quality))  stop("Quality file ", opt$quality, " not found")
 
 if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
 if (opt$outDir   == opt.list[[3]]@default) {opt$outDir   <- paste(opt$species, opt$outDir, sep="")}
@@ -87,7 +81,7 @@ if (is.na(sampleFiles[1])) {
 } else {
     if (verb) {cat("Merging IR of", length(sampleFiles), "sample(s)...\n")}
 }
-samples <- data.frame(Sample = sub("\\.cReadcount.*", "", sampleFiles),
+samples <- data.frame(Sample = sub("\\.IR", "", sampleFiles),
                       File   = sampleFiles,
                       stringsAsFactors=FALSE)
 template <- read.delim(templFile)
@@ -127,8 +121,8 @@ for (i in 1:nrow(samples)) {
     ## make the 'quality' column: cov,bal@alpha,beta
     qal.i <- paste(round(cov.i, 1), ",", signif(bal.i, 3), "@", alpha.i, ",", beta.i, sep="")
 
-    ## Remove values that do not pass criteria
-    pir.i[which(cov.i <= opt$COVthresh | bal.i < opt$BALthresh)] <- NA
+    ## Remove values that do not pass criteria  # not done any more --UB
+    #pir.i[which(cov.i <= opt$COVthresh | bal.i < opt$BALthresh)] <- NA
 
     ## bring into correct order and populate tables
     datMerge <- data.frame(dat$Event, datInd = 1:nrow(dat))
@@ -137,6 +131,20 @@ for (i in 1:nrow(samples)) {
 
     pir[,2*i - 1] <- pir.i[datMerge]
     pir[,2*i]     <- qal.i[datMerge]
+}
+
+
+## Add legacy quality scores for compatibility with downstream tools
+legQual <- read.delim(qualFile)
+if (!all(names(legQual)[-1] == samples$Sample)) {stop("Samples in IR and IR quality file do not match")}
+
+legQual <- legQual[legQual$EVENT %in% template$juncID,]
+qualMerge <- data.frame(legQual$EVENT, qualInd=1:nrow(legQual))
+qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qualMerge, by=1, all.x=TRUE)
+legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
+
+for (i in 1:nrow(samples)) {
+    pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", , pir[,i * 2]) 
 }
 
 ## Remove values from events that are never below PIRthresh
