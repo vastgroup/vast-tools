@@ -135,7 +135,7 @@ for (i in 1:nrow(samples)) {
 
 
 ## Add legacy quality scores for compatibility with downstream tools
-legQual <- read.delim(opt$quality)
+legQual <- read.delim(opt$quality, as.is=TRUE)
 if (!all(names(legQual)[-1] == samples$Sample)) {stop("Samples in IR and IR quality file do not match")}
 
 legQual <- legQual[legQual$EVENT %in% template$juncID,]
@@ -144,6 +144,8 @@ qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qual
 legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
 
 for (i in 1:nrow(samples)) {
+    legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,N,NA,0=0=0" # set qual scores when missing due to no reads
+    pir[is.na(pir[,i * 2]),i * 2] <- "@NA,NA"                 # set pseudocounts -"-
     pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", pir[,i * 2]), sep="")
 }
 
