@@ -332,4 +332,4 @@ unless ($genome_sub or $noIRflag) {
 }
 
 verbPrint "Completed " . localtime;
-exit $EXIT_STATUS
+exit $EXIT_STATUS;
