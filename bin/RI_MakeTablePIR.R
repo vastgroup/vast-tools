@@ -34,7 +34,7 @@ opt.list <- list(
                 help="Location of output [default: <species>/%default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
-    make_option(c("-v", "--verbose"),  action="store", type = "integer", 
+    make_option(c("-v", "--verbose"),  action="store", type = "integer",
                 default = 1,
                 help="Print status messages (0 - no/1 - yes)? [default: %default]"),
     make_option(c("-P", "--PIRthresh"),  action="store", default=95, type="numeric",
@@ -43,7 +43,7 @@ opt.list <- list(
                 help="Threshold for junction read count [default: %default]"),
     make_option(c("-B", "--BALthresh"),  action="store", default=0.05, type="numeric",
                 help="Threshold for p-value of balance binomial test [default: %default]")
-    )  
+    )
 opt <- parse_args(OptionParser(option_list=opt.list), args=argv)
 
 
@@ -57,8 +57,8 @@ species <- basename(opt$species)
 if (is.null(opt$quality))       stop("Quality file is required")  # Legacy qualities --UB
 if (!file.exists(opt$quality))  stop("Quality file ", opt$quality, " not found")
 
-if (opt$countDir == opt.list[[2]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
-if (opt$outDir   == opt.list[[3]]@default) {opt$outDir   <- paste(opt$species, opt$outDir, sep="")}
+if (opt$countDir == opt.list[[3]]@default) {opt$countDir <- paste(opt$species, opt$countDir, sep="")}
+if (opt$outDir   == opt.list[[4]]@default) {opt$outDir   <- paste(opt$species, opt$outDir, sep="")}
 if (!file.exists(opt$outDir))   {dir.create(opt$outDir, recursive=TRUE)}
 countDir  <- paste(sub("/$?", "", opt$countDir), "/", sep="")
 outDir    <- paste(sub("/$?", "", opt$outDir), "/", sep="")
@@ -108,14 +108,14 @@ for (i in 1:nrow(samples)) {
     tot.i <- dat[,2] + dat[,3] + dat[,4]
     alpha.i <- pir.i / 100 * tot.i
     beta.i  <- (1 - pir.i / 100) * tot.i
-    
+
     xranges <- t(apply(dat[,c(2,3,5)], MAR=1, FUN=range))
     xranges <- apply(xranges, MAR=2, round)
     xranges[,2] <- xranges[,1] + xranges[,2]
     bal.i <- numeric(length=nrow(xranges))
     bal.i[xranges[,2] == 0] <- 1
     bal.i[xranges[,2] > 0] <- apply(xranges[xranges[,2] > 0,], MAR=1, FUN=function(x) {
-        binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value         
+        binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value
     })
 
     ## make the 'quality' column: cov,bal@alpha,beta
@@ -135,7 +135,7 @@ for (i in 1:nrow(samples)) {
 
 
 ## Add legacy quality scores for compatibility with downstream tools
-legQual <- read.delim(qualFile)
+legQual <- read.delim(opt$quality, as.is=TRUE)
 if (!all(names(legQual)[-1] == samples$Sample)) {stop("Samples in IR and IR quality file do not match")}
 
 legQual <- legQual[legQual$EVENT %in% template$juncID,]
@@ -144,6 +144,8 @@ qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qual
 legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
 
 for (i in 1:nrow(samples)) {
+    legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,N,NA,0=0=0" # set qual scores when missing due to no reads
+    pir[is.na(pir[,i * 2]),i * 2] <- "@NA,NA"                 # set pseudocounts -"-
     pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", pir[,i * 2]), sep="")
 }
 

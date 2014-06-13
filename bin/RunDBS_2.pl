@@ -22,7 +22,7 @@ my $compress = 0;
 
 my $noIRflag = 0; #don't use IR!
 
-GetOptions("help"           => \$helpFlag, 
+GetOptions("help"           => \$helpFlag,
 			  "dbDir=s"     => \$dbDir,
 			  "sp=s"        => \$sp,
 			  "verbose"     => \$verboseFlag,
@@ -61,7 +61,7 @@ OPTIONS:
 	-o OUTPUTDIR, --output OUTPUTDIR	:	output directory to combine samples from... [default vast_out]
 	-dbDir DBDIR				:	Database directory
 	-sp Hsa/Mmu				:	Species selection
-	-z						:	Compress all output files using gzip   
+	-z						:	Compress all output files using gzip
 	-v, --verbose				:	Verbose messages
 	-h, --help				:	Print this message
 ";
@@ -87,7 +87,7 @@ die "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be b
 my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
 my $N=$#files+1;
 
-if ($N == 0) { 
+if ($N == 0) {
     errPrint "Could not find any samples in $outDir/to_combine.\n";
     exit $EXIT_STATUS;
 }
@@ -112,13 +112,18 @@ sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose
 
 unless($noIRflag) {
   ### Gets the PIRs for the Intron Retention pipeline
+  verbPrint "Building quality score table for intron retention\n";
+  sysErrMsg "$binPath/RI_MakeCoverageKey.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
   verbPrint "Building Table for intron retention\n";
-  sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir -c " . abs_path("to_combine") . " -o " . abs_path("raw_incl"); 
+  sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir" .
+              " -c " . abs_path("to_combine") .
+              " -q " . abs_path("to_combine") . "/Coverage_key-$sp$N.IRQ" .
+              " -o " . abs_path("raw_incl");
 }
 
 ### Adds those PSIs to the full database of PSIs (MERGE3m).
 # to be deprecated and replaced by Add_to_FULL (see below) --KH
-#verbPrint "Building non-redundant PSI table (MERGE3m)\n";  
+#verbPrint "Building non-redundant PSI table (MERGE3m)\n";
 #sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
 #"raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
 #"raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
@@ -143,8 +148,8 @@ my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
 
-unless($noIRflag) { 
-  push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab"); 
+unless($noIRflag) {
+  push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
 }
 
 my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
