@@ -31,13 +31,14 @@ my $stringentIRflag = 0; # Run extra genome/eej subtraction step
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
+my $cleanFlag = 0;  # delete genome subtracted reads
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions("bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
 			  "dbDir=s" => \$dbDir,
-			  "c=i" => \$cores,
-			  "pe" => \$pairedEnd,
+			  "c=i" => \$cores, 
+			  "pe" => \$pairedEnd, #deprecated?
 			  "expr" => \$runExprFlag,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
@@ -45,16 +46,17 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "v" => \$verboseFlag,
-			  "readLen=i" => \$readLength,
+			  "readLen=i" => \$readLength, # deprecated
            "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
-			  "stringentIR" => \$stringentIRflag);
+			  "stringentIR" => \$stringentIRflag,
+			  "clean" => \$cleanFlag);
 
 our $EXIT_STATUS = 0;
 
 sub sysErrMsg {
-  my @sysCommand = (shift);
+  my @sysCommand = @_;
   not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
@@ -278,7 +280,14 @@ if (!$genome_sub){
    verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
  }
 
+
 ####
+}
+
+# clean up
+if($cleanFlag) {
+  verbPrint "Cleaning $fq files!";
+  sysErrMsg "rm $fq";
 }
 
 if ($EXIT_STATUS) {
@@ -329,6 +338,11 @@ unless ($genome_sub or $noIRflag) {
               "$binPath/RI_summarize_introns.pl - $runArgs";
 } else {
   verbPrint "Skipping intron retention step...\n";
+}
+
+if($cleanFlag) {
+  verbPrint "Cleaning up $subtractedFq!";
+  sysErrMsg "rm $subtractedFq";
 }
 
 verbPrint "Completed " . localtime;
