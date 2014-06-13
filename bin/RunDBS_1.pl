@@ -102,9 +102,7 @@ OPTIONS:
 	-sp Mmu/Hsa		:	Three letter code for the database (default Hsa)
 	-dbDir db		:	Database directory (default vastdb_curVer/Hsa)
 	-pe			:	Paired end data? (defaults to off)
-	-readLen i		:	Optional read length, otherwise fastq file naming convention enforced (see README)
 	-c i			:	# of cores to use for bowtie and pigz (default 1)
-	-trim once/twice	:	For trimming, it can be trimmed once (at 3') or twice (in an overlapping manner). (default is twice if length > 50)
 	-output OUTPUT, -o	:	Output directory (default <current working directory>)
 	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
@@ -112,6 +110,7 @@ OPTIONS:
 
 	-noIR			:	Don't run intron retention pipeline.. substantially increases speed, works with species without IR libraries (default off)
 	-stringentIR	:	Don't run first filtering step, this will increase speed, but perhaps also artifact potential (default off)
+	-clean		:	RM trimmed and genome-subtracted reads after use. (default off)
 ";
 
 #";
