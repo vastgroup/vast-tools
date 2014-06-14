@@ -33,7 +33,7 @@ my $legacyFlag = 0; # Use old input and output... Not by default.
 my $helpFlag = 0;
 my $cleanFlag = 0;
 
-my $outdir = undef;
+my $outdir;
 
 my $subCommand = shift @ARGV or $helpFlag = 1;
 
@@ -44,8 +44,7 @@ GetOptions("help" => \$helpFlag,
 			  "h" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "output=s" => \$outdir,
-			  "o=s" => \$outdir,
-			  "clean" => \$cleanFlag);
+			  "o=s" => \$outdir);
 
 if($helpFlag and 
 	!defined($subCommand) or
@@ -81,14 +80,9 @@ if (! defined $outdir) {
     $outdir = abs_path($outdir);
 }
 
-# this may need to be altered later --TSW
-if($cleanFlag) {
-  #system("rm -rf $outdir");
-} else {
-  unless($helpFlag or !defined($ARGV[0])) { 
-    mkdir($outdir) unless (-e $outdir);
-    #chdir($outdir);
-  }
+
+unless($helpFlag or !defined($ARGV[0])) { 
+  mkdir($outdir) unless (-e $outdir);
 }
 
 ## Nuts and Bolts...

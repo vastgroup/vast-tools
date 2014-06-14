@@ -82,3 +82,6 @@ verbPrint "Total processed reads: $total_reads\n";
 verbPrint "Total valid reads: $total_reads_accepted\n";
 
 if($total_reads <= 1 or $total_reads_accepted <= 1) { exit 1; }
+
+exit $total_reads_accepted;
+
