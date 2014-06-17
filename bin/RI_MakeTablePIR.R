@@ -135,7 +135,7 @@ for (i in 1:nrow(samples)) {
 
 
 ## Add legacy quality scores for compatibility with downstream tools
-legQual <- read.delim(opt$quality, as.is=TRUE)
+legQual <- read.delim(opt$quality, as.is=TRUE, check.names = FALSE)
 if (!all(names(legQual)[-1] == samples$Sample)) {stop("Samples in IR and IR quality file do not match")}
 
 legQual <- legQual[legQual$EVENT %in% template$juncID,]
