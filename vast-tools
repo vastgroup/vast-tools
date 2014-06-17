@@ -96,4 +96,4 @@ if($subCommand eq "align") {
   $EXIT_STATUS = system("$path/R/psiplotter.R @args");
 }
 
-exit $EXIT_STATUS;
+exit $EXIT_STATUS >> 8;
