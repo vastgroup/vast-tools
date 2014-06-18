@@ -39,15 +39,16 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
 			  "dbDir=s" => \$dbDir,
 			  "c=i" => \$cores, 
-			  "pe" => \$pairedEnd, #deprecated?
+              #"pe" => \$pairedEnd, #deprecated?
 			  "expr" => \$runExprFlag,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
 			  "help" => \$helpFlag,
+			  "h" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "v" => \$verboseFlag,
-			  "readLen=i" => \$readLength, # deprecated
+              #"readLen=i" => \$readLength, # deprecated
            "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
@@ -96,34 +97,29 @@ $dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
-    print "\nUsage:
-
-vast-tools align fastq_file_1 [fastq_file_2] [options]
+    print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]
 
 OPTIONS:
-	-sp Mmu/Hsa		:	Three letter code for the database (default Hsa)
-	-dbDir db		:	Database directory (default vastdb_curVer/Hsa)
-	-pe			:	Paired end data? (defaults to off)
-	-c i			:	# of cores to use for bowtie and pigz (default 1)
-	-output OUTPUT, -o	:	Output directory (default <current working directory>)
-	-expr			:	For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
-	-exprONLY		:	For expression analyses: -exprONLY (only cRPKMs) (default off)
-	-bowtieProg path/bowtie	:	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
+	-sp Mmu/Hsa		Three letter code for the database (default Hsa)
+	-dbDir db		Database directory (default vastdb_curVer/Hsa)
+	-c i			Number of cores to use for bowtie and pigz (default 1)
+	-o, --output	Output directory (default <current working directory>)
+	-expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
+	-exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
+	-bowtieProg path/bowtie	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
 
-	-noIR			:	Don't run intron retention pipeline.. substantially increases speed, works with species without IR libraries (default off)
-	-stringentIR	:	Don't run first filtering step, this will increase speed, but perhaps also artifact potential (default off)
-	-clean		:	RM trimmed and genome-subtracted reads after use. (default off)
+	-noIR			Don't run intron retention pipeline.. substantially increases speed, works with species without IR libraries (default off)
+	-stringentIR		Don't run first filtering step, this will increase speed, but perhaps also artifact potential (default off)
+	-clean			RM trimmed and genome-subtracted reads after use. (default off)
+	-h, --help		Print this help message
 ";
 
-#";
   exit $EXIT_STATUS;
 }
 
 errPrint "Needs species\n" if !$species;
 
 # Command line flags here
-if($pairedEnd and !defined($ARGV[0]) and !defined($ARGV[1])) { $EXIT_STATUS = 1; }
-
 if (defined $ARGV[1]) { $pairedEnd = 1; }
 
 ## Getting sample name and length:
