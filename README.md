@@ -143,9 +143,9 @@ Bayesian inference to estimate the posterior distribution over Psi followed by
 differential analysis of joint emperical posterior distributions with respect to
 Psi.  
 
-``Author Inquiries: Tim Sterne-Weiler [tim dot sterne dot weiler at
+Author Inquiries: Tim Sterne-Weiler [tim dot sterne dot weiler at
 utoronto.ca](mailto:tim.sterne.weiler@utoronto.ca)
-[web](www.utoronto.ca/intron/sterne-weiler.html)``
+[web](www.utoronto.ca/intron/sterne-weiler.html)
 
 ~~~~
 > vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > significant_events.tab
