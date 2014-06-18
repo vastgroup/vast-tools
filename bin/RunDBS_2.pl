@@ -44,6 +44,12 @@ sub errPrint {
   $EXIT_STATUS = 1;
 }
 
+sub errPrintDie {
+  my $errMsg = shift;
+  errPrint $errMsg;
+  exit $EXIT_STATUS if ($EXIT_STATUS != 0);
+}
+
 sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
@@ -53,27 +59,28 @@ sub verbPrint {
 }
 
 if ($helpFlag){
-    errPrint "Usage:
-
-vast-tools combine -o OUTPUTDIR [options]
+    errPrint "Usage: vast-tools combine -o OUTPUTDIR [options]
 
 OPTIONS:
-	-o OUTPUTDIR, --output OUTPUTDIR	:	output directory to combine samples from... [default vast_out]
-	-dbDir DBDIR				:	Database directory
-	-sp Hsa/Mmu				:	Species selection
-	-z						:	Compress all output files using gzip
-	-v, --verbose				:	Verbose messages
-	-h, --help				:	Print this message
+	-o, --output Output directory to combine samples from... [default vast_out]
+	-dbDir DBDIR				Database directory
+	-sp Hsa/Mmu				Species selection
+	-z					Compress all output files using gzip
+	-v, --verbose				Verbose messages
+	-h, --help				Print this help message
 ";
   exit $EXIT_STATUS;
 }
+
+errPrintDie "Need output directory" unless (defined $outDir);
+errPrintDie "The output directory $outDir does not exist" unless (-e $outDir);
 
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../VASTDB";
 }
 $dbDir = abs_path($dbDir);
 $dbDir .= "/$sp";
-errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
+errPrintDie "The database directory $dbDir does not exist" unless (-e $dbDir);
 
 chdir($outDir);
 
@@ -81,8 +88,7 @@ mkdir("raw_incl") unless (-e "raw_incl"); # make new output directories.  --TSW
 mkdir("raw_reads") unless (-e "raw_reads"); # ^
 
 ### Settings:
-#$sp=$ARGV[0];
-die "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
+errPrintDie "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
 
 my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
 my $N=$#files+1;
