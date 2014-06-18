@@ -69,6 +69,12 @@ sub errPrint {
   $EXIT_STATUS++; 
 }
 
+sub errPrintDie {
+  my $errMsg = shift;
+  errPrint $errMsg;
+  exit $EXIT_STATUS if ($EXIT_STATUS != 0);
+}
+
 sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
@@ -117,7 +123,7 @@ OPTIONS:
   exit $EXIT_STATUS;
 }
 
-errPrint "Needs species\n" if !$species;
+errPrintDie "Needs species\n" if !$species;
 
 # Command line flags here
 if (defined $ARGV[1]) { $pairedEnd = 1; }
@@ -128,11 +134,11 @@ my $fq2;
 my $fq;     # takes the fastq file to be processed at each step
 
 if (!defined($fq1)) {
-  die "No FASTQ file given!";
+  errPrintDie "No FASTQ file given!";
 }
 
 if (! -e $fq1) {
-  die "$fq1 does not exist!";
+  errPrintDie "$fq1 does not exist!";
 }
 
 my $fileName1 = $fq1;
