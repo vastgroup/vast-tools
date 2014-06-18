@@ -31,6 +31,8 @@ The VAST-TOOLS software package can be downloaded, unpacked and run as is. It
 does not require any additional installation steps.
 
 ### VASTDB
+(VASTDB download instructions coming soon)
+
 VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
 directory, or in an external location. If the latter, the path of VASTDB must be
 supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can be created in the
