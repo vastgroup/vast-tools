@@ -21,8 +21,8 @@ VAST-TOOLS also requires species-specific library files (collectively known as
 VASTDB), which must be downloaded separately. VASTDB consists of pre-made Bowtie
 indices, annotation, and template files.
 
-VAST-TOOLS and VASTDB Installation
-----------------------------------
+Installation
+------------
 There are two components that need to be installed: VAST-TOOLS software package
 and VASTDB library files.
 
