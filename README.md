@@ -9,13 +9,13 @@ Requirements
 ------------
 
 VAST-TOOLS requires the following software:
-    * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
-    * R 3.0.1 or higher, with the following packages installed:
-        * optparse
-        * RColorBrewer
-        * reshape2
-        * ggplot2
-    * Perl 5.10.1 or higher
+ * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
+ * R 3.0.1 or higher, with the following packages installed:
+  * optparse
+  * RColorBrewer
+  * reshape2
+  * ggplot2
+ * Perl 5.10.1 or higher
 
 VAST-TOOLS also requires species-specific library files (collectively known as
 VASTDB), which must be downloaded separately. VASTDB consists of pre-made Bowtie
