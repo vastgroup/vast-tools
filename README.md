@@ -215,12 +215,6 @@ resulting pdf file will be very large.
 For advanced usage (e.g. plot customizations), see the help description:
 ``vast-tools plot -h``.
 
-Questions 
----------
-Send questions to Manuel Irimia: [mirimia@gmail.com](mailto:mirimia@gmail.com).
-
-Please send the smallest example necessary order to reproduce the error. 
-
 Issues
 ------
 Please report all bugs and issues using the issue tracker on GitHub (url
