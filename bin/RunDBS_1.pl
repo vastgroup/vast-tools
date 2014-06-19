@@ -55,7 +55,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "noIR" => \$noIRflag,
 			  "stringentIR" => \$stringentIRflag,
 			  "clean" => \$cleanFlag,
-			  "minReadDepth=i" => \$minReadNum,
+			  "minReadDepth=i" => \$minReadNum, #to do
 			  "tmpDir=s" => \$tmpDir);
 
 our $EXIT_STATUS = 0;
