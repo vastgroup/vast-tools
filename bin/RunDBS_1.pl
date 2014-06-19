@@ -33,6 +33,7 @@ my $minReadNum;
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
 my $cleanFlag = 0;  # delete genome subtracted reads
+my $tmpDir;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions("bowtieProg=s" => \$bowtie,
@@ -54,7 +55,8 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "noIR" => \$noIRflag,
 			  "stringentIR" => \$stringentIRflag,
 			  "clean" => \$cleanFlag,
-			  "minReadDepth=i" => \$minReadNum);
+			  "minReadDepth=i" => \$minReadNum,
+			  "tmpDir=s" => \$tmpDir);
 
 our $EXIT_STATUS = 0;
 
@@ -187,6 +189,19 @@ verbPrint "Setting output directory to $outdir";
 mkdir("to_combine") unless (-e "to_combine");
 mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 
+# set default tmpDir for sort;
+verbPrint "Setting tmp directory to $tmpDir!";
+unless(defined($tmpDir)) {
+  mkdir("tmp");
+  $tmpDir = abs_path("tmp");  
+} else {
+  $tmpDir = abs_path($tmpDir);  # or try to find it
+  unless(-e $tmpDir) {
+    errPrint "$tmpDir does not exist!";
+  }
+}
+
+
 #length options:
 my ($le, $half_length);
 my $difLE;
@@ -291,26 +306,26 @@ my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/$species"."_COMBI-M-$le - | " .
-             "cut -f 1-4,8 - | sort -Vu -k 1,1 - | " .
+             "cut -f 1-4,8 - | sort -T $tmpDir -Vu -k 1,1 - | " .
              "$binPath/Analyze_COMBI.pl deprecated " .
              "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/EXSK-$le - | " .
-             "cut -f 1-4,8 | sort -Vu -k 1,1 - | " .
+             "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 - | " .
              "$binPath/Analyze_EXSK.pl $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/MULTI-$le - | " .
-             "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+             "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 | " .
              "$binPath/Analyze_MULTI.pl $runArgs";
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/$species"."_MIC-$le - | ".
-            " cut -f 1-4,8 - | sort -Vu -k 1,1 | " .
+            " cut -f 1-4,8 - | sort -T $tmpDir -Vu -k 1,1 | " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
 # Align to intron retention mapped reads here..
@@ -319,12 +334,12 @@ unless ($genome_sub or $noIRflag) {
   $preCmd = getPrefixCmd($fq);
   sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
                   "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
-              "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+              "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize.pl - $runArgs";
   sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
-              "cut -f 1-4,8 | sort -Vu -k 1,1 | " .
+              "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize_introns.pl - $runArgs";
 } else {
@@ -334,6 +349,7 @@ unless ($genome_sub or $noIRflag) {
 if($cleanFlag) {
   verbPrint "Cleaning up $subtractedFq!";
   sysErrMsg "rm $subtractedFq";
+  sysErrMsg "rm -rf $tmpDir";
 }
 
 verbPrint "Completed " . localtime;
