@@ -190,7 +190,7 @@ mkdir("to_combine") unless (-e "to_combine");
 mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 
 # set default tmpDir for sort;
-verbPrint "Setting tmp directory to $tmpDir!";
+verbPrint "Setting tmp directory..";
 unless(defined($tmpDir)) {
   mkdir("tmp");
   $tmpDir = abs_path("tmp");  
@@ -200,7 +200,9 @@ unless(defined($tmpDir)) {
     errPrint "$tmpDir does not exist!";
   }
 }
-
+unless($EXIT_STATUS > 0) {
+  verbPrint "Set tmp directory to $tmpDir!";
+}
 
 #length options:
 my ($le, $half_length);
@@ -349,7 +351,6 @@ unless ($genome_sub or $noIRflag) {
 if($cleanFlag) {
   verbPrint "Cleaning up $subtractedFq!";
   sysErrMsg "rm $subtractedFq";
-  sysErrMsg "rm -rf $tmpDir";
 }
 
 verbPrint "Completed " . localtime;
