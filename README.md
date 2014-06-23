@@ -179,7 +179,7 @@ The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
 will accept, such that we are are sure with at least probability ``-r`` that
 there is a difference of at least ``-m``
 
-Additionally, 'diff' allows you to alter the parameters of the conjugate beta
+Additionally, ``diff`` allows you to alter the parameters of the conjugate beta
 prior distribution, which is set as a uniform beta with shape parameters
 ``--alpha`` and ``--beta`` as 1 and 1 respectively.
 Beta shape parameters greater than one alter this probability distribution, and
@@ -201,14 +201,14 @@ The ``-s`` flag can be used to specify the ``-s SIZE`` of the emperical
 posterior distribution to sample, lower numbers decrease accuracy but increase
 performance.
 
-The 'diff' command is also able to run in parallel.., specify the number of
+The ``diff`` command is also able to run in parallel.., specify the number of
 cores to use with ``-c INT``
-Obviously more cores will increase the speed of 'diff', though it may increase
+Obviously more cores will increase the speed of ``diff``, though it may increase
 the RAM usage as well..
 
 Using the ``-n`` flag to specify the number of lines to read/process at a time,
 will set a max threshold to the RAM used by parallel processing with the ``-c``
-flag.  A lower number means that 'diff' will use significantly less memory,
+flag.  A lower number means that ``diff`` will use significantly less memory,
 however by decreasing ``-n`` you have increased the number of times that the
 ``mclapply`` function must calculate the parallel processing overhead.  The
 default is 100, which works well.
@@ -216,20 +216,21 @@ default is 100, which works well.
 ### Plotting
 
 VAST-TOOLS comes with a plotting script written in R.
-The input format follows the same format from the "combine" step described
+The input format follows the same format from the ``combine`` step described
 above. The output is a pdf of scatterplots (one per AS event) of PSI values.
-To execute from VAST-TOOLS, use the subcommand "plot":
+To execute from VAST-TOOLS, use the subcommand ``plot``:
 
 ~~~~
 > vast-tools plot significant_events.tab
 ~~~~
 
 It is recommended to filter the input file to a subset of events of interest
-before plotting, such as those obtained from "vast-tools diff". Otherwise, the
+before plotting, such as those obtained from ``diff``. Otherwise, the
 resulting pdf file will be very large.
 
-For advanced usage (e.g. plot customizations), see the help description:
-``vast-tools plot -h``.
+Plot customizations such as coloring and ordering of the results can be applied
+using a configuration file. For more details on this advanced usage, see the
+help description: ``vast-tools plot -h``.
 
 Issues
 ------
