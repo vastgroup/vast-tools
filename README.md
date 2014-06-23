@@ -116,8 +116,8 @@ AND
 
 In this step, reads are first aligned against a reference genome to obtain
 unmapped reads, followed by splice junction libraries. Unmapped reads are saved
-in the output directory as <sample>-<length>-e.fq, where <sample> is the sample
-name and <length> is the trimmed read length (e.g. 50). The input reads can be
+in the output directory as ``<sample>-<length>-e.fq``, where ``sample`` is the sample
+name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
 compressed (via gzip) or uncompressed.
 
 Currently, VAST-TOOLS supports two species, human (Hsa) and mouse (Mmu). By
@@ -132,7 +132,7 @@ alignment with expression analysis on mouse data:
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
-can be skipped by supplying the <sample>-<length>-e.fq file as input. VAST-TOOLS
+can be skipped by supplying the ``<sample>-<length>-e.fq`` file as input. VAST-TOOLS
 will recognize the \"-e.fq\" suffix and start at the splice junction alignment
 step. Gene expression analysis *cannot* be run from this stage (you must start
 from the raw reads).
