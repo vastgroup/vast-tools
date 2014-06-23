@@ -35,17 +35,18 @@ does not require any additional installation steps.
 
 VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
 directory, or in an external location. If the latter, the path of VASTDB must be
-supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can be created in the
-root of VAST-TOOLS directory. By default, VAST-TOOLS looks for VASTDB
-inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
+supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can
+be created in the root of VAST-TOOLS directory. By default, VAST-TOOLS looks for
+VASTDB inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
 
 ~~~~
 > cd ~/bin/vast-tools-0.0.1/
 > ln -s <path to VASTDB> VASTDB
 ~~~~
 
-You can test and see if you have everything installed that is necessary to run all 
-of vast-tools, OR vast-tools will try and install R packages on the fly when necessary.
+You can test and see if you have everything installed that is necessary to run
+all of vast-tools, OR vast-tools will try and install R packages on the fly when
+necessary.
 
 ~~~~
 > ./install.packages.R
@@ -81,9 +82,10 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 ### Quick Usage
 
 VAST-TOOLS can be run as simply as:
-NOTE: Unless specified, all options are default, for example the output directory 
-is assumed to be 'vast_out', the database to be <path>/vast-tools-0.0.1/VASTDB, 
-and the species Hsa.. to change these use the ``--output``, ``-dbDir`` and ``-sp`` flags!
+NOTE: Unless specified, all options are default, for example the output
+directory is assumed to be 'vast_out', the database to be
+``<path>/vast-tools-0.0.1/VASTDB``, and the species ``Hsa``. To change these use
+the ``--output``, ``-dbDir`` and ``-sp`` flags!
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz
@@ -98,8 +100,9 @@ and the species Hsa.. to change these use the ``--output``, ``-dbDir`` and ``-sp
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
 
-You can speed up vast-tools significantly by allowing it to use multiple cores by running it on a cluster.
-The ``-c`` flag can be passed to both 'align' and 'diff'.
+You can speed up vast-tools significantly by allowing it to use multiple cores
+by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
+``diff``.
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz -c 8
@@ -117,13 +120,26 @@ in the output directory as <sample>-<length>-e.fq, where <sample> is the sample
 name and <length> is the trimmed read length (e.g. 50). The input reads can be
 compressed (via gzip) or uncompressed.
 
-To enable gene expression analysis, use either the option -expr (PSIs plus cRPKM
-calculations) or -exprONLY (cRPKMs only).
+Currently, VAST-TOOLS supports two species, human (Hsa) and mouse (Mmu). By
+default, the ``-sp`` option is ``Hsa``.
+
+To enable gene expression analysis, use either the option ``-expr`` (PSIs plus
+cRPKM calculations) or ``-exprONLY`` (cRPKMs only). For example, to perform
+alignment with expression analysis on mouse data:
+
+~~~~
+> vast-tools align mouse_tissue.fq.gz -sp Mmu -expr
+~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
 can be skipped by supplying the <sample>-<length>-e.fq file as input. VAST-TOOLS
 will recognize the \"-e.fq\" suffix and start at the splice junction alignment
-step.
+step. Gene expression analysis *cannot* be run from this stage (you must start
+from the raw reads).
+
+~~~~
+> vast-tools align mouse_tissue-e.fq.gz -sp Mmu
+~~~~
 
 ### Combining Results 
 
@@ -134,7 +150,7 @@ intend to compare multiple samples.  This output file contains a psi value and a
 qual column for each sample.
 
 ~~~~
-> vast-tools combine -o outputdir
+> vast-tools combine -o outputdir -sp [Hsa|Mmu]
 ~~~~
 
 ### Differential Splicing Analysis
