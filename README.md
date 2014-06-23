@@ -217,7 +217,7 @@ For advanced usage (e.g. plot customizations), see the help description:
 
 Issues
 ------
-Please report all bugs and issues using the issue tracker on GitHub
+Please report all bugs and issues using the GitHub [issue tracker]
 (https://github.com/vastgroup/vast-tools/issues).
 
 Authors
