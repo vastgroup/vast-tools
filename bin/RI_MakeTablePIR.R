@@ -102,6 +102,11 @@ for (i in 1:nrow(samples)) {
     dat <- dat[dat$Event %in% template$juncID,]
     dat <- dat[!(dat$Event %in% dat$Event[duplicated(dat$Event)]),]  # should never be present
 
+    ## check that filtered input data is not empty
+    if (nrow(dat) == 0) {
+        stop("Filtered input data contains 0 rows. Was the correct species being specified?")
+    }
+
     ## calculate PIR, coverage, balance
     pir.i <- 100 * (dat[,2] + dat[,3]) / (dat[,2] + dat[,3] + 2 * dat[,4])
     cov.i <- dat[,4] + apply(dat[,c(2,3,5)], MAR=1, FUN=median)
