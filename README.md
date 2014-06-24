@@ -10,12 +10,13 @@ Requirements
 
 VAST-TOOLS requires the following software:
  * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
- * R 3.0.1 or higher, with the following packages installed:
+ * R 3.0.1 or higher, with the following packages installed (see Installation Section):
   * optparse
   * RColorBrewer
   * reshape2
   * ggplot2
  * Perl 5.10.1 or higher
+ * GNU coreutils `sort` (default unix sort..) 
 
 VAST-TOOLS also requires species-specific library files (collectively known as
 VASTDB), which must be downloaded separately. VASTDB consists of pre-made Bowtie
@@ -45,7 +46,7 @@ inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
 ~~~~
 
 You can test and see if you have everything installed that is necessary to run all 
-of vast-tools, OR vast-tools will try and install R packages on the fly when necessary.
+of vast-tools, OR vast-tools will try and install R packages on the fly locally as necessary.
 
 ~~~~
 > ./install.packages.R
