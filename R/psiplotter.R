@@ -44,30 +44,32 @@ Input:
   PSI data - one AS event per row - using the standard PSI format
       e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1 Tissue1_Q ... 
   Recommended to use only a subset of AS events instead of the full table
-  otherwise the resulting PDF file will be very large. See options for customizing
-  the maximum number of plots to generate.
+  otherwise the resulting PDF file will be very large. See options for
+  customizing the maximum number of plots to generate.
 
 Output:
   A PDF file will be created with one PSI plot per page.
 
 Customizing plots [optional]:
   The color and ordering of samples can be customized by supplying a plot
-  configuration file. This file is tab-delimited and in the following format:
+  configuration file (psiplotter.config). This file is tab-delimited and must be
+  manually created. The format of psiplotter.config is the following: 
   Order    SampleName    GroupName    RColorCode
   1        Ooctye        EarlyDev     36
   2        Embr_2C       EarlyDev     36
   etc..
  
-  Order 		: The ordering of the samples from left to right.
+  Order 	: The ordering of the samples from left to right.
   SampleName 	: Name of the sample. MUST match sample name in input table.
-  GroupName		: Group name. Use for plotting the average PSI of samples
-      belonging to the same group. Currently supports grouping of ESC, Muscle,
-      Neural, and Tissues. Everything else is ignored.
-  RColorCode	: Color value corresponding to the index of the vector produced by
-      colors(). For example, RColorCode = 36 corresponds to:
+  GroupName	: Group name. Use for plotting the average PSI of samples belonging
+    to the same group. Currently supports grouping of ESC, Muscle, Neural, and
+    Tissues. Everything else is ignored.
+  RColorCode	: Color value corresponding to the index of the vector produced
+    by colors(). For example, RColorCode = 36 corresponds to:
         > cols <- colors()
         > mycolour <- cols[36]
 
+  The samples under SampleName MUST MATCH the names in the PSI input table.
   Only the samples listed in the config file will be represented in the 
   resulting plots. Other samples in the PSI table but not in the config 
   file will be ignored. This may be useful if you want to customize the 

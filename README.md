@@ -36,17 +36,18 @@ does not require any additional installation steps.
 
 VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
 directory, or in an external location. If the latter, the path of VASTDB must be
-supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can be created in the
-root of VAST-TOOLS directory. By default, VAST-TOOLS looks for VASTDB
-inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
+supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can
+be created in the root of VAST-TOOLS directory. By default, VAST-TOOLS looks for
+VASTDB inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
 
 ~~~~
 > cd ~/bin/vast-tools-0.0.1/
 > ln -s <path to VASTDB> VASTDB
 ~~~~
 
-You can test and see if you have everything installed that is necessary to run all 
-of vast-tools, OR vast-tools will try and install R packages on the fly locally as necessary.
+You can test and see if you have everything installed that is necessary to run
+all of vast-tools, OR vast-tools will try and install R packages on the fly when
+necessary.
 
 ~~~~
 > ./install.packages.R
@@ -82,9 +83,10 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 ### Quick Usage
 
 VAST-TOOLS can be run as simply as:
-NOTE: Unless specified, all options are default, for example the output directory 
-is assumed to be 'vast_out', the database to be <path>/vast-tools-0.0.1/VASTDB, 
-and the species Hsa.. to change these use the ``--output``, ``-dbDir`` and ``-sp`` flags!
+NOTE: Unless specified, all options are default, for example the output
+directory is assumed to be 'vast_out', the database to be
+``<path>/vast-tools-0.0.1/VASTDB``, and the species ``Hsa``. To change these use
+the ``--output``, ``-dbDir`` and ``-sp`` flags!
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz
@@ -99,8 +101,9 @@ and the species Hsa.. to change these use the ``--output``, ``-dbDir`` and ``-sp
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
 
-You can speed up vast-tools significantly by allowing it to use multiple cores by running it on a cluster.
-The ``-c`` flag can be passed to both 'align' and 'diff'.
+You can speed up vast-tools significantly by allowing it to use multiple cores
+by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
+``diff``.
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz -c 8
@@ -114,17 +117,30 @@ AND
 
 In this step, reads are first aligned against a reference genome to obtain
 unmapped reads, followed by splice junction libraries. Unmapped reads are saved
-in the output directory as <sample>-<length>-e.fq, where <sample> is the sample
-name and <length> is the trimmed read length (e.g. 50). The input reads can be
+in the output directory as ``<sample>-<length>-e.fq``, where ``sample`` is the sample
+name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
 compressed (via gzip) or uncompressed.
 
-To enable gene expression analysis, use either the option -expr (PSIs plus cRPKM
-calculations) or -exprONLY (cRPKMs only).
+Currently, VAST-TOOLS supports two species, human (Hsa) and mouse (Mmu). By
+default, the ``-sp`` option is ``Hsa``.
+
+To enable gene expression analysis, use either the option ``-expr`` (PSIs plus
+cRPKM calculations) or ``-exprONLY`` (cRPKMs only). For example, to perform
+alignment with expression analysis on mouse data:
+
+~~~~
+> vast-tools align mouse_tissue.fq.gz -sp Mmu -expr
+~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
-can be skipped by supplying the <sample>-<length>-e.fq file as input. VAST-TOOLS
+can be skipped by supplying the ``<sample>-<length>-e.fq`` file as input. VAST-TOOLS
 will recognize the \"-e.fq\" suffix and start at the splice junction alignment
-step.
+step. Gene expression analysis *cannot* be run from this stage (you must start
+from the raw reads).
+
+~~~~
+> vast-tools align mouse_tissue-e.fq.gz -sp Mmu
+~~~~
 
 ### Combining Results 
 
@@ -135,7 +151,7 @@ intend to compare multiple samples.  This output file contains a psi value and a
 qual column for each sample.
 
 ~~~~
-> vast-tools combine -o outputdir
+> vast-tools combine -o outputdir -sp [Hsa|Mmu]
 ~~~~
 
 ### Differential Splicing Analysis
@@ -164,7 +180,7 @@ The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
 will accept, such that we are are sure with at least probability ``-r`` that
 there is a difference of at least ``-m``
 
-Additionally, 'diff' allows you to alter the parameters of the conjugate beta
+Additionally, ``diff`` allows you to alter the parameters of the conjugate beta
 prior distribution, which is set as a uniform beta with shape parameters
 ``--alpha`` and ``--beta`` as 1 and 1 respectively.
 Beta shape parameters greater than one alter this probability distribution, and
@@ -186,14 +202,14 @@ The ``-s`` flag can be used to specify the ``-s SIZE`` of the emperical
 posterior distribution to sample, lower numbers decrease accuracy but increase
 performance.
 
-The 'diff' command is also able to run in parallel.., specify the number of
+The ``diff`` command is also able to run in parallel.., specify the number of
 cores to use with ``-c INT``
-Obviously more cores will increase the speed of 'diff', though it may increase
+Obviously more cores will increase the speed of ``diff``, though it may increase
 the RAM usage as well..
 
 Using the ``-n`` flag to specify the number of lines to read/process at a time,
 will set a max threshold to the RAM used by parallel processing with the ``-c``
-flag.  A lower number means that 'diff' will use significantly less memory,
+flag.  A lower number means that ``diff`` will use significantly less memory,
 however by decreasing ``-n`` you have increased the number of times that the
 ``mclapply`` function must calculate the parallel processing overhead.  The
 default is 100, which works well.
@@ -201,25 +217,26 @@ default is 100, which works well.
 ### Plotting
 
 VAST-TOOLS comes with a plotting script written in R.
-The input format follows the same format from the "combine" step described
+The input format follows the same format from the ``combine`` step described
 above. The output is a pdf of scatterplots (one per AS event) of PSI values.
-To execute from VAST-TOOLS, use the subcommand "plot":
+To execute from VAST-TOOLS, use the subcommand ``plot``:
 
 ~~~~
 > vast-tools plot significant_events.tab
 ~~~~
 
 It is recommended to filter the input file to a subset of events of interest
-before plotting, such as those obtained from "vast-tools diff". Otherwise, the
+before plotting, such as those obtained from ``diff``. Otherwise, the
 resulting pdf file will be very large.
 
-For advanced usage (e.g. plot customizations), see the help description:
-``vast-tools plot -h``.
+Plot customizations such as coloring and ordering of the results can be applied
+using a configuration file. For more details on this advanced usage, see the
+help description: ``vast-tools plot -h``.
 
 Issues
 ------
-Please report all bugs and issues using the issue tracker on GitHub (url
-coming soon!)
+Please report all bugs and issues using the GitHub [issue tracker]
+(https://github.com/vastgroup/vast-tools/issues).
 
 Authors
 -------
