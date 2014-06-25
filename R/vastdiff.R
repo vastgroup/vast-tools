@@ -67,6 +67,8 @@ option.list <- list(
         help = "Probability threshold for P( (psi1 - psi2) > x ) > threshold [default %default]"),
     make_option(c("-m", "--minDiff"), type = "numeric", default = 0.1,
         help = "Threshold for min diff where P( (psi1 - psi2) > threshold ) > --prob [default %default]"),
+    make_option(c("-r", "--minReads"), type = "numeric", default = 5,
+        help = "Threshold for min reads in a sample (use this flag unless you believe the prior) [default %default]"),
     make_option(c("--alpha"), type = "numeric", default = 1,
         help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
     make_option(c("--beta"), type = "numeric", default = 1,
@@ -200,8 +202,8 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 								} )
 
     # if no data, next;
-    if(shapeFirst[1] + shapeFirst[2] == 2 &&
-		 shapeSecond[1] + shapeSecond[2] == 2) {
+    if(shapeFirst[1] + shapeFirst[2] < (opt$minReads + opt$alpha + opt$beta) ||
+		 shapeSecond[1] + shapeSecond[2] < (opt$minReads + opt$alpha + opt$beta) ) {
 		next
 	 }
 
