@@ -161,8 +161,7 @@ differential analysis of joint emperical posterior distributions with respect to
 Psi.  
 
 Author Inquiries: Tim Sterne-Weiler [tim.sterne.weiler at utoronto.ca](mailto:tim.sterne.weiler@utoronto.ca) 
-
- [web](www.utoronto.ca/intron/sterne-weiler.html)
+[web](http://www.utoronto.ca/intron/sterne-weiler.html)
 
 ~~~~
 > vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > significant_events.tab
@@ -172,13 +171,17 @@ Author Inquiries: Tim Sterne-Weiler [tim.sterne.weiler at utoronto.ca](mailto:ti
 
 Probably the most important extra options to consider are ``-r PROB (--prob)``,
 ``-m MINDIFF (--minDiff)`` and ``-e MINREADS (--minReads)`` These represent the stringency criterion for
-visual output and filtering of input to STDOUT The ``-r`` flag represents the
+visual output and filtering of input to STDOUT.
+
+The ``-r`` flag represents the
 minimal probability of acceptance that is required to consider a comparison to
 be 'believable'.  By default this is 0.9, but it can be increased depending on
 stringency requirements.  
+
 The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
 will accept, such that we are are sure with at least probability ``-r`` that
 there is a difference of at least ``-m``.
+
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
 and/or is believable beyond an uninformative prior (like the uniform default),
