@@ -178,7 +178,7 @@ be 'believable'.  By default this is 0.9, but it can be increased depending on
 stringency requirements.  
 The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
 will accept, such that we are are sure with at least probability ``-r`` that
-there is a difference of at least ``-m``
+there is a difference of at least ``-m``.
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
 and/or is believable beyond an uninformative prior (like the uniform default),
