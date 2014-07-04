@@ -181,8 +181,8 @@ Bayesian inference to estimate the posterior distribution over Psi followed by
 differential analysis of joint emperical posterior distributions with respect to
 Psi.  
 
-Author Inquiries: Tim Sterne-Weiler [tim.sterne.weiler at utoronto.ca](mailto:tim.sterne.weiler@utoronto.ca) 
-[web](http://www.utoronto.ca/intron/sterne-weiler.html)
+Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://www.utoronto.ca/intron/sterne-weiler.html)
+
 
 ~~~~
 > vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > significant_events.tab
@@ -243,6 +243,7 @@ however by decreasing ``-n`` you have increased the number of times that the
 ``mclapply`` function must calculate the parallel processing overhead.  The
 default is 100, which works well.
 
+
 ### Plotting
 
 VAST-TOOLS comes with a plotting script written in R.
@@ -267,14 +268,14 @@ Issues
 Please report all bugs and issues using the GitHub [issue tracker]
 (https://github.com/vastgroup/vast-tools/issues).
 
-Authors
--------
-Manuel Irimia
-Nuno Barbosa-Morais
-Ulrich Braunschweig
-Sandy Pan
-Kevin Ha
-Tim Sterne-Weiler
+Contributions
+-------------
+* Manuel Irimia
+* Nuno Barbosa-Morais 
+* Ulrich Braunschweig 
+* Sandy Pan
+* Kevin Ha
+* Tim Sterne-Weiler
 
 Citation
 --------
