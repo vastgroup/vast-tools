@@ -33,12 +33,14 @@ downloadDb <- function(speUrl, speFile) {
 
 writeLines("Looking for VAST Database [VASTDB]")
 if(!file.exists("VASTDB")) {
-  writeLines("Cannot find 'VASTDB'.. Do you want to install automatically? [y/n]")
+  writeLines("Cannot find 'VASTDB'.. Do you want me to download it for you? [y/n]")
   auto <- readLines(file("stdin"),1)
+  close(file("stdin"))
   if(as.character(auto) == 'y') {
-    writeLines("Trying to install automatically.. Please choose database [hg19/mm9/both] [h/m/b]")
+    writeLines("OK I will try... Please choose database [hg19/mm9/both] [h/m/b]")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
+    close(file("stdin"))
     if(db == 'h' || db == 'b') {
       downloadDb(humanUrl, humanDbFile)
     }
