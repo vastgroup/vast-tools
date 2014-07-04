@@ -194,16 +194,19 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
 	
 	 # Posterior parameters... Prior given from command line --alpha, --beta
-	 shapeFirst <- unlist(lapply( tabLine[repA.qualInd], function(x) { 
+	 shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
 										parseQual(x, opt$alpha, opt$beta) 
-								} ))
-	 shapeSecond <- unlist(lapply( tabLine[repB.qualInd], function(x) {
+								} )
+	 shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
 										parseQual(x, opt$alpha, opt$beta)
-								} ))
+								} )
+
+    totalFirst <- unlist(lapply( shapeFirst, function(x) { x[1] + x[2] }))
+    totalSecond <- unlist(lapply( shapeSecond, function(x) { x[1] + x[2] }))
 
     # if no data, next;
-    if( ((shapeFirst[1] + shapeFirst[2]) < (opt$minReads + opt$alpha + opt$beta)) ||
-		  ((shapeSecond[1] + shapeSecond[2]) < (opt$minReads + opt$alpha + opt$beta)) ) {
+    if( all(totalFirst < (opt$minReads + opt$alpha + opt$beta)) ||
+		  all(totalSecond < (opt$minReads + opt$alpha + opt$beta)) ) {
 		return(NULL)
 	 }
 
