@@ -45,7 +45,7 @@ if(!file.exists("VASTDB")) {
       downloadDb(humanUrl, humanDbFile)
     }
     if(db == 'm' || db == 'b') {
-		downloadDb(mouseUrl, mouseDbFile)
+      downloadDb(mouseUrl, mouseDbFile)
     }
   }
 } else {
