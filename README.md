@@ -51,7 +51,15 @@ Then you can automatically install the database files using:
 ~~~~
 Follow the command prompt to install `automatically`, and that should be it!
 
-OR install human (hsa), or mouse (mmu), or both manually to any location by:
+Of course you should add the vast-tools-0.0.1 directory to your PATH:
+~~~~
+$ export PATH=~/bin/vast-tools-0.0.1:$PATH
+$ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
+~~~~
+
+
+For `manual`, install human (hsa), or mouse (mmu), or both to any location by:
+
 Human (hg19):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz
@@ -78,18 +86,6 @@ on the fly when necessary.
 > ./install.packages.R
 ~~~~
 
-And of course you should add the vast-tools-0.0.1 directory to your PATH:
-IN bash
-~~~~
-$ export PATH=~/bin/vast-tools-0.0.1:$PATH
-$ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
-~~~~
-
-OR IN csh
-~~~~
-% setenv PATH ~/bin/vast-tools-0.0.1/:$PATH
-% echo 'setenv PATH ~/bin/vast-tools-0.0.1/:$PATH' >> ~/.cshrc
-~~~~
 
 Usage
 -----
