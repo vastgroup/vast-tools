@@ -44,29 +44,29 @@ VAST-TOOLS looks for VASTDB inside its own directory
 > git clone https://github.com/vastgroup/vast-tools.git
 > cd vast-tools-0.0.1
 ~~~~
+**Automatic DB Installation:**
 
 Then you can automatically install the database files using:
 ~~~~
 > ./install.packages.R
 ~~~~
-Follow the command prompt to install `automatically`, and that should be it!
+Follow the command prompt to install automatically, and that should be it!
 
 Of course you should add the vast-tools-0.0.1 directory to your PATH:
 ~~~~
 $ export PATH=~/bin/vast-tools-0.0.1:$PATH
 $ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
 ~~~~
+**Manual DB Installation:**
 
+For manual, install human (hsa), or mouse (mmu), or both to any location by:
 
-For `manual`, install human (hsa), or mouse (mmu), or both to any location by:
-
-Human (hg19):
+Human (hg19) [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz
 > tar xzvf vastdb.hsa.7.3.14.tar.gz
 ~~~~
-
-Mouse (mm9):
+Mouse (mm9) [vastdb.mmu.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz
 > tar xzvf vastdb.mmu.7.3.14.tar.gz
