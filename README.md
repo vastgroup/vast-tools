@@ -32,22 +32,47 @@ The VAST-TOOLS software package can be downloaded, unpacked and run as is. It
 does not require any additional installation steps.
 
 ### VASTDB
-(VASTDB download instructions coming soon)
 
 VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
-directory, or in an external location. If the latter, the path of VASTDB must be
-supplied to `vast-tools` via ``--dbDir`` or alternatively, a symbolic link can
-be created in the root of VAST-TOOLS directory. By default, VAST-TOOLS looks for
-VASTDB inside its own directory (e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
+directory, or in an external location. If the latter, the path of VASTDB 
+must be supplied to `vast-tools` via `--dbDir` or alternatively, a symbolic 
+link can be created in the root of VAST-TOOLS directory. By default, 
+VAST-TOOLS looks for VASTDB inside its own directory 
+(e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
 
 ~~~~
-> cd ~/bin/vast-tools-0.0.1/
+> git clone https://github.com/vastgroup/vast-tools.git
+> cd vast-tools-0.0.1
+~~~~
+
+Then you can automatically install the database files using:
+~~~~
+> ./install.packages.R
+~~~~
+Follow the command prompt to install `automatically`, and that should be it!
+
+OR install human (hsa), or mouse (mmu), or both manually to any location by:
+Human (hg19):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz
+> tar xzvf vastdb.hsa.7.3.14.tar.gz
+~~~~
+
+Mouse (mm9):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz
+> tar xzvf vastdb.mmu.7.3.14.tar.gz
+~~~~
+
+If manually installed to central location, link the database files to vast-tools.0.0.1
+directory using:
+~~~~
 > ln -s <path to VASTDB> VASTDB
 ~~~~
 
-You can test and see if you have everything installed that is necessary to run
-all of vast-tools, OR vast-tools will try and install R packages on the fly when
-necessary.
+If you did a manual install, you can test and see if you have everything that is 
+necessary to run all of vast-tools, OR vast-tools will try and install R packages 
+on the fly when necessary.
 
 ~~~~
 > ./install.packages.R
