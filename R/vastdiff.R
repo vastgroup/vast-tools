@@ -194,17 +194,17 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
 	
 	 # Posterior parameters... Prior given from command line --alpha, --beta
-	 shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
+	 shapeFirst <- unlist(lapply( tabLine[repA.qualInd], function(x) { 
 										parseQual(x, opt$alpha, opt$beta) 
-								} )
-	 shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
+								} ))
+	 shapeSecond <- unlist(lapply( tabLine[repB.qualInd], function(x) {
 										parseQual(x, opt$alpha, opt$beta)
-								} )
+								} ))
 
     # if no data, next;
-    if(shapeFirst[1] + shapeFirst[2] < (opt$minReads + opt$alpha + opt$beta) ||
-		 shapeSecond[1] + shapeSecond[2] < (opt$minReads + opt$alpha + opt$beta) ) {
-		next
+    if( ((shapeFirst[1] + shapeFirst[2]) < (opt$minReads + opt$alpha + opt$beta)) ||
+		  ((shapeSecond[1] + shapeSecond[2]) < (opt$minReads + opt$alpha + opt$beta)) ) {
+		return(NULL)
 	 }
 
 	 # Sample Posterior Distributions
