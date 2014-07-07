@@ -47,7 +47,7 @@ my %samples;
 my %corrected_reads;
 my %raw_reads;
 foreach my $file (@files){
-    my ($sample)=$file=~/.+\/(.+?)\./;
+    my ($sample)=$file=~/([^\/]+)\.IR$/;
 
     $samples{$sample}=1;
     open (IN, $file);
@@ -72,12 +72,18 @@ foreach my $file (@files){
     close IN;
 }
 
+my $M = keys %samples;
+if (! %samples or $M != $N) {
+    die "Number of parsed samples ($M) does not match number of input samples
+        ($N)";
+}
+
 my $outputFile = "$combineFolder/Coverage_key-$species$N.IRQ";
 open (OUT, ">$outputFile") or die "Failed to open $outputFile";
 
 print OUT "EVENT";
-foreach my $samples (sort keys %samples){
-    print OUT "\t$samples";
+foreach my $sample (sort keys %samples){
+    print OUT "\t$sample";
 }
 print OUT "\n";
 
