@@ -48,7 +48,7 @@ VAST-TOOLS looks for VASTDB inside its own directory
 
 Then you can automatically install the database files using:
 ~~~~
-> ./install.packages.R
+> ./install.R
 ~~~~
 Follow the command prompt to install automatically, and that should be it!
 
@@ -83,7 +83,7 @@ necessary to run all of vast-tools, OR vast-tools will try and install R package
 on the fly when necessary.
 
 ~~~~
-> ./install.packages.R
+> ./install.R
 ~~~~
 
 
