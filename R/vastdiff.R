@@ -63,7 +63,7 @@ option.list <- list(
         help = "Output directory, [default vast_out]\n
 
 [statistical options]"),
-    make_option(c("-r", "--prob"), type = "numeric", default = 0.9,
+    make_option(c("-r", "--prob"), type = "numeric", default = 0.95,
         help = "Probability threshold for P( (psi1 - psi2) > x ) > threshold [default %default]"),
     make_option(c("-m", "--minDiff"), type = "numeric", default = 0.1,
         help = "Threshold for min diff where P( (psi1 - psi2) > threshold ) > --prob [default %default]"),
