@@ -167,4 +167,4 @@ pir <- data.frame(template[,1:6], pir)
 write.table(pir, file=paste(outDir, "INCLUSION_LEVELS_IR-", species, nrow(samples), ".tab", sep=""),
             row.names=F, col.names=T, quote=F, sep='\t')
 
-if (verb) {cat("... done.\n\n")}
+if (verb) {cat("... done.\n")}
