@@ -196,7 +196,7 @@ visual output and filtering of input to STDOUT.
 
 The ``-r`` flag represents the
 minimal probability of acceptance that is required to consider a comparison to
-be 'believable'.  By default this is 0.9, but it can be increased depending on
+be 'believable'.  By default this is 0.95, but it can be altered depending on
 stringency requirements.  
 
 The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
