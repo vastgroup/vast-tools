@@ -177,8 +177,7 @@ qual column for each sample.
 
 ### Differential Splicing Analysis
 
-Bayesian inference to estimate the posterior distribution over Psi followed by
-differential analysis of joint emperical posterior distributions with respect to
+Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
 Psi.  
 
 Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://www.utoronto.ca/intron/sterne-weiler.html)
