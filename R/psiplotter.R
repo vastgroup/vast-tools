@@ -161,7 +161,10 @@ get_beta_ci <- function(q) {
 
 format_table <- function(m) {
   # Format table to keep only PSIs and convert exon metadata as rownames
-  id <- paste(m$COMPLEX, m$GENE, m$COORD, m$LENGTH, sep="=")
+  id <- paste(m$GENE, m$COORD, 
+            paste(m$LENGTH, "nt"), 
+            paste("Type = ", m$COMPLEX), 
+            sep=", ")
   
   # Extract PSIs
   r <- convert_psi(m[,7:ncol(m)])
