@@ -47,13 +47,17 @@ Input:
   otherwise the resulting PDF file will be very large. See options for
   customizing the maximum number of plots to generate.
 
+  PSI values that are \"NA\" or have \"NA\" quality scores will not be plotted
+  (not point will be drawn).
+
 Output:
   A PDF file will be created with one PSI plot per page.
 
 Customizing plots [optional]:
   The color and ordering of samples can be customized by supplying a plot
   configuration file (psiplotter.config). This file is tab-delimited and must be
-  manually created. The format of psiplotter.config is the following: 
+  manually created. The format of psiplotter.config is the following (the header
+  line is required): 
   Order    SampleName    GroupName    RColorCode
   1        Ooctye        EarlyDev     36
   2        Embr_2C       EarlyDev     36
@@ -237,7 +241,7 @@ for (i in 1:nplot) {
   text(seq(1, ncol(PSIs), by=1), 
        par("usr")[3] - 3.5, 
        labels = samples, 
-       srt = 45, adj=c(1,1), xpd = TRUE,cex=0.5)
+       srt = 45, adj=c(1,1), xpd = TRUE,cex=0.6)
   
   
   # Draw error bars

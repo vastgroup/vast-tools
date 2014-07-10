@@ -35,7 +35,7 @@ preprocess_sample_colors <- function(data, database) {
                qual=data[, seq(2, ncol(data), 2)], 
                col=mycols, group.index=NULL, group.col=NULL)
    } else {
-     db <- read.csv(database, sep="\t")
+     db <- read.table(database, header = T, sep="\t")
      
      # check input file
      if (ncol(db) < 4) {
