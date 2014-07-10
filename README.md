@@ -260,7 +260,8 @@ resulting pdf file will be very large.
 
 Plot customizations such as coloring and ordering of the results can be applied
 using a configuration file. For more details on this advanced usage, see the
-help description: ``vast-tools plot -h``.
+help description: ``vast-tools plot -h``. An example of sample input data and
+configuration file template can be found under ``R/sample_data``.
 
 Issues
 ------
