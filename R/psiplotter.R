@@ -176,7 +176,7 @@ if (!grepl("^GENE", colnames(all_events)[1])) {
 
 if (nrow(all_events) > opt$options$max) {
   warning(paste("Too many entries in input file. Plotting only the first",
-                opt$options$max, ". Try splitting your input file into smaller"
+                opt$options$max, ". Try splitting your input file into smaller",
                 "files and running them separately."))
 }
 
