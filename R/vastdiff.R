@@ -57,7 +57,7 @@ option.list <- list(
 [output options]"),
     make_option(c("-f", "--filter"), type = "logical", default = TRUE,
         help = "Filter output for differential events only [default %default]"),
-    make_option(c("-d", "--pdf"), type = "character", default = "plotDiff_out", metavar="FILE",
+    make_option(c("-d", "--pdf"), type = "character", default = "input.DIFF_plots", metavar="FILE",
         help = "Plot visual output (pdf) for differential events into FILE [default %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
         help = "Output directory, [default vast_out]\n
@@ -177,7 +177,12 @@ repB.qualInd <- repBind + 1
 alphaList <- seq(0,1,0.01)
 
 ### TMP OUT
-pdf(paste(c(opt$pdf, ".pdf"), collapse=""), width=7, height=3)
+if(opt$pdf == "input.DIFF_plots") {
+  pdfname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_plots.pdf", basename(opt$input))
+} else {
+  pdfname <- paste(c(opt$pdf, ".pdf"), collapse="")
+}
+pdf(pdfname, width=7, height=3)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
