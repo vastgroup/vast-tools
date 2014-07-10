@@ -61,12 +61,12 @@ $ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
 
 For manual, install human (hsa), or mouse (mmu), or both to any location by:
 
-Human (hg19) [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz):
+Human (hg19) - 6.0G [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz
 > tar xzvf vastdb.hsa.7.3.14.tar.gz
 ~~~~
-Mouse (mm9) [vastdb.mmu.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz):
+Mouse (mm9) - 7.9G [vastdb.mmu.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz
 > tar xzvf vastdb.mmu.7.3.14.tar.gz
@@ -131,7 +131,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 ~~~~
 AND
 ~~~~
-> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 --filter=T -c 8 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
 ~~~~
 
 ### Alignment
