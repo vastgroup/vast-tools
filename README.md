@@ -184,7 +184,7 @@ Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utor
 
 
 ~~~~
-> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > significant_events.tab
+> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > outputdir/significant_events.tab
 ~~~~
 
 *Statistics Options*
@@ -251,7 +251,7 @@ above. The output is a pdf of scatterplots (one per AS event) of PSI values.
 To execute from VAST-TOOLS, use the subcommand ``plot``:
 
 ~~~~
-> vast-tools plot significant_events.tab
+> vast-tools plot outputdir/significant_events.tab
 ~~~~
 
 It is recommended to filter the input file to a subset of events of interest
