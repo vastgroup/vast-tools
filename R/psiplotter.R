@@ -85,7 +85,9 @@ option.list <- list(
   make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
               help = "Maximum number of AS events to plot [first %default]"),
   make_option(c("-o", "--output"), type = "character", default = NULL,
-              help = "Output directory [%default]"),
+              meta="DIR",
+              help = "Output directory where pdf will be saved
+                    [default is same location as input data]"),
   make_option(c("--noErrorBar"), type = "logical", default = FALSE,
               dest = "noErrorBar",
               help = "Do not plot error bars [%default]")
@@ -119,10 +121,7 @@ verbPrint(paste("\n// Input file:", file))
 verbPrint(paste("// Tissue Group file:", 
                 ifelse(is.null(tissueFile), "Did not provide", tissueFile)))
 
-#### Format input data #########################################################
-
-all_events <- read.csv(file, sep="\t")
-
+#### Format input data functions ##############################################
 convert_psi <- function(t) {
   # Helper function to filter and return PSI values
   # PSIs are converted to NA if first coverage code is 'N'
@@ -168,6 +167,8 @@ format_table <- function(m) {
   rownames(r) <- id
   return(r)
 }
+
+all_events <- read.csv(file, sep="\t")
 
 # Perform some checks #########################################################
 if (!grepl("^GENE", colnames(all_events)[1])) {
@@ -242,7 +243,8 @@ for (i in 1:nplot) {
   # Draw error bars
   if (! opt$options$noErrorBar) {
     ci <- get_beta_ci(reordered$qual[i,])
-      
+    ci[,is.na(reordered$data[i,])] <- NA
+    
     arrows(1:ncol(PSIs), ci[,1],
            1:ncol(PSIs), ci[,2],
            length = 0.025,
