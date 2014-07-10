@@ -74,8 +74,8 @@ preprocess_sample_colors <- function(data, database) {
      for (i in 1:length(groups)) {
        mygroups[[i]] <- which(colnames(data.new) %in%  
                                 db[db$GroupName == groups[i],"SampleName"])
-       mygroupcol[i] <- colors()[unique(db[db$GroupName == groups[i], 
-                                           "RColorCode"])]
+       mygroupcol[i] <- colors()[db[db$GroupName == groups[i], 
+                                           "RColorCode"][1]]
      }
      names(mygroups) <- groups
      names(mygroupcol) <- groups
