@@ -50,6 +50,8 @@ Input:
   PSI values that are \"NA\" or have \"NA\" quality scores will not be plotted
   (not point will be drawn).
 
+  If no input file is provided, standard input will be used.
+
 Output:
   A PDF file will be created with one PSI plot per page.
 
@@ -106,13 +108,18 @@ if (length(opt$args) == 0) {
   stop("Missing arguments")
 }
 
+using_stdin <- FALSE
 file <- opt$args[1]
-if (!file.exists(file))
+if (file == "-") {
+    file <- file('stdin')
+    using_stdin <- TRUE
+} else if (!file.exists(file)) {
   stop(paste("Input PSI file", file, "doesn't exist!"))
+}
 
-tissueFile <- opt$options$config
-if (!(is.null(tissueFile) || file.exists(tissueFile)))
-  stop(paste("Tissue Group file", tissueFile, "doesn't exist!"))
+config_file <- opt$options$config
+if (!(is.null(config_file) || file.exists(config_file)))
+  stop(paste("Tissue Group file", config_file, "doesn't exist!"))
 
 verbPrint <- function(s) {
   if (opt$options$verbose) {
@@ -121,9 +128,9 @@ verbPrint <- function(s) {
 }
 
 verbPrint(paste("PSI Plotter"))
-verbPrint(paste("\n// Input file:", file))
+verbPrint(paste("\n// Input file:", ifelse(using_stdin, "STDIN", file)))
 verbPrint(paste("// Tissue Group file:", 
-                ifelse(is.null(tissueFile), "Did not provide", tissueFile)))
+                ifelse(is.null(config_file), "Did not provide", config_file)))
 
 #### Format input data functions ##############################################
 convert_psi <- function(t) {
@@ -195,7 +202,7 @@ all_events_formatted <- format_table(all_events)
 #   col         - vector of colours that will be plotted
 #   group.index - list of indices for each sample group (e.g. ESC, Neural, etc.)
 #   group.col   - corresponding color for sample group
-reordered <- preprocess_sample_colors(all_events_formatted, tissueFile)
+reordered <- preprocess_sample_colors(all_events_formatted, config_file)
 verbPrint(paste("//", ncol(reordered$data), "out of", 
                 ncol(all_events_formatted) / 2, "samples detected"))
 PSIs <- as.matrix(reordered$data)
@@ -209,11 +216,16 @@ verbPrint("// Plotting...")
 supercolors <- reordered$col
 
 # Set output file
-outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
+outfile <- "PSI_plots.pdf"
+if (!using_stdin) {
+  outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
+}
 
 # Check if output directory was specified
 if (is.null(opt$options$output)) {
-  outfile <- file.path(dirname(file), outfile)
+  if (!using_stdin) {
+    outfile <- file.path(dirname(file), outfile)
+  }
 } else {
   # Create directory if necessary
   if (!file.exists(opt$options$output))
@@ -257,7 +269,7 @@ for (i in 1:nplot) {
   }
   
   # Draw horizontal lines
-  if (!is.null(tissueFile)) {
+  if (!is.null(config_file)) {
     abline(h=mean(PSIs[i, reordered$group.index[["ESC"]] ], na.rm=TRUE), 
            col=reordered$group.col["ESC"], lwd=0.5)
     abline(h=mean(PSIs[i, reordered$group.index[["Neural"]] ], na.rm=TRUE),
