@@ -112,7 +112,7 @@ OPTIONS:
 	--sp Mmu/Hsa		Three letter code for the database (default Hsa)
 	--dbDir db		Database directory (default vastdb_curVer/Hsa)
 	-c i			Number of cores to use for bowtie (default 1)
-	-o, --output		Output directory (default <current working directory>)
+	-o, --output		Output directory (default vast_out)
 	--expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
 	--bowtieProg path	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
