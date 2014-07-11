@@ -110,7 +110,7 @@ if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
 
 OPTIONS:
 	--sp Mmu/Hsa		Three letter code for the database (default Hsa)
-	--dbDir db		Database directory (default vastdb_curVer/Hsa)
+	--dbDir db		Database directory (default VASTDB)
 	-c i			Number of cores to use for bowtie (default 1)
 	-o, --output		Output directory (default vast_out)
 	--expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
