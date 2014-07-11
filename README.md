@@ -101,6 +101,7 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 > vast-tools [sub-command] -h
 ~~~~
 
+
 ### Quick Usage
 
 VAST-TOOLS can be run as simply as:
