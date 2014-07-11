@@ -164,6 +164,11 @@ from the raw reads).
 > vast-tools align mouse_tissue-e.fq.gz -sp Mmu
 ~~~~
 
+Although you can specify two fastq files to vast-tools in a 'paired-end' format,
+the program treats both mates independently because of trimming such that
+`> vast-tools align fwd.fq.gz rev.fq.gz` is the same as running the program with
+`> vast-tools align <(cat fwd.fq.gz rev.fq.gz)` catenated reads.
+
 ### Combining Results 
 
 ``vast-tools combine`` will join all of the files sent to the same output
