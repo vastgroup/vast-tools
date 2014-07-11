@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 ### Generate PIR (percent intron retention) tables from normalized count files containing
 ### EIJ1, EIJ2, EEJ, I read counts. All such files in the given collection will be merged.
