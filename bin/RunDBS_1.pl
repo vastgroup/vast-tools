@@ -117,7 +117,7 @@ OPTIONS:
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
 	--bowtieProg path	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
 
-	--noIR			Don't run intron retention pipeline.. (substantially increases speed) (default off)
+	--noIR			Don't run intron retention pipeline (substantially increases speed) (default off)
 	--stringentIR		Don't run first filtering step of IR, (this will increase speed a little) (default off)
 	--keep			Don't remove trimmed and genome-subtracted reads after use. (default off)
 	-h, --help		Print this help message
