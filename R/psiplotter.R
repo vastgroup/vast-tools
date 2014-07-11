@@ -47,13 +47,19 @@ Input:
   otherwise the resulting PDF file will be very large. See options for
   customizing the maximum number of plots to generate.
 
+  PSI values that are \"NA\" or have \"NA\" quality scores will not be plotted
+  (not point will be drawn).
+
+  If no input file is provided, standard input will be used.
+
 Output:
   A PDF file will be created with one PSI plot per page.
 
 Customizing plots [optional]:
   The color and ordering of samples can be customized by supplying a plot
   configuration file (psiplotter.config). This file is tab-delimited and must be
-  manually created. The format of psiplotter.config is the following: 
+  manually created. The format of psiplotter.config is the following (the header
+  line is required): 
   Order    SampleName    GroupName    RColorCode
   1        Ooctye        EarlyDev     36
   2        Embr_2C       EarlyDev     36
@@ -85,7 +91,9 @@ option.list <- list(
   make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
               help = "Maximum number of AS events to plot [first %default]"),
   make_option(c("-o", "--output"), type = "character", default = NULL,
-              help = "Output directory [%default]"),
+              meta="DIR",
+              help = "Output directory where pdf will be saved
+                    [default is same location as input data]"),
   make_option(c("--noErrorBar"), type = "logical", default = FALSE,
               dest = "noErrorBar",
               help = "Do not plot error bars [%default]")
@@ -100,13 +108,18 @@ if (length(opt$args) == 0) {
   stop("Missing arguments")
 }
 
+using_stdin <- FALSE
 file <- opt$args[1]
-if (!file.exists(file))
+if (file == "-") {
+    file <- file('stdin')
+    using_stdin <- TRUE
+} else if (!file.exists(file)) {
   stop(paste("Input PSI file", file, "doesn't exist!"))
+}
 
-tissueFile <- opt$options$config
-if (!(is.null(tissueFile) || file.exists(tissueFile)))
-  stop(paste("Tissue Group file", tissueFile, "doesn't exist!"))
+config_file <- opt$options$config
+if (!(is.null(config_file) || file.exists(config_file)))
+  stop(paste("Tissue Group file", config_file, "doesn't exist!"))
 
 verbPrint <- function(s) {
   if (opt$options$verbose) {
@@ -115,14 +128,11 @@ verbPrint <- function(s) {
 }
 
 verbPrint(paste("PSI Plotter"))
-verbPrint(paste("\n// Input file:", file))
+verbPrint(paste("\n// Input file:", ifelse(using_stdin, "STDIN", file)))
 verbPrint(paste("// Tissue Group file:", 
-                ifelse(is.null(tissueFile), "Did not provide", tissueFile)))
+                ifelse(is.null(config_file), "Did not provide", config_file)))
 
-#### Format input data #########################################################
-
-all_events <- read.csv(file, sep="\t")
-
+#### Format input data functions ##############################################
 convert_psi <- function(t) {
   # Helper function to filter and return PSI values
   # PSIs are converted to NA if first coverage code is 'N'
@@ -169,6 +179,8 @@ format_table <- function(m) {
   return(r)
 }
 
+all_events <- read.csv(file, sep="\t")
+
 # Perform some checks #########################################################
 if (!grepl("^GENE", colnames(all_events)[1])) {
   stop("Invalid column names. Does your input file contain the correct header?")
@@ -190,7 +202,7 @@ all_events_formatted <- format_table(all_events)
 #   col         - vector of colours that will be plotted
 #   group.index - list of indices for each sample group (e.g. ESC, Neural, etc.)
 #   group.col   - corresponding color for sample group
-reordered <- preprocess_sample_colors(all_events_formatted, tissueFile)
+reordered <- preprocess_sample_colors(all_events_formatted, config_file)
 verbPrint(paste("//", ncol(reordered$data), "out of", 
                 ncol(all_events_formatted) / 2, "samples detected"))
 PSIs <- as.matrix(reordered$data)
@@ -204,11 +216,16 @@ verbPrint("// Plotting...")
 supercolors <- reordered$col
 
 # Set output file
-outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
+outfile <- "PSI_plots.pdf"
+if (!using_stdin) {
+  outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
+}
 
 # Check if output directory was specified
 if (is.null(opt$options$output)) {
-  outfile <- file.path(dirname(file), outfile)
+  if (!using_stdin) {
+    outfile <- file.path(dirname(file), outfile)
+  }
 } else {
   # Create directory if necessary
   if (!file.exists(opt$options$output))
@@ -236,13 +253,14 @@ for (i in 1:nplot) {
   text(seq(1, ncol(PSIs), by=1), 
        par("usr")[3] - 3.5, 
        labels = samples, 
-       srt = 45, adj=c(1,1), xpd = TRUE,cex=0.5)
+       srt = 45, adj=c(1,1), xpd = TRUE,cex=0.6)
   
   
   # Draw error bars
   if (! opt$options$noErrorBar) {
     ci <- get_beta_ci(reordered$qual[i,])
-      
+    ci[,which(is.na(reordered$data[i,]))] <- NA
+    
     arrows(1:ncol(PSIs), ci[,1],
            1:ncol(PSIs), ci[,2],
            length = 0.025,
@@ -251,7 +269,7 @@ for (i in 1:nplot) {
   }
   
   # Draw horizontal lines
-  if (!is.null(tissueFile)) {
+  if (!is.null(config_file)) {
     abline(h=mean(PSIs[i, reordered$group.index[["ESC"]] ], na.rm=TRUE), 
            col=reordered$group.col["ESC"], lwd=0.5)
     abline(h=mean(PSIs[i, reordered$group.index[["Neural"]] ], na.rm=TRUE),

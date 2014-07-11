@@ -258,9 +258,14 @@ It is recommended to filter the input file to a subset of events of interest
 before plotting, such as those obtained from ``diff``. Otherwise, the
 resulting pdf file will be very large.
 
-Plot customizations such as coloring and ordering of the results can be applied
+Plot customizations such as coloring and ordering of samples can be applied
 using a configuration file. For more details on this advanced usage, see the
-help description: ``vast-tools plot -h``.
+help description: ``vast-tools plot -h``. An example of sample input data and
+configuration file template can be found under ``R/sample_data``:
+
+~~~~
+> vast-tools plot -c R/sample_data/sample_psi_data.config R/sample_data/sample_psi_data.tab
+~~~~
 
 Issues
 ------
