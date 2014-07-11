@@ -256,7 +256,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 		writeLines(lines[i], stdout())
     }
 
-    eventTitle <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
+    eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2], " Coord:", tabLine[3]), collapse="")
 #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
 
 	 # Print visual output to pdf;
