@@ -28,6 +28,7 @@ There are two components that need to be installed: VAST-TOOLS software package
 and VASTDB library files.
 
 ### VAST-TOOLS
+
 The VAST-TOOLS software package can be downloaded, unpacked and run as is. It
 does not require any additional installation steps.
 
