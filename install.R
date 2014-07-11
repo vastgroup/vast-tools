@@ -9,12 +9,6 @@ scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 # Source Rlib.
 source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
 
-humanDbFile <- "vastdb.hsa.7.3.14.tar.gz"
-mouseDbFile <- "vastdb.mmu.7.3.14.tar.gz"
-
-humanUrl <- paste(c("http://vastdb.crg.eu/libs/", humanDbFile), collapse="")
-mouseUrl <- paste(c("http://vastdb.crg.eu/libs/", mouseDbFile), collapse="")
-#
 joinStr <- function(x,y) {
   return(paste(c(as.character(x), as.character(y)), collapse=""))
 }
@@ -22,7 +16,7 @@ joinStr <- function(x,y) {
 downloadDb <- function(speUrl, speFile) {
    if(system(joinStr("wget ", speUrl)) > 0) {
      stop(joinStr("Cannot download ", speUrl))
-   }       
+   }
    if(system(joinStr("tar xzvf ", speFile)) > 0) {
      stop(joinStr("Cannot tar xzvf ", speFile))
    }
@@ -30,6 +24,13 @@ downloadDb <- function(speUrl, speFile) {
      stop(joinStr("Cannot rm ", speFile))
    }
 }
+
+humanDbFile <- "vastdb.hsa.7.3.14.tar.gz"
+mouseDbFile <- "vastdb.mmu.7.3.14.tar.gz"
+
+humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
+mouseUrl <- joinStr("http://vastdb.crg.eu/libs/", mouseDbFile)
+#
 
 writeLines("Looking for VAST Database [VASTDB]")
 if(!file.exists("VASTDB")) {
