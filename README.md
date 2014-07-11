@@ -87,7 +87,6 @@ on the fly when necessary.
 > ./install.R
 ~~~~
 
-
 Usage
 -----
 
