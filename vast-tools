@@ -48,7 +48,7 @@ GetOptions(		  "help" => \$helpFlag,
 
 # Check current version of git repository:
 system("bash", "-c", "[ `git log --pretty=%H ...refs/heads/master^` != `git ls-remote origin -h refs/heads/master |cut -f1` ] && (echo; \ 
-echo UPDATE!: It looks like you are not up to date with the current git repository!; echo There may be a newer version available... try 'git pull')");
+echo UPDATE!: It looks like you are not up to date with the current git repository!; echo There may be a newer version available... try 'git pull')>&2");
 
 if($helpFlag and 
 	!defined($subCommand) or
