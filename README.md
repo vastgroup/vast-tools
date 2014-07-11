@@ -38,11 +38,11 @@ directory, or in an external location. If the latter, the path of VASTDB
 must be supplied to `vast-tools` via `--dbDir` or alternatively, a symbolic 
 link can be created in the root of VAST-TOOLS directory. By default, 
 VAST-TOOLS looks for VASTDB inside its own directory 
-(e.g. `~/bin/vast-tools-0.0.1/VASTDB`).
+(e.g. `~/bin/vast-tools/VASTDB`).
 
 ~~~~
 > git clone https://github.com/vastgroup/vast-tools.git
-> cd vast-tools-0.0.1
+> cd vast-tools
 ~~~~
 **Automatic DB Installation:**
 
@@ -52,10 +52,10 @@ Then you can automatically install the database files using:
 ~~~~
 Follow the command prompt to install automatically, and that should be it!
 
-Of course you should add the vast-tools-0.0.1 directory to your PATH:
+Of course you should add the vast-tools directory to your PATH:
 ~~~~
-$ export PATH=~/bin/vast-tools-0.0.1:$PATH
-$ echo 'export PATH=~/bin/vast-tools-0.0.1:$PATH' >> ~/.bashrc
+$ export PATH=~/bin/vast-tools:$PATH
+$ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 ~~~~
 **Manual DB Installation:**
 
@@ -106,7 +106,7 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 VAST-TOOLS can be run as simply as:
 NOTE: Unless specified, all options are default, for example the output
 directory is assumed to be 'vast_out', the database to be
-``<path>/vast-tools-0.0.1/VASTDB``, and the species ``Hsa``. To change these use
+``<path>/vast-tools/VASTDB``, and the species ``Hsa``. To change these use
 the ``--output``, ``-dbDir`` and ``-sp`` flags!
 
 ~~~~
