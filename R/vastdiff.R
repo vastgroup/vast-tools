@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --vanilla
+#!/usr/bin/env Rscript
 
 # Author: Tim Sterne-Weiler, 2014
 # tim.sterne.weiler@utoronto.ca
