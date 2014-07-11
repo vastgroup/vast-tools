@@ -40,7 +40,7 @@ my $subCommand = shift @ARGV or $helpFlag = 1;
 my @args = @ARGV;
 
 Getopt::Long::Configure("pass_through", "no_auto_abbrev");
-GetOptions("help" => \$helpFlag,
+GetOptions(		  "help" => \$helpFlag,
 			  "h" => \$helpFlag,
 			  "legacy" => \$legacyFlag,
 			  "output=s" => \$outdir,
@@ -48,10 +48,10 @@ GetOptions("help" => \$helpFlag,
 
 if($helpFlag and 
 	!defined($subCommand) or
-   (($subCommand eq "align" or
+   	(($subCommand eq "align" or
 	  $subCommand eq "combine" or
 	  $subCommand eq "diff" or
-      $subCommand eq "plot") ? 0 : 1)) {
+      	  $subCommand eq "plot") ? 0 : 1)) {
   die "
 Usage: $0 sub-commands [options]
 
