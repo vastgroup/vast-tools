@@ -182,7 +182,7 @@ if(opt$pdf == "input.DIFF_plots") {
 } else {
   pdfname <- paste(c(opt$pdf, ".pdf"), collapse="")
 }
-pdf(pdfname, width=7, height=3)
+pdf(pdfname, width=7, height=3.5)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
@@ -256,7 +256,8 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 		writeLines(lines[i], stdout())
     }
 
-    eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2], " Coord:", tabLine[3]), collapse="")
+    eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
+    eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
 #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
 
 	 # Print visual output to pdf;
@@ -269,13 +270,13 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 #    }
 
 
-	 return(list(retPlot, eventTitle))  #return of mclapply function
+	 return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function
   }, mc.cores=opt$cores) #End For
 
   for(it in 1:length(lines)) {
   # PRINT LIST OF PLOTS.
     if(is.null(plotListed[[it]][[1]])) { next; }
-    plotPrint(plotListed[[it]][[2]], plotListed[[it]][[1]])
+    plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
   }
 
 } #End While

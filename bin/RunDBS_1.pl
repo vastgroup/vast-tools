@@ -103,7 +103,7 @@ unless(defined($dbDir)) {
 }
 $dbDir = abs_path($dbDir);
 $dbDir .= "/$species";
-errPrint "The database directory $dbDir does not exist" unless (-e $dbDir);
+errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]

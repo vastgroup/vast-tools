@@ -59,7 +59,7 @@ sub verbPrint {
 }
 
 if ($helpFlag){
-    errPrint "Usage: vast-tools combine -o OUTPUTDIR [options]
+    print STDERR "Usage: vast-tools combine -o OUTPUTDIR [options]
 
 OPTIONS:
 	-o, --output 		Output directory to combine samples from... [default vast_out]
