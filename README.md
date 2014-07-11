@@ -242,7 +242,6 @@ however by decreasing ``-n`` you have increased the number of times that the
 ``mclapply`` function must calculate the parallel processing overhead.  The
 default is 100, which works well.
 
-
 ### Plotting
 
 VAST-TOOLS comes with a plotting script written in R.
