@@ -62,12 +62,12 @@ if ($helpFlag){
     errPrint "Usage: vast-tools combine -o OUTPUTDIR [options]
 
 OPTIONS:
-	-o, --output Output directory to combine samples from... [default vast_out]
-	-dbDir DBDIR				Database directory
-	-sp Hsa/Mmu				Species selection
-	-z					Compress all output files using gzip
-	-v, --verbose				Verbose messages
-	-h, --help				Print this help message
+	-o, --output 		Output directory to combine samples from... [default vast_out]
+	--dbDir DBDIR		Database directory
+	--sp Hsa/Mmu		Species selection
+	-z			Compress all output files using gzip
+	-v, --verbose		Verbose messages
+	-h, --help		Print this help message
 ";
   exit $EXIT_STATUS;
 }

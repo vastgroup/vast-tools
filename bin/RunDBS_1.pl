@@ -32,7 +32,7 @@ my $minReadNum;
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
-my $cleanFlag = 0;  # delete genome subtracted reads
+my $keepFlag = 0;  # delete genome subtracted reads
 my $tmpDir;
 
 Getopt::Long::Configure("no_auto_abbrev");
@@ -54,7 +54,7 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
 			  "stringentIR" => \$stringentIRflag,
-			  "clean" => \$cleanFlag,
+			  "keepFiles" => \$keepFlag,
 			  "minReadDepth=i" => \$minReadNum, #to do
 			  "tmpDir=s" => \$tmpDir);
 
@@ -108,17 +108,17 @@ if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]
 
 OPTIONS:
-	-sp Mmu/Hsa		Three letter code for the database (default Hsa)
-	-dbDir db		Database directory (default vastdb_curVer/Hsa)
-	-c i			Number of cores to use for bowtie and pigz (default 1)
-	-o, --output	Output directory (default <current working directory>)
-	-expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
-	-exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
-	-bowtieProg path/bowtie	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
+	--sp Mmu/Hsa		Three letter code for the database (default Hsa)
+	--dbDir db		Database directory (default vastdb_curVer/Hsa)
+	-c i			Number of cores to use for bowtie (default 1)
+	-o, --output		Output directory (default <current working directory>)
+	--expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
+	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
+	--bowtieProg path	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
 
-	-noIR			Don't run intron retention pipeline.. substantially increases speed, works with species without IR libraries (default off)
-	-stringentIR		Don't run first filtering step, this will increase speed, but perhaps also artifact potential (default off)
-	-clean			RM trimmed and genome-subtracted reads after use. (default off)
+	--noIR			Don't run intron retention pipeline.. (substantially increases speed) (default off)
+	--stringentIR		Don't run first filtering step of IR, (this will increase speed a little) (default off)
+	--keep			Don't remove trimmed and genome-subtracted reads after use. (default off)
 	-h, --help		Print this help message
 ";
 
@@ -293,7 +293,7 @@ if (!$genome_sub){
 }
 
 # clean up
-if($cleanFlag) {
+unless($keepFlag) {
   verbPrint "Cleaning $fq files!";
   sysErrMsg "rm $fq";
 }
@@ -348,7 +348,7 @@ unless ($genome_sub or $noIRflag) {
   verbPrint "Skipping intron retention step...\n";
 }
 
-if($cleanFlag) {
+unless($keepFlag) {
   verbPrint "Cleaning up $subtractedFq!";
   sysErrMsg "rm $subtractedFq";
 }
