@@ -22,14 +22,14 @@ my $compress = 0;
 
 my $noIRflag = 0; #don't use IR!
 
-GetOptions("help"           => \$helpFlag,
-			  "dbDir=s"     => \$dbDir,
-			  "sp=s"        => \$sp,
-			  "verbose"     => \$verboseFlag,
-			  "output=s"    => \$outDir,
-			  "o=s"         => \$outDir,
+GetOptions("help"  	 => \$helpFlag,
+	   "dbDir=s"     => \$dbDir,
+	   "sp=s"        => \$sp,
+	   "verbose"     => \$verboseFlag,
+	   "output=s"    => \$outDir,
+	   "o=s"         => \$outDir,
            "z"           => \$compress,
-			  "noIR"			 => \$noIRflag);
+	   "noIR"	 => \$noIRflag);
 
 our $EXIT_STATUS = 0;
 
