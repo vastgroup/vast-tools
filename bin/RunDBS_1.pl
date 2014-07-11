@@ -36,11 +36,11 @@ my $keepFlag = 0;  # delete genome subtracted reads
 my $tmpDir;
 
 Getopt::Long::Configure("no_auto_abbrev");
-GetOptions("bowtieProg=s" => \$bowtie,
+GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
 			  "dbDir=s" => \$dbDir,
 			  "c=i" => \$cores, 
-              #"pe" => \$pairedEnd, #deprecated?
+              		  #"pe" => \$pairedEnd, #deprecated?
 			  "expr" => \$runExprFlag,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
@@ -49,14 +49,15 @@ GetOptions("bowtieProg=s" => \$bowtie,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "v" => \$verboseFlag,
-              #"readLen=i" => \$readLength, # deprecated
-           "output=s" => \$outdir,
+              		  #"readLen=i" => \$readLength, # deprecated
+              		  "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
 			  "stringentIR" => \$stringentIRflag,
 			  "keepFiles" => \$keepFlag,
 			  "minReadDepth=i" => \$minReadNum, #to do
-			  "tmpDir=s" => \$tmpDir);
+			  "tmpDir=s" => \$tmpDir
+			  );
 
 our $EXIT_STATUS = 0;
 
