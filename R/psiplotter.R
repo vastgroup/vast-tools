@@ -61,8 +61,8 @@ Customizing plots [optional]:
   manually created. The format of psiplotter.config is the following (the header
   line is required): 
   Order    SampleName    GroupName    RColorCode
-  1        Ooctye        EarlyDev     36
-  2        Embr_2C       EarlyDev     36
+  1        Ooctye        EarlyDev     blue
+  2        Embr_2C       EarlyDev     red
   etc..
  
   Order 	: The ordering of the samples from left to right.
@@ -70,10 +70,9 @@ Customizing plots [optional]:
   GroupName	: Group name. Use for plotting the average PSI of samples belonging
     to the same group. Currently supports grouping of ESC, Muscle, Neural, and
     Tissues. Everything else is ignored.
-  RColorCode	: Color value corresponding to the index of the vector produced
-    by colors(). For example, RColorCode = 36 corresponds to:
-        > cols <- colors()
-        > mycolour <- cols[36]
+  RColorCode	: Any of the three kinds of R color specifications:
+    1) color name (as specified by colors())
+    2) hex color code (#rrggbb)
 
   The samples under SampleName MUST MATCH the names in the PSI input table.
   Only the samples listed in the config file will be represented in the 

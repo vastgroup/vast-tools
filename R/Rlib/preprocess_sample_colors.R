@@ -8,14 +8,13 @@ preprocess_sample_colors <- function(data, database) {
    # Color codes and sample ordering are taken from a "master" samples database
    # in the following format:
    # Order    SampleName    GroupName    RColorCode
-   # 1        Ooctye        EarlyDev     36
-   # 2        Embr_2C       EarlyDev     36
+   # 1        Ooctye        EarlyDev     blue
+   # 2        Embr_2C       EarlyDev     red
    # etc..
    #
-   # The RColorCode value corresponds to the index of the vector produced by
-   # colors(). For example, RColorCode = 36 corresponds to:
-   # > cols <- colors()
-   # > mycolour <- cols[36]
+   # RColorCode	: Any of the three kinds of R color specifications:
+   #  1) color name (as specified by colors())
+   #  2) hex color code (#rrggbb)
    #
    # Args:
    #    data: a n x m data frame of PSI values and quality scores where n is 
@@ -64,7 +63,7 @@ preprocess_sample_colors <- function(data, database) {
      data.new <- data[,new.column.idx]
      
      # Generate a corresponding color code sequence
-     mycols <- colors()[db$RColorCode]
+     mycols <- db$RColorCode
      names(mycols) <- db$SampleName
      
      # Store indices of columns for each group
