@@ -16,8 +16,8 @@ VAST-TOOLS requires the following software:
   * reshape2
   * ggplot2
  * Perl 5.10.1 or higher
- * GNU coreutils `sort` (standard unix sort) 
-
+ * GNU coreutils `sort` version v8.1 or greater (`sort --version` to check)
+ 
 VAST-TOOLS also requires species-specific library files (collectively known as
 VASTDB), which must be downloaded separately. VASTDB consists of pre-made Bowtie
 indices, annotation, and template files. See below for installation instructions.
