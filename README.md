@@ -129,7 +129,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz -c 8
-~~~~
+~~~~ 
 AND
 ~~~~
 > vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
@@ -138,7 +138,7 @@ AND
 ### Alignment
 
 In this step, reads are first aligned against a reference genome to obtain
-unmapped reads, followed by splice junction libraries. Unmapped reads are saved
+unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
 in the output directory as ``<sample>-<length>-e.fq``, where ``sample`` is the sample
 name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
 compressed (via gzip) or uncompressed.
@@ -146,8 +146,8 @@ compressed (via gzip) or uncompressed.
 Currently, VAST-TOOLS supports two species, human (Hsa) and mouse (Mmu). By
 default, the ``-sp`` option is ``Hsa``.
 
-To enable gene expression analysis, use either the option ``-expr`` (PSIs plus
-cRPKM calculations) or ``-exprONLY`` (cRPKMs only). For example, to perform
+To enable gene expression analysis, use either the option ``-expr`` (PSI/PSU/PIRs plus
+cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``-exprONLY`` (cRPKMs only). For example, to perform
 alignment with expression analysis on mouse data:
 
 ~~~~
@@ -174,8 +174,7 @@ the program treats both mates independently because of trimming such that
 ``vast-tools combine`` will join all of the files sent to the same output
 directory found in <output_dir>/to_combine/, to form one final table in the main
 <output_dir> folder.  This is the file you give to ``diff`` in the case that you
-intend to compare multiple samples.  This output file contains a psi value and a
-qual column for each sample.
+intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below.
 
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu]
@@ -184,7 +183,7 @@ qual column for each sample.
 ### Differential Splicing Analysis
 
 Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
-Psi.  
+PSI/PSU/PIR.  
 
 Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://www.utoronto.ca/intron/sterne-weiler.html)
 
@@ -272,6 +271,56 @@ configuration file template can be found under ``R/sample_data``:
 > vast-tools plot -c R/sample_data/sample_psi_data.config R/sample_data/sample_psi_data.tab
 ~~~~
 
+Combine output format
+---------------------
+The output of ``combine`` is a tab-separated table with an entry (row) for each predefined alternative splicing event. For each event, there are six columns with basic information about it, and then a pair of columns for each sample from ``align`` that is combined. 
+
+ * Column 1: Official gene symbol.
+ * Column 2: VAST-DB event ID. Formed by: 
+  * Species identifier: Hsa (Human) or Mmu (Mouse);
+  * Type of AS event: alternative exon skipping (EX), retained intron (INT), alternative splice site donor choice (ALTD), or alternative splice site acceptor choice (ALTA). In the case of ALTD/ALTA, each splice site within the event is indicated (from exonic internal to external) over the total number of alternative splice sites in the event (e.g. HsaALTA0000011-1/2).
+  * Numerical identifier.
+ * Column 3: Genomic coordinate of the alternative sequence.
+ * Column 4: Length of the alternative sequence. In ALTD/ALTA events, the first splice site within each event has a length of 0 nt, by definition.
+ * Column 5: Full set of genomic coordinates of the alternative splicing event. 
+  * For EX: *chromosome:C1donor,Aexon,C2acceptor*. Where C1donor is the reference upstream exon's donor, C2acceptor the reference downstream exon's acceptor, and A the alternative exon. Strand is "+" if C1donor < C2acceptor. If multiple acceptor/donors exist in any of the exons, they are shown separated by "+". 
+  * For ALTD: *chromosome:Aexon,C2acceptor*. Multiple donors of the event are separated by "+".
+  * For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
+  * For INT: *chromosome:C1exon=C2exon:strand*.
+ * Column 6: Type of event.
+  * S, C1, C2, C3: exon skipping (EX) events quantified by the *a posteriori* or *a priori* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information).
+  * MIC: exon skipping (EX) events quantified by the microexon pipeline.
+  * IR-S: intron retention event with no other annotated overlapping alternative splicing event and/or alternative first/last exons.
+  * IR-C: intron retention event with other annotated overlapping alternative splicing event(s) and/or alternative first/last exons (similar to Type C introns in Braunschweig *et al*, 2014).  
+  * Alt3: ALTA events.
+  * Alt5: ALTD events.
+
+Then, for each combined sample, a pair of columns: 
+ * Column 7: Estimated percent of sequence inclusion (PSI/PSU/PIR). PSI: percent spliced in (for EX). PSU: percent splice site usage (for ALTD and ALTA). PIR: percent intron retention (for INT).
+ * Column 8: Quality scores, and number of corrected inclusion and exclusion reads (qual@inc,exc).
+  * *Score 1*: Read coverage, based on actual reads:
+    - For EX: OK/LOW/VLOW: (i) ≥20/15/10 actual reads (i.e. before mappability correction) mapping to all exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two groups of inclusion splice junctions (upstream or downstream the alternative exon), and ≥15/10/5 to the other group of inclusion splice junctions.
+    - For EX (microexon module): OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to the sum of inclusion splice junctions.
+    - For INT: OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of skipping splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two inclusion exon-intron junctions (the 5' or 3' of the intron), and ≥15/10/5 to the other inclusion splice junctions.
+    - For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/20/10 actual reads mapping to the sum of all splice junctions involved in the specific event.
+    - For any type of event: SOK: same thresholds as OK, but a total number of reads ≥100.
+    - For any type of event: N: does not meet the minimum threshold (VLOW).
+
+  * *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
+  * *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*).
+  * *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the *a posteriori* or *a priori* modules; for intron retention, see Braunschweig *et al*, 2014).
+    - OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
+    - B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
+    - B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
+    - Bl/Bn: low/no read coverage for splice junctions supporting inclusion.
+  * *Score 5*: Complexity of the event (only for exon skipping events quantified by the *a posteriori* or *a priori* modules).
+    - S: percent of complex reads (i.e. those inclusion- and exclusion-supporting reads that do not map to the reference C1A, AC2 or C1C2 splice junctions) is < 5%.
+    - C1: percent of complex reads is > 5% but < 20%.
+    - C2: percent of complex reads is > 20% but < 50%.
+    - C3: percent of complex reads is > 50%.
+    - NA: low coverage event.
+  * inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
+
 Issues
 ------
 Please report all bugs and issues using the GitHub [issue tracker]
@@ -286,13 +335,15 @@ Contributions
 * Kevin Ha
 * Tim Sterne-Weiler
 
-Citation
---------
+Citations
+---------
 Coming soon...
 
 References
 ----------
 
+Labbé, R.M., Irimia, M., Currie, K.W., Lin, A., Zhu, S.J., Brown, D.D., Ross, E.J., Voisin, V., Bader, G.D., Blencowe, B.J., Pearson, B.J., 2012. A comparative transcriptomic analysis reveals conserved features of stem cell pluripotency in planarians and mammals. Stem Cells. 30 (8):1734-45.
+
 Langmead, B., Trapnell, C., Pop, M., Salzberg, S.L., 2009. Ultrafast and
 memory-efficient alignment of short DNA sequences to the human genome. Genome
-Biol. 10, R25.
+Biol. 10:R25.
