@@ -221,6 +221,9 @@ prior distribution, which is set as a uniform beta with shape parameters
 Beta shape parameters greater than one alter this probability distribution, and
 may be more or less applicable to certain uses, see: [beta
 distribution](http://mathworld.wolfram.com/BetaDistribution.html) 
+NOTE: When considering differential analysis of event types like intron retention
+it may be more appropriate to use a custom prior model that is able to more accurately
+reflect the lower expectation of inclusion levels.
 
 In the case that you have paired samples, where NormalA is dependent on
 PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag.  When
