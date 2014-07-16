@@ -58,11 +58,11 @@ while (<STDIN>){
     @t=split(/\t/);
 
     # obtains original read source
-    ($read)=$t[0]=~/(.+) /;
-    ($read)=$t[0]=~/(.+)\#/ if !$read;
-    ($read)=$t[0]=~/(.+)\:/ if !$read;
-    ($read)=$t[0]=~/(.+)\// if !$read;
-    ($read)=$t[0]=~/(.+?)\-/ if !$read;
+#    ($read)=$t[0]=~/(.+) /;
+#    ($read)=$t[0]=~/(.+)\#/ if !$read;
+#    ($read)=$t[0]=~/(.+)\:/ if !$read;
+#    ($read)=$t[0]=~/(.+)\// if !$read;
+    ($read)=$t[0]=~/(.+)\-\d+/ if !$read;
     $read=$t[0] if !$read;
 
     ($event,$eej)=$t[2]=~/(.+)_.+?_.+?_(.+?\-.+?\..+)/;

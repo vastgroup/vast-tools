@@ -34,11 +34,11 @@ while (<STDIN>) {
     @t=split(/\t/);
     
     # General ranked search pattern for gene name. It may vary in specific cases.
-    ($read)=$t[0]=~/(.+) /;
-    ($read)=$t[0]=~/(.+)\#/ if !$read;
-    ($read)=$t[0]=~/(.+)\:/ if !$read;
-    ($read)=$t[0]=~/(.+)\// if !$read;
-    ($read)=$t[0]=~/(.+?)\-/ if !$read;
+#    ($read)=$t[0]=~/(.+) /;
+#    ($read)=$t[0]=~/(.+)\#/ if !$read;
+#    ($read)=$t[0]=~/(.+)\:/ if !$read;
+#    ($read)=$t[0]=~/(.+)\// if !$read;
+    ($read)=$t[0]=~/(.+)\-\d+/ if !$read;
     $read=$t[0] if !$read;
     
     $hit=$t[2];

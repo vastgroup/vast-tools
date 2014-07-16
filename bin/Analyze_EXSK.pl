@@ -55,11 +55,11 @@ while (<STDIN>){
     @t=split(/\t/);
 
     # this is to get the actual read name to avoid doublecounting in a sorted output
-    ($read)=$t[0]=~/(.+) /;
-    ($read)=$t[0]=~/(.+)\:/ if !$read;
-    ($read)=$t[0]=~/(.+)\#/ if !$read;
-    ($read)=$t[0]=~/(.+)\// if !$read;
-    ($read)=$t[0]=~/(.+?)\-/ if !$read;
+#    ($read)=$t[0]=~/(.+) /;
+#    ($read)=$t[0]=~/(.+)\:/ if !$read;
+#    ($read)=$t[0]=~/(.+)\#/ if !$read;
+#    ($read)=$t[0]=~/(.+)\// if !$read;
+    ($read)=$t[0]=~/(.+)\-\d+/ if !$read;
     $read=$t[0] if !$read;
 
     ($event,$eej)=$t[2]=~/(.+)_(.+?_\d+?_\d+?_\d+)/; #gets exon-exon junction (eej) info

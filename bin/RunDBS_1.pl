@@ -35,12 +35,19 @@ my $verboseFlag = 1;  # on for debugging
 my $keepFlag = 0;  # delete genome subtracted reads
 my $tmpDir;
 
+my $trimOnceFlag = 0;
+my $trimStep = 25;
+my $fastaOnly = 1; # Use this to trim to fasta not fastq;
+my $inpType = $fastaOnly ? "-f" : "-q";
+
+my $useGenSub = 0;
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
 			  "dbDir=s" => \$dbDir,
 			  "c=i" => \$cores, 
-              		  #"pe" => \$pairedEnd, #deprecated?
+			  "cores=i" -> \$cores,
 			  "expr" => \$runExprFlag,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
@@ -56,7 +63,10 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "stringentIR" => \$stringentIRflag,
 			  "keepFiles" => \$keepFlag,
 			  "minReadDepth=i" => \$minReadNum, #to do
-			  "tmpDir=s" => \$tmpDir
+			  "tmpDir=s" => \$tmpDir,
+			  "stepSize=i" => \$trimStep,
+			  "trimOnce" => \$trimOnceFlag,
+			  "findSubtracted" => \$useGenSub
 			  );
 
 our $EXIT_STATUS = 0;
@@ -111,15 +121,18 @@ if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
 OPTIONS:
 	--sp Mmu/Hsa		Three letter code for the database (default Hsa)
 	--dbDir db		Database directory (default VASTDB)
-	-c i			Number of cores to use for bowtie (default 1)
-	-o, --output		Output directory (default vast_out)
+	--cores, -c i			Number of cores to use for bowtie (default 1)
+	--output, -o		Output directory (default vast_out)
 	--expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
-	--bowtieProg path	Default is to use the bowtie in PATH, instead you can specify here (default bowtie)
+	--bowtieProg path	Default is to use the bowtie in PATH, instead you can specify here (default `bowtie`)
 
 	--noIR			Don't run intron retention pipeline (substantially increases speed) (default off)
 	--stringentIR		Don't run first filtering step of IR, (this will increase speed a little) (default off)
 	--keep			Don't remove trimmed and genome-subtracted reads after use. (default off)
+	--findSubtracted	In order to start from -e.fq reads, you need to use this flag (default off)
+	--trimOnce		Only use first 50bp of reads, if paired, only use 50 from fwd and 50 from rev (default off)
+	--stepSize i		Trim 50bp every --stepSize (default is 25)
 	-h, --help		Print this help message
 ";
 
@@ -225,7 +238,7 @@ if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
 }
 
-if (!$genome_sub){
+if (!$genome_sub and !$useGenSub){
  my $cmd;
 #### Expression analysis (it maps only the first $le nucleotides of the read)
  if ($runExprFlag || $onlyExprFlag){
@@ -248,42 +261,50 @@ if (!$genome_sub){
      print STDERR "Expression analysis done\n";
      exit 0;
  }
+}
 ###
 
 #### Merge PE
- if ($pairedEnd){
-     verbPrint "Concatenating paired end reads";
+# if ($pairedEnd){
+#   verbPrint "Concatenating paired end reads";
      #sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
                                        # $fq is used in trimming below. but we
                                        # can pipe into it. KH
-     $fq = "$fq1 $fq2";
- } else {
-   $fq = $fq1;
- }
+#   $fq = "$fq1 $fq2";
+  #} else {
+   $fq = $fq1; # Above is deprecated --TSW 7/14/14
+#}
+
  
 #### Trimming
 #
-# TODO: substitute all of this with gawk 'NR%2==0{print substr($1,5,55)}NR%2==1' INPUT.fq... style 
  my $trimmed = 0;    # flag determining whether trimming occurred
-# if ($difLE >= 10){
-   $cmd = getPrefixCmd($fq);
+ my $cmd = getPrefixCmd($fq);
 
-	 verbPrint "Trimming fastq sequences to $le nt sequences";
-    ## Add min read depth!
-    sysErrMsg "$cmd | $binPath/Trim.pl | gzip > $root-$le.fq.gz";
+ my $trimArgs = "--stepSize $trimStep";
+ $trimArgs .= " --fasta" if($fastaOnly);
+ $trimArgs .= " --once" if($trimOnceFlag);
+ if($pairedEnd) {
+   my $pairFq = isZipped($fq2) ? "<( gzip -dc $fq2 )" : $fq2;
+   $trimArgs .= " --paired $pairFq";
+ } 
 
-   $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
-   $trimmed = 1;
-# }
+ verbPrint "Trimming fastq sequences to $le nt sequences";
+  ## Add min read depth!
+ sysErrMsg "bash -c \"$cmd | $binPath/Trim.pl $trimArgs | gzip > $root-$le.fq.gz\"";
+
+ $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
+ $trimmed = 1;
 ####
+
  
 #### Get effective reads (i.e. genome substraction).
  $subtractedFq = "$root-$le-e.fq.gz";
- if (! -e $subtractedFq) {
+ unless(-e $subtractedFq and $useGenSub) {
    verbPrint "Doing genome substraction\n";
    # Force bash shell to support process substitution
    $cmd = "bash -c \"" . getPrefixCmd($fq);
-   $cmd .= " | $bowtie -p $cores -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null\"";
+   $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null\"";
    sysErrMsg $cmd;
  } else {
    verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
@@ -291,13 +312,6 @@ if (!$genome_sub){
 
 
 ####
-}
-
-# clean up
-unless($keepFlag) {
-  verbPrint "Cleaning $fq files!";
-  sysErrMsg "rm $fq";
-}
 
 if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
@@ -307,46 +321,51 @@ if ($EXIT_STATUS) {
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/$species"."_COMBI-M-$le - | " .
-             "cut -f 1-4,8 - | sort -T $tmpDir -Vu -k 1,1 - | " .
+             "cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 - | " .
              "$binPath/Analyze_COMBI.pl deprecated " .
              "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/EXSK-$le - | " .
-             "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 - | " .
+             "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 - | " .
              "$binPath/Analyze_EXSK.pl $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/MULTI-$le - | " .
-             "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 | " .
+             "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
              "$binPath/Analyze_MULTI.pl $runArgs";
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/$species"."_MIC-$le - | ".
-            " cut -f 1-4,8 - | sort -T $tmpDir -Vu -k 1,1 | " .
+            " cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
             " $binPath/Analyze_MIC.pl $runArgs";
 
 # Align to intron retention mapped reads here..
-unless ($genome_sub or $noIRflag) {
+unless (($genome_sub and $useGenSub)  or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
   $preCmd = getPrefixCmd($fq);
-  sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                   "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
-              "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 | " .
+              "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize.pl - $runArgs";
-  sysErrMsg "$preCmd | $bowtie -p $cores -m 1 -v 2 " .
+  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
-              "cut -f 1-4,8 | sort -T $tmpDir -Vu -k 1,1 | " .
+              "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize_introns.pl - $runArgs";
 } else {
   verbPrint "Skipping intron retention step...\n";
+}
+
+unless($keepFlag) {
+  verbPrint "Cleaning $fq files!";
+  sysErrMsg "rm $fq";
 }
 
 unless($keepFlag) {
