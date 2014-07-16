@@ -61,7 +61,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
 			  "stringentIR" => \$stringentIRflag,
-			  "keepFiles" => \$keepFlag,
+			  "keep" => \$keepFlag,
 			  "minReadDepth=i" => \$minReadNum, #to do
 			  "tmpDir=s" => \$tmpDir,
 			  "stepSize=i" => \$trimStep,
