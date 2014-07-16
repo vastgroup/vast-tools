@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/env perl 
 # This script takes an a posteriori template and uses it to get PSIs for exactly those events. 
 # It does NOT do a new call for AS events
 

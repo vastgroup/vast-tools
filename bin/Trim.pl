@@ -1,14 +1,6 @@
-#!/usr/bin/perl -w
-# Script to trim reads
-#
-# Trim settings:
-# Once:
-# Trims reads into one X-nt read
-#
-# Twice:
-# Splits reads into two X-nt reads. 
-# If the length of the original reads is < 2X, it splits in an overlapping manner.
+#!/usr/bin/env perl
 
+use warnings;
 use strict;
 use Getopt::Long;
 

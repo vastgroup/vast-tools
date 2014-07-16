@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # This script puts all cRPKMs together in two tables (one alone, the other one with the raw read counts for each sample).
 
 use FindBin;

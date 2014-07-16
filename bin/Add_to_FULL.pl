@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Final "Add_to_*" script that combines all previous AS event type-specific PSI
 # tables into one final ("FULL") table.

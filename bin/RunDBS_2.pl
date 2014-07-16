@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # This pipeline takes PSI templates and adds PSIs from new samples.
+use warnings;
 use strict;
 use Cwd qw(abs_path);
 use Getopt::Long;

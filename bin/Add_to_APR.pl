@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # This script gets the PSIs for the APR events, plus qualities, etc.
 
 use FindBin;

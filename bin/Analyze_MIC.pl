@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # this script analyzes the bowtie output for the microexon (MIC) junctions; EEJs and EEEJs
 # comment
 

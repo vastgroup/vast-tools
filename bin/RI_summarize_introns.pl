@@ -1,6 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # This script gets, for each event, the normalized read counts for the three associated junctions in the sample
 
+use warnings;
 use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib";

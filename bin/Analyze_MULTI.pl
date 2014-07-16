@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # This script parses the bowtie output against the EEJ for MULTIEX events (a priori complex events).
 
 use FindBin;
