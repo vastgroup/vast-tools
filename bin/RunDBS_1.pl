@@ -323,14 +323,14 @@ my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/$species"."_COMBI-M-$le - | " .
-             "cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 - | " .
+             "cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
              "$binPath/Analyze_COMBI.pl deprecated " .
              "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
 sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
                 "$dbDir/FILES/EXSK-$le - | " .
-             "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 - | " .
+             "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
              "$binPath/Analyze_EXSK.pl $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
