@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use Getopt::Long;
 
+use Digest::MD5 qw(md5_base64);
+
 my $verboseFlag = 1;
 my $stepSize = 25;
 
@@ -35,15 +37,16 @@ sub verbPrint {
   }
 }
 
-sub randString {
-  my $len = shift;
-  my @chars=('a'..'z','A'..'Z','0'..'9');
-  my $ret = "";
-  for(my $c=0; $c < $len; $c++) {
-    $ret .= $chars[int rand @chars];
-  }
-  return($ret);
-}
+# Deprecated --TSW
+#sub randString {
+#  my $len = shift;
+#  my @chars=('a'..'z','A'..'Z','0'..'9');
+#  my $ret = "";
+#  for(my $c=0; $c < $len; $c++) {
+#    $ret .= $chars[int rand @chars];
+#  }
+#  return($ret);
+#}
 
 ### Initialize variables
 my $total_reads = 0;
@@ -78,7 +81,8 @@ while (my $fwd = <>){
   my $mod = $lineCounter % 4;
   if ($mod == 1) {
       #$name = $fwd;
-      $rand = randString(32);
+      $rand = md5_base64($fwd);
+      #$rand = randString(32);
       my $preChar = ($fastaFlag ? ">" : "@");
       $name = "$preChar$rand";
   } elsif ($mod == 2) {
