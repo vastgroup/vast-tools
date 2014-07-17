@@ -48,7 +48,16 @@ while (<STDIN>){
     @t=split(/\t/);
     ($event,$coord,$inc_exc,$n)=$t[2]=~/(.+)\.(.+?)\.(.+?)\.(\d+)/;
     $eej="$coord=$n";
-    $reads{$event}{$inc_exc}{$eej}++;
+    
+    ($read)=$t[0]=~/(.+)\-\d+/;
+    $read=$t[0] if !$read;
+
+    if ($event ne $previous_event || $read ne $previous_read){	#avoid multiple counting
+    	$reads{$event}{$inc_exc}{$eej}++;
+    }
+    #keeps a 1-line memmory in the loop
+    $previous_read=$read;
+    $previous_event=$event;
 }
 #close STDIN;
 
