@@ -62,7 +62,7 @@ while (<STDIN>){
 #    ($read)=$t[0]=~/(.+)\#/ if !$read;
 #    ($read)=$t[0]=~/(.+)\:/ if !$read;
 #    ($read)=$t[0]=~/(.+)\// if !$read;
-    ($read)=$t[0]=~/(.+)\-\d+/ if !$read;
+    ($read)=$t[0]=~/(.+)\-\d+/;
     $read=$t[0] if !$read;
 
     ($event,$eej)=$t[2]=~/(.+)_.+?_.+?_(.+?\-.+?\..+)/;
