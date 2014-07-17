@@ -7,6 +7,7 @@
 # library file "New_ID-*.txt.gz" in VASTDB/FILES/ directory
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
@@ -20,6 +21,8 @@ my $verboseFlag;
 GetOptions("sp=s" => \$sp, "dbDir=s" => \$dbDir, "len=i" => \$samLen,
 			  "verbose=i" => \$verboseFlag);
 
+###############################################################################
+
 sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
@@ -27,6 +30,21 @@ sub verbPrint {
     print STDERR "[vast combine convert]: $verbMsg\n";
   }
 }
+
+sub simplifyComplex {
+    # Ad hoc routine to simplify COMPLEX types
+    # (should eventually be simplified in the template source files)
+    my $type = shift;
+    $type =~ s/\*//;
+    if ($type =~ /^ME\(.*\)$/) {
+        $type = "C3";
+    } elsif ($type =~ /MIC/) {
+        $type = "MIC";
+    }
+    return $type;
+}
+
+###############################################################################
 
 # Load conversation table file to memory
 my $NEWID = openFileHandle("$dbDir/FILES/New_ID-$sp.txt.gz");
@@ -55,6 +73,7 @@ while (<$TEMPLATE>){
   if (defined $template{$l[1]}) {
     die "Non-unique key value pair!\n";
   }
+
   $template{$l[1]} = \@l;
 }
 close $TEMPLATE;
@@ -88,6 +107,7 @@ while (<STDIN>) {
     if ($newIDs{$prefix[1]}) {
 
       $prefix[1] = $newIDs{$prefix[1]};
+      $prefix[5] = simplifyComplex($prefix[5]);     # simplify complex codes
 
       print STDOUT join("\t", (@prefix, @l[6..$#l])) . "\n" 
           unless $done{$l[2]};
