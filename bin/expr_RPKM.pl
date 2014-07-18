@@ -43,7 +43,7 @@ while (<>){ #analyzes the bowtie output
 #open (OUTPUT, ">$root"."_exprRPKM.txt"); #output file (cRPKM per gene)
 
 foreach $gene (sort (keys %effective_length)){
-    $cRPKM="ne";
+    $cRPKM="NA";
     $cRPKM=sprintf("%.2f",1000000*(1000*$tally{$gene}/$effective_length{$gene})/$total_mapped) if $effective_length{$gene};
     print STDOUT "$gene\t$cRPKM\t$tally{$gene}\n" if $gene;
 }
