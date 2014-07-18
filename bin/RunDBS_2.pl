@@ -23,14 +23,17 @@ my $compress = 0;
 
 my $noIRflag = 0; #don't use IR!
 
+my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
+
 GetOptions("help"  	 => \$helpFlag,
 	   "dbDir=s"     => \$dbDir,
 	   "sp=s"        => \$sp,
 	   "verbose"     => \$verboseFlag,
 	   "output=s"    => \$outDir,
 	   "o=s"         => \$outDir,
-           "z"           => \$compress,
-	   "noIR"	 => \$noIRflag);
+       "z"           => \$compress,
+	   "noIR"	     => \$noIRflag,
+       "C"           => \$cRPKMCounts);
 
 our $EXIT_STATUS = 0;
 
@@ -63,6 +66,9 @@ if ($helpFlag){
     print STDERR "
 Usage: vast-tools combine -o OUTPUTDIR [options]
 
+Combine multiple samples analyzed using \"vast-tools align\" into a single
+summary tables. 
+
 OPTIONS:
 	-o, --output 		Output directory to combine samples from... [default vast_out]
 	--dbDir DBDIR		Database directory
@@ -70,7 +76,11 @@ OPTIONS:
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help message
-";
+	-C			Create a cRPKM plus read counts summary table. By default, a
+    				table containing ONLY cRPKM is produced. This option is only
+           			applicable when expression analysis is enabled.
+					\n";
+
   exit $EXIT_STATUS;
 }
 
@@ -148,7 +158,7 @@ verbPrint "Building Table for Alternative 3'ss choice events\n";
 sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
 ### Combine results into unified "FULL" table
-verbPrint "Combining results into single table\n";
+verbPrint "Combining results into a single table\n";
 my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
                 "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
@@ -165,6 +175,14 @@ sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
             "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
 
 verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
+
+### Combine cRPKM files, if present
+my @rpkmFiles=glob("expr_out/*.cRPKM"); 
+if (@rpkmFiles > 0) {
+    verbPrint "Combining cRPKMs into a single table\n";
+    $cRPKMCounts = $cRPKMCounts ? "-C" : "";
+    sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts";
+}
 
 ### Compress intermediate files
 if ($compress) {
