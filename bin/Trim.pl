@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Getopt::Long;
 
-use Digest::MD5 qw(md5_base64);
+use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 my $verboseFlag = 1;
 my $stepSize = 25;
@@ -67,6 +67,7 @@ if(defined($pairedEndFile)) {
   open(REV, $pairedEndFile) or sysErrMsg "Can't open paired end file = $pairedEndFile!" and die "\n";
 }
 
+my $trimNum = 1;
 ### Parses the original reads
 my $lineCounter = 1;
 while (my $fwd = <>){
@@ -96,17 +97,16 @@ while (my $fwd = <>){
   
       $total_reads++;
     
-      my $trimNum = 1;
       $stepSize = "inf" if($onceTrim); ### ONLY TRIM ONCE FOR EACH READ
       for(my $off=0; length($seq) >= $off + $targetLength; $off += $stepSize) { 
         # make sure the length of the sequence AND quality scores are >= length
         my $S1 = substr($seq, $off, $targetLength);
         my $R1 = substr($rest, $off, $targetLength);
-
+        my $subCode = substr(md5_hex($trimNum), 0, 4);
         if($fastaFlag) {
-          print STDOUT "$name-$trimNum\n$S1\n";
+          print STDOUT "$name-$subCode\n$S1\n";
         } else {
-          print STDOUT "$name-$trimNum\n$S1\n$name2-$trimNum\n$R1\n";
+          print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n";
         }
 		  $trimNum++;
       }
@@ -115,10 +115,11 @@ while (my $fwd = <>){
         for(my $off=0; length($seqRev) >= $off + $targetLength; $off += $stepSize) {
           my $S1 = substr($seqRev, $off, $targetLength);
           my $R1 = substr($restRev, $off, $targetLength);
+          my $subCode = substr(md5_hex($trimNum), 0, 4);
           if($fastaFlag) {
-            print STDOUT "$name-$trimNum\n$S1\n";
+            print STDOUT "$name-$subCode\n$S1\n";
           } else {
-            print STDOUT "$name-$trimNum\n$S1\n$name2-$trimNum\n$R1\n";
+            print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n";
           }
           $trimNum++;
         }
