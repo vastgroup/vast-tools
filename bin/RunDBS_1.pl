@@ -129,7 +129,7 @@ OPTIONS:
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
 				(default off)
-	--bowtieProg path	Default is to use the bowtie in PATH, instead you can
+	--bowtieProg path	Default is to use the bowtie in PATH. Alternatively you can
 				supply a specific bowtie program here (default `bowtie`)
 	--noIR			Don't run intron retention pipeline 
 				(substantially increases speed) (default off)
@@ -263,8 +263,7 @@ if (!$genome_sub and !$useGenSub){
      $cmd .= " | $bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA -";
 
      verbPrint "Calculating cRPKMs\n";
-     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff > expr_out/$root\_exprRPKM.txt";
-#     sysErrMsg "$binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff >expr_out/$root\_exprRPKM.txt"; 
+     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff > expr_out/$root\.cRPKM";
  }
  if ($onlyExprFlag){
      print STDERR "Expression analysis done\n";

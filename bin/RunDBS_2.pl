@@ -177,7 +177,7 @@ sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
 
 ### Combine cRPKM files, if present
-my @rpkmFiles=glob("expr_out/*_exprRPKM.txt"); 
+my @rpkmFiles=glob("expr_out/*.cRPKM"); 
 if (@rpkmFiles > 0) {
     verbPrint "Combining cRPKMs into a single table\n";
     $cRPKMCounts = $cRPKMCounts ? "-C" : "";

@@ -39,7 +39,7 @@ my %RPKM;
 my $head="ID\tNAME";
 my $headRPKM=$head;
 foreach my $f (@files){
-    my ($root)=$f=~/([^\/]+)\-\d+\_exprRPKM/;
+    my ($root)=$f=~/([^\/]+)\-\d+\.cRPKM/;
     $head.="\t$root-cRPKM\t$root-Counts";
     $headRPKM.="\t$root";
     open (INPUT, $f);
