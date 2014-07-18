@@ -83,6 +83,7 @@ Customizing plots [optional]:
 
 option.list <- list(
   make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
+              meta="TRUE|FALSE",
               help="Enable verbose [%default]"),
   make_option(c("-c", "--config"), type = "character", default = NULL,
               help = "Plot configuration file. Used for customizing order and color
@@ -94,7 +95,7 @@ option.list <- list(
               help = "Output directory where pdf will be saved
                     [default is same location as input data]"),
   make_option(c("--noErrorBar"), type = "logical", default = FALSE,
-              dest = "noErrorBar",
+              meta="TRUE|FALSE", dest = "noErrorBar",
               help = "Do not plot error bars [%default]")
 )
 parser <- OptionParser(option_list = option.list,
@@ -211,6 +212,8 @@ samples <- colnames(PSIs)
 #### Prepare plotting ##########################################################
 verbPrint("// Plotting...")
 
+tissuegroups <- c("ESC", "Neural", "Muscle", "Tissues")
+
 # assign list of colors
 supercolors <- reordered$col
 
@@ -269,14 +272,19 @@ for (i in 1:nplot) {
   
   # Draw horizontal lines
   if (!is.null(config_file)) {
-    abline(h=mean(PSIs[i, reordered$group.index[["ESC"]] ], na.rm=TRUE), 
-           col=reordered$group.col["ESC"], lwd=0.5)
-    abline(h=mean(PSIs[i, reordered$group.index[["Neural"]] ], na.rm=TRUE),
-           col=reordered$group.col["Neural"], lwd=0.5)
-    abline(h=mean(PSIs[i, reordered$group.index[["Muscle"]] ], na.rm=TRUE),
-           col=reordered$group.col["Muscle"], lwd=0.5)
-    abline(h=mean(PSIs[i, reordered$group.index[["Tissues"]] ], na.rm=TRUE),
-           col=reordered$group.col["Tissues"], lwd=0.5)
+    seen <- vector()
+    for (t in 1:length(tissuegroups)) {
+      if (tissuegroups[t] %in% names(reordered$group.index)) {
+        abline(h=mean(PSIs[i, reordered$group.index[[tissuegroups[t]]] ], 
+                      na.rm=TRUE), 
+               col=reordered$group.col[tissuegroups[t]], lwd=0.5)
+        seen <- append(seen, paste(tissuegroups[t], "Avg"))
+      }
+    }
+    
+    # plot legend for mean group values
+    legend_position <- ifelse(PSIs[i,ncol(PSIs)] > 50, "bottomright", "topright")
+    legend(legend_position, legend = seen, lty = 1, col = reordered$group.col)  
   }
   
   # Draw grid lines
@@ -284,8 +292,8 @@ for (i in 1:nplot) {
   abline(h=seq(0,100,10), col="grey", lwd=0.3, lty=2)
   
   # Draw PSIs
-  points(1:ncol(PSIs), as.numeric(PSIs[i,]), col=supercolors, pch=20,
-         cex = 1)
+  points(1:ncol(PSIs), as.numeric(PSIs[i,]), col=as.character(supercolors), 
+         pch=20, cex = 1)
 }
 dev.off()
 

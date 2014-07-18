@@ -34,7 +34,7 @@ preprocess_sample_colors <- function(data, database) {
                qual=data[, seq(2, ncol(data), 2)], 
                col=mycols, group.index=NULL, group.col=NULL)
    } else {
-     db <- read.table(database, header = T, sep="\t")
+     db <- read.table(database, header = T, sep="\t", comment.char="")
      
      # check input file
      if (ncol(db) < 4) {
@@ -73,8 +73,8 @@ preprocess_sample_colors <- function(data, database) {
      for (i in 1:length(groups)) {
        mygroups[[i]] <- which(colnames(data.new) %in%  
                                 db[db$GroupName == groups[i],"SampleName"])
-       mygroupcol[i] <- colors()[db[db$GroupName == groups[i], 
-                                           "RColorCode"][1]]
+       mygroupcol[i] <- as.character(db[db$GroupName == groups[i], 
+                                        "RColorCode"][1])
      }
      names(mygroups) <- groups
      names(mygroupcol) <- groups
