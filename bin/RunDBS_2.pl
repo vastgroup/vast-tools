@@ -23,14 +23,17 @@ my $compress = 0;
 
 my $noIRflag = 0; #don't use IR!
 
+my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
+
 GetOptions("help"  	 => \$helpFlag,
 	   "dbDir=s"     => \$dbDir,
 	   "sp=s"        => \$sp,
 	   "verbose"     => \$verboseFlag,
 	   "output=s"    => \$outDir,
 	   "o=s"         => \$outDir,
-           "z"           => \$compress,
-	   "noIR"	 => \$noIRflag);
+       "z"           => \$compress,
+	   "noIR"	     => \$noIRflag,
+       "C"           => \$cRPKMCounts);
 
 our $EXIT_STATUS = 0;
 
@@ -70,7 +73,11 @@ OPTIONS:
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help message
-";
+	-C			Create a cRPKM plus read counts summary table. By default, a
+    				table containing ONLY cRPKM is produced. This option is only
+           			applicable when expression analysis is enabled.
+					\n";
+
   exit $EXIT_STATUS;
 }
 
@@ -165,6 +172,14 @@ sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
             "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
 
 verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
+
+### Combine cRPKM files, if present
+my @rpkmFiles=glob("expr_out/*_exprRPKM.txt"); 
+if (@rpkmFiles > 0) {
+    verbPrint "Combining cRPKMs into a single table\n";
+    $cRPKMCounts = $cRPKMCounts ? "-C" : "";
+    sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts";
+}
 
 ### Compress intermediate files
 if ($compress) {
