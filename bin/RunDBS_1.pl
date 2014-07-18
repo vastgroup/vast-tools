@@ -118,20 +118,29 @@ errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $he
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]
 
+Align a single RNA-Seq sample to VASTDB genome and junction libraries.
+
 OPTIONS:
 	--sp Mmu/Hsa		Three letter code for the database (default Hsa)
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
-	--expr			For expression analyses: -expr (PSIs plus cRPKM calculations) (default off)
-	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) (default off)
-	--bowtieProg path	Default is to use the bowtie in PATH, instead you can specify here (default `bowtie`)
-
-	--noIR			Don't run intron retention pipeline (substantially increases speed) (default off)
-	--stringentIR		Don't run first filtering step of IR, (this will increase speed a little) (default off)
-	--keep			Don't remove trimmed and genome-subtracted reads after use. (default off)
-	--findSubtracted	In order to start from -e.fq reads, you need to use this flag (default off)
-	--trimOnce		Only use first 50bp of reads, if paired, only use 50 from fwd and 50 from rev (default off)
+	--expr			For expression analyses: -expr 
+				(PSIs plus cRPKM calculations) (default off)
+	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
+				(default off)
+	--bowtieProg path	Default is to use the bowtie in PATH, instead you can
+				supply a specific bowtie program here (default `bowtie`)
+	--noIR			Don't run intron retention pipeline 
+				(substantially increases speed) (default off)
+	--stringentIR		Don't run first filtering step of IR 
+				(this will increase speed a little) (default off)
+	--keep			Don't remove trimmed and genome-subtracted reads 
+				after use. (default off)
+	--findSubtracted	Set this flag to start alignment from genome-substracted
+				reads (default off). If enabled, must supply *-e.fq as input
+	--trimOnce		Only use first 50bp of reads, if paired, only use 
+					50 from fwd and 50 from rev (default off)
 	--stepSize i		Trim 50bp every --stepSize (default is 25)
 	-h, --help		Print this help message
 ";
