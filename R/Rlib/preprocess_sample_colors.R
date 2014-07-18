@@ -8,14 +8,13 @@ preprocess_sample_colors <- function(data, database) {
    # Color codes and sample ordering are taken from a "master" samples database
    # in the following format:
    # Order    SampleName    GroupName    RColorCode
-   # 1        Ooctye        EarlyDev     36
-   # 2        Embr_2C       EarlyDev     36
+   # 1        Ooctye        EarlyDev     blue
+   # 2        Embr_2C       EarlyDev     red
    # etc..
    #
-   # The RColorCode value corresponds to the index of the vector produced by
-   # colors(). For example, RColorCode = 36 corresponds to:
-   # > cols <- colors()
-   # > mycolour <- cols[36]
+   # RColorCode	: Any of the three kinds of R color specifications:
+   #  1) color name (as specified by colors())
+   #  2) hex color code (#rrggbb)
    #
    # Args:
    #    data: a n x m data frame of PSI values and quality scores where n is 
@@ -35,7 +34,7 @@ preprocess_sample_colors <- function(data, database) {
                qual=data[, seq(2, ncol(data), 2)], 
                col=mycols, group.index=NULL, group.col=NULL)
    } else {
-     db <- read.table(database, header = T, sep="\t")
+     db <- read.table(database, header = T, sep="\t", comment.char="")
      
      # check input file
      if (ncol(db) < 4) {
@@ -64,7 +63,7 @@ preprocess_sample_colors <- function(data, database) {
      data.new <- data[,new.column.idx]
      
      # Generate a corresponding color code sequence
-     mycols <- colors()[db$RColorCode]
+     mycols <- db$RColorCode
      names(mycols) <- db$SampleName
      
      # Store indices of columns for each group
@@ -74,8 +73,8 @@ preprocess_sample_colors <- function(data, database) {
      for (i in 1:length(groups)) {
        mygroups[[i]] <- which(colnames(data.new) %in%  
                                 db[db$GroupName == groups[i],"SampleName"])
-       mygroupcol[i] <- colors()[db[db$GroupName == groups[i], 
-                                           "RColorCode"][1]]
+       mygroupcol[i] <- as.character(db[db$GroupName == groups[i], 
+                                        "RColorCode"][1])
      }
      names(mygroups) <- groups
      names(mygroupcol) <- groups
