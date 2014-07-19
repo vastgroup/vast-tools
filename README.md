@@ -42,7 +42,7 @@ VAST-TOOLS looks for VASTDB inside its own directory
 (e.g. `~/bin/vast-tools/VASTDB`).
 
 ~~~~
-> git clone https://github.com/vastgroup/vast-tools.git
+> git clone git@github.com:vastgroup/vast-tools.git
 > cd vast-tools
 ~~~~
 **Automatic DB Installation:**
