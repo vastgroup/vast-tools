@@ -299,7 +299,7 @@ if (!$genome_sub and !$useGenSub){
 
  verbPrint "Trimming fastq sequences to $le nt sequences";
   ## Add min read depth!
- sysErrMsg "bash -c \"$cmd | $binPath/Trim.pl $trimArgs | gzip > $root-$le.fq.gz\"";
+ sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip > $root-$le.fq.gz");
 
  $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
  $trimmed = 1;
