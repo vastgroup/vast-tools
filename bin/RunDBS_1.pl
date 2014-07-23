@@ -129,7 +129,7 @@ OPTIONS:
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
 				(default off)
-	--bowtieProg path	Default is to use the bowtie in PATH. Alternatively you can
+	--bowtieProg prog	Default is to use the bowtie in PATH. Alternatively you can
 				supply a specific bowtie program here (default `bowtie`)
 	--noIR			Don't run intron retention pipeline 
 				(substantially increases speed) (default off)
@@ -148,23 +148,20 @@ OPTIONS:
   exit $EXIT_STATUS;
 }
 
-errPrintDie "Needs species\n" if !$species;
-
 # Command line flags here
 if (defined $ARGV[1]) { $pairedEnd = 1; }
+
+# Input sanity checks
+errPrintDie "Needs species\n" if !$species;
+errPrintDie "Input file " . $ARGV[0] . " does not exist!" if (! -e $ARGV[0]);
+errPrintDie "Input file " . $ARGV[1] . " does not exist!" if ($pairedEnd and ! -e $ARGV[1]);
+errPrintDie "Invalid number of cores. Must be at least 1." if ($cores !~ /^[1-9]\d+$/);
+errPrintDie "Invalid step size." if ($trimStep !~ /^[1-9]\d+$/);
 
 ## Getting sample name and length:
 my $fq1 = abs_path($ARGV[0]);
 my $fq2;
 my $fq;     # takes the fastq file to be processed at each step
-
-if (!defined($fq1)) {
-  errPrintDie "No FASTQ file given!";
-}
-
-if (! -e $fq1) {
-  errPrintDie "$fq1 does not exist!";
-}
 
 my $fileName1 = $fq1;
 my $fileName2;
@@ -197,7 +194,7 @@ if ($fileName1 =~ /\-e\.f/){
     if ($pairedEnd){
 		$fq2 = abs_path($ARGV[1]);
 		$fileName2 = $fq2;
-      $fileName2 =~ s/^.*\///g; # strip path
+		$fileName2 =~ s/^.*\///g; # strip path
     }
     $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq";
 }
