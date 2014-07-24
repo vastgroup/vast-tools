@@ -155,8 +155,8 @@ if (defined $ARGV[1]) { $pairedEnd = 1; }
 errPrintDie "Needs species\n" if !$species;
 errPrintDie "Input file " . $ARGV[0] . " does not exist!" if (! -e $ARGV[0]);
 errPrintDie "Input file " . $ARGV[1] . " does not exist!" if ($pairedEnd and ! -e $ARGV[1]);
-errPrintDie "Invalid number of cores. Must be at least 1." if ($cores !~ /^[1-9]\d+$/);
-errPrintDie "Invalid step size." if ($trimStep !~ /^[1-9]\d+$/);
+errPrintDie "Invalid number of cores. Must be at least 1." if ($cores !~ /^[1-9]\d*$/);
+errPrintDie "Invalid step size." if ($trimStep !~ /^[1-9]\d*$/);
 
 ## Getting sample name and length:
 my $fq1 = abs_path($ARGV[0]);
