@@ -6,8 +6,10 @@
 #  This function takes a qual and returns c(post_alpha, post_beta)
 #  Increments by prior alpha and prior distribution beta, uniform by default
 parseQual <- function(qual, prior_alpha=1, prior_beta=1) {
-  if(is.na(qual) || !grepl("@", qual)) { return(c(1,1)) }  ## for INT NA Columns
+  if(is.na(qual) || !grepl("@", qual)) { return(c(prior_alpha, prior_beta)) }  ## for INT NA Columns
   res <- as.numeric(unlist(strsplit(unlist(strsplit(qual, "@"))[2], ",")))
+  if(is.nan(res[1]) || is.nan(res[2])) { return(c(prior_alpha, prior_beta)) }
+  if(is.infinite(res[1]) || is.infinite(res[2])) { return(c(prior_alpha, prior_beta)) }
   res[1] <- res[1] + prior_alpha
   res[2] <- res[2] + prior_beta
   res
