@@ -17,7 +17,7 @@ my $cRPKMCounts = 0;
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts);
 
 die "[vast combine cRPKM error] Needs Species\n" if !$sp;
-my @files=glob("expr_out/*_exprRPKM.txt");
+my @files=glob("expr_out/*.cRPKM");
 my $index=$#files+1;
 
 # creates output files where run
@@ -71,5 +71,5 @@ foreach my $gene (sort (keys %data)){
     print RPKM "$gene\t$names{$gene}$RPKM{$gene}\n";
 }
 
-close $OUTPUT;
+close $OUTPUT if $cRPKMCounts;
 close RPKM;
