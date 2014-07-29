@@ -109,7 +109,7 @@ foreach my $event (sort keys %mappability){
 
         ### If any of the three junctions is "ne" (=no mappability) the whole KEY is turned into N's
         if ($rIE eq "ne" || $rEI eq "ne" || $rEE eq "ne") {
-            $Q="N,N,N,ne";
+            $Q="N,N,NA,ne";  # score 3 set to NA for consistency --UB
         } else {
             ### Corresponds to Q1 in other events
             $Q="N";
@@ -120,7 +120,7 @@ foreach my $event (sort keys %mappability){
 
             ### Includes keys 2,3 and 4 of other events, but only 2 is real. 3 is always
             ### "NA" and "Reads" is just all the reads.
-            ### The 5th key would be Ulrich's imbalanced test (OK, N)
+            ### The 5th key would be Ulrich's imbalanced test p-value and will be added later
             if (! (defined $eEI && defined $eIE && defined $eEE)) {
                 $Q.=",N,NA,$reads";
             }
@@ -141,7 +141,7 @@ foreach my $event (sort keys %mappability){
             }
         }
 
-        print OUT "\t$Q"; ### Add 5th key based on Ulrich's imbalanced test
+        print OUT "\t$Q";
     }
     print OUT "\n";
 }

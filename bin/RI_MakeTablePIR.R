@@ -111,8 +111,8 @@ for (i in 1:nrow(samples)) {
     pir.i <- 100 * (dat[,2] + dat[,3]) / (dat[,2] + dat[,3] + 2 * dat[,4])
     cov.i <- dat[,4] + apply(dat[,c(2,3,5)], MAR=1, FUN=median)
     tot.i <- dat[,2] + dat[,3] + dat[,4]
-    alpha.i <- pir.i / 100 * tot.i
-    beta.i  <- (1 - pir.i / 100) * tot.i
+    alpha.i <- round(pir.i / 100 * tot.i, 2)
+    beta.i  <- round((1 - pir.i / 100) * tot.i, 2)
 
     xranges <- t(apply(dat[,c(2,3,5)], MAR=1, FUN=range))
     xranges <- apply(xranges, MAR=2, round)
@@ -126,7 +126,7 @@ for (i in 1:nrow(samples)) {
     ## make the 'quality' column: cov,bal@alpha,beta
     qal.i <- paste(round(cov.i, 1), ",", signif(bal.i, 3), "@", alpha.i, ",", beta.i, sep="")
 
-    ## Remove values that do not pass criteria  # not done any more --UB
+    ## Remove values that do not pass criteria  # not done any more because already removed from template --UB
     #pir.i[which(cov.i <= opt$COVthresh | bal.i < opt$BALthresh)] <- NA
 
     ## bring into correct order and populate tables
@@ -149,10 +149,17 @@ qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qual
 legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
 
 for (i in 1:nrow(samples)) {
-    legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,N,NA,0=0=0" # set qual scores when missing due to no reads
-    pir[is.na(pir[,i * 2]),i * 2] <- "@NA,NA"                 # set pseudocounts -"-
+    legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,NA,NA,0=0=0" # set qual scores when missing due to no reads
+    pir[is.na(pir[,i * 2]),i * 2] <- ",NA@NA,NA"                  # set balance p and pseudocounts -"- 
     pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", pir[,i * 2]), sep="")
 }
+
+## Remove events of which at least one junction has no mappable positions --UB
+unmap <- rep(FALSE, nrow(legQual))
+for (i in 1:nrow(samples)) {
+    unmap <- unmap | grepl(",ne,", legQual[,i + 1])
+}
+pir <- pir[!unmap,]
 
 ## Remove values from events that are never below PIRthresh
 if (rmHigh) {
