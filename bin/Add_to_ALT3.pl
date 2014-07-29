@@ -182,27 +182,28 @@ foreach $event_root (sort (keys %ALL)){
 	    $PSI[$i]=sprintf("%.2f",100*$corr_inc_reads_ALL[$i]/$total_corr_reads_ALL) if $total_corr_reads_ALL>0;
 	    $PSI[$i]="NA" if $total_corr_reads_ALL==0;
 
-       ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
-       ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
-       ### These values are added to the qual score and used to infer the posterior distribution
-       unless($legacyFlag) {
-         my $totalN = $total_raw_reads_ALL;
-         my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-         unless($PSI[$i] eq "NA" or $totalN < 2) {
-           $pPSI = $PSI[$i] / 100;
-           #$exValOfInc = $pPSI * $totalN;
-           #$exValOfExc = (1-$pPSI) * $totalN;
-       	  $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
-       	  $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
-         }
-         # ALTER QUAL OUTPUT HERE>>
-         $Q .= "\@$exValOfInc,$exValOfExc" unless $Q =~ /\@/;
-       }
+	   $Q[$i] = $Q;
+           ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
+           ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+           ### These values are added to the qual score and used to infer the posterior distribution
+           unless($legacyFlag) {
+             my $totalN = $total_raw_reads_ALL;
+             my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+             unless($PSI[$i] eq "NA" or $totalN < 2) {
+               $pPSI = $PSI[$i] / 100;
+               #$exValOfInc = $pPSI * $totalN;
+               #$exValOfExc = (1-$pPSI) * $totalN;
+           	  $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+           	  $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
+             }
+             # ALTER QUAL OUTPUT HERE>>
+             $Q[$i] .= "\@$exValOfInc,$exValOfExc";
+           }
 
 	    $ind=$i+1;
 	    $event="$event_root-$ind/$ALL{$event_root}";
-	    $TPC1[$i].="$PSI[$i]\t$Q\t";
-	    $TPC2[$i].="\t$raw_inc_reads_ALL[$i]\t$total_raw_reads_ALL\t$PSI[$i]=$Q";
+	    $TPC1[$i].="$PSI[$i]\t$Q[$i]\t";
+	    $TPC2[$i].="\t$raw_inc_reads_ALL[$i]\t$total_raw_reads_ALL\t$PSI[$i]=$Q[$i]";
 	}
     }
     
