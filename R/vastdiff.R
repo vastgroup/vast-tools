@@ -200,10 +200,10 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 	
 	 # Posterior parameters... Prior given from command line --alpha, --beta
 	 shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
-										parseQual(x, opt$alpha, opt$beta) 
+									parseQual(x, opt$alpha, opt$beta) 
 								} )
 	 shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
-										parseQual(x, opt$alpha, opt$beta)
+									parseQual(x, opt$alpha, opt$beta)
 								} )
 
     totalFirst <- unlist(lapply( shapeFirst, function(x) { x[1] + x[2] }))
@@ -211,30 +211,31 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
     # if no data, next;
     if( all(totalFirst < (opt$minReads + opt$alpha + opt$beta)) ||
-		  all(totalSecond < (opt$minReads + opt$alpha + opt$beta)) ) {
+	all(totalSecond < (opt$minReads + opt$alpha + opt$beta)) ) {
 		return(NULL)
-	 }
+    }
 
-	 # Sample Posterior Distributions
-	 psiFirst <- lapply( shapeFirst, function(x) {
-      #sample here from rbeta(N, alpha, beta)
-      rbeta(opt$size, shape1=x[1], shape2=x[2])
-    })
-	 psiSecond <- lapply( shapeSecond, function(x) {
+    # Sample Posterior Distributions
+    psiFirst <- lapply( shapeFirst, function(x) {
       #sample here from rbeta(N, alpha, beta)
       rbeta(opt$size, shape1=x[1], shape2=x[2])
     })
 
-	 # Create non-parametric Joint Distributions
-	 psiFirstComb <- do.call(c, psiFirst)
+    psiSecond <- lapply( shapeSecond, function(x) {
+    #sample here from rbeta(N, alpha, beta)
+      rbeta(opt$size, shape1=x[1], shape2=x[2])
+    })
+
+    # Create non-parametric Joint Distributions
+    psiFirstComb <- do.call(c, psiFirst)
     psiSecondComb <- do.call(c, psiSecond)
 
-#    print(length(psiFirstComb))
+    #    print(length(psiFirstComb))
 
     # if they aren't paired, then shuffle the joint distributions...
     if( !opt$paired ) {
       psiFirstComb <- shuffle(psiFirstComb)
-	   psiSecondComb <- shuffle(psiSecondComb)
+      psiSecondComb <- shuffle(psiSecondComb)
     }
 
 	 # get emperical posterior median of psi
@@ -252,8 +253,8 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
     if(max < opt$minDiff) { return(NULL) } # or continue...
 
     # SIGNIFICANT from here on out:
-	 if( opt$filter ) { 
-		writeLines(lines[i], stdout())
+    if( opt$filter ) { 
+      writeLines(lines[i], stdout())
     }
 
     eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
