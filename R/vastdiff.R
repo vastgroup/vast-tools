@@ -79,6 +79,8 @@ option.list <- list(
 [general options]"),
     make_option(c("-c", "--cores"), type = "integer", default = 1, metavar="int",
         help="Number of cores to use for plot processing.. [default %default]"),
+    make_option(c("-z", "--seed"), type = "integer", default = 10, metavar="int",
+        help="Seed the RNG for a deterministic result.. [default %default]"),
     make_option(c("-v", "--verbose"), type = "logical", default = TRUE, metavar=NULL,
         help="Enable verbose [default %default]")
 )
@@ -90,6 +92,9 @@ opt <- optpar$options
 
 ## move to output directory
 setwd(opt$output)
+
+## seed RNG
+set.seed(opt$seed)
 
 ## try and find the input file if they aren't exact
 if(!file.exists(opt$input)) {
