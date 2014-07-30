@@ -6,13 +6,13 @@
 #  This function takes a qual and returns c(post_alpha, post_beta)
 #  Increments by prior alpha and prior distribution beta, uniform by default
 parseQual <- function(qual, prior_alpha=1, prior_beta=1) {
-  if(is.na(qual) || !grepl("@", qual)) { return(c(prior_alpha, prior_beta)) }  ## for INT NA Columns
-  res <- as.numeric(unlist(strsplit(unlist(strsplit(qual, "@"))[2], ",")))
-  if(is.nan(res[1]) || is.nan(res[2])) { return(c(prior_alpha, prior_beta)) }
-  if(is.infinite(res[1]) || is.infinite(res[2])) { return(c(prior_alpha, prior_beta)) }
-  res[1] <- res[1] + prior_alpha
-  res[2] <- res[2] + prior_beta
-  res
+    if(is.na(qual) || !grepl("@", qual)) { return(c(prior_alpha, prior_beta)) }  ## for INT NA Columns
+    res <- as.numeric(unlist(strsplit(unlist(strsplit(qual, "@"))[2], ",")))
+    if(is.nan(res[1]) || is.nan(res[2])) { return(c(prior_alpha, prior_beta)) }
+    if(is.infinite(res[1]) || is.infinite(res[2])) { return(c(prior_alpha, prior_beta)) }
+    res[1] <- res[1] + prior_alpha
+    res[2] <- res[2] + prior_beta
+    res
 }
 
 # calculate the probability that the first dist is > than second
@@ -22,9 +22,9 @@ parseQual <- function(qual, prior_alpha=1, prior_beta=1) {
 ##								           sample(secondDist, length(secondDist))
 ## UNLESS you have paired data, then don't sample.
 pDiff  <- function(firstDist, secondDist, alpha=0.15) {
-	N <- length(firstDist)	
-	pass <- length( which( (firstDist - secondDist) > alpha  ) )
-	pass / N
+    N <- length(firstDist)	
+    pass <- length( which( (firstDist - secondDist) > alpha  ) )
+    pass / N
 }
 
 #  This function finds the maximum difference between psi1 and psi2 given
@@ -32,8 +32,8 @@ pDiff  <- function(firstDist, secondDist, alpha=0.15) {
 #  distributions where no diff value exists with a probability > 0.8 are given
 #  maxDiff of 0.
 maxDiff <- function(firstDist, secondDist, acceptProb=0.9) {
-	alphaSet <- seq(0,1,0.01)  #make this global?
-	probs <- unlist(lapply(alphaSet, function(x) { pDiff(firstDist, secondDist, x) }))
+    alphaSet <- seq(0,1,0.01)  #make this global?
+    probs <- unlist(lapply(alphaSet, function(x) { pDiff(firstDist, secondDist, x) }))
     ind <- max(c(which(probs > acceptProb), 1))
     alphaSet[ind]
 }
@@ -41,25 +41,25 @@ maxDiff <- function(firstDist, secondDist, acceptProb=0.9) {
 #
 #  return the beta variance
 betaVar <- function(alpha, beta) {
-  var <- alpha*beta / (
-		 ((alpha + beta) ** 2) * (alpha + beta + 1)
-  )
-  var
+    var <- alpha*beta / (
+	 ((alpha + beta) ** 2) * (alpha + beta + 1)
+    )
+    var
 }
 
 # 
 betaCI <- function(betaDist, percentile = c(0.05, 0.95)) {
-  quantile(betaDist, p=percentile, na.rm = T)
+    quantile(betaDist, p=percentile, na.rm = T)
 }
 
 # Extention of betaCI function that includes the sampling step
 betaCISample <- function(alpha, beta, n = 5000) {
-  if (is.na(alpha) || is.na(beta)) {
-    sample <- NA 
-  } else {
-    sample <- rbeta(n, alpha, beta)
-  }
-  return(betaCI(sample))
+    if (is.na(alpha) || is.na(beta)) {
+      sample <- NA 
+    } else {
+      sample <- rbeta(n, alpha, beta)
+    }
+    return(betaCI(sample))
 }
 
 
