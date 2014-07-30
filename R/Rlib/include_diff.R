@@ -113,6 +113,7 @@ plotPrint <- function(plotTitle, plotCoord, plotList) {
   grid.text(as.character(plotCoord), check.overlap=TRUE, gp=gpar(font=1), draw=T, vp = viewport(layout.pos.row = 2, layout.pos.col = 1:2))
   print(plotList[[1]], vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
   print(plotList[[2]], vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
+  popViewport(1)
 }
 
 # Shuffle...

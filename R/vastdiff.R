@@ -49,7 +49,7 @@ option.list <- list(
         help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
         help = "Exact or Partial match to PSI table in output directory [default %default]"),
-    make_option(c("-n", "--nLines"), type = "integer", default = "1000",
+    make_option(c("-n", "--nLines"), type = "integer", default = "10000",
         help = "Number of lines to read/process in parallel at a time... lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
         help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [default %default]\n
@@ -187,7 +187,7 @@ if(opt$pdf == "input.DIFF_plots") {
 } else {
   pdfname <- paste(c(opt$pdf, ".pdf"), collapse="")
 }
-pdf(pdfname, width=7, height=3.5)
+pdf(pdfname, width=7, height=3.5, family="sans")
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
@@ -274,7 +274,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
       }
 
       return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function
-  }, mc.cores=opt$cores) #End For
+  }, mc.cores=opt$cores, mc.preschedule=TRUE) #End For
 
   for(it in 1:length(lines)) {
   # PRINT LIST OF PLOTS.
