@@ -167,7 +167,7 @@ repAind <- which( head_n %in% firstRepSet  )
 repBind <- which( head_n %in% secondRepSet )
 
 if(length(repAind) == 0 ||
-	length(repBind) == 0) { 
+   length(repBind) == 0) { 
    print_help(parser)
    stop("[vast diff error]: Incorrect sampleNames given, One or more do not exist!!!\n") 
 }
@@ -200,88 +200,85 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
   plotListed <- mclapply(1:length(lines), function(i) {
  
-    tabLine <- unlist( strsplit( lines[i], "\t" ) )
+      tabLine <- unlist( strsplit( lines[i], "\t" ) )
 	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
 	
-	 # Posterior parameters... Prior given from command line --alpha, --beta
-	 shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
-									parseQual(x, opt$alpha, opt$beta) 
-								} )
-	 shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
-									parseQual(x, opt$alpha, opt$beta)
-								} )
+      # Posterior parameters... Prior given from command line --alpha, --beta
+      shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
+								parseQual(x, opt$alpha, opt$beta) 
+							   } )
+      shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
+								parseQual(x, opt$alpha, opt$beta)
+							    } )
 
-    totalFirst <- unlist(lapply( shapeFirst, function(x) { x[1] + x[2] }))
-    totalSecond <- unlist(lapply( shapeSecond, function(x) { x[1] + x[2] }))
+      totalFirst <- unlist(lapply( shapeFirst, function(x) { x[1] + x[2] }))
+      totalSecond <- unlist(lapply( shapeSecond, function(x) { x[1] + x[2] }))
 
-    # if no data, next;
-    if( all(totalFirst < (opt$minReads + opt$alpha + opt$beta)) ||
-	all(totalSecond < (opt$minReads + opt$alpha + opt$beta)) ) {
+      # if no data, next;
+      if( all(totalFirst < (opt$minReads + opt$alpha + opt$beta)) ||
+  	  all(totalSecond < (opt$minReads + opt$alpha + opt$beta)) ) {
 		return(NULL)
-    }
+      }
 
-    # Sample Posterior Distributions
-    psiFirst <- lapply( shapeFirst, function(x) {
+      # Sample Posterior Distributions
+      psiFirst <- lapply( shapeFirst, function(x) {
+        #sample here from rbeta(N, alpha, beta)
+        rbeta(opt$size, shape1=x[1], shape2=x[2])
+      })
+
+      psiSecond <- lapply( shapeSecond, function(x) {
       #sample here from rbeta(N, alpha, beta)
-      rbeta(opt$size, shape1=x[1], shape2=x[2])
-    })
+        rbeta(opt$size, shape1=x[1], shape2=x[2])
+      })
 
-    psiSecond <- lapply( shapeSecond, function(x) {
-    #sample here from rbeta(N, alpha, beta)
-      rbeta(opt$size, shape1=x[1], shape2=x[2])
-    })
+      # Create non-parametric Joint Distributions
+      psiFirstComb <- do.call(c, psiFirst)
+      psiSecondComb <- do.call(c, psiSecond)
 
-    # Create non-parametric Joint Distributions
-    psiFirstComb <- do.call(c, psiFirst)
-    psiSecondComb <- do.call(c, psiSecond)
+      #    print(length(psiFirstComb))
 
-    #    print(length(psiFirstComb))
+      # if they aren't paired, then shuffle the joint distributions...
+      if( !opt$paired ) {
+        psiFirstComb <- shuffle(psiFirstComb)
+        psiSecondComb <- shuffle(psiSecondComb)
+      }
 
-    # if they aren't paired, then shuffle the joint distributions...
-    if( !opt$paired ) {
-      psiFirstComb <- shuffle(psiFirstComb)
-      psiSecondComb <- shuffle(psiSecondComb)
-    }
+      # get emperical posterior median of psi
+      medOne <- median(psiFirstComb)
+      medTwo <- median(psiSecondComb)
 
-	 # get emperical posterior median of psi
-    medOne <- median(psiFirstComb)
-    medTwo <- median(psiSecondComb)
+      # look for a max difference given prob cutoff...
+      if(medOne > medTwo) {
+        max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob)
+      } else {
+        max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
+      }
+      #    writeLines(lines[i], stderr()) ### DEBUGGING
+      # check for significant difference
+      if(max < opt$minDiff) { return(NULL) } # or continue...
 
-    # look for a max difference given prob cutoff...
-    if(medOne > medTwo) {
-      max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob)
-    } else {
-      max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
-    }
-#    writeLines(lines[i], stderr()) ### DEBUGGING
-    # check for significant difference
-    if(max < opt$minDiff) { return(NULL) } # or continue...
+      # SIGNIFICANT from here on out:
+      if( opt$filter ) { 
+        writeLines(lines[i], stdout())
+      }
 
-    # SIGNIFICANT from here on out:
-    if( opt$filter ) { 
-      writeLines(lines[i], stdout())
-    }
+      eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
+      eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
+      #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
 
-    eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
-    eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
-#    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
-
-	 # Print visual output to pdf;
-#    if( opt$pdf ) {
+      # Print visual output to pdf;
       if( medOne > medTwo ) {
         retPlot <- plotDiff(psiFirstComb, psiSecondComb, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
       } else {
         retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
-#    }
 
-
-	 return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function
+      return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function
   }, mc.cores=opt$cores) #End For
 
   for(it in 1:length(lines)) {
   # PRINT LIST OF PLOTS.
-    if(is.null(plotListed[[it]][[1]])) { next; }
+    if(is.null(plotListed[[it]]) || is.null(plotListed[[it]][[1]])) { next; }
     plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
   }
 
