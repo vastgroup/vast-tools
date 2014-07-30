@@ -109,8 +109,8 @@ plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoN
 plotPrint <- function(plotTitle, plotCoord, plotList) {
   grid.newpage()
   pushViewport(viewport(layout = grid.layout(3, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 0.5, 5), "null"))))
-  grid.text(as.character(plotTitle),gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
-  grid.text(as.character(plotCoord),gp=gpar(font=1), draw=T, vp = viewport(layout.pos.row = 2, layout.pos.col = 1:2))
+  grid.text(as.character(plotTitle), check.overlap=TRUE, gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
+  grid.text(as.character(plotCoord), check.overlap=TRUE, gp=gpar(font=1), draw=T, vp = viewport(layout.pos.row = 2, layout.pos.col = 1:2))
   print(plotList[[1]], vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
   print(plotList[[2]], vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
 }

@@ -49,7 +49,7 @@ option.list <- list(
         help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
         help = "Exact or Partial match to PSI table in output directory [default %default]"),
-    make_option(c("-n", "--nLines"), type = "integer", default = "100",
+    make_option(c("-n", "--nLines"), type = "integer", default = "1000",
         help = "Number of lines to read/process in parallel at a time... lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
         help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [default %default]\n
