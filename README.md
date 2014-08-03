@@ -187,7 +187,7 @@ intend to compare multiple samples.  This output file contains a value for the p
 Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
 PSI/PSU/PIR.  
 
-Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://www.utoronto.ca/intron/sterne-weiler.html)
+Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://www.utoronto.ca/intron/sterne-weiler.php)
 
 
 ~~~~
