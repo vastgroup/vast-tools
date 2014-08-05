@@ -42,6 +42,9 @@ my $inpType = $fastaOnly ? "-f" : "-q";
 
 my $useGenSub = 0;
 
+my $trimLen; # This is an undocumented flag for Trim.pl (allows 48bp use)
+my $bowtieV = 2; # This undocumented option for # of allowed mismatches..
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
@@ -66,7 +69,9 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "tmpDir=s" => \$tmpDir,
 			  "stepSize=i" => \$trimStep,
 			  "trimOnce" => \$trimOnceFlag,
-			  "findSubtracted" => \$useGenSub
+			  "findSubtracted" => \$useGenSub,
+                          "trimLen=i" => \$trimLen,
+                          "mismatchNum=i" => \$bowtieV
 			  );
 
 our $EXIT_STATUS = 0;
@@ -257,7 +262,7 @@ if (!$genome_sub and !$useGenSub){
      }
 
      $cmd = getPrefixCmd($cmd);
-     $cmd .= " | $bowtie -p $cores -m 1 -v 2 -3 $difLE $dbDir/EXPRESSION/mRNA -";
+     $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -";
 
      verbPrint "Calculating cRPKMs\n";
      sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff > expr_out/$root\.cRPKM";
@@ -289,6 +294,7 @@ if (!$genome_sub and !$useGenSub){
  my $trimArgs = "--stepSize $trimStep";
  $trimArgs .= " --fasta" if($fastaOnly);
  $trimArgs .= " --once" if($trimOnceFlag);
+ $trimArgs .= " --targetLen $trimLen" if(defined($trimLen));
  if($pairedEnd) {
    my $pairFq = isZipped($fq2) ? "<( gzip -dc $fq2 )" : $fq2;
    $trimArgs .= " --paired $pairFq";
@@ -296,7 +302,7 @@ if (!$genome_sub and !$useGenSub){
 
  verbPrint "Trimming fastq sequences to $le nt sequences";
   ## Add min read depth!
- sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip > $root-$le.fq.gz");
+ sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fq.gz");
 
  $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
  $trimmed = 1;
@@ -326,26 +332,26 @@ if ($EXIT_STATUS) {
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 my $preCmd = getPrefixCmd($subtractedFq);
 verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                 "$dbDir/FILES/$species"."_COMBI-M-$le - | " .
              "cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
              "$binPath/Analyze_COMBI.pl deprecated " .
              "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                 "$dbDir/FILES/EXSK-$le - | " .
              "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
              "$binPath/Analyze_EXSK.pl $runArgs";
 
 verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                 "$dbDir/FILES/MULTI-$le - | " .
              "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
              "$binPath/Analyze_MULTI.pl $runArgs";
 
 verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
+sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                 "$dbDir/FILES/$species"."_MIC-$le - | ".
             " cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
             " $binPath/Analyze_MIC.pl $runArgs";
@@ -354,12 +360,12 @@ sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
 unless (($genome_sub and $useGenSub)  or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
   $preCmd = getPrefixCmd($fq);
-  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
+  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize.pl - $runArgs";
-  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v 2 " .
+  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .

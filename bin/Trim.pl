@@ -17,11 +17,12 @@ my $onceTrim = 0;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions("verbose" => \$verboseFlag,
-		    "v" => \$verboseFlag,
-			 "stepSize=i" => \$stepSize,
-          "paired=s" => \$pairedEndFile,
-			 "fasta" => \$fastaFlag,
-			 "once" => \$onceTrim
+           "v" => \$verboseFlag,
+	   "stepSize=i" => \$stepSize,
+           "paired=s" => \$pairedEndFile,
+           "fasta" => \$fastaFlag,
+	   "once" => \$onceTrim,
+           "targetLen=i" => \$targetLength
 );
 
 sub sysErrMsg {
@@ -50,7 +51,8 @@ sub verbPrint {
 
 ### Initialize variables
 my $total_reads = 0;
-my $total_reads_accepted = 0;
+my $total_fwd_accepted = 0;
+my $total_rev_accepted = 0;
 my $name;
 my $name2;
 my $seq;
@@ -70,7 +72,7 @@ if(defined($pairedEndFile)) {
 my $trimNum = 1;
 ### Parses the original reads
 my $lineCounter = 1;
-while (my $fwd = <>){
+while(my $fwd = <STDIN>) {
   chomp $fwd;
 
   my $rev;
@@ -96,7 +98,8 @@ while (my $fwd = <>){
       $restRev = $rev if($pairedFlag);
   
       $total_reads++;
-    
+      my $acceptedFwd = 0;
+      my $acceptedRev = 0;
       $stepSize = "inf" if($onceTrim); ### ONLY TRIM ONCE FOR EACH READ
       for(my $off=0; length($seq) >= $off + $targetLength; $off += $stepSize) { 
         # make sure the length of the sequence AND quality scores are >= length
@@ -108,7 +111,8 @@ while (my $fwd = <>){
         } else {
           print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n";
         }
-		  $trimNum++;
+        $trimNum++;
+        $acceptedFwd++;
       }
       # NOW FOR PAIR IF EXISTS
       if($pairedFlag) {
@@ -122,16 +126,19 @@ while (my $fwd = <>){
             print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n";
           }
           $trimNum++;
+          $acceptedRev++;
         }
       }
-      $total_reads_accepted++;
+      $total_fwd_accepted++ if $acceptedFwd;
+      $total_rev_accepted++ if $acceptedRev;
   }
   $lineCounter++;
 }
 
 verbPrint "Total processed reads: $total_reads\n";
-verbPrint "Total valid reads: $total_reads_accepted\n";
+verbPrint "Total valid fwd reads: $total_fwd_accepted\n";
+verbPrint "Total valid rev reads: $total_rev_accepted\n" if($pairedFlag);
 
-if($total_reads <= 1 or $total_reads_accepted <= 1) { exit 1; }
+if($total_reads <= 1 or $total_fwd_accepted <= 1) { exit 1; }
 
-exit $total_reads_accepted;
+exit $total_fwd_accepted;
