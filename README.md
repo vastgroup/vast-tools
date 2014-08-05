@@ -42,7 +42,7 @@ VAST-TOOLS looks for VASTDB inside its own directory
 (e.g. `~/bin/vast-tools/VASTDB`).
 
 ~~~~
-> git clone git@github.com:vastgroup/vast-tools.git
+> git clone https://github.com/vastgroup/vast-tools.git
 > cd vast-tools
 ~~~~
 **Automatic DB Installation:**
@@ -187,7 +187,7 @@ intend to compare multiple samples.  This output file contains a value for the p
 Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
 PSI/PSU/PIR.  
 
-Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://www.utoronto.ca/intron/sterne-weiler.html)
+Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://sites.utoronto.ca/intron/sterne-weiler.php)
 
 
 ~~~~
@@ -312,13 +312,13 @@ Then, for each combined sample, a pair of columns:
     - For any type of event: N: does not meet the minimum threshold (VLOW).
 
   * *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
-  * *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*).
-  * *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the *a posteriori* or *a priori* modules; for intron retention, see Braunschweig *et al*, 2014).
+  * *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). Always NA for intron retention events.
+  * *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the a posteriori or a priori modules; For intron retention events, numbers of reads mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format A=B=C)
     - OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
     - B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
     - B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
     - Bl/Bn: low/no read coverage for splice junctions supporting inclusion.
-  * *Score 5*: Complexity of the event (only for exon skipping events quantified by the *a posteriori* or *a priori* modules).
+  * *Score 5*: Complexity of the event (only for exon skipping events quantified by the a posteriori or a priori modules); For intron retention events, p-value of a binomial test of balance between reads mapping to the upstream and downstream exon-intron junctions, modified by reads mapping to a 200-bp window in the centre of the intron (see Braunschweig et al., 2014).
     - S: percent of complex reads (i.e. those inclusion- and exclusion-supporting reads that do not map to the reference C1A, AC2 or C1C2 splice junctions) is < 5%.
     - C1: percent of complex reads is > 5% but < 20%.
     - C2: percent of complex reads is > 20% but < 50%.

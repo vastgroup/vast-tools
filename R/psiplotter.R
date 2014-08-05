@@ -171,7 +171,7 @@ get_beta_ci <- function(q) {
 
 format_table <- function(m) {
   # Format table to keep only PSIs and convert exon metadata as rownames
-  id <- paste(m$COMPLEX, m$GENE, m$COORD, m$LENGTH, sep="=")
+  id <- paste(m$COMPLEX, m$GENE, m$COORD, m$LENGTH, sep="|")
   
   # Extract PSIs
   r <- convert_psi(m[,7:ncol(m)])
@@ -240,7 +240,7 @@ par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to 
 nplot <- min(nrow(PSIs), opt$options$max)
 for (i in 1:nplot) {
   # Set plot title
-  event <- strsplit(rownames(PSIs)[i], split = "=")[[1]]
+  event <- strsplit(rownames(PSIs)[i], split = "\\|")[[1]]
   title <- sprintf("%s (position = %s, length = %s, type = %s)", 
     event[2], event[3], event[4], event[1])
 
