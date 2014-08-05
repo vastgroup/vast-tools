@@ -308,9 +308,9 @@ if (!$genome_sub and !$useGenSub){
  unless(-e $subtractedFq and $useGenSub) {
    verbPrint "Doing genome substraction\n";
    # Force bash shell to support process substitution
-   $cmd = "bash -c \"" . getPrefixCmd($fq);
-   $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null\"";
-   sysErrMsg $cmd;
+   $cmd = getPrefixCmd($fq);
+   $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+   sysErrMsg("bash", "-c", $cmd);
  } else {
    verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
  }
