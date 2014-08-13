@@ -45,6 +45,8 @@ my $useGenSub = 0;
 my $trimLen; # This is an undocumented flag for Trim.pl (allows 48bp use)
 my $bowtieV = 2; # This undocumented option for # of allowed mismatches..
 
+my $trimmed = 0; # use pre-trimmed read set by Trim.pl
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
@@ -71,7 +73,8 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "trimOnce" => \$trimOnceFlag,
 			  "findSubtracted" => \$useGenSub,
                           "trimLen=i" => \$trimLen,
-                          "mismatchNum=i" => \$bowtieV
+                          "mismatchNum=i" => \$bowtieV,
+                          "preTrimmed" => \$trimmed
 			  );
 
 our $EXIT_STATUS = 0;
@@ -288,7 +291,8 @@ if (!$genome_sub and !$useGenSub){
  
 #### Trimming
 #
- my $trimmed = 0;    # flag determining whether trimming occurred
+unless($trimmed) {
+
  my $cmd = getPrefixCmd($fq);
 
  my $trimArgs = "--stepSize $trimStep";
@@ -306,6 +310,7 @@ if (!$genome_sub and !$useGenSub){
 
  $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
  $trimmed = 1;
+}
 ####
 
  

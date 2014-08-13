@@ -9,6 +9,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 my $verboseFlag = 1;
 my $stepSize = 25;
 
+my $hackLen = 50;
 my $targetLength = 50;
 
 my $pairedEndFile;
@@ -22,7 +23,7 @@ GetOptions("verbose" => \$verboseFlag,
            "paired=s" => \$pairedEndFile,
            "fasta" => \$fastaFlag,
 	   "once" => \$onceTrim,
-           "targetLen=i" => \$targetLength
+           "targetLen=i" => \$hackLen
 );
 
 sub sysErrMsg {
@@ -100,6 +101,11 @@ while(my $fwd = <STDIN>) {
       $total_reads++;
       my $acceptedFwd = 0;
       my $acceptedRev = 0;
+
+      if(length($seq) >= $hackLen and length($seq) < $targetLength) {
+        $targetLength = $hackLen;
+      }
+
       $stepSize = "inf" if($onceTrim); ### ONLY TRIM ONCE FOR EACH READ
       for(my $off=0; length($seq) >= $off + $targetLength; $off += $stepSize) { 
         # make sure the length of the sequence AND quality scores are >= length
