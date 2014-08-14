@@ -31,9 +31,9 @@ GetOptions("help"  	 => \$helpFlag,
 	   "verbose"     => \$verboseFlag,
 	   "output=s"    => \$outDir,
 	   "o=s"         => \$outDir,
-       "z"           => \$compress,
-	   "noIR"	     => \$noIRflag,
-       "C"           => \$cRPKMCounts);
+           "z"           => \$compress,
+	   "noIR"        => \$noIRflag,
+           "C"           => \$cRPKMCounts);
 
 our $EXIT_STATUS = 0;
 

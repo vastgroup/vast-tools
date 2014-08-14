@@ -291,9 +291,10 @@ if (!$genome_sub and !$useGenSub){
  
 #### Trimming
 #
-unless($trimmed) {
+#
+my $cmd = getPrefixCmd($fq);
 
- my $cmd = getPrefixCmd($fq);
+unless($trimmed) {
 
  my $trimArgs = "--stepSize $trimStep";
  $trimArgs .= " --fasta" if($fastaOnly);
