@@ -65,13 +65,6 @@ betaCISample <- function(alpha, beta, n = 5000) {
 
 ### MAKE VISUAL OUTPUT
 plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoName, rever ) {
-#  dput(inpOne)
-#  dput(inpTwo)
-#  dput(maxD)
-#  dput(medOne)
-#  dput(medTwo)
-#  dput(sampOneName)
-#  dput(sampTwoName)
 
   if(rever) {   #write this better. ;-)
     curCol <- cbb[3:2]
@@ -98,25 +91,20 @@ plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoN
             xlab(expression(x))+ylim(c(0,1))+
             annotate("text",x=(maxD+0.08), y=0.05, label=maxD, col=cbb[7])
 
-#  grid.newpage()
-#  pushViewport(viewport(layout = grid.layout(2, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 5), "null"))))
-#  grid.text(eventName,gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
-#  print(distPlot, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-#  print(probPlot, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
   return(list(distPlot, probPlot))
 }
 
 plotPrint <- function(plotTitle, plotCoord, plotList) {
-  grid.newpage()
-  pushViewport(viewport(layout = grid.layout(3, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 0.5, 5), "null"))))
-  grid.text(as.character(plotTitle), check.overlap=TRUE, gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
-  grid.text(as.character(plotCoord), check.overlap=TRUE, gp=gpar(font=1), draw=T, vp = viewport(layout.pos.row = 2, layout.pos.col = 1:2))
-  print(plotList[[1]], vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
-  print(plotList[[2]], vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
-  popViewport(1)
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(3, 2, widths = unit(c(5, 4), "null"), heights = unit(c(1, 0.5, 5), "null"))))
+    grid.text(as.character(plotTitle), check.overlap=TRUE, gp=gpar(font=2), draw=T, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
+    grid.text(as.character(plotCoord), check.overlap=TRUE, gp=gpar(font=1), draw=T, vp = viewport(layout.pos.row = 2, layout.pos.col = 1:2))
+    print(plotList[[1]], vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
+    print(plotList[[2]], vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
+    popViewport(1)
 }
 
 # Shuffle...
 shuffle <- function(x) {
-	sample(x, length(x))	
+    sample(x, length(x))	
 }

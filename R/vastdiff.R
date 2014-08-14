@@ -123,7 +123,7 @@ firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "@" ))
 secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "@" ))
 
 if( length(firstRepSet) <= 0 || 
-	 length(secondRepSet) <= 0) { 
+    length(secondRepSet) <= 0) { 
   print_help(parser) 
   stop("[vast diff error]: No replicate sample names given!!! -a sampA@sampB -b sampC@sampD")
 }
