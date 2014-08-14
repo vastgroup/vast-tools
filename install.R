@@ -6,12 +6,14 @@
 argv <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 
-# Source Rlib.
-source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
-
 joinStr <- function(x,y) {
   return(paste(c(as.character(x), as.character(y)), collapse=""))
 }
+
+writeLines(joinStr("Using ", R.Version()$version.string));
+
+# Source Rlib.
+source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
 
 downloadDb <- function(speUrl, speFile) {
    if(system(joinStr("wget ", speUrl)) > 0) {
