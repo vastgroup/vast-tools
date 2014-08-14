@@ -168,7 +168,7 @@ Although you can specify two fastq files to vast-tools in a 'paired-end' format,
 the program treats both mates independently because of trimming, but will not double
 count the any trim or mate pair more than once. Reads must be given to the program
 such that `vast-tools align fwd-mate_1.fq.gz rev-mate_2.fq.gz` refers to two fastq
-files of identical line number where Read1 from file_1 is mated to Read1 from file_2.
+files of identical line number where Read1 from file_1 is mated to Read1 from file_2. NOTE: if reads are downloaded from SRA as sra files, use ``fastq-dump --split-file ./sample.sra`` to generate separate fastq files for each paired-end (plus a third file with unmatched mates).
 
 
 ### Combining Results 

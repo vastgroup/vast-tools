@@ -149,17 +149,18 @@ qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qual
 legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
 
 for (i in 1:nrow(samples)) {
-    legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,NA,NA,0=0=0" # set qual scores when missing due to no reads
-    pir[is.na(pir[,i * 2]),i * 2] <- ",NA@NA,NA"                  # set balance p and pseudocounts -"- 
+    legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,NA,0=0=0" # set qual scores when missing due to no reads
+    pir[is.na(pir[,i * 2]),i * 2] <- "NA,NA@NA,NA"                  # set balance p and pseudocounts -"- 
     pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", pir[,i * 2]), sep="")
 }
 
 ## Remove events of which at least one junction has no mappable positions --UB
 unmap <- rep(FALSE, nrow(legQual))
 for (i in 1:nrow(samples)) {
-    unmap <- unmap | grepl(",ne,", legQual[,i + 1])
+    unmap <- unmap | grepl(",ne", legQual[,i + 1])
 }
-pir <- pir[!unmap,]
+pir      <- pir[!unmap,]
+template <- template[!unmap,]
 
 ## Remove values from events that are never below PIRthresh
 if (rmHigh) {
