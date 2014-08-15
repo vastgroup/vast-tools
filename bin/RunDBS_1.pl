@@ -38,7 +38,6 @@ my $tmpDir;
 my $trimOnceFlag = 0;
 my $trimStep = 25;
 my $fastaOnly = 1; # Use this to trim to fasta not fastq;
-my $inpType = $fastaOnly ? "-f" : "-q";
 
 my $useGenSub = 0;
 
@@ -114,6 +113,8 @@ sub getPrefixCmd {
   my $prefix = isZipped($file) ? "gzip -dc $file" : "cat $file";
   return $prefix;
 }
+
+my $inpType = $fastaOnly ? "-f" : "-q";
 
 # Check database directory
 unless(defined($dbDir)) {
