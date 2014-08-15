@@ -274,7 +274,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
       }
 
       return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function
-  }, mc.cores=opt$cores, mc.preschedule=TRUE) #End For
+  }, mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE) #End For
 
   for(it in 1:length(lines)) {
   # PRINT LIST OF PLOTS.
