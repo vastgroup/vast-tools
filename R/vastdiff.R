@@ -187,7 +187,7 @@ if(opt$pdf == "input.DIFF_plots") {
 } else {
   pdfname <- paste(c(opt$pdf, ".pdf"), collapse="")
 }
-pdf(pdfname, width=7, height=3.5, family="sans")
+pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
