@@ -74,7 +74,8 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "findSubtracted" => \$useGenSub,
                           "trimLen=i" => \$trimLen,
                           "mismatchNum=i" => \$bowtieV,
-                          "preTrimmed" => \$trimmed
+                          "preTrimmed" => \$trimmed,
+                          "useFastq" => \$fastaOnly
 			  );
 
 our $EXIT_STATUS = 0;
