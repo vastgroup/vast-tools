@@ -37,7 +37,7 @@ my $tmpDir;
 
 my $trimOnceFlag = 0;
 my $trimStep = 25;
-my $fastaOnly = 1; # Use this to trim to fasta not fastq;
+my $fastaOnly = 0; # Use this to trim to fasta not fastq;
 
 my $useGenSub = 0;
 
@@ -115,7 +115,7 @@ sub getPrefixCmd {
   return $prefix;
 }
 
-my $inpType = $fastaOnly ? "-f" : "-q";
+my $inpType = !$fastaOnly ? "-f" : "-q";
 
 # Check database directory
 unless(defined($dbDir)) {
