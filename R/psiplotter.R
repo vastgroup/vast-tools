@@ -261,7 +261,7 @@ for (i in 1:nplot) {
   # Draw error bars
   if (! opt$options$noErrorBar) {
     ci <- get_beta_ci(reordered$qual[i,])
-    ci[,which(is.na(reordered$data[i,]))] <- NA
+    ci[which(is.na(reordered$data[i,])),] <- NA
     
     arrows(1:ncol(PSIs), ci[,1],
            1:ncol(PSIs), ci[,2],
