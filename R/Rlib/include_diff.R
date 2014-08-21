@@ -8,11 +8,11 @@
 parseQual <- function(qual, prior_alpha=1, prior_beta=1) {
     if(is.na(qual) || !grepl("@", qual)) { return(c(prior_alpha, prior_beta)) }  ## for INT NA Columns
     res <- unlist(strsplit(unlist(strsplit(as.character(qual), "@"))[2], ","))
-    if(is.nan(res[1]) || is.nan(res[2])) { return(c(prior_alpha, prior_beta)) }
-    if(is.infinite(res[1]) || is.infinite(res[2])) { return(c(prior_alpha, prior_beta)) }
     if(is.na(res[1]) || is.na(res[2])) { return(c(prior_alpha, prior_beta)) }
     if(is.null(res[1]) || is.null(res[2])) { return(c(prior_alpha, prior_beta)) }
     res <- as.numeric(res)
+    if(is.nan(res[1]) || is.nan(res[2])) { return(c(prior_alpha, prior_beta)) }
+    if(is.infinite(res[1]) || is.infinite(res[2])) { return(c(prior_alpha, prior_beta)) }
     res[1] <- res[1] + prior_alpha
     res[2] <- res[2] + prior_beta
     res
