@@ -10,6 +10,7 @@ parseQual <- function(qual, prior_alpha=1, prior_beta=1) {
     res <- unlist(strsplit(unlist(strsplit(as.character(qual), "@"))[2], ","))
     if(is.na(res[1]) || is.na(res[2])) { return(c(prior_alpha, prior_beta)) }
     if(is.null(res[1]) || is.null(res[2])) { return(c(prior_alpha, prior_beta)) }
+    if(res[1] == "NA" || res[2] == "NA") { return(c(prior_alpha, prior_beta)) }
     res <- as.numeric(res)
     if(is.nan(res[1]) || is.nan(res[2])) { return(c(prior_alpha, prior_beta)) }
     if(is.infinite(res[1]) || is.infinite(res[2])) { return(c(prior_alpha, prior_beta)) }
