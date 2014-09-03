@@ -303,7 +303,7 @@ my $cmd = getPrefixCmd($fq);
 unless($trimmed) {
 
  my $trimArgs = "--stepSize $trimStep";
- $trimArgs .= " --fasta" if($fastaOnly);
+ $trimArgs .= " --fasta" if(!$fastaOnly);
  $trimArgs .= " --once" if($trimOnceFlag);
  $trimArgs .= " --targetLen $trimLen" if(defined($trimLen));
  if($pairedEnd) {
