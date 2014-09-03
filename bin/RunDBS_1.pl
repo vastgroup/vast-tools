@@ -152,6 +152,10 @@ OPTIONS:
 	--trimOnce		Only use first 50bp of reads, if paired, only use 
 					50 from fwd and 50 from rev (default off)
 	--stepSize i		Trim 50bp every --stepSize (default is 25)
+	--preTrimmed		If you are trying to use pre-trimmed fasta/q files 
+					(only output from Trim.pl, default off)
+	--useFastq		This option is only necessary if you have pre-trimmed reads 
+					in fastq not fasta format (default off)
 	-h, --help		Print this help message
 ";
 
