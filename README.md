@@ -213,7 +213,7 @@ The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
 and/or is believable beyond an uninformative prior (like the uniform default),
 this may not be necessary, however it is still highly recommended.  The default 
-value for ``-e`` is 5, though this could easily be higher.
+value for ``-e`` is 10, though this could easily be higher.
 
 Additionally, ``diff`` allows you to alter the parameters of the conjugate beta
 prior distribution, which is set as a uniform beta with shape parameters
