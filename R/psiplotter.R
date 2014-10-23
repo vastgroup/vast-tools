@@ -283,8 +283,10 @@ for (i in 1:nplot) {
     }
     
     # plot legend for mean group values
-    legend_position <- ifelse(PSIs[i,ncol(PSIs)] > 50, "bottomright", "topright")
-    legend(legend_position, legend = seen, lty = 1, col = reordered$group.col)  
+    if (length(seen) > 0) {
+      legend_position <- ifelse(PSIs[i,ncol(PSIs)] > 50, "bottomright", "topright")
+      legend(legend_position, legend = seen, lty = 1, col = reordered$group.col)  
+    }
   }
   
   # Draw grid lines
