@@ -68,8 +68,7 @@ Customizing plots [optional]:
   Order 	: The ordering of the samples from left to right.
   SampleName 	: Name of the sample. MUST match sample name in input table.
   GroupName	: Group name. Use for plotting the average PSI of samples belonging
-    to the same group. Currently supports grouping of ESC, Muscle, Neural, and
-    Tissues. Everything else is ignored.
+    to the same group (need to use option -u/--group-means)
   RColorCode	: Any of the three kinds of R color specifications:
     1) color name (as specified by colors())
     2) hex color code (#rrggbb)
@@ -88,15 +87,19 @@ option.list <- list(
   make_option(c("-c", "--config"), type = "character", default = NULL,
               help = "Plot configuration file. Used for customizing order and color
             [%default]"),
-  make_option(c("--max"), type = "integer", default = MAX_ENTRIES,
+  make_option(c("-m", "--max"), type = "integer", default = MAX_ENTRIES,
               help = "Maximum number of AS events to plot [first %default]"),
   make_option(c("-o", "--output"), type = "character", default = NULL,
               meta="DIR",
               help = "Output directory where pdf will be saved
                     [default is same location as input data]"),
-  make_option(c("--noErrorBar"), type = "logical", default = FALSE,
+  make_option(c("-E", "--noErrorBar"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "noErrorBar",
-              help = "Do not plot error bars [%default]")
+              help = "Do not plot error bars [%default]"),
+  make_option(c("-u", "--group-means"), type = "logical", default = FALSE,
+              meta="TRUE|FALSE", dest = "plotGroupMeans",
+              help = "Plot mean PSIs for groups defined in config file. Requires
+              --config option. [%default]")
 )
 parser <- OptionParser(option_list = option.list,
                        desc = desc,
@@ -204,15 +207,17 @@ all_events_formatted <- format_table(all_events)
 #   group.col   - corresponding color for sample group
 reordered <- preprocess_sample_colors(all_events_formatted, config_file)
 verbPrint(paste("//", ncol(reordered$data), "out of", 
-                ncol(all_events_formatted) / 2, "samples detected"))
+                ncol(all_events_formatted) / 2, "samples selected"))
 PSIs <- as.matrix(reordered$data)
 #ALLev <- row.names(PSIs)
 samples <- colnames(PSIs)
 
 #### Prepare plotting ##########################################################
 verbPrint("// Plotting...")
+verbPrint(paste("// Plot group means as horizontal lines:", 
+                opt$options$plotGroupMeans))
 
-tissuegroups <- c("ESC", "Neural", "Muscle", "Tissues")
+# tissuegroups <- c("ESC", "Neural", "Muscle", "Tissues")
 
 # assign list of colors
 supercolors <- reordered$col
@@ -270,22 +275,22 @@ for (i in 1:nplot) {
            code = 3)
   }
   
-  # Draw horizontal lines
-  if (!is.null(config_file)) {
+  # Draw horizontal lines for groups
+  if (!is.null(config_file) && opt$options$plotGroupMeans) {
     seen <- vector()
-    for (t in 1:length(tissuegroups)) {
-      if (tissuegroups[t] %in% names(reordered$group.index)) {
-        abline(h=mean(PSIs[i, reordered$group.index[[tissuegroups[t]]] ], 
-                      na.rm=TRUE), 
-               col=reordered$group.col[tissuegroups[t]], lwd=0.5)
-        seen <- append(seen, paste(tissuegroups[t], "Avg"))
-      }
+    groups <- names(reordered$group.index)
+    for (t in 1:length(groups)) {
+      abline(h=mean(PSIs[i, reordered$group.index[[groups[t]]] ], 
+                    na.rm=TRUE), 
+             col=reordered$group.col[groups[t]], lwd=0.5)
+      seen <- append(seen, paste(groups[t]))
     }
     
     # plot legend for mean group values
     if (length(seen) > 0) {
       legend_position <- ifelse(PSIs[i,ncol(PSIs)] > 50, "bottomright", "topright")
-      legend(legend_position, legend = seen, lty = 1, col = reordered$group.col)  
+      legend(legend_position, legend = seen, lty = 1, col = reordered$group.col,
+             title = "Group Means", cex = 0.7, ncol = 2)  
     }
   }
   
