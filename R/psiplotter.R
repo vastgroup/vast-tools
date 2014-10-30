@@ -196,7 +196,7 @@ if (nrow(all_events) > opt$options$max) {
 }
 
 # Format input data ###########################################################
-verbPrint("// Formatting input data for plotting...")
+verbPrint("// Formatting input data for plotting")
 all_events_formatted <- format_table(all_events)
 # Call function to re-order columns of PSI data
 #
@@ -214,8 +214,10 @@ samples <- colnames(PSIs)
 
 #### Prepare plotting ##########################################################
 verbPrint("// Plotting...")
-verbPrint(paste("// Plot group means as horizontal lines:", 
+if (!is.null(opt$options$config)) {
+    verbPrint(paste("// Plot group means as horizontal lines:", 
                 opt$options$plotGroupMeans))
+}
 
 # tissuegroups <- c("ESC", "Neural", "Muscle", "Tissues")
 
