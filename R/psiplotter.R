@@ -272,7 +272,7 @@ for (i in 1:nplot) {
            1:ncol(PSIs), ci[,2],
            length = 0.025,
            angle = 90,
-           code = 3)
+           code = 3, col = as.character(supercolors))
   }
   
   # Draw horizontal lines for groups
