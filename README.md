@@ -176,7 +176,7 @@ files of identical line number where Read1 from file_1 is mated to Read1 from fi
 ``vast-tools combine`` will join all of the files sent to the same output
 directory found in <output_dir>/to_combine/, to form one final table in the main
 <output_dir> folder.  This is the file you give to ``diff`` in the case that you
-intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below.
+intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined.
 
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu]
