@@ -42,6 +42,7 @@ VAST-TOOLS looks for VASTDB inside its own directory
 (e.g. `~/bin/vast-tools/VASTDB`).
 
 ~~~~
+> cd ~/bin
 > git clone https://github.com/vastgroup/vast-tools.git
 > cd vast-tools
 ~~~~
@@ -53,7 +54,7 @@ Then you can automatically install the database files using:
 ~~~~
 Follow the command prompt to install automatically, and that should be it!
 
-Of course you should add the vast-tools directory to your PATH:
+Of course you should add the vast-tools directory (probably ~/bin/vast-tools) to your PATH:
 ~~~~
 $ export PATH=~/bin/vast-tools:$PATH
 $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
