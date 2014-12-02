@@ -32,17 +32,28 @@ sub verbPrint {
 }
 
 sub simplifyComplex {
-    # Ad hoc routine to simplify COMPLEX types
-    # (should eventually be simplified in the template source files)
-    my $type = shift;
-    $type =~ s/\*//;
-    if ($type =~ /^ME\(.*\)$/) {
-        $type = "C3";
-    } elsif ($type =~ /MIC/) {
-        $type = "MIC";
-    }
-    return $type;
+  # Ad hoc routine to simplify COMPLEX types
+  # (should eventually be simplified in the template source files)
+  my $type = shift;
+  $type =~ s/\*//;
+  if ($type =~ /^ME\(.*\)$/) {
+      $type = "C3";
+  } elsif ($type =~ /MIC/) {
+      $type = "MIC";
+  }
+  return $type;
 }
+
+#sub reorderColumns {
+  # Re-order columns if input files don't have the same sample ordering
+  #my $columns = shift;
+  #my $refOrder = shift;
+  #my @newOrder;
+  #for my $c (@{$columns}) {
+  #push @newOrder, $refOrder->{$c}
+  #}
+  #return @newOrder;
+#}
 
 ###############################################################################
 
@@ -53,7 +64,7 @@ while (<$NEWID>) {
   chomp;
   my @l = split("\t");
   if (defined $newIDs{$l[1]}) {
-      die "Non-unique key value pair!\n";
+      die "Non-unique key value pair in $NEWID!\n";
   }
   $newIDs{$l[1]} = $l[0];
 }
@@ -71,7 +82,7 @@ while (<$TEMPLATE>){
   chomp;
   my @l = split(/\t/);
   if (defined $template{$l[1]}) {
-    die "Non-unique key value pair!\n";
+    die "Non-unique key value pair in $TEMPLATE!\n";
   }
 
   $template{$l[1]} = \@l;
@@ -81,21 +92,38 @@ close $TEMPLATE;
 # Load input data
 my %done;
 my $sawHeader = 0;
+my @prevSampleCols;     # remember last header
+my $headerCount = 0;    # count number of columns
+#my %headerOrder;        # store order of samples
+#my @newOrder;           # used for fixing out-of-order headers
 
 while (<STDIN>) {
   chomp;
   
   my @l = split(/\t/);
 
+  my @sampleCols = @l[6..$#l];
+
   # Check headers
   if (/^GENE\tEVENT/) {
+    $headerCount++;
     if (!$sawHeader) {
-      push @header, @l[6..$#l];
+      push @header, @sampleCols;
       $sawHeader = @l;  # store number of expected columns
       print STDOUT join("\t", @header) . "\n";
+
+      #for (my $i=0; $i < @sampleCols; $i++) {
+      #$headerOrder{$sampleCols[$i]} = $i;
+      #push @newOrder, $i;
+      #}
     } elsif ($sawHeader != @l) {
       die "Number of columns in subsequent header does not match. Terminating!!\n";
-    }  
+    } elsif (!(@sampleCols ~~ @prevSampleCols)) {
+      die "Inconsistent ordering of samples in input file $headerCount!" .
+        " Check your input files' headers";
+      #@newOrder = reorderColumns(\@sampleCols, \%headerOrder);
+    }
+    @prevSampleCols = @sampleCols;
     next;
   }
 
@@ -109,7 +137,8 @@ while (<STDIN>) {
       $prefix[1] = $newIDs{$prefix[1]};
       $prefix[5] = simplifyComplex($prefix[5]);     # simplify complex codes
 
-      print STDOUT join("\t", (@prefix, @l[6..$#l])) . "\n" 
+      #print STDOUT join("\t", (@prefix, @sampleCols[@newOrder])) . "\n" 
+      print STDOUT join("\t", (@prefix, @sampleCols)) . "\n" 
           unless $done{$l[2]};
 
       $done{$l[2]} = 1;
