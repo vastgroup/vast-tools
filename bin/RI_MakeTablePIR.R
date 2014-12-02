@@ -82,7 +82,7 @@ if (is.na(sampleFiles[1])) {
 } else {
     if (verb) {cat("Merging IR of", length(sampleFiles), "sample(s)...\n")}
 }
-samples <- data.frame(Sample = sub("\\.IR", "", sampleFiles),
+samples <- data.frame(Sample = basename(sub("\\.IR$", "", sampleFiles)),
                       File   = sampleFiles,
                       stringsAsFactors=FALSE)
 template <- read.delim(templFile)
@@ -95,7 +95,7 @@ names(pir) <- paste(rep(samples$Sample, each=2), c("","-Q"), sep="")
 for (i in 1:nrow(samples)) {
     ## Read data for one sample
     if (verb) {cat(samples$Sample[i], "\n")}
-    dat <- read.delim(paste(countDir, samples$File[i], sep=""))
+    dat <- read.delim(samples$File[i])
     if (names(dat)[1] != "Event") {
         dat <- read.delim(paste(countDir, samples$File[i], sep=""), header=F)
         names(dat) <- c("Event","EIJ1","EIJ2","EEJ","I")
@@ -147,7 +147,12 @@ if (!all(names(legQual)[-1] %in% samples$Sample)) {stop("Samples in IR and IR qu
 legQual <- legQual[legQual$EVENT %in% template$juncID,]
 qualMerge <- data.frame(legQual$EVENT, qualInd=1:nrow(legQual))
 qualMerge <- merge(data.frame(template$juncID, intronInd=1:nrow(template)), qualMerge, by=1, all.x=TRUE)
-legQual <- legQual[qualMerge[order(qualMerge[,1]), 3],]  # reorder the same way as the template
+qualCols  <- merge(data.frame(qualCol  = 2:ncol(legQual), qualName   = names(legQual)[-1]),
+	           data.frame(sampleNo = 1:nrow(samples), sampleName = samples$Sample),
+		   by=2)
+qualCols <- qualCols[order(qualCols$sampleNo),]
+legQual <- legQual[qualMerge[order(qualMerge[,2]), 3], c(1, qualCols$qualCol)]  
+           # reorder the same way as the template (rows) and PIR table (cols)
 
 for (i in 1:nrow(samples)) {
     legQual[is.na(legQual[,i + 1]),i + 1] <- "N,N,NA,0=0=0" # set qual scores when missing due to no reads
@@ -171,7 +176,9 @@ if (rmHigh) {
 
 
 ## Save table
-pir <- data.frame(template[,1:6], pir)
+outnames <- c(names(template)[1:6], names(pir))
+pir <- data.frame(template[,1:6], pir) 
+names(pir) <- outnames
 
 write.table(pir, file=paste(outDir, "INCLUSION_LEVELS_IR-", species, nrow(samples), ".tab", sep=""),
             row.names=F, col.names=T, quote=F, sep='\t')
