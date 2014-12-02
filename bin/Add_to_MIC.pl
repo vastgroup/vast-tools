@@ -16,7 +16,7 @@ my $samLen;
 my $legacyFlag;
 
 GetOptions("dbDir=s" =>\$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
+	   "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
 
 sub verbPrint {
   my $verbMsg = shift;
