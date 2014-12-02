@@ -42,6 +42,7 @@ VAST-TOOLS looks for VASTDB inside its own directory
 (e.g. `~/bin/vast-tools/VASTDB`).
 
 ~~~~
+> cd ~/bin
 > git clone https://github.com/vastgroup/vast-tools.git
 > cd vast-tools
 ~~~~
@@ -53,7 +54,7 @@ Then you can automatically install the database files using:
 ~~~~
 Follow the command prompt to install automatically, and that should be it!
 
-Of course you should add the vast-tools directory to your PATH:
+Of course you should add the vast-tools directory (e.g. ~/bin/vast-tools) to your PATH:
 ~~~~
 $ export PATH=~/bin/vast-tools:$PATH
 $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
@@ -176,7 +177,7 @@ files of identical line number where Read1 from file_1 is mated to Read1 from fi
 ``vast-tools combine`` will join all of the files sent to the same output
 directory found in <output_dir>/to_combine/, to form one final table in the main
 <output_dir> folder.  This is the file you give to ``diff`` in the case that you
-intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below.
+intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined.
 
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu]
@@ -213,7 +214,7 @@ The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
 and/or is believable beyond an uninformative prior (like the uniform default),
 this may not be necessary, however it is still highly recommended.  The default 
-value for ``-e`` is 5, though this could easily be higher.
+value for ``-e`` is 10, though this could easily be higher.
 
 Additionally, ``diff`` allows you to alter the parameters of the conjugate beta
 prior distribution, which is set as a uniform beta with shape parameters
