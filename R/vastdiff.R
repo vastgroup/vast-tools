@@ -222,12 +222,14 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
       # Sample Posterior Distributions
       psiFirst <- lapply( shapeFirst, function(x) {
-        #sample here from rbeta(N, alpha, beta)
+        #sample here from rbeta(N, alpha, beta) if > -e
+        if(x[1]+x[2] < opt$minReads) { return(NULL) }
         rbeta(opt$size, shape1=x[1], shape2=x[2])
       })
 
       psiSecond <- lapply( shapeSecond, function(x) {
-      #sample here from rbeta(N, alpha, beta)
+        #sample here from rbeta(N, alpha, beta)
+        if(x[1]+x[2] < opt$minReads) { return(NULL) }
         rbeta(opt$size, shape1=x[1], shape2=x[2])
       })
 
