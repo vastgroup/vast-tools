@@ -103,7 +103,7 @@ print PSIs "$head_PSI\n";
 print COUNTs "$head_counts\n";
 
 foreach $event (sort keys %pre_data){
-    next if $event =~ /GENE/; # test
+    next if $event eq "EVENT"; # test
     print PSIs "$pre_data{$event}"."$PSI{$event}\n";
     print COUNTs "$pre_data{$event}"."$read_counts{$event}\n";
 }
