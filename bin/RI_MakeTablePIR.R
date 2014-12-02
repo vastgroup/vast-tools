@@ -75,7 +75,8 @@ if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthr
 
 
 ## Check which samples are there and load template
-sampleFiles <- dir(countDir, pattern="*\\.IR$")
+sampleFiles <- Sys.glob(paste(countDir, "*\\.IR", sep=""))
+
 if (is.na(sampleFiles[1])) {
     stop("No IR samples found in ", countDir)
 } else {
