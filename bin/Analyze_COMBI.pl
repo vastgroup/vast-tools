@@ -38,7 +38,7 @@ while (<STDIN>) {
 #    ($read)=$t[0]=~/(.+)\#/ if !$read;
 #    ($read)=$t[0]=~/(.+)\:/ if !$read;
 #    ($read)=$t[0]=~/(.+)\// if !$read;
-    ($read)=$t[0]=~/(.+)\-\d+/;
+    ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
     
     $hit=$t[2];
