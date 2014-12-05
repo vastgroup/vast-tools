@@ -84,7 +84,7 @@ if (is.na(sampleFiles[1])) {
 }
 samples <- data.frame(Sample = basename(sub("\\.IR$", "", sampleFiles)),
                       File   = sampleFiles,
-                      stringsAsFasctors=FALSE)
+                      stringsAsFactors=FALSE)
 samples <- samples[order(samples$Sample),]  #  temporary fix --UB
 ###########################################################
 ### Needs to be replaced with a locale-independent sort ###
