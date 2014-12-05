@@ -10,7 +10,7 @@ use strict;
 #open (I, $sam);
 #open (O, ">$r.outsum");
 
-my $reB;
+my $previous_read;
 my $hitB;
 my %tally;
 my %POS;
