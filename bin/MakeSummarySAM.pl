@@ -20,21 +20,22 @@ while (<STDIN>){
     my $read="";
     my @t=split(/\t/);
     
-    ($read)=$t[0]=~/(.+) /;
-    ($read)=$t[0]=~/(.+)\#/ if !$read;
-    ($read)=$t[0]=~/(.+)\:/ if !$read;
-    ($read)=$t[0]=~/(.+)\// if !$read;
-    ($read)=$t[0]=~/(.+?)\-/ if !$read;
+#    ($read)=$t[0]=~/(.+) /;
+#    ($read)=$t[0]=~/(.+)\#/ if !$read;
+#    ($read)=$t[0]=~/(.+)\:/ if !$read;
+#    ($read)=$t[0]=~/(.+)\// if !$read;
+
+    ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
     
     my $hit=$t[2];
     
-    if ($read ne $reB){
+    if ($read ne $previous_read){
         $tally{$hit}++;
 	$EJ{$hit}++;
         $POS{$hit}{$t[3]}++;
     }
-    $reB=$read;
+    $previous_read=$read;
     $hitB=$hit;
 }
 
