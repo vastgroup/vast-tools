@@ -46,6 +46,8 @@ my $bowtieV = 2; # This undocumented option for # of allowed mismatches..
 
 my $trimmed = 0; # use pre-trimmed read set by Trim.pl
 
+my $ribofoot = 0; # flag for ribosome footprinting libraries
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
@@ -74,7 +76,8 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
                           "trimLen=i" => \$trimLen,
                           "mismatchNum=i" => \$bowtieV,
                           "preTrimmed" => \$trimmed,
-                          "useFastq" => \$fastaOnly
+                          "useFastq" => \$fastaOnly,
+			  "riboFoot" => \$ribofoot
 			  );
 
 our $EXIT_STATUS = 0;
@@ -172,6 +175,14 @@ errPrintDie "Input file " . $ARGV[1] . " does not exist!" if ($pairedEnd and ! -
 errPrintDie "Invalid number of cores. Must be at least 1." if ($cores !~ /^[1-9]\d*$/);
 errPrintDie "Invalid step size." if ($trimStep !~ /^[1-9]\d*$/);
 
+# FOR RIBOFOOT
+if($ribofoot) {
+  $trimOnceFlag = 1; # only trim once. no slide.
+  $runExprFlag = 0; # no need for expression calculations.
+  $readLength = 32;
+  $trimLen = 32;   
+}
+
 ## Getting sample name and length:
 my $fq1 = abs_path($ARGV[0]);
 my $fq2;
@@ -246,8 +257,11 @@ if ($length >= 50){
     $difLE = $length-50;
     $le = 50;
 } elsif ($length >= 36){
-    $difLE = $length-36;
-    $le=36;
+    $difLE = $length - 36;
+    $le = 36;
+} elsif ($ribofoot and $species eq "Mmu") {
+    $difLE = 0;
+    $le = 32;
 } else {
     errPrint "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
 }
