@@ -55,8 +55,12 @@ if(!file.exists("VASTDB")) {
   writeLines("Found what appears to be VASTDB.. OK")
 }
 
+
 # custom install from include.R
-loadPackages(c("getopt", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))
+loadPackages(c("getopt", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel", "devtools"), local.lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))
+
+# install latest version of required packages from github
+devtools::install_github("kcha/psiplot")
 
 if(Sys.chmod(paste(c(scriptPath, "/vast-tools"), collapse=""), mode = "755")) {
   writeLines("Setting vast-tools permissions... success!", stderr());
