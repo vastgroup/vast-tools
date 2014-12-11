@@ -44,16 +44,16 @@ sub simplifyComplex {
   return $type;
 }
 
-#sub reorderColumns {
+sub reorderColumns {
   # Re-order columns if input files don't have the same sample ordering
-  #my $columns = shift;
-  #my $refOrder = shift;
-  #my @newOrder;
-  #for my $c (@{$columns}) {
-  #push @newOrder, $refOrder->{$c}
-  #}
-  #return @newOrder;
-#}
+  my $columns = shift;
+  my $refOrder = shift;
+  my @newOrder;
+  for my $c (@{$columns}) {
+    push @newOrder, $refOrder->{$c}
+  }
+  return @newOrder;
+}
 
 ###############################################################################
 
@@ -94,8 +94,8 @@ my %done;
 my $sawHeader = 0;
 my @prevSampleCols;     # remember last header
 my $headerCount = 0;    # count number of columns
-#my %headerOrder;        # store order of samples
-#my @newOrder;           # used for fixing out-of-order headers
+my %headerOrder;        # store order of samples
+my @newOrder;           # used for fixing out-of-order headers
 
 while (<STDIN>) {
   chomp;
@@ -112,16 +112,16 @@ while (<STDIN>) {
       $sawHeader = @l;  # store number of expected columns
       print STDOUT join("\t", @header) . "\n";
 
-      #for (my $i=0; $i < @sampleCols; $i++) {
-      #$headerOrder{$sampleCols[$i]} = $i;
-      #push @newOrder, $i;
-      #}
+      for (my $i=0; $i < @sampleCols; $i++) {
+        $headerOrder{$sampleCols[$i]} = $i;
+        push @newOrder, $i;
+      }
     } elsif ($sawHeader != @l) {
       die "Number of columns in subsequent header does not match. Terminating!!\n";
     } elsif (!(@sampleCols ~~ @prevSampleCols)) {
       die "Inconsistent ordering of samples in input file $headerCount!" .
         " Check your input files' headers";
-      #@newOrder = reorderColumns(\@sampleCols, \%headerOrder);
+      @newOrder = reorderColumns(\@sampleCols, \%headerOrder);
     }
     @prevSampleCols = @sampleCols;
     next;
@@ -137,8 +137,7 @@ while (<STDIN>) {
       $prefix[1] = $newIDs{$prefix[1]};
       $prefix[5] = simplifyComplex($prefix[5]);     # simplify complex codes
 
-      #print STDOUT join("\t", (@prefix, @sampleCols[@newOrder])) . "\n" 
-      print STDOUT join("\t", (@prefix, @sampleCols)) . "\n" 
+      print STDOUT join("\t", (@prefix, @sampleCols[@newOrder])) . "\n" 
           unless $done{$l[2]};
 
       $done{$l[2]} = 1;
