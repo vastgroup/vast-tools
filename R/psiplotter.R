@@ -26,11 +26,11 @@ MAX_ENTRIES <- 1000
 
 args <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
+source(file.path(scriptPath, "Rlib", "preprocess_sample_colors.R"))
 source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
-# source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
+source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
-loadPackages(c("optparse", "psiplot"), local.lib=paste(c(scriptPath,"/Rlib"), 
-                                                       collapse=""))
+loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 #### Arguments #################################################################
 # - Input file
@@ -95,8 +95,8 @@ option.list <- list(
                     [default is same location as input data]"),
   make_option(c("-E", "--noErrorBar"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "noErrorBar",
-              help = "Do not plot 95% confidence interval as error bars [%default]"),
-  make_option(c("-u", "--groupMeans"), type = "logical", default = FALSE,
+              help = "Do not plot error bars [%default]"),
+  make_option(c("-u", "--group-means"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "plotGroupMeans",
               help = "Plot mean PSIs for groups defined in config file. Requires
               --config option. [%default]")
@@ -130,17 +130,59 @@ verbPrint <- function(s) {
   }
 }
 
-verbPrint(paste("\nPSI Plotter"))
+verbPrint(paste("PSI Plotter"))
 verbPrint(paste("\n// Input file:", ifelse(using_stdin, "STDIN", file)))
 verbPrint(paste("// Tissue Group file:", 
                 ifelse(is.null(config_file), "Did not provide", config_file)))
 
-all_events <- read.csv(file, sep="\t")
-if(is.null(config_file)) {
-  config <- NULL
-} else {
-  config <- read.csv(config_file, sep="\t")
+#### Format input data functions ##############################################
+convert_psi <- function(t) {
+  # Helper function to filter and return PSI values
+  # PSIs are converted to NA if first coverage code is 'N'
+  # e.g. PSI=100, Coverage=N,N,N,OK,S ---> PSI=NA
+  #
+  # Input: original PSI plus quality scores WITHOUT the first 7 columns
+  
+  stopifnot(ncol(t) %% 2 == 0)
+  psi <- t
+  
+  for (i in seq(1, ncol(psi), 2)) {
+    cov <- strsplit(as.character(psi[,i+1]), split = ",")
+    cov <- sapply(cov, "[", 1)
+    
+    na <- which(cov == "N")
+    if (length(na) > 0) {
+      psi[na, i] <- NA
+      psi[na, i+1] <- NA
+    }
+  }
+  return(psi)
 }
+
+get_beta_ci <- function(q) {
+  # Helper function to filter and return confidence intervals based on beta
+  # distribution from Q scores
+  # 
+  # Input: original PSI plus quality scores WITHOUT the first 7 columns
+  
+  parameters <- sapply(q, function(x) parseQual(as.character(x)))
+  ci <- lapply(1:ncol(parameters), function(j) betaCISample(parameters[1,j], 
+                                                            parameters[2,j]))
+  ci <- do.call("rbind", ci) * 100
+  return(ci)
+}
+
+format_table <- function(m) {
+  # Format table to keep only PSIs and convert exon metadata as rownames
+  id <- paste(m$COMPLEX, m$GENE, m$COORD, m$LENGTH, sep="|")
+  
+  # Extract PSIs
+  r <- convert_psi(m[,7:ncol(m)])
+  rownames(r) <- id
+  return(r)
+}
+
+all_events <- read.csv(file, sep="\t")
 
 # Perform some checks #########################################################
 if (!grepl("^GENE", colnames(all_events)[1])) {
@@ -153,12 +195,34 @@ if (nrow(all_events) > opt$options$max) {
                 "files and running them separately."))
 }
 
+# Format input data ###########################################################
+verbPrint("// Formatting input data for plotting")
+all_events_formatted <- format_table(all_events)
+# Call function to re-order columns of PSI data
+#
+# returns a list containing four elements:
+#   data        - the PSI data with sample columsn re-ordered
+#   col         - vector of colours that will be plotted
+#   group.index - list of indices for each sample group (e.g. ESC, Neural, etc.)
+#   group.col   - corresponding color for sample group
+reordered <- preprocess_sample_colors(all_events_formatted, config_file)
+verbPrint(paste("//", ncol(reordered$data), "out of", 
+                ncol(all_events_formatted) / 2, "samples selected"))
+PSIs <- as.matrix(reordered$data)
+#ALLev <- row.names(PSIs)
+samples <- colnames(PSIs)
+
 #### Prepare plotting ##########################################################
 verbPrint("// Plotting...")
 if (!is.null(opt$options$config)) {
     verbPrint(paste("// Plot group means as horizontal lines:", 
                 opt$options$plotGroupMeans))
 }
+
+# tissuegroups <- c("ESC", "Neural", "Muscle", "Tissues")
+
+# assign list of colors
+supercolors <- reordered$col
 
 # Set output file
 outfile <- "PSI_plots.pdf"
@@ -180,10 +244,65 @@ if (is.null(opt$options$output)) {
 
 pdf(outfile, width = 8.5, height = 5.5)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
-nplot <- min(nrow(all_events), opt$options$max)
+nplot <- min(nrow(PSIs), opt$options$max)
 for (i in 1:nplot) {
-  plot_event(all_events[i,], config = config, errorbar = !opt$options$noErrorBar,
-              groupmean = opt$options$plotGroupMeans)
+  # Set plot title
+  event <- strsplit(rownames(PSIs)[i], split = "\\|")[[1]]
+  title <- sprintf("%s (position = %s, length = %s, type = %s)", 
+    event[2], event[3], event[4], event[1])
+
+
+  # Set up plot
+  plot(NA,
+       main=title,
+       ylab="PSI", xlab="", xaxt="n",
+       ylim=c(1,100), xlim=c(1, ncol(PSIs)),
+       cex.main=0.9, cex.axis=0.8)
+  axis(1, at=seq(1, ncol(PSIs), by=1), labels = FALSE)
+  text(seq(1, ncol(PSIs), by=1), 
+       par("usr")[3] - 3.5, 
+       labels = samples, 
+       srt = 45, adj=c(1,1), xpd = TRUE,cex=0.6)
+  
+  
+  # Draw error bars
+  if (! opt$options$noErrorBar) {
+    ci <- get_beta_ci(reordered$qual[i,])
+    ci[which(is.na(reordered$data[i,])),] <- NA
+    
+    arrows(1:ncol(PSIs), ci[,1],
+           1:ncol(PSIs), ci[,2],
+           length = 0.025,
+           angle = 90,
+           code = 3, col = as.character(supercolors))
+  }
+  
+  # Draw horizontal lines for groups
+  if (!is.null(config_file) && opt$options$plotGroupMeans) {
+    seen <- vector()
+    groups <- names(reordered$group.index)
+    for (t in 1:length(groups)) {
+      abline(h=mean(PSIs[i, reordered$group.index[[groups[t]]] ], 
+                    na.rm=TRUE), 
+             col=reordered$group.col[groups[t]], lwd=0.5)
+      seen <- append(seen, paste(groups[t]))
+    }
+    
+    # plot legend for mean group values
+    if (length(seen) > 0) {
+      legend_position <- ifelse(PSIs[i,ncol(PSIs)] > 50, "bottomright", "topright")
+      legend(legend_position, legend = seen, lty = 1, col = reordered$group.col,
+             title = "Group Means", cex = 0.7, ncol = 2)  
+    }
+  }
+  
+  # Draw grid lines
+  abline(v=1:ncol(PSIs), col="grey", lwd=0.3, lty=2)
+  abline(h=seq(0,100,10), col="grey", lwd=0.3, lty=2)
+  
+  # Draw PSIs
+  points(1:ncol(PSIs), as.numeric(PSIs[i,]), col=as.character(supercolors), 
+         pch=20, cex = 1)
 }
 dev.off()
 
