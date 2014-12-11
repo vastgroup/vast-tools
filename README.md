@@ -341,8 +341,8 @@ Contributions
 * Kevin Ha
 * Tim Sterne-Weiler
 
-Citations
----------
+Citation
+--------
 Coming soon...
 
 References
