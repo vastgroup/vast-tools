@@ -119,8 +119,8 @@ while (<STDIN>) {
     } elsif ($sawHeader != @l) {
       die "Number of columns in subsequent header does not match. Terminating!!\n";
     } elsif (!(@sampleCols ~~ @prevSampleCols)) {
-      warn "Inconsistent ordering of samples in input file $headerCount!" .
-        " I will try to reorder the columns for you.";
+        #warn "Inconsistent ordering of samples in input file $headerCount!" .
+        #" I will try to reorder the columns for you.";
       @newOrder = reorderColumns(\@sampleCols, \%headerOrder);
     }
     @prevSampleCols = @sampleCols;
