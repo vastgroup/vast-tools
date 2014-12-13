@@ -49,7 +49,7 @@ while (<STDIN>){
     ($event,$coord,$inc_exc,$n)=$t[2]=~/(.+)\.(.+?)\.(.+?)\.(\d+)/;
     $eej="$coord=$n";
     
-    ($read)=$t[0]=~/(.+)\-\d+/;
+    ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
 
     if ($event ne $previous_event || $read ne $previous_read){	#avoid multiple counting

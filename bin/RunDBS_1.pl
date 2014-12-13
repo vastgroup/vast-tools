@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Authors:
-# Original Draft: Manuel Irimia, 2011?, 
+# Original Draft: Manuel Irimia, 2011-2014 
 # 						mirimia@gmail.com
 # Reworked: Tim Sterne-Weiler & Kevin Ha, 2014
 # 				tim.sterne.weiler@utoronto.ca & k.ha@mail.utoronto.ca 
