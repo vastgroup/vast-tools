@@ -181,6 +181,7 @@ if($ribofoot) {
   $runExprFlag = 0; # no need for expression calculations.
   $readLength = 32;
   $trimLen = 32;   
+  $noIRflag = 1;  # temporary;
 }
 
 ## Getting sample name and length:
