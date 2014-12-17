@@ -3,6 +3,7 @@
 *.gz
 *.eff*
 *.swp
+*.pdf
 
 # Directories
 VASTDB
