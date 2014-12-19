@@ -30,7 +30,12 @@ and VASTDB library files.
 ### VAST-TOOLS
 
 The VAST-TOOLS software package can be downloaded, unpacked and run as is. It
-does not require any additional installation steps.
+does not require any additional installation steps. See [Releases](https://github.com/vastgroup/vast-tools/releases)
+for the latest release or to get the latest development version, simply clone this repo:
+
+~~~~
+> git clone https://github.com/vastgroup/vast-tools.git
+~~~~
 
 ### VASTDB
 
@@ -41,11 +46,6 @@ link can be created in the root of VAST-TOOLS directory. By default,
 VAST-TOOLS looks for VASTDB inside its own directory 
 (e.g. `~/bin/vast-tools/VASTDB`).
 
-~~~~
-> cd ~/bin
-> git clone https://github.com/vastgroup/vast-tools.git
-> cd vast-tools
-~~~~
 **Automatic DB Installation:**
 
 Then you can automatically install the database files using:
