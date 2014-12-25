@@ -279,11 +279,12 @@ if (!$genome_sub and !$useGenSub){
  if ($runExprFlag || $onlyExprFlag){
      verbPrint "Mapping reads against mRNA sequences";
 
-     if ($pairedEnd) {
-         $cmd = "$fq1 $fq2";  # altered this to cat both for/rev reads into bowtie.
-     } else {
+#### Only the first $le nucleotides of the forward read --MI 25/12/14
+#     if ($pairedEnd) {
+#         $cmd = "$fq1 $fq2";  # altered this to cat both for/rev reads into bowtie.
+#     } else {
          $cmd = "$fq1";
-     }
+#     }
 
      $cmd = getPrefixCmd($cmd);
      $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -";
