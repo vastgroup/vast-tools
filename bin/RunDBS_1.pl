@@ -260,7 +260,7 @@ if ($length >= 50){
 } elsif ($length >= 36){
     $difLE = $length - 36;
     $le = 36;
-} elsif ($ribofoot and $species eq "Mmu") {
+} elsif ($ribofoot) {
     $difLE = 0;
     $le = 32;
 } else {
