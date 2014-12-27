@@ -181,7 +181,7 @@ if($ribofoot) {
   $runExprFlag = 0; # no need for expression calculations.
   $readLength = 32;
   $trimLen = 32;   
-  $noIRflag = 1;  # temporary;
+#  $noIRflag = 1;  # temporary;
 }
 
 ## Getting sample name and length:
@@ -208,19 +208,19 @@ if ($fileName1 =~ /\-e\.f/){
 } else {
     # allow readlength to be given by -readLen x --TSW
     if($readLength) {
-         $length = $readLength;
-         $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
-         $root = $1;
+        $length = $readLength;
+        $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
+        $root = $1;
     } else { # default behavior by --MI
-         ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
-			if(!defined($length) or $length eq "") { 
-  				errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
-			}
+        ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
+  	if(!defined($length) or $length eq "") { 
+  	  errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
+	}
     }
     if ($pairedEnd){
-		$fq2 = abs_path($ARGV[1]);
-		$fileName2 = $fq2;
-		$fileName2 =~ s/^.*\///g; # strip path
+	$fq2 = abs_path($ARGV[1]);
+	$fileName2 = $fq2;
+	$fileName2 =~ s/^.*\///g; # strip path
     }
     $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq";
 }
