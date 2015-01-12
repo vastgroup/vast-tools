@@ -95,7 +95,7 @@ close $TEMPLATE;
 # Load input data
 my %done;
 my $sawHeader = 0;
-my @prevSampleCols;     # remember last header
+my @samples;     
 my $headerCount = 0;    # count number of columns
 my %headerOrder;        # store order of samples
 my @newOrder;           # used for fixing out-of-order headers
@@ -119,15 +119,18 @@ while (<STDIN>) {
         $headerOrder{$sampleCols[$i]} = $i;
         push @newOrder, $i;
       }
+
+      @samples = @sampleCols;
     } elsif ($sawHeader != @l) {
       die "Number of columns in subsequent header of input file $headerCount" .
       " does not match. Terminating!\n";
-    } elsif (!(@sampleCols ~~ @prevSampleCols)) {
+    } elsif (!(@samples ~~ @sampleCols)) {
       print STDERR "Inconsistent ordering of samples in input file $headerCount!" .
       " Re-ordering columns.\n";
       @newOrder = reorderColumns(\@sampleCols, \%headerOrder);
+    } else {
+      @newOrder = sort {$a <=> $b} values %headerOrder; 
     }
-    @prevSampleCols = @sampleCols;
     next;
   }
 
