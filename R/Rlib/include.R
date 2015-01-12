@@ -12,7 +12,7 @@ loadPackages <- function(toLoad, local.lib="Rlib/") {
     if(!suppressWarnings(require(toString(i), character.only=T, quietly=T)) &&
 		 !suppressWarnings(require(toString(i), character.only=T, lib.loc=local.lib, quietly=T))){
         writeLines(sprintf("%s did not load correctly! Now trying to install..", i), stderr()) 
-        install.packages(i, , repos='http://cran.us.r-project.org', lib=local.lib)
+        install.packages(i, dependencies=TRUE, repos='http://cran.us.r-project.org', lib=local.lib)
         if(require(toString(i), character.only=T, lib.loc=local.lib)) {
           writeLines(sprintf("%s has been installed locally in R/Rlib!", i), stderr())
         } else {
