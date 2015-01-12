@@ -277,6 +277,9 @@ configuration file template can be found under ``R/sample_data``:
 > vast-tools plot -c R/sample_data/sample_psi_data.config R/sample_data/sample_psi_data.tab
 ~~~~
 
+**New!** For advanced users who would like to generate plots interactively in R, you can
+alternatively use the R package [psiplot](https://github.com/kcha/psiplot).
+
 Combine output format
 ---------------------
 The output of ``combine`` is a tab-separated table with an entry (row) for each predefined alternative splicing event. For each event, there are six columns with basic information about it, and then a pair of columns for each sample from ``align`` that is combined. 
