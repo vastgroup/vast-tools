@@ -48,9 +48,12 @@ sub reorderColumns {
   # Re-order columns if input files don't have the same sample ordering
   my $columns = shift;
   my $refOrder = shift;
-  my @newOrder;
-  for my $c (@{$columns}) {
-    push @newOrder, $refOrder->{$c}
+  my @newOrder = (0) x keys %{$refOrder};
+  for (my $i = 0; $i < @{$columns}; $i++) {
+   # Iterate through each column, find out it's actual position based on the
+   # original sample ordering from previous input file
+   my $pos = $refOrder->{$columns->[$i]};
+   $newOrder[$pos] = $i; 
   }
   return @newOrder;
 }
@@ -92,7 +95,7 @@ close $TEMPLATE;
 # Load input data
 my %done;
 my $sawHeader = 0;
-my @prevSampleCols;     # remember last header
+my @samples;     
 my $headerCount = 0;    # count number of columns
 my %headerOrder;        # store order of samples
 my @newOrder;           # used for fixing out-of-order headers
@@ -116,14 +119,18 @@ while (<STDIN>) {
         $headerOrder{$sampleCols[$i]} = $i;
         push @newOrder, $i;
       }
+
+      @samples = @sampleCols;
     } elsif ($sawHeader != @l) {
-      die "Number of columns in subsequent header does not match. Terminating!!\n";
-    } elsif (!(@sampleCols ~~ @prevSampleCols)) {
-        #warn "Inconsistent ordering of samples in input file $headerCount!" .
-        #" I will try to reorder the columns for you.";
+      die "Number of columns in subsequent header of input file $headerCount" .
+      " does not match. Terminating!\n";
+    } elsif (!(@samples ~~ @sampleCols)) {
+      print STDERR "Inconsistent ordering of samples in input file $headerCount!" .
+      " Re-ordering columns.\n";
       @newOrder = reorderColumns(\@sampleCols, \%headerOrder);
+    } else {
+      @newOrder = sort {$a <=> $b} values %headerOrder; 
     }
-    @prevSampleCols = @sampleCols;
     next;
   }
 
