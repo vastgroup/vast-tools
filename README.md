@@ -105,11 +105,12 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 
 ### Quick Usage
 
-VAST-TOOLS can be run as simply as:
 NOTE: Unless specified, all options are default, for example the output
 directory is assumed to be 'vast_out', the database to be
 ``<path>/vast-tools/VASTDB``, and the species ``Hsa``. To change these use
 the ``--output``, ``-dbDir`` and ``-sp`` flags!
+
+VAST-TOOLS can be run as simply as:
 
 ~~~~
 > vast-tools align tissueA-rep1.fq.gz
