@@ -1,6 +1,27 @@
 VAST-TOOLS
 ==========
 
+Table of Contents:
+
+- [Summary](#)
+- [Requirements](#)
+- [Installation](#)
+	- [VAST-TOOLS](#)
+	- [VASTDB](#)
+- [Usage](#)
+	- [Help](#)
+	- [Quick Usage](#)
+	- [Alignment](#)
+	- [Combining Results](#)
+	- [Differential Splicing Analysis](#)
+	- [Plotting](#)
+- [Combine output format](#)
+- [Issues](#)
+- [Contributions](#)
+- [Citation](#)
+- [References](#)
+ 
+	
 Summary
 -------
 VAST-TOOLS is a toolset for profiling alternative splicing events in RNA-Seq data. 
