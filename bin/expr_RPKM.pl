@@ -34,8 +34,8 @@ while (<>){ #analyzes the bowtie output
     chomp;
     @d=split(/\t/);
     $gene=$d[2];
-    $tally{$gene}++;
-    $total_mapped++;
+    $tally{$gene}++ if $gene;
+    $total_mapped++ if $gene;
 }
 
 ### Calculating cRPKMs and finalizing
