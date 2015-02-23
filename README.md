@@ -20,11 +20,10 @@ Table of Contents:
 - [Contributions](#contributions)
 - [Citation](#citation)
 - [References](#references)
- 
 	
 Summary
 -------
-VAST-TOOLS is a toolset for profiling alternative splicing events in RNA-Seq data. 
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling alternative splicing events in RNA-Seq data. 
 
 Requirements
 ------------
