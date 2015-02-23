@@ -13,7 +13,7 @@ Table of Contents:
 	- [Quick Usage](#quick-usage)
 	- [Alignment](#alignment)
 	- [Combining Results](#combining-results)
-	- [Differential Splicing Analysis](#differential-spicing-analysis)
+	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
 - [Combine output format](#combine-output-format)
 - [Issues](#issues)
