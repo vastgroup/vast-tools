@@ -19,7 +19,7 @@ preprocess_sample_colors <- function(data, database) {
   # Args:
   #    data: a n x m data frame of PSI values and quality scores where n is 
   #            the number of AS events and m/2 is the number of samples
-  #    config: filename of the samples database in tab-delimited format
+  #    database: filename of the samples database in tab-delimited format
   #
   # Returns:
   #    A list containing the re-ordered data.frame of PSI ("data"), re-ordered 
