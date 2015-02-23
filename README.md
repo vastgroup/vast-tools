@@ -3,23 +3,23 @@ VAST-TOOLS
 
 Table of Contents:
 
-- [Summary](#)
-- [Requirements](#)
-- [Installation](#)
+- [Summary](#Summary)
+- [Requirements](#Requirements)
+- [Installation](#Installation)
 	- [VAST-TOOLS](#)
 	- [VASTDB](#)
-- [Usage](#)
+- [Usage](#Usage)
 	- [Help](#)
 	- [Quick Usage](#)
 	- [Alignment](#)
 	- [Combining Results](#)
 	- [Differential Splicing Analysis](#)
 	- [Plotting](#)
-- [Combine output format](#)
-- [Issues](#)
-- [Contributions](#)
-- [Citation](#)
-- [References](#)
+- [Combine output format](#Combine-output-format)
+- [Issues](#Issues)
+- [Contributions](#Contributions)
+- [Citation](#Citation)
+- [References](#References)
  
 	
 Summary
