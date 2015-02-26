@@ -15,6 +15,8 @@ VAST-TOOLS requires the following software:
   * RColorBrewer
   * reshape2
   * ggplot2
+  * devtools
+  * [psiplot](https://github.com/kcha/psiplot)
  * Perl 5.10.1 or higher
  * GNU coreutils `sort` (all versions)
  
@@ -86,6 +88,16 @@ on the fly when necessary.
 
 ~~~~
 > ./install.R
+~~~~
+
+### R packages
+
+If you did not use `install.R` as described above, you can manually install the
+required R packages using the following commands:
+
+~~~~
+> R -e 'install.packages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "devtools"))'
+> R -e 'devtools::install_github("kcha/psiplot")'
 ~~~~
 
 
