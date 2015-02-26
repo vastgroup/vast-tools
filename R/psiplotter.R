@@ -145,11 +145,11 @@ verbPrint(paste("\n// Input file:", ifelse(using_stdin, "STDIN", file)))
 verbPrint(paste("// Tissue Group file:", 
                 ifelse(is.null(config_file), "Did not provide", config_file)))
 
-all_events <- read.csv(file, sep="\t")
+all_events <- read.delim(file, stringsAsFactors=FALSE)
 if(is.null(config_file)) {
   config <- NULL
 } else {
-  config <- read.csv(config_file, sep="\t")
+  config <- read.delim(config_file, stringsAsFactors=FALSE)
 }
 
 # Perform some checks #########################################################
