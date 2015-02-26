@@ -27,7 +27,6 @@ MAX_ENTRIES <- 1000
 args <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
 source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
-# source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 loadPackages(c("optparse", "psiplot"), local.lib=paste(c(scriptPath,"/Rlib"), 
                                                        collapse=""))
