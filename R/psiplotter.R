@@ -32,6 +32,16 @@ source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 loadPackages(c("optparse", "psiplot"), local.lib=paste(c(scriptPath,"/Rlib"), 
                                                        collapse=""))
 
+# Check for correct version of psiplot
+v <- as.character(packageVersion('psiplot'))
+if (compareVersion(v, '1.1.1') == -1) {
+  stop(paste("Your version of psiplot, the R library that this script uses, is",
+             v, "and is out of date.\n",
+             "Please update before running this script.",
+             "See README.md for additional help.")
+  )
+}
+
 #### Arguments #################################################################
 # - Input file
 # - Tissue group or Species
@@ -182,8 +192,9 @@ pdf(outfile, width = 8.5, height = 5.5)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
 nplot <- min(nrow(all_events), opt$options$max)
 for (i in 1:nplot) {
-  plot_event(all_events[i,], config = config, errorbar = !opt$options$noErrorBar,
-              groupmean = opt$options$plotGroupMeans)
+  plot_event(all_events[i,], config = config, 
+             errorbar = !opt$options$noErrorBar,
+             groupmean = opt$options$plotGroupMeans)
 }
 dev.off()
 
