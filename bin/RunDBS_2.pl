@@ -70,10 +70,11 @@ Combine multiple samples analyzed using \"vast-tools align\" into a single
 summary tables. 
 
 OPTIONS:
-	-o, --output 		Output directory to combine samples from... [default vast_out]
+	-o, --output 		Output directory to combine samples from (default vast_out)
 	--dbDir DBDIR		Database directory
 	-sp Hsa/Mmu		Species selection
 	-z			Compress all output files using gzip
+	--noIR			Don't run intron retention pipeline (default off)
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help message
 	-C			Create a cRPKM plus read counts summary table. By default, a
@@ -127,6 +128,9 @@ verbPrint "Building Table for MIC (microexons)\n";
 sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
 #my($verbRFlag) = ($verboseFlag) ? "T" : "F";
+
+my @irFiles = glob(abs_path("to_combine") . "/*.IR");
+$noIRflag = 1 if @irFiles == 0;
 
 unless($noIRflag) {
   ### Gets the PIRs for the Intron Retention pipeline
