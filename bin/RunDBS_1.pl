@@ -412,5 +412,12 @@ unless($keepFlag) {
   sysErrMsg "rm $subtractedFq";
 }
 
+unless($noIRflag) {  # --UB
+    my $juncAnnotationFile = "./to_combine/$root.IR.summary.txt";
+    verbPrint "Cleaning up $juncAnnotationFile!";
+    sysErrMsg "rm $juncAnnotationFile";
+}
+
+
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS;
