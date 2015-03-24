@@ -206,6 +206,8 @@ intend to compare multiple samples.  This output file contains a value for the p
 
 ### Differential Splicing Analysis
 
+\*\*\*\*\* IMPORTANT NOTE: "diff" is still under development and currently being tested. Please use at your own risk and only if you understand what you are doing.
+
 Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
 PSI/PSU/PIR.  
 
