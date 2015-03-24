@@ -31,7 +31,7 @@ source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 # custom install from include.R
-loadPackages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
+loadPackages(c("MASS", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 argv <- commandArgs(TRUE)
 
@@ -73,7 +73,7 @@ option.list <- list(
         help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
     make_option(c("--beta"), type = "numeric", default = 1,
         help = "Second shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
-    make_option(c("-s", "--size"), type = "integer", default = 5000,
+    make_option(c("-s", "--size"), type = "integer", default = 250,
         help = "Size of the posterior emperical distribution over psi, lower = faster... [default %default]\n
 
 [general options]"),
@@ -237,12 +237,16 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
       psiFirstComb <- do.call(c, psiFirst)
       psiSecondComb <- do.call(c, psiSecond)
 
+      if( length(psiFirstComb) <= 0 || length(psiSecondComb) <= 0 ) { return(NULL) }
+
       #    print(length(psiFirstComb))
 
       # if they aren't paired, then shuffle the joint distributions...
       if( !opt$paired ) {
-        psiFirstComb <- shuffle(psiFirstComb)
-        psiSecondComb <- shuffle(psiSecondComb)
+        paramFirst <- suppressWarnings(fitdistr(psiFirstComb, "beta", start=list(shape1=1,shape2=1))$estimate)
+        paramSecond <- suppressWarnings(fitdistr(psiSecondComb,"beta", start=list(shape1=1,shape2=1))$estimate)
+        psiFirstComb <- rbeta(opt$size, shape1=paramFirst[1], shape2=paramFirst[2])
+        psiSecondComb <- rbeta(opt$size, shape1=paramSecond[1], shape2=paramSecond[2])
       }
 
       # get emperical posterior median of psi
