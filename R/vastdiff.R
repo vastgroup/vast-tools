@@ -220,6 +220,12 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 		return(NULL)
       }
 
+      firstShapeMat <- do.call(rbind, shapeFirst)
+      secondShapeMat <- do.call(rbind, shapeSecond)
+
+      firstShapeAve <- c( mean(firstShapeMat[,1]), mean(firstShapeMat[,2]) )
+      secondShapeAve <- c( mean(secondShapeMat[,1]), mean(secondShapeMat[,2]) )
+
       # Sample Posterior Distributions
       psiFirst <- lapply( shapeFirst, function(x) {
         #sample here from rbeta(N, alpha, beta) if > -e
@@ -243,10 +249,24 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
       # if they aren't paired, then shuffle the joint distributions...
       if( !opt$paired ) {
-        paramFirst <- suppressWarnings(fitdistr(psiFirstComb, "beta", start=list(shape1=1,shape2=1))$estimate)
-        paramSecond <- suppressWarnings(fitdistr(psiSecondComb,"beta", start=list(shape1=1,shape2=1))$estimate)
-        psiFirstComb <- rbeta(opt$size, shape1=paramFirst[1], shape2=paramFirst[2])
-        psiSecondComb <- rbeta(opt$size, shape1=paramSecond[1], shape2=paramSecond[2])
+        paramFirst <- try (suppressWarnings(
+				fitdistr(psiFirstComb, 
+					"beta", 
+					list( shape1=firstShapeAve[1], shape2=firstShapeAve[2])
+				)$estimate ), TRUE )
+        paramSecond <- try (suppressWarnings(
+				fitdistr(psiSecondComb,
+					"beta", 
+					list( shape1=secondShapeAve[1], shape2=secondShapeAve[2])
+				)$estimate ), TRUE )
+        # if optimization fails its because the distribution is too narrow
+        # in which case our starting shapes should already be good enough
+	if(class(paramFirst) != "try-error") {
+          psiFirstComb <- rbeta(opt$size, shape1=paramFirst[1], shape2=paramFirst[2])
+        }
+        if(class(paramSecond) != "try-error") {
+          psiSecondComb <- rbeta(opt$size, shape1=paramSecond[1], shape2=paramSecond[2])
+        }
       }
 
       # get emperical posterior median of psi
