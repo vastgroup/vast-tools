@@ -282,16 +282,16 @@ default is 100, which works well.
 *Output Format*
 
 The text output of diff looks like:
-|GENE	|EVENT		|SampleA	|SampleB	|Exp[deltaPsi]	|P(|deltaPsi|)>0.95|
-|-------|---------------|---------------|---------------|---------------|------------------|
-|BOD1L	|HsaEX0008312	|0.124353	|0.700205	|-0.575851	|0.3		   |	
-|KARS	|HsaEX0032865	|0.172134	|0.460027	|-0.287892	|0.22              |
-|NISCH	|HsaEX0043017	|0.247743	|0.500657	|-0.252915	|0.09              |
-|ALAS1	|HsaEX0003568	|0.293333	|0.537553	|-0.244220	|0.09		   |
-|VPS13D	|HsaEX0070518	|0.984622	|0.657589	|0.327033	|0.1		   |
-|TRO	|HsaEX0067335	|0.757929	|0.474551	|0.283378	|0.04		   |
-|USP33	|HsaEX0069762	|0.337669	|0.845228	|-0.507560	|0.14		   |
-|BCORL1	|HsaEX0007940	|0.213452	|0.500425	|-0.286973	|0.05		   |
+ GENE	| EVENT		| SampleA	| SampleB	| Exp[deltaPsi]	| P(|deltaPsi|)>0.95
+:-------|:------------- |:------------- |:------------- |:------------- |------------------
+ BOD1L	| HsaEX0008312	| 0.124353	| 0.700205	| -0.575851	| 0.3		   	
+ KARS	| HsaEX0032865	| 0.172134	| 0.460027	| -0.287892	| 0.22              
+ NISCH	| HsaEX0043017	| 0.247743	| 0.500657	| -0.252915	| 0.09             
+ ALAS1	| HsaEX0003568	| 0.293333	| 0.537553	| -0.244220	| 0.09		   
+ VPS13D	| HsaEX0070518	| 0.984622	| 0.657589	| 0.327033	| 0.1		   
+ TRO	| HsaEX0067335	| 0.757929	| 0.474551	| 0.283378	| 0.04		   
+ USP33	| HsaEX0069762	| 0.337669	| 0.845228	| -0.507560	| 0.14		   
+ BCORL1	| HsaEX0007940	| 0.213452	| 0.500425	| -0.286973	| 0.05		   
 
 Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
 for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
