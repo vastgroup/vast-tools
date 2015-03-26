@@ -140,7 +140,7 @@ VAST-TOOLS can be run as simply as:
 
 > vast-tools combine
 
-> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA-rep1,tissueA-rep2 -b tissueB-rep1,tissueB-rep2 > INCLUSION-FILTERED.tab
 
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
@@ -154,7 +154,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 ~~~~ 
 AND
 ~~~~
-> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA-rep1,tissueA-rep2 -b tissueB-rep1,tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
 ~~~~
 
 ### Alignment
@@ -206,16 +206,15 @@ intend to compare multiple samples.  This output file contains a value for the p
 
 ### Differential Splicing Analysis
 
-\*\*\*\*\* IMPORTANT NOTE: "diff" is still under development and currently being tested. Please use at your own risk and only if you understand what you are doing.
+*IMPORTANT NOTE*: `diff` is still an experimental part of this package and is currently under development and testing. Please use at your own knowledge and risk.
 
 Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
 PSI/PSU/PIR.  
 
-Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://sites.utoronto.ca/intron/sterne-weiler.php)
-
+Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca)
 
 ~~~~
-> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > outputdir/significant_events.tab
+> vast-tools diff -a sampleA_rep1,sampleA_rep2 -b sampleB_rep1,sampleB_rep2 -o outputdir > outputdir/significant_events.tab
 ~~~~
 
 *Statistics Options*
@@ -250,12 +249,15 @@ it may be more appropriate to use a custom prior model that is able to more accu
 reflect the lower expectation of inclusion levels.
 
 In the case that you have paired samples, where NormalA is dependent on
-PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag.  When
-calculating the joint emperical posterior distribution,
-for example from NormalA and NormalB, to compare to PerturbationA and
-PerturbationB, the probability that P( joint_psi1 - joint_psi2 > ``-m`` ) is not
-resampled such that NormalA is only compared to PerturbationA, and then NormalB
-is compared to PerturbationB.  
+PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag.  For
+example when considering NormalA and NormalB, to compare to PerturbationA and
+PerturbationB, the probability that P( joint_psi1 - joint_psi2 > ``-m`` ) is
+calculated such that NormalA is only compared to PerturbationA, and then NormalB
+is compared to PerturbationB.
+
+In other cases with multiple replicates and `--paired=FALSE`, the posterior distributions
+of the individual replicates are sampled and a 'best fit multi-replicate posterior' distribution
+over psi is estimated.
 
  
 *Performance Options*
