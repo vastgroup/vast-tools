@@ -106,92 +106,102 @@ errPrintDie "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs
 my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
 my $N=$#files+1;
 
-if ($N == 0) {
-    errPrint "Could not find any samples in $outDir/to_combine.\n";
-    exit $EXIT_STATUS;
+if ($N != 0) {
+    ### Gets the PSIs for the events in the a posteriori pipeline
+    verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
+    sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    ### Gets the PSIs for the a priori, SIMPLE
+    verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
+    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    ### Gets the PSIs for the a priori, COMPLEX
+    verbPrint "Building Table for MULTI (a priori pipeline, multiexon)\n";
+    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    ### Gets the PSIs for the MIC pipeline
+    verbPrint "Building Table for MIC (microexons)\n";
+    sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    #my($verbRFlag) = ($verboseFlag) ? "T" : "F";
+
+    my @irFiles = glob(abs_path("to_combine") . "/*.IR");
+    $noIRflag = 1 if @irFiles == 0;
+
+    unless($noIRflag) {
+      ### Gets the PIRs for the Intron Retention pipeline
+      verbPrint "Building quality score table for intron retention\n";
+      sysErrMsg "$binPath/RI_MakeCoverageKey.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
+      verbPrint "Building Table for intron retention\n";
+      sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir" .
+                  " -c " . abs_path("to_combine") .
+                  " -q " . abs_path("to_combine") . "/Coverage_key-$sp$N.IRQ" .
+                  " -o " . abs_path("raw_incl");
+    }
+
+    ### Adds those PSIs to the full database of PSIs (MERGE3m).
+    # to be deprecated and replaced by Add_to_FULL (see below) --KH
+    #verbPrint "Building non-redundant PSI table (MERGE3m)\n";
+    #sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
+    #"raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
+    #"raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
+    #"raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab " .
+    #"raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
+    #"-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    ### Gets PSIs for ALT5ss and adds them to the general database
+    verbPrint "Building Table for Alternative 5'ss choice events\n";
+    sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    ### Gets PSIs for ALT3ss and adds them to the general database
+    verbPrint "Building Table for Alternative 3'ss choice events\n";
+    sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+
+    ### Combine results into unified "FULL" table
+    verbPrint "Combining results into a single table\n";
+    my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
+                    "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
+                    "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
+                    "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
+                    "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
+                    "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
+
+    unless($noIRflag) {
+      push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
+    }
+
+    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
+    sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
+                "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
+
+    verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
+    
+    if ($compress) {
+      verbPrint "Compressing files\n";
+      sysErrMsg "gzip -v raw_incl/*.tab raw_reads/*.tab $finalOutput";
+      $finalOutput .= ".gz";
+    }
 }
-
-### Gets the PSIs for the events in the a posteriori pipeline
-verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
-sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-### Gets the PSIs for the a priori, SIMPLE
-verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
-sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-### Gets the PSIs for the a priori, COMPLEX
-verbPrint "Building Table for MULTI (a priori pipeline, multiexon)\n";
-sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-### Gets the PSIs for the MIC pipeline
-verbPrint "Building Table for MIC (microexons)\n";
-sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-#my($verbRFlag) = ($verboseFlag) ? "T" : "F";
-
-my @irFiles = glob(abs_path("to_combine") . "/*.IR");
-$noIRflag = 1 if @irFiles == 0;
-
-unless($noIRflag) {
-  ### Gets the PIRs for the Intron Retention pipeline
-  verbPrint "Building quality score table for intron retention\n";
-  sysErrMsg "$binPath/RI_MakeCoverageKey.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
-  verbPrint "Building Table for intron retention\n";
-  sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir" .
-              " -c " . abs_path("to_combine") .
-              " -q " . abs_path("to_combine") . "/Coverage_key-$sp$N.IRQ" .
-              " -o " . abs_path("raw_incl");
-}
-
-### Adds those PSIs to the full database of PSIs (MERGE3m).
-# to be deprecated and replaced by Add_to_FULL (see below) --KH
-#verbPrint "Building non-redundant PSI table (MERGE3m)\n";
-#sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
-#"raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
-#"raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
-#"raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab " .
-#"raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
-#"-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-### Gets PSIs for ALT5ss and adds them to the general database
-verbPrint "Building Table for Alternative 5'ss choice events\n";
-sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-### Gets PSIs for ALT3ss and adds them to the general database
-verbPrint "Building Table for Alternative 3'ss choice events\n";
-sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-### Combine results into unified "FULL" table
-verbPrint "Combining results into a single table\n";
-my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
-                "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
-
-unless($noIRflag) {
-  push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
-}
-
-my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
-sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
-            "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
-
-verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
 
 ### Combine cRPKM files, if present
 my @rpkmFiles=glob("expr_out/*.cRPKM"); 
 if (@rpkmFiles > 0) {
     verbPrint "Combining cRPKMs into a single table\n";
+    my $cRPKMOutput = "cRPKM-$sp" . @rpkmFiles . ".tab";
     $cRPKMCounts = $cRPKMCounts ? "-C" : "";
     sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts";
+
+    if ($compress) {
+      verbPrint "Compressing files\n";
+      sysErrMsg "gzip -v expr_out/*.cRPKM $cRPKMOutput";
+      $cRPKMOutput .= ".gz";
+    }
+
+    verbPrint "Final cRPKM table saved as: " . abs_path($cRPKMOutput) . "\n";
 }
 
-### Compress intermediate files
-if ($compress) {
-  verbPrint "Compressing files\n";
-  sysErrMsg "gzip -v raw_incl/*.tab raw_reads/*.tab $finalOutput";
+if ($N + @rpkmFiles == 0) {
+    verbPrint "Could not find any files to combine. If they are compressed, please decompress them first.\n";
 }
 
 verbPrint "Completed " . localtime;
