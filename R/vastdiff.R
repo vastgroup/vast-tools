@@ -38,9 +38,9 @@ argv <- commandArgs(TRUE)
 # optparse..
 option.list <- list(
     make_option(c("-a", "--replicateA"), type = "character", default = NULL, metavar = "SampleA@SampleB@SampleC",
-        help = "Required, 1:n sample names separated by @ [mandatory!]"),
+        help = "Required, 1:n sample names separated by , [mandatory!]"),
     make_option(c("-b", "--replicateB"), type = "character", default = NULL, metavar = "SampleA@SampleB@SampleC",
-        help = "Required, 1:n sample names separated by @ [mandatory!]\n
+        help = "Required, 1:n sample names separated by , [mandatory!]\n
 
 [input options]"),
     make_option(c("--sampleNameA"), type = "character", default = NULL, metavar = "string",
@@ -52,7 +52,7 @@ option.list <- list(
     make_option(c("-n", "--nLines"), type = "integer", default = "10000",
         help = "Number of lines to read/process in parallel at a time... lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
-        help = "Samples are paired, -a pairOneA@pairTwoA@.. -b pairOneB@pairTwoB [default %default]\n
+        help = "Samples are paired, -a pairOneA,pairTwoA,.. -b pairOneB,pairTwoB,.. [default %default]\n
 
 [output options]"),
     make_option(c("-f", "--filter"), type = "logical", default = TRUE,
@@ -86,7 +86,7 @@ option.list <- list(
 )
 
 parser <- OptionParser(option_list = option.list,
-            usage = "vast-tools diff -a SampleA@..@SampleD -b SampleF@..@SampleG [options]\n\nAuthor: Tim Sterne-Weiler\nQuestions? OR Bug Reports: tim.sterne.weiler@utoronto.ca")
+            usage = "vast-tools diff -a SampleA,..,SampleD -b SampleF,..,SampleG [options]\n\nAuthor: Tim Sterne-Weiler\n")
 optpar <- parse_args(parser, argv, positional_arguments = TRUE)
 opt <- optpar$options
 
@@ -119,13 +119,13 @@ inputFile <- file( opt$input, 'r' )
 #}
 
 #-replicatesA=name1@name2@name3 -replicatesB=name4@name5
-firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "@" ))
-secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "@" ))
+firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "," ))
+secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "," ))
 
 if( length(firstRepSet) <= 0 || 
     length(secondRepSet) <= 0) { 
   print_help(parser) 
-  stop("[vast diff error]: No replicate sample names given!!! -a sampA@sampB -b sampC@sampD")
+  stop("[vast diff error]: No replicate sample names given!!! -a sampA,sampB -b sampC,sampD")
 }
 
 # Set number of replicates
@@ -140,8 +140,8 @@ if(is.null( opt$sampleNameB ) ) {
   opt$sampleNameB <- secondRepSet[1]
 }
 # Set output sample names for plot
-sampOneName <- paste(c(substr(opt$sampleNameA, 1, 4), "(n=", as.character(firstRepN), ")"), collapse="")
-sampTwoName <- paste(c(substr(opt$sampleNameB, 1, 4), "(n=", as.character(secondRepN), ")"), collapse="")
+sampOneName <- substr(opt$sampleNameA, 1, 9)
+sampTwoName <- substr(opt$sampleNameB, 1, 9)
 
 
 ## INITIALIZE LISTS ##
@@ -155,9 +155,11 @@ psiSecond <- vector("list", secondRepN)
 head <- readLines( inputFile, n=1 )
 head_n <- unlist( strsplit( head, "\t" ) )
 
+#DEPRECATED -TSW 03/26/2015
 # if we are to filter to stdout, then print header
 if( opt$filter ) {
-  writeLines(head, stdout())
+#  writeLines(head, stdout())
+  writeLines(sprintf("GENE\tEVENT\t%s\t%s\tExp[deltaPsi]\tP(|deltaPsi|)>%s", sampOneName, sampTwoName, opt$prob), stdout())
 }
 
 # check if header is correct..  TODO
@@ -239,6 +241,25 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
         rbeta(opt$size, shape1=x[1], shape2=x[2])
       })
 
+      # calculate expected value of psi for each replicate
+      expFirst <- unlist(lapply(shapeFirst, function(x) { 
+         if(x[1]+x[2] < opt$minReads) { return(NULL) }
+         x[1] / (x[1] + x[2]) 
+      }))
+      expSecond <- unlist(lapply(shapeSecond, function(x) {
+         if(x[1]+x[2] < opt$minReads) { return(NULL) } 
+         x[1] / (x[1] + x[2]) 
+      }))
+ 
+      if(opt$paired) { #make sure both samples have a non-NULL replicate
+        for(lstInd in 1:length(psiFirst)) {
+          if(is.null(psiFirst[[lstInd]]) || is.null(psiSecond[[lstInd]])) {
+            psiFirst[[lstInd]] <- NULL
+            psiSecond[[lstInd]] <- NULL
+          }
+        }
+      }
+ 
       # Create non-parametric Joint Distributions
       psiFirstComb <- do.call(c, psiFirst)
       psiSecondComb <- do.call(c, psiSecond)
@@ -280,13 +301,14 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
         max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
       }
       #    writeLines(lines[i], stderr()) ### DEBUGGING
-      # check for significant difference
-      if(max < opt$minDiff) { return(NULL) } # or continue...
 
       # SIGNIFICANT from here on out:
-      if( opt$filter ) { 
-        writeLines(lines[i], stdout())
+      if( opt$filter ) {
+        write(sprintf("%s\t%s\t%f\t%f\t%f\t%s", tabLine[1], tabLine[2], medOne, medTwo, medOne - medTwo, round(max,2)), stdout())
       }
+
+      # check for significant difference
+      if(max < opt$minDiff) { return(NULL) } # or continue...
 
       eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
       eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
@@ -294,9 +316,9 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
       # Print visual output to pdf;
       if( medOne > medTwo ) {
-        retPlot <- plotDiff(psiFirstComb, psiSecondComb, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
+        retPlot <- plotDiff(psiFirstComb, psiSecondComb, expFirst, expSecond, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
       } else {
-        retPlot <- plotDiff(psiSecondComb, psiFirstComb, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
+        retPlot <- plotDiff(psiSecondComb, psiFirstComb, expFirst, expSecond, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
       }
 
       return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function

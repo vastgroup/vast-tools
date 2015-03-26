@@ -140,7 +140,7 @@ VAST-TOOLS can be run as simply as:
 
 > vast-tools combine
 
-> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA-rep1,tissueA-rep2 -b tissueB-rep1,tissueB-rep2 > INCLUSION-FILTERED.tab
 
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
@@ -154,7 +154,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 ~~~~ 
 AND
 ~~~~
-> vast-tools diff -a tissueA-rep1@tissueA-rep2 -b tissueB-rep1@tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA-rep1,tissueA-rep2 -b tissueB-rep1,tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
 ~~~~
 
 ### Alignment
@@ -206,23 +206,23 @@ intend to compare multiple samples.  This output file contains a value for the p
 
 ### Differential Splicing Analysis
 
-\*\*\*\*\* IMPORTANT NOTE: "diff" is still under development and currently being tested. Please use at your own risk and only if you understand what you are doing.
+*IMPORTANT NOTE*: `diff` is still an experimental part of this package and is currently under development and testing. Please use at your own knowledge and risk.
 
-Bayesian inference followed by differential analysis of joint emperical posterior distributions with respect to
-PSI/PSU/PIR.  
+Bayesian inference followed by differential analysis of posterior distributions with respect to
+PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample are estimated from 
+emperical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
 
-Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca) - [web](http://sites.utoronto.ca/intron/sterne-weiler.php)
-
+Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca)
 
 ~~~~
-> vast-tools diff -a sampleA_rep1@sampleA_rep2 -b sampleB_rep1@sampleB_rep2 -o outputdir > outputdir/significant_events.tab
+> vast-tools diff -a sampleA_rep1,sampleA_rep2 -b sampleB_rep1,sampleB_rep2 -o outputdir > outputdir/diff_output.tab
 ~~~~
 
 *Statistics Options*
 
 Probably the most important extra options to consider are ``-r PROB (--prob)``,
-``-m MINDIFF (--minDiff)`` and ``-e MINREADS (--minReads)`` These represent the stringency criterion for
-visual output and filtering of input to STDOUT.
+``-m MINDIFF (--minDiff)`` and ``-e MINREADS (--minReads)`` These represent the 
+stringency criterion for filtering of visual output and textual data to STDOUT.
 
 The ``-r`` flag represents the
 minimal probability of acceptance that is required to consider a comparison to
@@ -231,7 +231,8 @@ stringency requirements.
 
 The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
 will accept, such that we are are sure with at least probability ``-r`` that
-there is a difference of at least ``-m``.
+there is a difference of at least ``-m``.  `-m` does not currently alter the output
+sent to STDOUT, but does filter what is plotted to PDF.
 
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
@@ -250,13 +251,15 @@ it may be more appropriate to use a custom prior model that is able to more accu
 reflect the lower expectation of inclusion levels.
 
 In the case that you have paired samples, where NormalA is dependent on
-PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag.  When
-calculating the joint emperical posterior distribution,
-for example from NormalA and NormalB, to compare to PerturbationA and
-PerturbationB, the probability that P( joint_psi1 - joint_psi2 > ``-m`` ) is not
-resampled such that NormalA is only compared to PerturbationA, and then NormalB
-is compared to PerturbationB.  
+PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag.  For
+example when considering NormalA and NormalB, to compare to PerturbationA and
+PerturbationB, the probability that P( joint_psi1 - joint_psi2 > ``-m`` ) is
+calculated such that NormalA is only compared to PerturbationA, and then NormalB
+is compared to PerturbationB.  No MLE fitting is used in this case.
 
+In all multireplicate cases where `--paired=FALSE`, the posterior distributions
+of the individual replicates are used to estimate a 'best fit joint posterior' distribution
+over psi for each sample.
  
 *Performance Options*
 
@@ -275,6 +278,27 @@ flag.  A lower number means that ``diff`` will use significantly less memory,
 however by decreasing ``-n`` you have increased the number of times that the
 ``mclapply`` function must calculate the parallel processing overhead.  The
 default is 100, which works well.
+
+*Output Format*
+
+The text output of diff looks like:
+|GENE	|EVENT		|SampleA	|SampleB	|Exp[deltaPsi]	|P(|deltaPsi|)>0.95|
+|-------|---------------|---------------|---------------|---------------|------------------|
+|BOD1L	|HsaEX0008312	|0.124353	|0.700205	|-0.575851	|0.3		   |	
+|KARS	|HsaEX0032865	|0.172134	|0.460027	|-0.287892	|0.22              |
+|NISCH	|HsaEX0043017	|0.247743	|0.500657	|-0.252915	|0.09              |
+|ALAS1	|HsaEX0003568	|0.293333	|0.537553	|-0.244220	|0.09		   |
+|VPS13D	|HsaEX0070518	|0.984622	|0.657589	|0.327033	|0.1		   |
+|TRO	|HsaEX0067335	|0.757929	|0.474551	|0.283378	|0.04		   |
+|USP33	|HsaEX0069762	|0.337669	|0.845228	|-0.507560	|0.14		   |
+|BCORL1	|HsaEX0007940	|0.213452	|0.500425	|-0.286973	|0.05		   |
+
+Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
+for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
+Psi (deltaPsi) between SampleA and SampleB of -0.57, there is only a 0.95 probability that deltaPsi
+is greater than 0.3.  Use this value to filter for events that are statistically likely to 
+have at least a minimal difference of some magnitude that you deem to be biologically relevant. 
+ 
 
 ### Plotting
 

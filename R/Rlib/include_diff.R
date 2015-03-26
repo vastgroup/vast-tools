@@ -68,7 +68,7 @@ betaCISample <- function(alpha, beta, n = 5000) {
 
 
 ### MAKE VISUAL OUTPUT
-plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoName, rever ) {
+plotDiff <- function(inpOne, inpTwo, expOne, expTwo, maxD, medOne, medTwo, sampOneName, sampTwoName, rever ) {
 
   if(rever) {   #write this better. ;-)
     curCol <- cbb[3:2]
@@ -76,14 +76,19 @@ plotDiff <- function(inpOne, inpTwo, maxD, medOne, medTwo, sampOneName, sampTwoN
     curCol <- cbb[2:3]
   }
 
+  if(length(expOne) == 0 || length(expTwo) == 0) { return(NULL) }
+  one <- data.frame(x=expOne, y=-0.5)
+  two <- data.frame(x=expTwo, y=-0.5)
+
   distPlot <- ggplot(melt(as.data.frame(
          do.call(cbind,list(inpOne, inpTwo))
          ), measure.vars=c("V1","V2")), aes(fill=variable, x=value))+
-#         geom_vline(x=medOne, col=cbb[2])+
-#         geom_vline(x=medTwo, col=cbb[3])+
          geom_histogram(aes(y=..density..), binwidth=0.03333,alpha=0.5, col="grey", position="identity")+
          theme_bw()+xlim(c(0,1))+xlab(expression(hat(Psi)))+
-         scale_fill_manual(values=curCol, labels=c(sampOneName, sampTwoName), name="Samples")
+         scale_fill_manual(values=curCol, labels=c(sampOneName, sampTwoName), name="Samples")+
+         geom_point(data=one, aes(x=x, y=y), col=cbb[2], fill=cbb[2], alpha=0.85)+
+         geom_point(data=two, aes(x=x, y=y), col=cbb[3], fill=cbb[3], alpha=0.85)
+
 
   probPlot <- ggplot(as.data.frame(cbind(seq(0,1,0.01),
             unlist(lapply(alphaList, function(x) {
