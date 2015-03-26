@@ -140,8 +140,8 @@ if(is.null( opt$sampleNameB ) ) {
   opt$sampleNameB <- secondRepSet[1]
 }
 # Set output sample names for plot
-sampOneName <- paste(c(substr(opt$sampleNameA, 1, 4), "(n=", as.character(firstRepN), ")"), collapse="")
-sampTwoName <- paste(c(substr(opt$sampleNameB, 1, 4), "(n=", as.character(secondRepN), ")"), collapse="")
+sampOneName <- substr(opt$sampleNameA, 1, 9)
+sampTwoName <- substr(opt$sampleNameB, 1, 9)
 
 
 ## INITIALIZE LISTS ##
@@ -155,9 +155,11 @@ psiSecond <- vector("list", secondRepN)
 head <- readLines( inputFile, n=1 )
 head_n <- unlist( strsplit( head, "\t" ) )
 
+#DEPRECATED -TSW 03/26/2015
 # if we are to filter to stdout, then print header
 if( opt$filter ) {
-  writeLines(head, stdout())
+#  writeLines(head, stdout())
+  writeLines(sprintf("GENE\tEVENT\t%s\t%s\tExp[Psi1-Psi2]\tP(|diff|)>%s", sampOneName, sampTwoName, opt$prob), stdout())
 }
 
 # check if header is correct..  TODO
@@ -299,13 +301,14 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
         max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
       }
       #    writeLines(lines[i], stderr()) ### DEBUGGING
-      # check for significant difference
-      if(max < opt$minDiff) { return(NULL) } # or continue...
 
       # SIGNIFICANT from here on out:
-      if( opt$filter ) { 
-        writeLines(lines[i], stdout())
+      if( opt$filter ) {
+        write(sprintf("%s\t%s\t%f\t%f\t%f\t%s", tabLine[1], tabLine[2], medOne, medTwo, medOne - medTwo, round(max,2)), stdout())
       }
+
+      # check for significant difference
+      if(max < opt$minDiff) { return(NULL) } # or continue...
 
       eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
       eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
