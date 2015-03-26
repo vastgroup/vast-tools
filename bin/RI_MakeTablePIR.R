@@ -144,27 +144,13 @@ for (i in 1:nrow(samples)) {
     pir[,2*i]     <- qal.i[datMerge]
 }
 
+rm(dat, pir.i, cov.i, tot.i, alpha.i, beta.i, xranges, bal.i, qal.i, datMerge)
+gc()
+
 
 ## Add legacy quality scores for compatibility with downstream tools
 legQual <- read.delim(opt$quality, as.is=TRUE, check.names = FALSE)
 if (!all(names(legQual)[-1] %in% samples$Sample)) {stop("Samples in IR and IR quality file do not match")}
-    pir.i <- round(100 * (dat[,2] + dat[,3]) / (dat[,2] + dat[,3] + 2 * dat[,4]), digits=2)
-    cov.i <- dat[,4] + apply(dat[,c(2,3,5)], MAR=1, FUN=median)
-    tot.i <- dat[,2] + dat[,3] + dat[,4]
-    alpha.i <- round(pir.i / 100 * tot.i, 2)
-    beta.i  <- round((1 - pir.i / 100) * tot.i, 2)
-
-    xranges <- t(apply(dat[,c(2,3,5)], MAR=1, FUN=range))
-    xranges <- apply(xranges, MAR=2, round)
-    xranges[,2] <- xranges[,1] + xranges[,2]
-    bal.i <- numeric(length=nrow(xranges))
-    bal.i[xranges[,2] == 0] <- 1
-    bal.i[xranges[,2] > 0] <- apply(xranges[xranges[,2] > 0,], MAR=1, FUN=function(x) {
-        binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value
-    })
-
-    ## make the 'quality' column: cov,bal@alpha,beta
-    qal.i <- paste(round(cov.i, 1), ",", signif(bal.i, 3), "@", alpha.i, ",", beta.i, sep="")
 
 legQual <- legQual[legQual$EVENT %in% template$juncID,]
 qualMerge <- data.frame(legQual$EVENT, qualInd=1:nrow(legQual))
@@ -182,6 +168,7 @@ for (i in 1:nrow(samples)) {
     pir[,i * 2] <- paste(legQual[,1 + i], sub("[^,]+", "", pir[,i * 2]), sep="")
 }
 
+
 ## Remove events of which at least one junction has no mappable positions --UB
 unmap <- rep(FALSE, nrow(legQual))
 for (i in 1:nrow(samples)) {
@@ -189,6 +176,7 @@ for (i in 1:nrow(samples)) {
 }
 pir      <- pir[!unmap,]
 template <- template[!unmap,]
+
 
 ## Remove values from events that are never below PIRthresh
 if (rmHigh) {
