@@ -283,7 +283,7 @@ default is 100, which works well.
 
 The text output of diff looks like:
 
-  GENE	| EVENT		| SampleA	| SampleB	| Exp[deltaPsi]	| P(|deltaPsi|)>0.95
+  GENE	| EVENT		| SampleA	| SampleB	| Exp[deltaPsi]	| P(abs(deltaPsi))>0.95
 :-------|:------------- |:------------- |:------------- |:------------- | ------------------
  BOD1L	| HsaEX0008312	| 0.124353	| 0.700205	| -0.575851	| 0.3		   	
  KARS	| HsaEX0032865	| 0.172134	| 0.460027	| -0.287892	| 0.22              
