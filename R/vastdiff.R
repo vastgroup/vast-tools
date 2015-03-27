@@ -186,10 +186,16 @@ alphaList <- seq(0,1,0.01)
 ### TMP OUT
 if(opt$pdf == "input.DIFF_plots") {
   pdfname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_plots.pdf", basename(opt$input))
+  signame <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_sig.txt", basename(opt$input))
 } else {
   pdfname <- paste(c(opt$pdf, ".pdf"), collapse="")
+  signame <- paste(c(opt$pdf, ".txt"), collapse="")
 }
+
+sighandle <- file(signame, 'w')
+
 pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
+write(head, sighandle)
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
@@ -310,6 +316,8 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
       # check for significant difference
       if(max < opt$minDiff) { return(NULL) } # or continue...
 
+      writeLines(lines[i], sighandle)
+
       eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
       eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
       #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
@@ -333,5 +341,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 } #End While
 
 garbage <- dev.off()
+
+close(sighandle)
 
 q(status=0)
