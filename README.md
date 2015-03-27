@@ -283,8 +283,8 @@ default is 100, which works well.
 
 The text output of diff looks like:
 
-  GENE	| EVENT		| SampleA	| SampleB	| Exp[deltaPsi]	| P(abs(deltaPsi))>0.95
-:-------|:------------- |:------------- |:------------- |:------------- | ------------------
+  GENE	| EVENT		| SampleA	| SampleB	| Exp[deltaPsi]	| max(x)@P(abs(deltaPsi) > x)>0.95
+:-------|:------------- |:------------- |:------------- |:------------- | ---------------------------------
  BOD1L	| HsaEX0008312	| 0.124353	| 0.700205	| -0.575851	| 0.3		   	
  KARS	| HsaEX0032865	| 0.172134	| 0.460027	| -0.287892	| 0.22              
  NISCH	| HsaEX0043017	| 0.247743	| 0.500657	| -0.252915	| 0.09             
@@ -296,11 +296,16 @@ The text output of diff looks like:
 
 Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
 for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
-Psi (deltaPsi) between SampleA and SampleB of -0.57, there is only a 0.95 probability that deltaPsi
+Psi (deltaPsi) between SampleA and SampleB of -0.57, there is only a 0.95 probability that |deltaPsi|
 is greater than 0.3.  Use this value to filter for events that are statistically likely to 
 have at least a minimal difference of some magnitude that you deem to be biologically relevant. 
 
 ![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
+
+The output plot above shows in the left panel the two joint posterior distributions over psi, and the
+point estimates of psi for each replicate plotted as points below the histograms.  In the right panel:
+the y-axis represents the probability of delta psi being greater than some magnitude value of x (shown on the x-axis).
+The red line indicates the maximal value of x where P(deltaPsi > x) > `-r`, or the 0.95 default.  
 
 ### Plotting
 
