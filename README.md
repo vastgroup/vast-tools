@@ -303,7 +303,7 @@ have at least a minimal difference of some magnitude that you deem to be biologi
 ![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
 
 The output plot above shows in the left panel the two joint posterior distributions over psi, and the
-point estimates of psi for each replicate plotted as points below the histograms.  In the right panel:
+point estimates for each replicate plotted as points below the histograms.  In the right panel:
 the y-axis represents the probability of delta psi being greater than some magnitude value of x (shown on the x-axis).
 The red line indicates the maximal value of x where P(deltaPsi > x) > `-r`, or the 0.95 default.  
 
