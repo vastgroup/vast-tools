@@ -35,6 +35,8 @@ VAST-TOOLS requires the following software:
   * RColorBrewer
   * reshape2
   * ggplot2
+  * devtools
+  * [psiplot](https://github.com/kcha/psiplot)
  * Perl 5.10.1 or higher
  * GNU coreutils `sort` (all versions)
  
@@ -106,6 +108,16 @@ on the fly when necessary.
 
 ~~~~
 > ./install.R
+~~~~
+
+### R packages
+
+If you did not use `install.R` as described above, you can manually install the
+required R packages using the following commands:
+
+~~~~
+> R -e 'install.packages(c("optparse", "RColorBrewer", "reshape2", "ggplot2", "devtools"))'
+> R -e 'devtools::install_github("kcha/psiplot")'
 ~~~~
 
 
@@ -309,7 +321,11 @@ The red line indicates the maximal value of x where P(deltaPsi > x) > `-r`, or t
 
 ### Plotting
 
-VAST-TOOLS comes with a plotting script written in R.
+VAST-TOOLS comes with a plotting script written in R. As of version 0.2.0, the
+core functionality of this script has been ported to the R package
+[psiplot](https://github.com/kcha/psiplot). Advanced users who would like to
+generate plots interactively in R are encouraged to use this package directly.
+
 The input format follows the same format from the ``combine`` step described
 above. The output is a pdf of scatterplots (one per AS event) of PSI values.
 To execute from VAST-TOOLS, use the subcommand ``plot``:
@@ -320,19 +336,20 @@ To execute from VAST-TOOLS, use the subcommand ``plot``:
 
 It is recommended to filter the input file to a subset of events of interest
 before plotting, such as those obtained from ``diff``. Otherwise, the
-resulting pdf file will be very large.
+resulting pdf file will be very large. 
 
 Plot customizations such as coloring and ordering of samples can be applied
 using a configuration file. For more details on this advanced usage, see the
-help description: ``vast-tools plot -h``. An example of sample input data and
+help description: ``vast-tools plot -h`` or see the
+[README](https://github.com/kcha/psiplot#the-config-file-way) of the psiplot
+package. An example of sample input data and
 configuration file template can be found under ``R/sample_data``:
 
 ~~~~
 > vast-tools plot -c R/sample_data/sample_psi_data.config R/sample_data/sample_psi_data.tab
 ~~~~
 
-**New!** For advanced users who would like to generate plots interactively in R, you can
-alternatively use the R package [psiplot](https://github.com/kcha/psiplot).
+![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/PsiExample.png "Example") 
 
 Combine output format
 ---------------------
