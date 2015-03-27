@@ -331,8 +331,7 @@ configuration file template can be found under ``R/sample_data``:
 > vast-tools plot -c R/sample_data/sample_psi_data.config R/sample_data/sample_psi_data.tab
 ~~~~
 
-**New!** For advanced users who would like to generate plots interactively in R, you can
-alternatively use the R package [psiplot](https://github.com/kcha/psiplot).
+![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/PsiExample.png "Example") 
 
 Combine output format
 ---------------------
