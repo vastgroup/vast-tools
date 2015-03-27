@@ -300,7 +300,7 @@ Psi (deltaPsi) between SampleA and SampleB of -0.57, there is only a 0.95 probab
 is greater than 0.3.  Use this value to filter for events that are statistically likely to 
 have at least a minimal difference of some magnitude that you deem to be biologically relevant. 
 
-![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.pdf "Example") 
+![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
 
 ### Plotting
 
