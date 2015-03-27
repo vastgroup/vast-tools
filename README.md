@@ -299,7 +299,8 @@ for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for
 Psi (deltaPsi) between SampleA and SampleB of -0.57, there is only a 0.95 probability that deltaPsi
 is greater than 0.3.  Use this value to filter for events that are statistically likely to 
 have at least a minimal difference of some magnitude that you deem to be biologically relevant. 
- 
+
+![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.pdf "Example") 
 
 ### Plotting
 
