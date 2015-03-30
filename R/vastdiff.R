@@ -31,7 +31,7 @@ source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 source(paste(c(scriptPath,"/Rlib/include_diff.R"), collapse=""))
 
 # custom install from include.R
-loadPackages(c("MASS", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
+loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 argv <- commandArgs(TRUE)
 
@@ -89,6 +89,8 @@ parser <- OptionParser(option_list = option.list,
             usage = "vast-tools diff -a SampleA,..,SampleD -b SampleF,..,SampleG [options]\n\nAuthor: Tim Sterne-Weiler\n")
 optpar <- parse_args(parser, argv, positional_arguments = TRUE)
 opt <- optpar$options
+
+loadPackages(c("MASS", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 ## move to output directory
 setwd(opt$output)
