@@ -290,7 +290,7 @@ if (!$genome_sub and !$useGenSub){
      $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -";
 
      verbPrint "Calculating cRPKMs\n";
-     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff > expr_out/$root\.cRPKM";
+     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff expr_out/$root > expr_out/$root\.cRPKM";
  }
  if ($onlyExprFlag){
      print STDERR "Expression analysis done\n";
