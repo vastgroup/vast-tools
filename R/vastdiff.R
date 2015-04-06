@@ -37,9 +37,9 @@ argv <- commandArgs(TRUE)
 
 # optparse..
 option.list <- list(
-    make_option(c("-a", "--replicateA"), type = "character", default = NULL, metavar = "SampleA@SampleB@SampleC",
+    make_option(c("-a", "--replicateA"), type = "character", default = NULL, metavar = "SampleA,SampleB,SampleC",
         help = "Required, 1:n sample names separated by , [mandatory!]"),
-    make_option(c("-b", "--replicateB"), type = "character", default = NULL, metavar = "SampleA@SampleB@SampleC",
+    make_option(c("-b", "--replicateB"), type = "character", default = NULL, metavar = "SampleA,SampleB,SampleC",
         help = "Required, 1:n sample names separated by , [mandatory!]\n
 
 [input options]"),
