@@ -188,7 +188,7 @@ cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped r
 For example, to perform alignment with expression and 3′bias analysis on mouse data:
 
 ~~~~
-> vast-tools align mouse_tissue.fq.gz -sp Mmu -expr
+> vast-tools align mouse_tissue.fq.gz -sp Mmu --expr
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
