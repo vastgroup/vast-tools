@@ -180,9 +180,12 @@ compressed (via gzip) or uncompressed.
 Currently, VAST-TOOLS supports two species, human (Hsa) and mouse (Mmu). By
 default, the ``-sp`` option is ``Hsa``.
 
-To enable gene expression analysis, use either the option ``-expr`` (PSI/PSU/PIRs plus
-cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``-exprONLY`` (cRPKMs only). For example, to perform
-alignment with expression analysis on mouse data:
+To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs plus
+cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name *.3bias will be created. This file contains information to estimate 3′ sequencing biases in the RNA-seq sample. Each of *.3bias file contains two rows:
+- For all mRNAs with >200 mapped reads throughout at least 2500 nt, it provides the percentage of reads within the last five 500-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
+- For all mRNAs with >500 mapped reads throughout at least 5000 nt, it provides the percentage of reads within the last five 1000-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
+
+For example, to perform alignment with expression and 3′bias analysis on mouse data:
 
 ~~~~
 > vast-tools align mouse_tissue.fq.gz -sp Mmu -expr
