@@ -56,7 +56,7 @@ if(!file.exists("VASTDB")) {
 }
 
 # custom install from include.R
-loadPackages(c("getopt", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel", "devtools"), local.lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))
+loadPackages(c("MASS", "getopt", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel", "devtools"), local.lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))
 
 # install github packages
 if (!require('psiplot', character.only=T)) {
