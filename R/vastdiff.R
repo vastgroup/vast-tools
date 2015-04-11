@@ -192,7 +192,7 @@ if(opt$pdf == "input.DIFF_plots") {
   signame <- paste(c(opt$pdf, ".txt"), collapse="")
 }
 
-sighandle <- file(signame, 'w')
+sighandle <- file(signame, "w")
 
 pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
 write(head, sighandle)
@@ -217,7 +217,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 							   } )
       shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
 								parseQual(x, opt$alpha, opt$beta)
-							    } )
+							   } )
 
       totalFirst <- unlist(lapply( shapeFirst, function(x) { x[1] + x[2] }))
       totalSecond <- unlist(lapply( shapeSecond, function(x) { x[1] + x[2] }))
@@ -309,32 +309,49 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
       #    writeLines(lines[i], stderr()) ### DEBUGGING
 
       # SIGNIFICANT from here on out:
+    
       if( opt$filter ) {
-        write(sprintf("%s\t%s\t%f\t%f\t%f\t%s", tabLine[1], tabLine[2], medOne, medTwo, medOne - medTwo, round(max,2)), stdout())
+        filtOut <- sprintf("%s\t%s\t%f\t%f\t%f\t%s", tabLine[1], tabLine[2], medOne, medTwo, medOne - medTwo, round(max,2))
+      } else {
+        filtOut <- NULL
       }
 
       # check for significant difference
-      if(max < opt$minDiff) { return(NULL) } # or continue...
-
-      writeLines(lines[i], sighandle)
-
-      eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
-      eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
-      #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
-
-      # Print visual output to pdf;
-      if( medOne > medTwo ) {
-        retPlot <- plotDiff(psiFirstComb, psiSecondComb, expFirst, expSecond, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
+      if(max < opt$minDiff) {
+        # non-sig, return null plots and text output
+        return(list(NULL, NULL, NULL, NULL, filtOut))
       } else {
-        retPlot <- plotDiff(psiSecondComb, psiFirstComb, expFirst, expSecond, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
-      }
+        sigInd <- i
 
-      return(list(retPlot, eventTitle, eventCoord))  #return of mclapply function
+        eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
+        eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
+        #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
+
+        # Print visual output to pdf;
+        if( medOne > medTwo ) {
+          retPlot <- plotDiff(psiFirstComb, psiSecondComb, expFirst, expSecond, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
+        } else {
+          retPlot <- plotDiff(psiSecondComb, psiFirstComb, expFirst, expSecond, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
+        }
+        # sig event return
+        return(list(retPlot, eventTitle, eventCoord, sigInd, filtOut))  #return of mclapply function
+      }
   }, mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE) #End For
 
   for(it in 1:length(lines)) {
-  # PRINT LIST OF PLOTS.
-    if(is.null(plotListed[[it]]) || is.null(plotListed[[it]][[1]])) { next; }
+    if(is.null(plotListed[[it]])) { next; }
+    # PRINT MAIN OUTPUT
+    if(!is.null(plotListed[[it]][[5]])) {
+      write( plotListed[[it]][[5]], stdout() )
+    }
+  
+    # PRINT SIG OUTPUT
+    if(!is.null(plotListed[[it]][[4]])) {
+      writeLines( lines[ plotListed[[it]][[4]] ], sighandle )
+    } 
+
+    # PRINT LIST OF PLOTS.
+    if(is.null(plotListed[[it]][[1]])) { next; }
     plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
   }
 
@@ -342,6 +359,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
 
 garbage <- dev.off()
 
+flush(sighandle)
 close(sighandle)
 
 q(status=0)
