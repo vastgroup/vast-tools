@@ -191,8 +191,8 @@ if (is.null(opt$options$output)) {
   outfile <- file.path(opt$options$output, outfile)
 }
 
-W <- nsamples * 1
-H <- 4
+W <- 6 + 1/nsamples
+H <- 4.2 + 1/nsamples
 
 pdf(outfile, width = W, height = H)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
