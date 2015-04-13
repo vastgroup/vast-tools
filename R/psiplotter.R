@@ -149,8 +149,10 @@ verbPrint(paste("// Tissue Group file:",
 all_events <- read.delim(file, stringsAsFactors=FALSE)
 if(is.null(config_file)) {
   config <- NULL
+  nsamples <- (ncol(all_events) - 6)/2
 } else {
   config <- read.delim(config_file, stringsAsFactors=FALSE)
+  nsamples <- length(which(colnames(all_events) %in% config$SampleName))
 }
 
 # Perform some checks #########################################################
@@ -189,7 +191,10 @@ if (is.null(opt$options$output)) {
   outfile <- file.path(opt$options$output, outfile)
 }
 
-pdf(outfile, width = 8.5, height = 5.5)
+W <- nsamples * 1
+H <- 4
+
+pdf(outfile, width = W, height = H)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
 nplot <- min(nrow(all_events), opt$options$max)
 for (i in 1:nplot) {
