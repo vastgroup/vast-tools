@@ -202,8 +202,8 @@ if (is.null(opt$options$output)) {
 }
 
 # Set width and height of graphics
-W <- ifelse(is.null(opt$options$width), 6 + 1/nsamples, opt$options$width)
-H <- ifelse(is.null(opt$options$height), 4.2 + 1/nsamples, opt$options$height)
+W <- ifelse(is.null(opt$options$width), 5 + 0.1*nsamples, opt$options$width)
+H <- ifelse(is.null(opt$options$height), 4.2 + 0.05*nsamples, opt$options$height)
 verbPrint(paste("// Width = ", round(W, 2), "in, Height =", round(H, 2), "in"))
 
 pdf(outfile, width = W, height = H)
