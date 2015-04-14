@@ -100,6 +100,9 @@ option.list <- list(
             [%default]"),
   make_option(c("-m", "--max"), type = "integer", default = MAX_ENTRIES,
               help = "Maximum number of AS events to plot [first %default]"),
+  make_option(c("-l", "--gridLines"), type = "logical", default = TRUE,
+              meta="TRUE|FALSE", dest = "gridLines",
+              help = "Show grid lines [%default]"),
   make_option(c("-o", "--output"), type = "character", default = NULL,
               meta="DIR",
               help = "Output directory where pdf will be saved
@@ -110,7 +113,14 @@ option.list <- list(
   make_option(c("-u", "--groupMeans"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "plotGroupMeans",
               help = "Plot mean PSIs for groups defined in config file. Requires
-              --config option. [%default]")
+              --config option. [%default]"),
+  make_option(c("-W", "--width"), type = "numeric", default = NULL, dest = "width",
+              help = "Width of graphics region in inches (similar to width in
+              pdf()) [%default]"),
+  make_option(c("-H", "--height"), type = "numeric", default = NULL, 
+              dest = "height",
+              help = "Height of graphics region in inches (similar to height in
+              pdf()) [%default]")
 )
 parser <- OptionParser(option_list = option.list,
                        desc = desc,
@@ -191,8 +201,10 @@ if (is.null(opt$options$output)) {
   outfile <- file.path(opt$options$output, outfile)
 }
 
-W <- 6 + 1/nsamples
-H <- 4.2 + 1/nsamples
+# Set width and height of graphics
+W <- ifelse(is.null(opt$options$width), 6 + 1/nsamples, opt$options$width)
+H <- ifelse(is.null(opt$options$height), 4.2 + 1/nsamples, opt$options$height)
+verbPrint(paste("// Width = ", round(W, 2), "in, Height =", round(H, 2), "in"))
 
 pdf(outfile, width = W, height = H)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
@@ -200,7 +212,8 @@ nplot <- min(nrow(all_events), opt$options$max)
 for (i in 1:nplot) {
   plot_event(all_events[i,], config = config, 
              errorbar = !opt$options$noErrorBar,
-             groupmean = opt$options$plotGroupMeans)
+             groupmean = opt$options$plotGroupMeans,
+             gridlines = opt$options$gridLines)
 }
 dev.off()
 
