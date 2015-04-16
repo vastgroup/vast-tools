@@ -212,13 +212,17 @@ verbPrint(paste("// Width = ", round(W, 2), "in, Height =", round(H, 2), "in"))
 pdf(outfile, width = W, height = H)
 par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
 nplot <- min(nrow(all_events), opt$options$max)
+pb <- txtProgressBar(style = 3, file = stderr())
 for (i in 1:nplot) {
   result <- plot_event(all_events[i,], config = config,
              errorbar = !opt$options$noErrorBar,
              groupmean = opt$options$plotGroupMeans,
              gridlines = opt$options$gridLines,
              cex.xaxis = 10, cex.yaxis = 10, cex.main = 8)
+  setTxtProgressBar(pb, i/nplot)
 }
+setTxtProgressBar(pb, 1)
+verbPrint("")
 dev.off()
 
 verbPrint("// Done!\n")
