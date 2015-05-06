@@ -161,7 +161,7 @@ head_n <- unlist( strsplit( head, "\t" ) )
 # if we are to filter to stdout, then print header
 if( opt$filter ) {
 #  writeLines(head, stdout())
-  writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[deltaPsi]\tmax(x)@P(|deltaPsi| > x)>%s", sampOneName, sampTwoName, opt$prob), stdout())
+  writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[dPsi]\tMV[dPsi]_at_%s", sampOneName, sampTwoName, opt$prob), stdout())
 }
 
 # check if header is correct..  TODO

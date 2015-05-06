@@ -298,7 +298,7 @@ default is 100, which works well.
 
 The text output of diff looks like:
 
-  GENE	| EVENT		| SampleA	| SampleB	|    E[dPsi]	| max(x)@P(abs(dPsi)>x)>0.95
+  GENE	| EVENT		| SampleA	| SampleB	|    E[dPsi]	| MV[|dPsi|]_at_0.95
 :-------|:------------- |:------------- |:------------- |:------------- | ---------------------------------
  BOD1L	| HsaEX0008312	| 0.124353	| 0.700205	| -0.575851	| 0.3		   	
  KARS	| HsaEX0032865	| 0.172134	| 0.460027	| -0.287892	| 0.22              
@@ -311,9 +311,10 @@ The text output of diff looks like:
 
 Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
 for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
-Psi (deltaPsi) between SampleA and SampleB of -0.57, there is only a 0.95 probability that |deltaPsi|
-is greater than 0.3.  Use this value to filter for events that are statistically likely to 
-have at least a minimal difference of some magnitude that you deem to be biologically relevant. 
+Psi (deltaPsi) between SampleA and SampleB of -0.57, the minimum value (`MV`) for |dPsi| at 0.95 is
+0.3, meaning that there is a 0.95 probability that |deltaPsi| is greater than 0.3. Use this value 
+to filter for events that are statistically likely to have at least a minimal difference of some 
+magnitude that you deem to be biologically relevant. 
 
 ![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
 
