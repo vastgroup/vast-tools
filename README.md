@@ -35,6 +35,7 @@ VAST-TOOLS requires the following software:
   * RColorBrewer
   * reshape2
   * ggplot2
+  * MASS
   * devtools
   * [psiplot](https://github.com/kcha/psiplot)
  * Perl 5.10.1 or higher
@@ -237,7 +238,7 @@ Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utor
 
 Probably the most important extra options to consider are ``-r PROB (--prob)``,
 ``-m MINDIFF (--minDiff)`` and ``-e MINREADS (--minReads)`` These represent the 
-stringency criterion for filtering of visual output and textual data to STDOUT.
+stringency criterion for filtering of visual output and textual data sent to file.
 
 The ``-r`` flag represents the
 minimal probability of acceptance that is required to consider a comparison to
@@ -247,7 +248,7 @@ stringency requirements.
 The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
 will accept, such that we are are sure with at least probability ``-r`` that
 there is a difference of at least ``-m``.  `-m` does not currently alter the output
-sent to STDOUT, but does filter what is plotted to PDF.
+sent to STDOUT, but does filter what is plotted to PDF and printed to file.
 
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
