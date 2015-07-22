@@ -237,8 +237,11 @@ Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utor
 *Statistics Options*
 
 Probably the most important extra options to consider are ``-r PROB (--prob)``,
-``-m MINDIFF (--minDiff)`` and ``-e MINREADS (--minReads)`` These represent the 
-stringency criterion for filtering of visual output and textual data sent to file.
+``-m MINDIFF (--minDiff)``, ``-e MINREADS (--minReads)``, and `-S MINSAMPLES (--minSamples)` 
+These represent the stringency criterion for filtering of visual output and textual 
+data sent to file.  `-S` is the minimum number of samples for each set `-a` and `-b`
+that have to have at least `-e` reads each to be considered in the downstream
+statistical comparison.
 
 The ``-r`` flag represents the
 minimal probability of acceptance that is required to consider a comparison to
