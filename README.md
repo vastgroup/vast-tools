@@ -233,6 +233,8 @@ Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utor
 ~~~~
 > vast-tools diff -a sampleA_rep1,sampleA_rep2 -b sampleB_rep1,sampleB_rep2 -o outputdir > outputdir/diff_output.tab
 ~~~~
+Note: Sample names do not have to follow any specific convention as long as they remain valid ASCII words.
+
 
 *Statistics Options*
 
@@ -248,10 +250,11 @@ minimal probability of acceptance that is required to consider a comparison to
 be 'believable'.  By default this is 0.95, but it can be altered depending on
 stringency requirements.  
 
-The ``-m`` flag represents the minimum difference between psi1 and psi2 that you
-will accept, such that we are are sure with at least probability ``-r`` that
-there is a difference of at least ``-m``.  `-m` does not currently alter the output
-sent to STDOUT, but does filter what is plotted to PDF and printed to file.
+The ``-m`` flag represents the minimum value of difference (`MV`, see example below) 
+between psi1 and psi2 that you will accept, such that we are are sure with at least 
+probability ``-r`` that there is a difference of at least ``-m``.  `-m` does not 
+currently alter the output sent to STDOUT, but does filter what is plotted to PDF
+and printed to file.
 
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
@@ -318,7 +321,11 @@ for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for
 Psi (deltaPsi) between SampleA and SampleB of -0.57, the minimum value (`MV`) for |dPsi| at 0.95 is
 0.3, meaning that there is a 0.95 probability that |deltaPsi| is greater than 0.3. Use this value 
 to filter for events that are statistically likely to have at least a minimal difference of some 
-magnitude that you deem to be biologically relevant. 
+magnitude that you deem to be biologically relevant.  The `-m` argument (default 0.1) provides a
+lower bound for events that will be plotted to PDF and printed to file based on `MV`.  As a cutoff,
+the default is meant to provide a reasonably stringent baseline, however you could relax this if you
+would rather view more events that may have significant but modest changes.
+
 
 ![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
 
