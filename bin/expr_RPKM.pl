@@ -128,7 +128,7 @@ foreach $gene (sort (keys %effective_length)){
     $cRPKM="NA";
     $tally{$gene}=0 if !$tally{$gene};
     $tally{$gene}="NA" if $effective_length{$gene}==0;
-    $cRPKM=sprintf("%.2f",1000000*(1000*$tally{$gene}/$effective_length{$gene})/$total_mapped) if $effective_length{$gene};
+    $cRPKM=sprintf("%.2f",1000000*(1000*$tally{$gene}/$effective_length{$gene})/$total_mapped) if $effective_length{$gene}>0;
     print STDOUT "$gene\t$cRPKM\t$tally{$gene}\n" if $gene;
 }
 #close OUTPUT;
