@@ -150,7 +150,7 @@ OPTIONS:
 				(this will increase speed a little) (default off)
 	--keep			Don't remove trimmed and genome-subtracted reads 
 				after use. (default off)
-	--findSubtracted	Set this flag to start alignment from genome-substracted
+	--findSubtracted	Set this flag to start alignment from genome-subtracted
 				reads (default off). If enabled, must supply *-e.fq as input
 	--trimOnce		Only use first 50bp of reads, if paired, only use 
 					50 from fwd and 50 from rev (default off)
@@ -204,7 +204,7 @@ if ($fileName1 =~ /\-e\.f/){
     ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     $subtractedFq = $fq1;
-    errPrint "Only for 50nt or 36nt if genome substracted\n" if $length!=36 && $length!=50;
+    errPrint "Only for 50nt or 36nt if genome subtracted\n" if $length!=36 && $length!=50;
 } else {
     # allow readlength to be given by -readLen x --TSW
     if($readLength) {
@@ -337,16 +337,16 @@ unless($trimmed) {
 ####
 
  
-#### Get effective reads (i.e. genome substraction).
+#### Get effective reads (i.e. genome subtraction).
  $subtractedFq = "$root-$le-e.fq.gz";
  unless(-e $subtractedFq and $useGenSub) {
-   verbPrint "Doing genome substraction\n";
+   verbPrint "Doing genome subtraction\n";
    # Force bash shell to support process substitution
    $cmd = getPrefixCmd($fq);
    $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
    sysErrMsg("bash", "-c", $cmd);
  } else {
-   verbPrint "Found $subtractedFq. Skipping genome substration step...\n"; 
+   verbPrint "Found $subtractedFq. Skipping genome subtraction step...\n"; 
  }
 
 
