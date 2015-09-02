@@ -28,6 +28,8 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 ### Read count
+open (TEMP, ">$root"); # to avoid error from issue #40
+my $outDir = getcwd;
 while (<>){ #analyzes the bowtie output
     chomp;
     @d=split(/\t/);
@@ -38,6 +40,7 @@ while (<>){ #analyzes the bowtie output
 	$positions{$gene}[$d[3]]++;
     }
 }
+system "rm $outDir/$root"; # to avoid error from issue #40
 
 ### Calculating 3'bias of the sample
 ($sub_root)=$root=~/.+\/(.+)/;
