@@ -228,8 +228,6 @@ Bayesian inference followed by differential analysis of posterior distributions 
 PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample are estimated from 
 emperical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
 
-Diff Specific Inquiries: Tim Sterne-Weiler [email](mailto:tim.sterne.weiler@utoronto.ca)
-
 ~~~~
 > vast-tools diff -a sampleA_rep1,sampleA_rep2 -b sampleB_rep1,sampleB_rep2 -o outputdir > outputdir/diff_output.tab
 ~~~~
