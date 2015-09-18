@@ -229,9 +229,9 @@ PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample ar
 emperical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
 
 ~~~~
-> vast-tools diff -a sampleA_rep1,sampleA_rep2 -b sampleB_rep1,sampleB_rep2 -o outputdir > outputdir/diff_output.tab
+> vast-tools diff -a sampA_r1,sampA_r2,sampA_r3 -b sampB_r1,sampB_r2 -o outputdir > outputdir/diff_output.tab
 ~~~~
-Note: Sample names do not have to follow any specific convention as long as they remain valid ASCII words.
+Note: Sample names do not have to follow any specific convention as long as they remain valid ASCII words and any number of replicate sample names may be given 1:N.
 
 
 *Statistics Options*
