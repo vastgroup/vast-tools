@@ -29,9 +29,12 @@ downloadDb <- function(speUrl, speFile) {
 
 humanDbFile <- "vastdb.hsa.7.3.14.tar.gz"
 mouseDbFile <- "vastdb.mmu.7.3.14.tar.gz"
+chickenDbFile <- "vastdb.gga.31.1.15.tar.gz"
+
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
 mouseUrl <- joinStr("http://vastdb.crg.eu/libs/", mouseDbFile)
+chickenUrl <- joinStr("http://vastdb.crg.eu/libs/", chickenDbFile)
 #
 
 writeLines("Looking for VAST Database [VASTDB]")
@@ -40,15 +43,18 @@ if(!file.exists("VASTDB")) {
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
   if(as.character(auto) == 'y') {
-    writeLines("OK I will try... Please choose database [hg19/mm9/both] [h/m/b]")
+    writeLines("OK I will try... Please choose database [hg19/mm9/galGal3/all] [h/m/g/a]")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
-    if(db == 'h' || db == 'b') {
+    if(db == 'h' || db == 'a') {
       downloadDb(humanUrl, humanDbFile)
     }
-    if(db == 'm' || db == 'b') {
+    if(db == 'm' || db == 'a') {
       downloadDb(mouseUrl, mouseDbFile)
+    }
+    if(db == 'g' || db == 'a') {
+      downloadDb(chickenUrl, chickenDbFile)
     }
   }
 } else {
