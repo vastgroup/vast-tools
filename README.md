@@ -84,7 +84,7 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 ~~~~
 **Manual DB Installation:**
 
-For manual, install human (hsa), or mouse (mmu), or both to any location by:
+For manual, install human (hsa), mouse (mmu), chicken (gga), or all of them to any location by:
 
 Human (hg19) - 6.0G [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz):
 ~~~~
@@ -95,6 +95,11 @@ Mouse (mm9) - 7.9G [vastdb.mmu.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.m
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz
 > tar xzvf vastdb.mmu.7.3.14.tar.gz
+~~~~
+Chicken (galGal3) - 1.4G [vastdb.gga.31.1.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.31.1.15.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.gga.31.1.15.tar.gz
+> tar xzvf vastdb.gga.31.1.15.tar.gz
 ~~~~
 
 If manually installed to central location, link the database files to vast-tools.0.0.1
@@ -172,13 +177,15 @@ AND
 
 ### Alignment
 
-In this step, reads are first aligned against a reference genome to obtain
+In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--trimStep`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). 
+
+Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
 in the output directory as ``<sample>-<length>-e.fq``, where ``sample`` is the sample
 name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
 compressed (via gzip) or uncompressed.
 
-Currently, VAST-TOOLS supports two species, human (Hsa) and mouse (Mmu). By
+Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), and chicken (Gga). By
 default, the ``-sp`` option is ``Hsa``.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs plus
@@ -204,7 +211,7 @@ from the raw reads).
 
 Although you can specify two fastq files to vast-tools in a 'paired-end' format,
 the program treats both mates independently because of trimming, but will not double
-count the any trim or mate pair more than once. Reads must be given to the program
+count the any trim or mate pair more than once  (see above). Reads must be given to the program
 such that `vast-tools align fwd-mate_1.fq.gz rev-mate_2.fq.gz` refers to two fastq
 files of identical line number where Read1 from file_1 is mated to Read1 from file_2. NOTE: if reads are downloaded from SRA as sra files, use ``fastq-dump --split-file ./sample.sra`` to generate separate fastq files for each paired-end (plus a third file with unmatched mates).
 
@@ -217,7 +224,7 @@ directory found in <output_dir>/to_combine/, to form one final table in the main
 intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined.
 
 ~~~~
-> vast-tools combine -o outputdir -sp [Hsa|Mmu]
+> vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga]
 ~~~~
 
 ### Differential Splicing Analysis
@@ -370,7 +377,7 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
 
  * **Column 1**: Official gene symbol.
  * **Column 2**: VAST-DB event ID. Formed by: 
-  * Species identifier: Hsa (Human) or Mmu (Mouse);
+  * Species identifier: Hsa (Human), Mmu (Mouse), or Gga (Chicken);
   * Type of alternative splicing event: alternative exon skipping (EX), retained intron (INT), alternative splice site donor choice (ALTD), or alternative splice site acceptor choice (ALTA). In the case of ALTD/ALTA, each splice site within the event is indicated (from exonic internal to external) over the total number of alternative splice sites in the event (e.g. HsaALTA0000011-1/2).
   * Numerical identifier.
  * **Column 3**: Genomic coordinate of the alternative sequence.
