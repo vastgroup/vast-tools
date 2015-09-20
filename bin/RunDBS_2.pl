@@ -72,7 +72,7 @@ summary tables.
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 	--dbDir DBDIR		Database directory
-	-sp Hsa/Mmu		Species selection
+	-sp Hsa/Mmu/Gga		Species selection
 	-z			Compress all output files using gzip
 	--noIR			Don't run intron retention pipeline (default off)
 	-v, --verbose		Verbose messages
