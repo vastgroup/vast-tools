@@ -134,7 +134,7 @@ if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
 Align a single RNA-Seq sample to VASTDB genome and junction libraries.
 
 OPTIONS:
-	--sp Mmu/Hsa		Three letter code for the database (default Hsa)
+	--sp Hsa/Mmu/Gga	Three letter code for the database (default Hsa)
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
