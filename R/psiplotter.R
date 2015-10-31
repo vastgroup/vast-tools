@@ -55,8 +55,8 @@ Input:
   PSI data - one AS event per row - using the standard PSI format
       e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1 Tissue1_Q ...
   Recommended to use only a subset of AS events instead of the full table
-  otherwise the resulting PDF file will be very large. See options for
-  customizing the maximum number of plots to generate.
+  otherwise the resulting PDF file will be very large. Use option -m/--max to limit
+  the maximum number of plots to generate.
 
   PSI values that are \"NA\" or have \"NA\" quality scores will not be plotted
   (not point will be drawn).
@@ -68,7 +68,7 @@ Output:
 
 Customizing plots [optional]:
   The color and ordering of samples can be customized by supplying a plot
-  configuration file (psiplotter.config). This file is tab-delimited and must be
+  configuration file (e.g. psiplotter.config). This file is tab-delimited and must be
   manually created. The format of psiplotter.config is the following (the header
   line is required):
   Order    SampleName    GroupName    RColorCode
@@ -77,16 +77,16 @@ Customizing plots [optional]:
   etc..
 
   Order 	: The ordering of the samples from left to right.
-  SampleName 	: Name of the sample. MUST match sample name in input table.
+  SampleName 	: Name of the sample. MUST match sample name in input table*.
   GroupName	: Group name. Use for plotting the average PSI of samples belonging
     to the same group (need to use option -u/--group-means)
-  RColorCode	: Any of the three kinds of R color specifications:
-    1) color name (as specified by colors())
+  RColorCode	: Any of the following R color specifications:
+    1) color name (see colors())
     2) hex color code (#rrggbb)
 
-  The samples under SampleName MUST MATCH the names in the PSI input table.
+  *The samples under SampleName MUST MATCH the names in the PSI input table.
   Only the samples listed in the config file will be represented in the
-  resulting plots. Other samples in the PSI table but not in the config
+  resulting plots. Other samples in the input file but not in the config
   file will be ignored. This may be useful if you want to customize the
   type of samples in your plots.
 "
