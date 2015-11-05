@@ -94,6 +94,7 @@ if(!defined($dbDir)) {
 $dbDir = abs_path($dbDir);
 $dbDir .= "/$sp";
 errPrintDie "The database directory $dbDir does not exist" unless (-e $dbDir);
+verbPrint "Using VASTDB -> $dbDir";
 
 chdir($outDir);
 

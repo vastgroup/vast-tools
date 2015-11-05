@@ -228,6 +228,7 @@ if ($fileName1 =~ /\-e\.f/){
 #verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
 ###
 
+verbPrint "Using VASTDB -> $dbDir";
 # change directories
 errPrint "The output directory \"$outdir\" does not exist" unless (-e $outdir);
 chdir($outdir) or errPrint "Unable to change directories into output" and die;
