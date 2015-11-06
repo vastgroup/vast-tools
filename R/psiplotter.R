@@ -121,7 +121,7 @@ option.list <- list(
               dest = "height",
               help = "Height of graphics region in inches (similar to height in
               pdf()) [%default]"),
-  make_option(c("-g", "--gene"), type = "character", default = NULL,
+  make_option(c("--gene"), type = "character", default = NULL,
               dest = "gene",
               help = "Filter events by the GENE column. Can be any 
               valid R regular expression. [%default]")
