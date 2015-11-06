@@ -28,20 +28,8 @@ args <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","", args[grep("--file",args)]))
 source(paste(c(scriptPath,"/Rlib/include.R"), collapse=""))
 
-loadPackages(c("optparse", "psiplot", "methods"), local.lib=paste(c(scriptPath,"/Rlib"),
+loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/Rlib"),
                                                        collapse=""))
-
-# Check for correct version of psiplot
-v <- as.character(packageVersion('psiplot'))
-# The minimum required version of psiplot
-required <- '2.0.0'
-if (compareVersion(v, required) == -1) {
-  stop(paste("Your version of psiplot, the R package that this script uses, is",
-             v, "and is out of date.\n",
-             "Please update before running this script.",
-             "See https://github.com/kcha/psiplot for additional details.")
-  )
-}
 
 #### Arguments #################################################################
 # - Input file
@@ -131,6 +119,23 @@ parser <- OptionParser(option_list = option.list,
                        usage = "usage: %prog [options] INCLUSION_LEVELS.tab")
 opt <- parse_args(parser, args = args, positional_arguments = TRUE)
 
+# Load remaining packages
+loadPackages(c("psiplot", "methods"), local.lib=paste(c(scriptPath,"/Rlib"),
+                                                       collapse=""))
+
+# Check for correct version of psiplot
+v <- as.character(packageVersion('psiplot'))
+# The minimum required version of psiplot
+required <- '2.0.0'
+if (compareVersion(v, required) == -1) {
+  stop(paste("Your version of psiplot, the R package that this script uses, is",
+             v, "and is out of date.\n",
+             "Please update before running this script.",
+             "See https://github.com/kcha/psiplot for additional details.")
+  )
+}
+
+# Check options
 if (length(opt$args) == 0) {
   print_help(parser)
   stop("Missing arguments")
