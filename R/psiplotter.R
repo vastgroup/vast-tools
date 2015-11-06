@@ -120,7 +120,11 @@ option.list <- list(
   make_option(c("-H", "--height"), type = "numeric", default = NULL,
               dest = "height",
               help = "Height of graphics region in inches (similar to height in
-              pdf()) [%default]")
+              pdf()) [%default]"),
+  make_option(c("-g", "--gene"), type = "character", default = NULL,
+              dest = "gene",
+              help = "Filter events by the GENE column. Can be any 
+              valid R regular expression. [%default]")
 )
 parser <- OptionParser(option_list = option.list,
                        desc = desc,
@@ -164,6 +168,19 @@ if(is.null(config_file)) {
   config <- read.delim(config_file, stringsAsFactors=FALSE)
   nsamples <- length(which(colnames(all_events) %in% config$SampleName))
 }
+
+# Filter list if necessary
+if (!is.null(opt$options$gene)) {
+  all_events <- all_events[grep(opt$options$gene, all_events$GENE),]
+  
+  if (nrow(all_events) == 0) {
+    stop("No matching events found.")
+  } else {
+    verbPrint(paste("// Filtered", nrow(all_events), "events that match pattern", 
+                    opt$options$gene))
+  }
+}
+
 
 # Perform some checks #########################################################
 if (!grepl("^GENE", colnames(all_events)[1])) {
