@@ -22,6 +22,7 @@ my $outDir;
 my $compress = 0;
 
 my $noIRflag = 0; #don't use IR!
+my $IR_version = 1; # either 1 or 2
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 
@@ -33,6 +34,7 @@ GetOptions("help"  	 => \$helpFlag,
 	   "o=s"         => \$outDir,
            "z"           => \$compress,
 	   "noIR"        => \$noIRflag,
+	   "IR_version"  => \$IR_version,
            "C"           => \$cRPKMCounts);
 
 our $EXIT_STATUS = 0;
@@ -75,6 +77,7 @@ OPTIONS:
 	-sp Hsa/Mmu/Gga		Species selection
 	-z			Compress all output files using gzip
 	--noIR			Don't run intron retention pipeline (default off)
+        --IR_version 1/2        Version of the IR analysis (default 1)
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help message
 	-C			Create a cRPKM plus read counts summary table. By default, a
@@ -87,6 +90,7 @@ OPTIONS:
 
 errPrintDie "Need output directory" unless (defined $outDir);
 errPrintDie "The output directory $outDir does not exist" unless (-e $outDir);
+errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_version != 2);
 
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../VASTDB";
@@ -130,13 +134,22 @@ if ($N != 0) {
     $noIRflag = 1 if @irFiles == 0;
 
     unless($noIRflag) {
+	# To define version [02/10/15]; minimize changes for users
+        # $v2 => "" or "_v2" [v1/v2]
+	my $v2;
+	if ($IR_version == 1){
+	    $v2="";
+	}
+	elsif ($IR_version == 2){
+	    $v2="_v2"; 
+	}
       ### Gets the PIRs for the Intron Retention pipeline
       verbPrint "Building quality score table for intron retention\n";
-      sysErrMsg "$binPath/RI_MakeCoverageKey.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
+      sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
       verbPrint "Building Table for intron retention\n";
-      sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir" .
+      sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
                   " -c " . abs_path("to_combine") .
-                  " -q " . abs_path("to_combine") . "/Coverage_key-$sp$N.IRQ" .
+                  " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
                   " -o " . abs_path("raw_incl");
     }
 

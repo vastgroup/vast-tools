@@ -28,6 +28,7 @@ my $readLength = 50; # default... deprecated.
 my $outdir;
 my $noIRflag = 0;  # don't run intron retention (for speed..)
 my $stringentIRflag = 0; # Run extra genome/eej subtraction step
+my $IR_version = 1; # IR version [09/Nov/2015]
 my $minReadNum;
 
 my $legacyFlag = 0;
@@ -67,6 +68,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
 			  "stringentIR" => \$stringentIRflag,
+			  "IR_version=i" => \$IR_version, 
 			  "keep" => \$keepFlag,
 			  "minReadDepth=i" => \$minReadNum, #to do
 			  "tmpDir=s" => \$tmpDir,
@@ -148,6 +150,7 @@ OPTIONS:
 				(substantially increases speed) (default off)
 	--stringentIR		Don't run first filtering step of IR 
 				(this will increase speed a little) (default off)
+        --IR_version 1/2        Version of the Intron Retention analysis (default 1)
 	--keep			Don't remove trimmed and genome-subtracted reads 
 				after use. (default off)
 	--findSubtracted	Set this flag to start alignment from genome-subtracted
@@ -174,6 +177,7 @@ errPrintDie "Input file " . $ARGV[0] . " does not exist!" if (! -e $ARGV[0]);
 errPrintDie "Input file " . $ARGV[1] . " does not exist!" if ($pairedEnd and ! -e $ARGV[1]);
 errPrintDie "Invalid number of cores. Must be at least 1." if ($cores !~ /^[1-9]\d*$/);
 errPrintDie "Invalid step size." if ($trimStep !~ /^[1-9]\d*$/);
+errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_version != 2);
 
 # FOR RIBOFOOT
 if($ribofoot) {
@@ -388,17 +392,32 @@ sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
 # Align to intron retention mapped reads here..
 unless (($genome_sub and $useGenSub)  or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
+
+# To define version [02/10/15]; minimize changes for users
+# $v2 => "" or "_v2" [v1/v2]
+# $type => "new" or "ALL" [v1/v2]
+  my $v2;
+  my $type;
+  if ($IR_version == 1){
+      $v2="";
+      $type="new";
+  }
+  elsif ($IR_version == 2){
+      $v2="_v2"; 
+      $type="ALL";
+  }
+  
   $preCmd = getPrefixCmd($fq);
   sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
-                  "$dbDir/FILES/$species.IntronJunctions.new.$le.8 - | " .
+              "$dbDir/FILES/$species.IntronJunctions.$type.$le.8 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
-              "$binPath/RI_summarize.pl - $runArgs";
+              "$binPath/RI_summarize$v.pl - $runArgs";
   sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
-              "$binPath/RI_summarize_introns.pl - $runArgs";
+              "$binPath/RI_summarize_introns$v.pl - $runArgs";
 } else {
   verbPrint "Skipping intron retention step...\n";
 }
@@ -413,7 +432,7 @@ unless($keepFlag) {
   sysErrMsg "rm $subtractedFq";
 }
 
-unless($noIRflag) {  # --UB
+unless($noIRflag && $IR_version == 1) {  # --UB
     my $juncAnnotationFile = "./to_combine/$root.IR.summary.txt";
     verbPrint "Cleaning up $juncAnnotationFile!";
     sysErrMsg "rm $juncAnnotationFile";
