@@ -10,7 +10,8 @@
 ###   - Q:   quality, format: coverage,balance-p.val@alpha,beta where alpha and beta are reassigned pseudocounts for ret/const
 ###
 ### U. Braunschweig, The Donnelly Centre, University of Toronto - 06/2014
-
+###
+### Changes: incorporate Manuel's IR v2
 
 argv <- commandArgs(trailingOnly = FALSE)
 scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
@@ -32,6 +33,9 @@ opt.list <- list(
     make_option(c("-o", "--outDir"),   action="store",
                 default="raw_incl",
                 help="Location of output [default: <species>/%default]"),
+    make_option(c("--IR_version"),     action="store", default = 1,
+                help="Version of IR pipeline. V1 scores PIR based only on EEJ directly adjacent
+                to intron; v2 scores it based on all EEJs spanning the intron  [default: %default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,
                 help="Remove values of events that are always above threshold?  [default: %default]"),
     make_option(c("-v", "--verbose"),  action="store", type = "integer",
@@ -64,7 +68,8 @@ countDir  <- paste(sub("/$?", "", opt$countDir), "/", sep="")
 outDir    <- paste(sub("/$?", "", opt$outDir), "/", sep="")
 
 templFile <- paste(opt$species, "TEMPLATES/", species, ".IR.Template.txt", sep="")
-if (!file.exists(templFile))    {stop("Template file ", templFile, " not found")}
+if (!file.exists(templFile))       {stop("Template file ", templFile, " not found")}
+if (!(opt$IR_version %in% c(1,2))) {stop("IR_version must be either 1 or 2")}
 rmHigh    <- as.logical(opt$rmHigh)
 verb      <- as.logical(opt$verbose)
 
@@ -75,14 +80,21 @@ if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthr
 
 
 ## Check which samples are there and load template
-sampleFiles <- Sys.glob(paste(countDir, "*\\.IR", sep=""))
+if (opt$IR_version == 1) {
+   sampleFiles <- Sys.glob(paste(countDir, "*\\.IR", sep=""))
+   fileExt <- "\\.IR$"
+} else {
+   sampleFiles <- Sys.glob(paste(countDir, "*\\.IR2", sep=""))
+   fileExt <- "\\.IR2$"
+}
+
 
 if (is.na(sampleFiles[1])) {
     stop("No IR samples found in ", countDir)
 } else {
     if (verb) {cat("Merging IR of", length(sampleFiles), "sample(s)...\n")}
 }
-samples <- data.frame(Sample = basename(sub("\\.IR$", "", sampleFiles)),
+samples <- data.frame(Sample = basename(sub(fileExt, "", sampleFiles)),
                       File   = sampleFiles,
                       stringsAsFactors=FALSE)
 samples <- samples[order(samples$Sample),]  #  temporary fix --UB
