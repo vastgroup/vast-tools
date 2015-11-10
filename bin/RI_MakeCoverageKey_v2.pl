@@ -78,7 +78,7 @@ print OUT "\n";
 
 foreach my $event (sort keys %corrected_reads){
     print OUT "$event";
-    foreach my $sample (sort keys %samples_corr){
+    foreach my $sample (sort keys %samples_counts){
         my $eEI=$corrected_reads{$event}{EI1}{$sample};
         my $eIE=$corrected_reads{$event}{EI2}{$sample};
         my $eEE=$corrected_reads{$event}{EE}{$sample};
