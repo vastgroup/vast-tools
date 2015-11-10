@@ -135,22 +135,22 @@ if ($N != 0) {
 
     unless($noIRflag) {
 	# To define version [02/10/15]; minimize changes for users
-        # $v2 => "" or "_v2" [v1/v2]
-	my $v2;
+        # $v => "" or "_v2" [v1/v2]
+	my $v;
 	if ($IR_version == 1){
-	    $v2="";
+	    $v="";
 	}
 	elsif ($IR_version == 2){
-	    $v2="_v2"; 
+	    $v="_v2"; 
 	}
-      ### Gets the PIRs for the Intron Retention pipeline
-      verbPrint "Building quality score table for intron retention\n";
-      sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
-      verbPrint "Building Table for intron retention\n";
-      sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
-                  " -c " . abs_path("to_combine") .
-                  " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
-                  " -o " . abs_path("raw_incl");
+	### Gets the PIRs for the Intron Retention pipeline
+	verbPrint "Building quality score table for intron retention\n";
+	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
+	verbPrint "Building Table for intron retention\n";
+	sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
+	    " -c " . abs_path("to_combine") .
+	    " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
+	    " -o " . abs_path("raw_incl");
     }
 
     ### Adds those PSIs to the full database of PSIs (MERGE3m).
@@ -181,13 +181,13 @@ if ($N != 0) {
                     "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
 
     unless($noIRflag) {
-      push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
+	push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
     }
-
+    
     my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
-                "-len=$globalLen -verbose=$verboseFlag > $finalOutput";
-
+	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
+    
     verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
     
     if ($compress) {
