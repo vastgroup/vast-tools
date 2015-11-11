@@ -120,7 +120,7 @@ sub getPrefixCmd {
   return $prefix;
 }
 
-my $inpType = !$fastaOnly ? "-f" : "-q";
+my $inpType = !$fastaOnly ? "-f" : "-q"; 
 
 # Check database directory
 unless(defined($dbDir)) {
@@ -207,7 +207,7 @@ my($root, $length);
 $fileName1 =~ s/^.*\///g; # strip path
 
 my $genome_sub = 0;
-if ($fileName1 =~ /\-e\.f/){
+if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     $genome_sub=1;
     ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
@@ -219,10 +219,11 @@ if ($fileName1 =~ /\-e\.f/){
         $length = $readLength;
         $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
         $root = $1;
-    } else { # default behavior by --MI
+    } 
+    else { # default behavior by --MI
         ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
   	if(!defined($length) or $length eq "") { 
-  	  errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
+	    errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
 	}
     }
     if ($pairedEnd){
@@ -230,7 +231,7 @@ if ($fileName1 =~ /\-e\.f/){
 	$fileName2 = $fq2;
 	$fileName2 =~ s/^.*\///g; # strip path
     }
-    $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq";
+    $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq"; #only fastq files are allowed at this point
 }
 
 #verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
@@ -337,17 +338,24 @@ unless($trimmed) {
  } 
 
  verbPrint "Trimming fastq sequences to $le nt sequences";
-  ## Add min read depth!
- sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fq.gz");
-
- $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
+ ## Add min read depth!
+ # Renamed fa/fq --MI [11/11/15]
+ if ($fastaOnly){
+     sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fq.gz");
+     $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
+ }
+ else { # default behaviour 
+     sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fa.gz");
+     $fq = "$root-$le.fa.gz"; # set new $fq with trimmed reads --KH
+ }
  $trimmed = 1;
 }
 ####
 
  
 #### Get effective reads (i.e. genome subtraction).
- $subtractedFq = "$root-$le-e.fq.gz";
+ $subtractedFq = "$root-$le-e.fa.gz" if !$useGenSub;
+ $subtractedFq = "$root-$le-e.fq.gz" if $useGenSub;
  unless(-e $subtractedFq and $useGenSub) {
    verbPrint "Doing genome subtraction\n";
    # Force bash shell to support process substitution
