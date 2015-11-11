@@ -25,7 +25,7 @@ my $type = "ALL"; # ALL or new
 # Getting mappability information (from output of uniquecount.IJ.pl)
 my %ucount;
 
-my $ucountFile = "$dbDir/IR/$sp/$sp.Introns.sample.200.$rle.uniquecount.txt";
+my $ucountFile = "$dbDir/$sp.Introns.sample.200.$rle.uniquecount.txt";
 my $UC = openFileHandle($ucountFile);
 while(<$UC>){
     chomp($_);

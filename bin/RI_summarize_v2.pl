@@ -28,7 +28,7 @@ my %ucount;
 my %transcripts;
 
 # just to get the transcript per gene in COMBI
-my $ucountFile = "$dbDir/IR/$sp/$sp.IntronJunctions.$type.$rle.8.uniquecount.txt"; 
+my $ucountFile = "$dbDir/$sp.IntronJunctions.$type.$rle.8.uniquecount.txt"; 
 open (EFF, $ucountFile);
 while (<EFF>){
     chomp($_);
