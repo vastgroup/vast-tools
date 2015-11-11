@@ -46,6 +46,7 @@ my $trimLen; # This is an undocumented flag for Trim.pl (allows 48bp use)
 my $bowtieV = 2; # This undocumented option for # of allowed mismatches..
 
 my $trimmed = 0; # use pre-trimmed read set by Trim.pl
+my $keep_trimmed= 0; # to keep the original file when pre-trimmed
 
 my $ribofoot = 0; # flag for ribosome footprinting libraries
 
@@ -324,31 +325,33 @@ if (!$genome_sub and !$useGenSub){
 #### Trimming
 #
 #
+
+$keep_trimmed=1 if $trimmed; #keeps the original file provided as pre-trimmed input
+
 my $cmd = getPrefixCmd($fq);
 
 unless($trimmed) {
-
- my $trimArgs = "--stepSize $trimStep";
- $trimArgs .= " --fasta" if(!$fastaOnly);
- $trimArgs .= " --once" if($trimOnceFlag);
- $trimArgs .= " --targetLen $trimLen" if(defined($trimLen));
- if($pairedEnd) {
-   my $pairFq = isZipped($fq2) ? "<( gzip -dc $fq2 )" : $fq2;
-   $trimArgs .= " --paired $pairFq";
- } 
-
- verbPrint "Trimming fastq sequences to $le nt sequences";
- ## Add min read depth!
- # Renamed fa/fq --MI [11/11/15]
- if ($fastaOnly){
-     sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fq.gz");
-     $fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
- }
- else { # default behaviour 
-     sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fa.gz");
-     $fq = "$root-$le.fa.gz"; # set new $fq with trimmed reads --KH
- }
- $trimmed = 1;
+    my $trimArgs = "--stepSize $trimStep";
+    $trimArgs .= " --fasta" if(!$fastaOnly);
+    $trimArgs .= " --once" if($trimOnceFlag);
+    $trimArgs .= " --targetLen $trimLen" if(defined($trimLen));
+    if($pairedEnd) {
+	my $pairFq = isZipped($fq2) ? "<( gzip -dc $fq2 )" : $fq2;
+	$trimArgs .= " --paired $pairFq";
+    } 
+    
+    verbPrint "Trimming fastq sequences to $le nt sequences";
+    ## Add min read depth!
+    # Renamed fa/fq --MI [11/11/15]
+    if ($fastaOnly){
+	sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fq.gz");
+	$fq = "$root-$le.fq.gz"; # set new $fq with trimmed reads --KH
+    }
+    else { # default behaviour 
+	sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fa.gz");
+	$fq = "$root-$le.fa.gz"; # set new $fq with trimmed reads --KH
+    }
+    $trimmed = 1;
 }
 ####
 
@@ -434,7 +437,7 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
   verbPrint "Skipping intron retention step...\n";
 }
 
-unless($keepFlag or $trimmed) {
+unless($keepFlag or $keep_trimmed) {
   verbPrint "Cleaning $fq files!";
   sysErrMsg "rm $fq";
 }
