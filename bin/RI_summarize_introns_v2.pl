@@ -51,7 +51,7 @@ close $RC;
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
 # summary_v2 has raw and corrected read counts, and should not be deleted
-my $juncAnnotationFile = "$dbDir/FILES/$root.IR.summary_v2.txt"; # new input
+my $juncAnnotationFile = "./to_combine/$root.IR.summary_v2.txt"; # new input
 my $ANOT = openFileHandle($juncAnnotationFile);
 my $outfile = "./to_combine/$root.IR2"; 
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";

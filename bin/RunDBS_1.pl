@@ -406,7 +406,7 @@ sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
 
 # Align to intron retention mapped reads here..
 unless (($genome_sub and $useGenSub)  or $noIRflag) {
-  verbPrint "Mapping reads to intron retention library...\n";
+  verbPrint "Mapping reads to intron retention library (version $IR_version)...\n";
 
 # To define version [02/10/15]; minimize changes for users
 # $v => "" or "_v2" [v1/v2]
@@ -447,7 +447,7 @@ unless($keepFlag) {
   sysErrMsg "rm $subtractedFq";
 }
 
-unless($noIRflag && $IR_version == 1) {  # --UB
+unless($noIRflag || $IR_version == 2) {  # --UB
     my $juncAnnotationFile = "./to_combine/$root.IR.summary.txt";
     verbPrint "Cleaning up $juncAnnotationFile!";
     sysErrMsg "rm $juncAnnotationFile";

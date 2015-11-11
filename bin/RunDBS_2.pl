@@ -73,7 +73,7 @@ Combine multiple samples analyzed using \"vast-tools align\" into a single summa
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 	--dbDir DBDIR		Database directory
-	-sp Hsa/Mmu/Gga		Species selection
+	-sp Hsa/Mmu/etc		Species selection
 	-z			Compress all output files using gzip
 	--noIR			Don't run intron retention pipeline (default off)
         --IR_version 1/2        Version of the IR analysis (default 1)
@@ -145,9 +145,9 @@ if ($N != 0) {
 	    $v="_v2"; 
 	}
 	### Gets the PIRs for the Intron Retention pipeline
-	verbPrint "Building quality score table for intron retention\n";
+	verbPrint "Building quality score table for intron retention (version $IR_version)\n";
 	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
-	verbPrint "Building Table for intron retention\n";
+	verbPrint "Building Table for intron retention (version $IR_version)\n";
 	sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
 	    " -c " . abs_path("to_combine") .
 	    " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
