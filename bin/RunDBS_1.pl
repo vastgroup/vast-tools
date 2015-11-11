@@ -224,7 +224,8 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
         $root = $1;
     } 
     else { # default behavior by --MI
-        ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Fixed regex --TSW
+#        ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Fixed regex --TSW
+        ($root,$length)=$fileName1=~/(\S+)\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Refixed regex --MI
 
   	if(!defined($length) or $length eq "") { 
 	    errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
