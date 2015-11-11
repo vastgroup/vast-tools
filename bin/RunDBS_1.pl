@@ -209,7 +209,7 @@ $fileName1 =~ s/^.*\///g; # strip path
 my $genome_sub = 0;
 if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     $genome_sub=1;
-    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq)(\.gz)?/;  #Fixed regex --TSW
+    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq|fastq|fa)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     $subtractedFq = $fq1;
     errPrint "Only for 50nt or 36nt if genome subtracted\n" if $length!=36 && $length!=50;
@@ -217,11 +217,11 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     # allow readlength to be given by -readLen x --TSW
     if($readLength) {
         $length = $readLength;
-        $fileName1 =~ /(\S+)\.(fastq|fq)(\.gz)?/; 
+        $fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/; 
         $root = $1;
     } 
     else { # default behavior by --MI
-        ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq)(\.gz)?/; #Fixed regex --TSW
+        ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Fixed regex --TSW
   	if(!defined($length) or $length eq "") { 
 	    errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
 	}
@@ -434,7 +434,7 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
   verbPrint "Skipping intron retention step...\n";
 }
 
-unless($keepFlag) {
+unless($keepFlag or $trimmed) {
   verbPrint "Cleaning $fq files!";
   sysErrMsg "rm $fq";
 }
