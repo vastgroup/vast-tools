@@ -163,6 +163,10 @@ OPTIONS:
 	--useFastq		This option is only necessary if you have pre-trimmed reads 
 					in fastq not fasta format (default off)
 	-h, --help		Print this help message
+
+
+*** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
+
 ";
 
   exit $EXIT_STATUS;

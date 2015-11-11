@@ -64,12 +64,11 @@ sub verbPrint {
   }
 }
 
-if ($helpFlag){
+if ($helpFlag or !defined($ARGV[0])){
     print STDERR "
 Usage: vast-tools combine -o OUTPUTDIR [options]
 
-Combine multiple samples analyzed using \"vast-tools align\" into a single
-summary tables. 
+Combine multiple samples analyzed using \"vast-tools align\" into a single summary tables. 
 
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
@@ -83,6 +82,8 @@ OPTIONS:
 	-C			Create a cRPKM plus read counts summary table. By default, a
     				table containing ONLY cRPKM is produced. This option is only
            			applicable when expression analysis is enabled.
+
+*** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
 					\n";
 
   exit $EXIT_STATUS;
