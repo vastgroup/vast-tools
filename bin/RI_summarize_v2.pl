@@ -36,7 +36,8 @@ while (<EFF>){
     
     if ($junction0 =~ /.+?\:.+?\:/){ # i.e. it's a EI junction
 	my($gene,$trans,$en,$l1,$l2) = split(/\:/,$junction0);
-	$transcripts{$gene}=$trans; # first should go the EI junctions
+        my ($N)=$en=~/(\d+)\-/; # adapted to the special case of Hsa/Mmu [11/11/15]
+        $transcripts{$gene}{$N}=$trans; # first should go the EI junctions # CHANGED 11/11/15 
     }
 }
 close EFF;
@@ -52,17 +53,18 @@ while(<$UC>){
 	$ucount{$junction} = $count; 
     }
     else {
-	my($gene,$en,$co) = split(/\-/,$junction0);
+#	my($gene,$en,$co) = split(/\-/,$junction0);
+	my($gene,$en,$co)=$junction0=~/(.+)\-(.+?)\-(.+)/; #CHANGED 11/11/15 (genes with "-", e.g. D17H6S56E-3)
 	my $junction = $gene."-".$en;
 
 	my($e1,$e2)=$en=~/(\d+)\_(\d+)/;
 	$e1++; # they were 0-based
 	$e2++;
 	my $new_en="$e1-EE";
-	my $final_junction = $gene.":".$transcripts{$gene}.":".$new_en; # requires all IEs going first
-	die "$gene\n" if !$transcripts{$gene};
-	
-	$ucount{$final_junction} = $count if $e1 eq $e2; # stores the mappability for the simple EE
+	if (defined $transcripts{$gene}{$e1}){ #CHANGED 11/11/15 (some Hsa/Mmu "introns" do not exist if multitr)
+	    my $final_junction = $gene.":".$transcripts{$gene}{$e1}.":".$new_en; # requires all IEs going first #CHANGED 11/11/15
+	    $ucount{$final_junction} = $count if $e1 eq $e2; # stores the mappability for the simple EE
+	}
 	$ucount{$junction} = $count; 
     }
 }
@@ -83,7 +85,8 @@ while(<$RC>){
 	$corrected_count{$junction} = ($count / $ucount{$junction}) * $maxcount if $ucount{$junction};
     }
     else {
-	my($gene,$en,$co) = split(/\-/,$junction0);
+#	my($gene,$en,$co) = split(/\-/,$junction0);
+	my($gene,$en,$co)=$junction0=~/(.+)\-(.+?)\-(.+)/; #CHANGED 11/11/15 (genes with "-", e.g. D17H6S56E-3)
 	my $junction = $gene."-".$en;
 	my($e1,$e2)=$en=~/(\d+)\_(\d+)/;
 	$e1++; # they were 0-based
@@ -91,18 +94,19 @@ while(<$RC>){
 
 	for my $i ($e1..$e2){ # it counts as splice out for all exons in between
 	    my $new_en="$i-EE"; # copies the 2-EE structures (EE for intron 2)
-	    my $final_junction = $gene.":".$transcripts{$gene}.":".$new_en;
 
-	    if (!defined ($rcount{$final_junction}) && defined ($ucount{$junction})){
-		$rcount{$final_junction}=0;
+	    if (defined $transcripts{$gene}{$e1}){ #CHANGED 11/11/15 (some Hsa/Mmu "introns" do not exist if multitr)
+		my $final_junction = $gene.":".$transcripts{$gene}{$e1}.":".$new_en;  #CHANGED 11/11/15
+		if (!defined ($rcount{$final_junction}) && defined ($ucount{$junction})){
+		    $rcount{$final_junction}=0;
+		}
+		if (!defined ($corrected_count{$final_junction}) && defined ($ucount{$junction})){
+		    $corrected_count{$final_junction} = 0;
+		}
+		
+		$rcount{$final_junction} = $rcount{$final_junction} + $count if $ucount{$junction};
+		$corrected_count{$final_junction} = $corrected_count{$final_junction} + (($count / $ucount{$junction}) * $maxcount) if $ucount{$junction}; 
 	    }
-	    if (!defined ($corrected_count{$final_junction}) && defined ($ucount{$junction})){
-		$corrected_count{$final_junction} = 0;
-	    }
-
-	    $rcount{$final_junction} = $rcount{$final_junction} + $count if $ucount{$junction};
-	    $corrected_count{$final_junction} = $corrected_count{$final_junction} + (($count / $ucount{$junction}) * $maxcount) if $ucount{$junction}; 
-	    # $ucount{$junction} and not final_junction!
 	}
     }
 # Examples of junctions: 
@@ -122,59 +126,64 @@ my $head = <$ANOT>;
 print OUT "Event\tcEIJ1\tcEIJ2\tcEEJ\trEIJ1\trEIJ2\trEEJ\n";
 while(<$ANOT>){
     chomp($_);
-    my ($event,$C1Aj,$AC2j,$C1C2j,@rest) = split(/\t/,$_);
+    my ($event,$EI1j,$EI2j,$EEj,@rest) = split(/\t/,$_); #names modified from v1 for IR consitency [11/11/15]
 
     if(! defined $eventseen{$event}){	
-	my $C1A_cor="";
-	my $C1A_raw="";
-	if ($ucount{$C1Aj}>0){
-	    if (!defined $corrected_count{$C1Aj}){
-		$corrected_count{$C1Aj} = 0;
+	my $EI1_cor="";
+	my $EI1_raw="";
+	$ucount{$EI1j}=0 if (!defined $ucount{$EI1j}); #CHANGED 11/11/15 (for missing junctions in conversion)  
+	if ($ucount{$EI1j}>0){
+	    if (!defined $corrected_count{$EI1j}){
+		$corrected_count{$EI1j} = 0;
 	    }
-	    if (!defined $rcount{$C1Aj}){
-		$rcount{$C1Aj} = 0;
+	    if (!defined $rcount{$EI1j}){
+		$rcount{$EI1j} = 0;
 	    }
-	    $C1A_cor=$corrected_count{$C1Aj};
-	    $C1A_raw=$rcount{$C1Aj};
+	    $EI1_cor=$corrected_count{$EI1j};
+	    $EI1_raw=$rcount{$EI1j};
 	}
 	else {
-	    $C1A_cor="ne";
-	    $C1A_raw="ne";
-	}
-	my $AC2_cor="";
-	my $AC2_raw="";
-	if ($ucount{$AC2j}>0){
-	    if (!defined $corrected_count{$AC2j}){
-		$corrected_count{$AC2j} = 0;
-	    }
-	    if (!defined $rcount{$AC2j}){
-		$rcount{$AC2j} = 0;
-	    }
-	    $AC2_cor=$corrected_count{$AC2j};
-	    $AC2_raw=$rcount{$AC2j};
-	}
-	else {
-	    $AC2_cor="ne";
-	    $AC2_raw="ne";
-	}
-	my $C1C2_cor="";
-	my $C1C2_raw="";
-	if ($ucount{$C1C2j}>0){
-	    if (!defined $corrected_count{$C1C2j}){
-		$corrected_count{$C1C2j} = 0;
-	    }
-	    if (!defined $rcount{$C1C2j}){
-		$rcount{$C1C2j} = 0;
-	    }
-	    $C1C2_cor=$corrected_count{$C1C2j};
-	    $C1C2_raw=$rcount{$C1C2j};
-	}
-	else {
-	    $C1C2_cor="ne";
-	    $C1C2_raw="ne";
+	    $EI1_cor="ne";
+	    $EI1_raw="ne";
 	}
 
-	print OUT "$event\t$C1A_cor\t$AC2_cor\t$C1C2_cor\t$C1A_raw\t$AC2_raw\t$C1C2_raw\n";
+	my $EI2_cor="";
+	my $EI2_raw="";
+	$ucount{$EI2j}=0 if (!defined $ucount{$EI2j}); #CHANGED 11/11/15 (for missing junctions in conversion) 
+	if ($ucount{$EI2j}>0){
+	    if (!defined $corrected_count{$EI2j}){
+		$corrected_count{$EI2j} = 0;
+	    }
+	    if (!defined $rcount{$EI2j}){
+		$rcount{$EI2j} = 0;
+	    }
+	    $EI2_cor=$corrected_count{$EI2j};
+	    $EI2_raw=$rcount{$EI2j};
+	}
+	else {
+	    $EI2_cor="ne";
+	    $EI2_raw="ne";
+	}
+
+	my $EE_cor="";
+	my $EE_raw="";
+	$ucount{$EEj}=0 if (!defined $ucount{$EEj}); #CHANGED 11/11/15 (for missing junctions in conversion) 
+	if ($ucount{$EEj}>0){
+	    if (!defined $corrected_count{$EEj}){
+		$corrected_count{$EEj} = 0;
+	    }
+	    if (!defined $rcount{$EEj}){
+		$rcount{$EEj} = 0;
+	    }
+	    $EE_cor=$corrected_count{$EEj};
+	    $EE_raw=$rcount{$EEj};
+	}
+	else {
+	    $EE_cor="ne";
+	    $EE_raw="ne";
+	}
+
+	print OUT "$event\t$EI1_cor\t$EI2_cor\t$EE_cor\t$EI1_raw\t$EI2_raw\t$EE_raw\n";
 	$eventseen{$event} = "Y";
     }
 }
