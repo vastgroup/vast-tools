@@ -25,7 +25,7 @@ my $type = "ALL"; # ALL or new
 # Getting mappability information (from output of uniquecount.IJ.pl)
 my %ucount;
 
-my $ucountFile = "$dbDir/$sp.Introns.sample.200.$rle.uniquecount.txt";
+my $ucountFile = "$dbDir/FILES/$sp.Introns.sample.200.$rle.uniquecount.txt";
 my $UC = openFileHandle($ucountFile);
 while(<$UC>){
     chomp($_);
@@ -51,9 +51,9 @@ close $RC;
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
 # summary_v2 has raw and corrected read counts, and should not be deleted
-my $juncAnnotationFile = "$dbDir/SAM/$sp/$root.IR.summary_v2.txt"; # new input
+my $juncAnnotationFile = "$dbDir/FILES/$root.IR.summary_v2.txt"; # new input
 my $ANOT = openFileHandle($juncAnnotationFile);
-my $outfile = "$dbDir/SAM/$sp/$root.IR2"; 
+my $outfile = "./to_combine/$root.IR2"; 
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
 my $head = <$ANOT>;
 print OUT "Event\tEIJ1\tEIJ2\tEEJ\tI\n"; # File to be used in RI_MakeTablePIR.R

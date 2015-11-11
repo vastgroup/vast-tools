@@ -28,7 +28,7 @@ my %ucount;
 my %transcripts;
 
 # just to get the transcript per gene in COMBI
-my $ucountFile = "$dbDir/$sp.IntronJunctions.$type.$rle.8.uniquecount.txt"; 
+my $ucountFile = "$dbDir/FILES/$sp.IntronJunctions.$type.$rle.8.uniquecount.txt"; 
 open (EFF, $ucountFile);
 while (<EFF>){
     chomp($_);
@@ -117,10 +117,10 @@ close $RC;
 
 # Getting junction annotation (i.e. the IDs of the 3 junctions associated with each event) and generating output file
 my %eventseen;
-my $juncAnnotationFile = "$dbDir/IR/$sp/$sp.IntronJunctions.new.annotation.txt"; # still maintained
+my $juncAnnotationFile = "$dbDir/FILES/$sp.IntronJunctions.new.annotation.txt"; # still maintained
 my $ANOT = openFileHandle($juncAnnotationFile);
 # summary_v2: contains corrected and raw read counts. It should not be deleted (used to build coverage key)
-my $outfile = "$dbDir/SAM/$sp/$root.IR.summary_v2.txt";
+my $outfile = "./to_combine/$root.IR.summary_v2.txt";
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
 my $head = <$ANOT>;
 print OUT "Event\tcEIJ1\tcEIJ2\tcEEJ\trEIJ1\trEIJ2\trEEJ\n";
