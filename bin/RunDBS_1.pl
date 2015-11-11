@@ -394,16 +394,16 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
   verbPrint "Mapping reads to intron retention library...\n";
 
 # To define version [02/10/15]; minimize changes for users
-# $v2 => "" or "_v2" [v1/v2]
+# $v => "" or "_v2" [v1/v2]
 # $type => "new" or "ALL" [v1/v2]
-  my $v2;
+  my $v;
   my $type;
   if ($IR_version == 1){
-      $v2="";
+      $v="";
       $type="new";
   }
   elsif ($IR_version == 2){
-      $v2="_v2"; 
+      $v="_v2"; 
       $type="ALL";
   }
   
