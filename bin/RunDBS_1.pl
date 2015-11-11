@@ -24,7 +24,7 @@ my $runExprFlag = 0; # no by default
 my $onlyExprFlag = 0; # no by default
 my $trim;
 my $cores = 1; #default
-my $readLength = 50; # default... deprecated. 
+my $readLength = ""; # default.
 my $outdir;
 my $noIRflag = 0;  # don't run intron retention (for speed..)
 my $stringentIRflag = 0; # Run extra genome/eej subtraction step
@@ -64,7 +64,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "v" => \$verboseFlag,
-              		  #"readLen=i" => \$readLength, # deprecated
+              		  "readLen=i" => \$readLength, # deprecated
               		  "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
@@ -141,6 +141,8 @@ OPTIONS:
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
+        --readLen i             Read length of input reads
+                                (If not provided, fastq files MUST be named Sample-length.fq.gz)
 	--expr			For expression analyses: -expr 
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
@@ -213,7 +215,7 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq|fastq|fa)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     $subtractedFq = $fq1;
-    errPrint "Only for 50nt or 36nt if genome subtracted\n" if $length!=36 && $length!=50;
+    errPrint "Only for 50nt if genome subtracted\n" if $length!=50;
 } else {
     # allow readlength to be given by -readLen x --TSW
     if($readLength) {
@@ -223,6 +225,7 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     } 
     else { # default behavior by --MI
         ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Fixed regex --TSW
+
   	if(!defined($length) or $length eq "") { 
 	    errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
 	}
@@ -232,7 +235,7 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
 	$fileName2 = $fq2;
 	$fileName2 =~ s/^.*\///g; # strip path
     }
-    $fq = $zipped ? "$root-$length.fq.gz" : "$root-$length.fq"; #only fastq files are allowed at this point
+    $fq = $zipped ? "$root-50.fq.gz" : "$root-50.fq"; #only fastq files are allowed at this point; default trimmed length = 50
 }
 
 #verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
@@ -268,16 +271,18 @@ my $difLE;
 if ($length >= 50){
     $difLE = $length-50;
     $le = 50;
-} elsif ($length >= 36){
-    $difLE = $length - 36;
-    $le = 36;
-} elsif ($ribofoot) {
+} 
+#elsif ($length >= 36){
+#    $difLE = $length - 36;
+#    $le = 36;
+#}
+ elsif ($ribofoot) {
     $difLE = 0;
     $le = 32;
 } else {
-    errPrint "Minimum reads length: 50nt (Human) and 36nt (Mouse)\n";
+    errPrint "Minimum reads length: 50nt\n";
 }
-errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa";
+#errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa"; # --MI deprecated 11/11/15
 #####
 
 if ($EXIT_STATUS) {
