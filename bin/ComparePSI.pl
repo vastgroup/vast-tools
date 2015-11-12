@@ -84,6 +84,9 @@ OPTIONS:
         --GO file                Generates gene lists for GO when provided a key file (e.g. Hsa.Event-Gene.IDs.txt)
         -o, --output             Output file name (default based on option parameters)
 
+
+*** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
+
 ";
 }
 
@@ -312,5 +315,3 @@ print "Long_AltEx\t$tally{AltEx}{DOWN}\t$tally{AltEx}{UP}\n";
 print "Intron_ret\t$tally{IR}{DOWN}\t$tally{IR}{UP}\n";
 print "Alt_3ss\t$tally{Alt3}{DOWN}\t$tally{Alt3}{UP}\n";
 print "Alt_5ss\t$tally{Alt5}{DOWN}\t$tally{Alt5}{UP}\n";
-
-

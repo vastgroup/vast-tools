@@ -19,11 +19,11 @@ $binPath =~ s/\/$0$//;
 my $helpFlag = 0;
 my $verboseFlag = 1; 
 my $dbDir; # directory of VASTDB
-my $species = "Hsa"; # needed to run expr merge automatically
+my $species; # needed to run expr merge automatically
 my $groups; # list with the groupings: sample1_rep1\tgroup_1\n sample1_rep2\tgroup_1\n...
 my $folder; # actual folder where the vast-tools outputs are (the to_combine folder!)
 my $effective; #effective file for expression. Obtained automatically from VASTDB
-my $expr = 1; #activates merging of cRPKMs
+my $expr; #activates merging of cRPKMs
 my $exprONLY; # if you want to do expr only, just write anything.
 my $move_to_PARTS; # to move the merged subfiles into the PARTS folder
 my $IR_version = 1; # version of IR pipeline
@@ -66,13 +66,16 @@ sub verbPrint {
 }
 
 # Check database directory
-unless(defined($dbDir)) {
-    $dbDir = "$binPath/../VASTDB";
-}
-$dbDir = abs_path($dbDir);
-$dbDir .= "/$species";
-errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
+if (defined $expr or defined $exprONLY){
+    errPrintDie "Needs to provide species (\-\-sp)\n" if (!defined $species);
 
+    unless(defined($dbDir)) {
+	$dbDir = "$binPath/../VASTDB";
+    }
+    $dbDir = abs_path($dbDir);
+    $dbDir .= "/$species";
+    errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
+}
 
 if (!defined($groups) || $helpFlag){
     die "\nUsage: vast-tools merge -g path/groups_file [-o align_output] [options]
@@ -82,10 +85,10 @@ Merges vast-tools outputs from multiple subsamples into grouped samples
 OPTIONS: 
         -g, --groups             File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
-        --sp Hsa/Mmu/etc         Three letter code for the database (default Hsa)
+        --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
         --dbDir db               Database directory (default VASTDB)
         --IR_version             Version of the Intron Retention pipeline (1 or 2) (default 1)
-        --expr                   Merges cRPKM files (default ON)
+        --expr                   Merges cRPKM files (default OFF)
         --exprONLY               Merges only cRPKM files (default OFF)
         --move_to_PARTS          Moves the subsample files to PARTS\/ within output folders (default ON)
         --help                   Prints this help message
@@ -96,14 +99,14 @@ OPTIONS:
 ";
 }
 
-# Sanity checks
-errPrintDie "Needs to provide a file with the groupings\n" if (!defined $groups);
-errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_version != 2);
-
 # If exprONLY, activates expr
 $expr=1 if (defined $exprONLY);
 
-verbPrint "Using VASTDB -> $dbDir";
+# Sanity checks
+errPrintDie "Needs a file with the groupings\n" if (!defined $groups);
+errPrintDie "IR version must be either 1 or 2\n" if ($IR_version != 1 && $IR_version != 2);
+
+verbPrint "Using VASTDB -> $dbDir" if (defined $expr);
 # change directories
 errPrintDie "The output directory \"$folder/to_combine\" does not exist" unless (-e "$folder/to_combine");
 chdir($folder) or errPrint "Unable to change directories into output" and die;
@@ -165,53 +168,53 @@ my %MULTIa;
 my %MULTIb;
 
 ### For expression
-verbPrint "Doing merging for Expression files only ...\n" if (defined $exprONLY);
+verbPrint "Doing merging for Expression files only\n" if (defined $exprONLY);
 
 if (defined $expr){
     $effective = "$dbDir/EXPRESSION/$species"."_mRNA-50.eff";
-}
-
-if (-e $effective){
-    verbPrint "Loading Effective data\n";
-    open (EFF, $effective) || errPrintDie "Cannot find the file with effective positions\n";
-    while (<EFF>){
-	chomp;
-	my @temp=split(/\t/,$_);
-	$eff{$temp[0]}=$temp[1];
-    }
-    close EFF;
-    
-    verbPrint "Loading Expression files\n";
-    my @files=glob("expr_out/*.cRPKM");
-    foreach my $file (@files){
-	my ($root)=$file=~/.+\/(.+?)\.cRPKM/;
-	next if !$group{$root};
-	$N_expr++;
-	
-	verbPrint "  Processing $file\n";
-	open (I, $file) or errPrint "Can't open $file";
-	while (<I>){
+    if (-e $effective){
+	verbPrint "Loading Effective data\n";
+	open (EFF, $effective) || errPrintDie "Cannot find the file with effective positions\n";
+	while (<EFF>){
 	    chomp;
 	    my @temp=split(/\t/,$_);
-	    my $gene=$temp[0];
-	    if ($temp[1] eq "NA" || $temp[1] eq "ne"){
-		$READS_EXPR{$group{$root}}{$gene}="NA";
-	    }
-	    else {
-		$READS_EXPR{$group{$root}}{$gene}+=$temp[2];
-		$TOTAL_READS_EXPR{$group{$root}}+=$temp[2];
-	    }
+	    $eff{$temp[0]}=$temp[1];
 	}
-	close I;
-	system "mv $file expr_out/PARTS/" if (defined $move_to_PARTS);
+	close EFF;
+	
+	verbPrint "Loading Expression files\n";
+	my @files=glob("expr_out/*.cRPKM");
+	foreach my $file (@files){
+	    my ($root)=$file=~/.+\/(.+?)\.cRPKM/;
+	    next if !$group{$root};
+	    $N_expr++;
+	    
+	    verbPrint "  Processing $file\n";
+	    open (I, $file) or errPrint "Can't open $file";
+	    while (<I>){
+		chomp;
+		my @temp=split(/\t/,$_);
+		my $gene=$temp[0];
+		if ($temp[1] eq "NA" || $temp[1] eq "ne"){
+		    $READS_EXPR{$group{$root}}{$gene}="NA";
+		}
+		else {
+		    $READS_EXPR{$group{$root}}{$gene}+=$temp[2];
+		    $TOTAL_READS_EXPR{$group{$root}}+=$temp[2];
+		}
+	    }
+	    close I;
+	    system "mv $file expr_out/PARTS/" if (defined $move_to_PARTS);
+	}
+    }
+    else {
+	errPrintDie "$effective file does not exist\n";
     }
 }
 else {
-    errPrintDie "$effective file does not exist\n";
+    verbPrint "Warning: Not merging Expression data\n" unless (defined $expr); 
 }
 
-verbPrint "Warning: Not merging Expression data\n" unless (defined $expr); 
-   
 unless (defined $exprONLY){
 ### For IR (v1 and v2)
     verbPrint "Loading IR files (version $IR_version)\n";
@@ -419,7 +422,7 @@ unless (defined $exprONLY){
 } 
 
 ### Print output files
-verbPrint "Printing group files ...\n";
+verbPrint "Printing group files\n";
 foreach my $group (sort keys %list){
     verbPrint ">>> $group\n";
 
