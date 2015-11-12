@@ -65,8 +65,10 @@ Usage: $0 sub-commands [options]
 
 [sub-commands]
 	align		:	Align RNA-Seq reads to exon-exon junctions and quantify AS
+        merge           :       Merges vast-tool outputs from multiple sub-samples  
 	combine		:	Combine two or more 'aligned' RNA-Seq samples into summary tables
-	diff		:	Compare posterior distributions over Psi of two or more samples 
+        compare         :       Compares PSIs between samples and produces lists for GO analysis
+	diff		:	Compare posterior distributions over PSI of two or more samples 
 	plot		:	Utility application to plot PSI scatterplots
 
 [global options]
@@ -98,6 +100,10 @@ if($subCommand eq "align") {
   $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args");
 } elsif($subCommand eq "combine") {
   $EXIT_STATUS = system("$path/bin/RunDBS_2.pl @args");
+} elsif($subCommand eq "merge") {
+  $EXIT_STATUS = system("$path/bin/MergeOutputs.pl @args");
+} elsif($subCommand eq "compare") {
+  $EXIT_STATUS = system("$path/bin/ComparePSI.pl @args");
 } elsif($subCommand eq "diff") {
   $EXIT_STATUS = system("$path/R/vastdiff.R @args");
 } elsif($subCommand eq "plot") {
