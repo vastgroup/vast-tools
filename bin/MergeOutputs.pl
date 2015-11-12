@@ -16,12 +16,15 @@ my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
+my $helpFlag = 0;
+my $verboseFlag = 1; 
 my $dbDir; # directory of VASTDB
-my $species; # needed to run expr merge automatically
+my $species = "Hsa"; # needed to run expr merge automatically
 my $groups; # list with the groupings: sample1_rep1\tgroup_1\n sample1_rep2\tgroup_1\n...
 my $folder; # actual folder where the vast-tools outputs are (the to_combine folder!)
 my $effective; #effective file for expression. Obtained automatically from VASTDB
-my $expr_only; # if you want to do expr only, just write anything.
+my $expr = 1; #activates merging of cRPKMs
+my $exprONLY; # if you want to do expr only, just write anything.
 my $move_to_PARTS; # to move the merged subfiles into the PARTS folder
 my $IR_version = 1; # version of IR pipeline
 
@@ -34,7 +37,7 @@ GetOptions(               "groups=s" => \$groups,
 			  "IR_version=i" => \$IR_version,
 			  "sp=s" => \$species,
 			  "expr" => \$expr,
-                          "exprONLY" => \$expr_only,
+                          "exprONLY" => \$exprONLY,
                           "help" => \$helpFlag,
 			  "move_to_PARTS" => \$move_to_PARTS
     );
@@ -71,19 +74,19 @@ $dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 
 
-if (!defined($ARGV[0]) || $helpFlag){
+if (!defined($groups) || $helpFlag){
     die "\nUsage: vast-tools merge -g path/groups_file [-o align_output] [options]
 
 Merges vast-tools outputs from multiple subsamples into grouped samples
 
 OPTIONS: 
-        --sp Hsa/Mmu/etc         Three letter code for the database (default Hsa)
-        --dbDir db               Database directory (default VASTDB)
         -g, --groups             File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
+        --sp Hsa/Mmu/etc         Three letter code for the database (default Hsa)
+        --dbDir db               Database directory (default VASTDB)
         --IR_version             Version of the Intron Retention pipeline (1 or 2) (default 1)
-        --expr                   Merges cRPKM files
-        --exprONLY               Merges only cRPKM files
+        --expr                   Merges cRPKM files (default ON)
+        --exprONLY               Merges only cRPKM files (default OFF)
         --move_to_PARTS          Moves the subsample files to PARTS\/ within output folders (default ON)
         --help                   Prints this help message
 
@@ -108,15 +111,16 @@ verbPrint "Setting output directory to $folder";
 
 
 if (defined $move_to_PARTS){
-    system "mkdir $folder/to_combine/PARTS" unless (-e "$folder/to_combine/PARTS");
-    system "mkdir $folder/expr_out/PARTS" unless (-e "$folder/expr_out/PARTS") || (!defined $expr);    
+    system "mkdir to_combine/PARTS" unless (-e "to_combine/PARTS");
+    system "mkdir expr_out/PARTS" unless (-e "expr_out/PARTS") || (!defined $expr);    
 }
 
 my %group;
 my %list;
 
 ### Loading group info
-open (GROUPS, $groups) || errPrint "Cannot open $groups file\n";
+$groups.="$binPath/../" if $groups !~ /^\//; # if relative path is provided
+open (GROUPS, $groups) || errPrintDie "Cannot open groupings: $groups\n";
 while (<GROUPS>){
     # cleaning in case they were made in Mac's excel
     $_ =~ s/\r//g;
@@ -141,6 +145,7 @@ my %eff;
 my %READS_EXPR;
 my %TOTAL_READS_EXPR;
 my %IR;
+my %IRsum;
 my $IR_head;
 my $IRsum_head;
 my $MIC_head;
@@ -167,8 +172,8 @@ if (defined $expr){
 }
 
 if (-e $effective){
-    print "Loading Effective data ...\n";
-    open (EFF, $effective) || die "Needs Effective\n";
+    verbPrint "Loading Effective data\n";
+    open (EFF, $effective) || errPrintDie "Cannot find the file with effective positions\n";
     while (<EFF>){
 	chomp;
 	my @temp=split(/\t/,$_);
@@ -176,14 +181,14 @@ if (-e $effective){
     }
     close EFF;
     
-    print "Loading Expression files ...\n";
-    my @files=glob("$folder/expr_out/*.cRPKM");
+    verbPrint "Loading Expression files\n";
+    my @files=glob("expr_out/*.cRPKM");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.cRPKM/;
 	next if !$group{$root};
 	$N_expr++;
 	
-	verbPrint "   Processing $file\n";
+	verbPrint "  Processing $file\n";
 	open (I, $file) or errPrint "Can't open $file";
 	while (<I>){
 	    chomp;
@@ -198,7 +203,7 @@ if (-e $effective){
 	    }
 	}
 	close I;
-	system "mv $file $folder/expr_out/PARTS/" if (defined $move_to_PARTS);
+	system "mv $file expr_out/PARTS/" if (defined $move_to_PARTS);
     }
 }
 else {
@@ -207,17 +212,17 @@ else {
 
 verbPrint "Warning: Not merging Expression data\n" unless (defined $expr); 
    
-unless (defined $expr_only){
+unless (defined $exprONLY){
 ### For IR (v1 and v2)
-    verbPrint "Loading IR files (for version $IR_version)...\n";
+    verbPrint "Loading IR files (version $IR_version)\n";
     if ($IR_version == 1){
-	my @files=glob("$folder/to_combine/*.IR"); 
+	my @files=glob("to_combine/*.IR"); 
 	foreach my $file (@files){
 	    my ($root)=$file=~/.+\/(.+?)\.IR/;
 	    next if (!defined $group{$root});
 	    $N_IR++; 
 	    
-	    verbPrint "   Processing $file\n";
+	    verbPrint "  Processing $file\n";
 	    open (I, $file);
 	    $IR_head=<I>;
 	    while (<I>){
@@ -229,17 +234,17 @@ unless (defined $expr_only){
 		}
 	    }
 	    close I;
-	    system "mv $f $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	    system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	}
     }
     elsif ($IR_version == 2){
-	my @files=glob("$folder/to_combine/*.IR2"); 
+	my @files=glob("to_combine/*.IR2"); 
 	foreach my $file (@files){
 	    my ($root)=$file=~/.+\/(.+?)\.IR2/;
 	    next if (!defined $group{$root});
 	    $N_IR++; 
 	    
-	    verbPrint "   Processing $file\n";
+	    verbPrint "  Processing $file\n";
 	    open (I, $file);
 	    $IR_head=<I>;
 	    while (<I>){
@@ -251,17 +256,17 @@ unless (defined $expr_only){
 		}
 	    }
 	    close I;
-	    system "mv $f $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	    system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	}
 	
-	verbPrint "Loading IR.summary_v2.txt files ...\n"; # only in v2
-	@files=glob("$folder/to_combine/*.IR.summary_v2.txt"); 
+	verbPrint "Loading IR.summary_v2.txt files\n"; # only in v2
+	@files=glob("to_combine/*.IR.summary_v2.txt"); 
 	foreach my $file (@files){
 	    my ($root)=$file=~/.+\/(.+?)\.IR.summary_v2/;
 	    next if (!defined $group{$root});
 	    $N_IRsum++;
 
-	    verbPrint "   Processing $file\n";
+	    verbPrint "  Processing $file\n";
 	    open (I, $file) || errPrintDie "Can't open $file\n";
 	    $IRsum_head=<I>;
 	    while (<I>){
@@ -273,19 +278,19 @@ unless (defined $expr_only){
 		}
 	    }
 	    close I;
-	    system "mv $file $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	    system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	}
     }
     
 ### For MIC
-    verbPrint "Loading Microexon files ...\n";
-    @files=glob("$folder/to_combine/*.micX");
+    verbPrint "Loading Microexon files\n";
+    my @files=glob("to_combine/*.micX");
     foreach my $file (@files){
-	($root)=$file=~/.+\/(.+?)\.micX/;
+	my ($root)=$file=~/.+\/(.+?)\.micX/;
 	next if (!defined $group{$root});
 	$N_MIC++;
 
-	verbPrint "   Processing $file\n";
+	verbPrint "  Processing $file\n";
 	open (I, $file) || errPrintDie "Can't open $file\n";
 	$MIC_head=<I>;
 	while (<I>){
@@ -293,25 +298,25 @@ unless (defined $expr_only){
 	    my @temp=split(/\t/,$_);
 	    my $event=$temp[1];
 	    $dataMIC{$event}=join("\t",@temp[0..5]);
-	    for my $i (7..$#temo){ # Raw_reads_exc  Raw_reads_inc  Corr_reads_exc  Corr_reads_inc
+	    for my $i (7..$#temp){ # Raw_reads_exc  Raw_reads_inc  Corr_reads_exc  Corr_reads_inc
 		$MIC{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
 		$MIC{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
 	    }
 	}
 	### Needs to recalculate PSI: from 9 and 10
 	close I;
-	system "mv $file $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
     }
     
 ### For EEJ2
-    verbPrint "Loading eej2 files ...\n";
-    @files=glob("$folder/to_combine/*.eej2");
+    verbPrint "Loading eej2 files\n";
+    @files=glob("to_combine/*.eej2");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.eej2/;
 	next if (!defined $group{$root});
 	$N_EEJ++;
 
-	verbPrint "   Processing $f\n";
+	verbPrint "  Processing $file\n";
 	open (I, $file) or errPrintDie "Can't open $file\n";
 	while (<I>){
 	    chomp($_);
@@ -329,27 +334,33 @@ unless (defined $expr_only){
 	    errPrint "Sum of positions ne total provided for $event in $file\n" if $tot_control ne $temp[2];
 	}
 	close I;
-	system "mv $file $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
     }
     
 ### For EXSK
-    verbPrint "Loading EXSK files ...\n";
-    @files=glob("$folder/to_combine/*.exskX");
+    verbPrint "Loading EXSK files\n";
+    @files=glob("to_combine/*.exskX");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.exskX/;
 	next if (!defined $group{$root});
 	$N_EXSK++;
 	
-	verbPrint "   Processing $file\n";
+	verbPrint "  Processing $file\n";
 	open (I, $file) or errPrintDie "Can't open $file\n";
 	$EXSK_head=<I>;
 	while (<I>){
 	    chomp($_);
 	    my @temp=split(/\t/,$_);
 	    my $event=$temp[3];
+	    $temp[25]="" if (!defined $temp[25]);
 	    $dataEXSK_pre{$event}=join("\t",@temp[0..11]);
 	    $dataEXSK_post{$event}=join("\t",@temp[22..25]);
-	    for my $i (13..$#temp){ # PSI  Reads_exc  Reads_inc1  Reads_inc2  Sum_of_reads  .  Complexity  Corrected_Exc  Corrected_Inc1  Corrected_Inc2
+	    for my $i (13..16){ # PSI  Reads_exc  Reads_inc1  Reads_inc2  Sum_of_reads  .  Complexity  Corrected_Exc  Corrected_Inc1  Corrected_Inc2
+		# only 13-16 and 19-21 really
+		$EXSK{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
+		$EXSK{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
+	    }
+	    for my $i (19..21){ # PSI  Reads_exc  Reads_inc1  Reads_inc2  Sum_of_reads  .  Complexity  Corrected_Exc  Corrected_Inc1  Corrected_Inc2
 		# only 13-16 and 19-21 really
 		$EXSK{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
 		$EXSK{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
@@ -357,18 +368,18 @@ unless (defined $expr_only){
 	}
 	### Needs to recalculate PSI: from 20+21 and 19
 	close I;
-	system "mv $file $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
     }
     
 ### For MULTI
-    verbPrint "Loading MULTI files ...\n";
-    @files=glob("$folder/to_combine/*.MULTI3X");
+    verbPrint "Loading MULTI files\n";
+    @files=glob("to_combine/*.MULTI3X");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.MULTI3X/;
 	next if (!defined $group{$root});
 	$N_MULTI++;
 
-	verbPrint "   Processing $file\n";
+	verbPrint "  Processing $file\n";
 	open (I, $file) or errPrintDie "Can't open $file\n";
 	$MULTI_head=<I>;
 	while (<I>){
@@ -376,27 +387,28 @@ unless (defined $expr_only){
 	    my @temp=split(/\t/,$_);
 	    my $event=$temp[3];
 	    # fixed data for each event (it basically overwrites it each time)
+	    $temp[25]="" if (!defined $temp[25]); # no name available
 	    $dataMULTI_pre{$event}=join("\t",@temp[0..11]);
 	    $dataMULTI_mid{$event}=join("\t",@temp[17..18]);
 	    $dataMULTI_post{$event}=join("\t",@temp[23..25]);
 	    
 	    for my $i (13..16){ # only sum of raw reads 
-		$MULTIa{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
+		$MULTIa{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA" && (defined $temp[$i]);
 		$MULTIa{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
 	    }
 	    for my $i (19..21){ 
 		my ($a,$b,$c)=$temp[$i]=~/(.*?)\=(.*?)\=(.*)/;
-		$MULTIb{$group{$root}}{$event}[$i][0]+=$a if $a ne "NA";
+		$MULTIb{$group{$root}}{$event}[$i][0]+=$a if $a ne "NA" && $a=~/\d/;
 		$MULTIb{$group{$root}}{$event}[$i][0]="NA" if $a eq "NA";
-		$MULTIb{$group{$root}}{$event}[$i][1]+=$b if $b ne "NA";
+		$MULTIb{$group{$root}}{$event}[$i][1]+=$b if $b ne "NA" && $b=~/\d/;
 		$MULTIb{$group{$root}}{$event}[$i][1]="NA" if $b eq "NA";
-		$MULTIb{$group{$root}}{$event}[$i][2]+=$c if $c ne "NA";
+		$MULTIb{$group{$root}}{$event}[$i][2]+=$c if $c ne "NA" && $c=~/\d/;
 		$MULTIb{$group{$root}}{$event}[$i][2]="NA" if $c eq "NA";
 	    }
 	}
 	### Needs to recalculate PSI: from 20a+21a and 19a
 	close I;
-	system "mv $file $folder/to_combine/PARTS/" if (defined $move_to_PARTS);
+	system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
     }
 
 ### Doing sample number check
@@ -413,7 +425,7 @@ foreach my $group (sort keys %list){
 
     ### EXPR
     if (defined $expr){
-	open (EXPR, ">$folder/expr_out/$group.cRPKM") || errPrintDie "Cannot open output file"; 
+	open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file"; 
 	foreach my $g (sort keys %{$READS_EXPR{$group}}){
 	    my $cRPKM = "";
 	    if ($READS_EXPR{$group}{$g} eq "NA" || $eff{$g}==0){
@@ -429,7 +441,7 @@ foreach my $group (sort keys %list){
     unless (defined $exprONLY){
 	### IR
 	if ($IR_version == 1){
-	    open (IR, ">$folder/to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
+	    open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
 	    print IR "$IR_head";
 	    foreach my $ev (sort keys %{$IR{$group}}){
 		print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
@@ -437,27 +449,32 @@ foreach my $group (sort keys %list){
 	    close IR;
 	}
 	elsif ($IR_version == 2){
-	    open (IR, ">$folder/to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
+	    open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
 	    print IR "$IR_head";
 	    foreach my $ev (sort keys %{$IR{$group}}){
 		print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
 	    }
 	    close IR;
 	    ### IRsum (only v2)
-	    open (IRsum, ">$folder/to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
+	    open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
 	    print IRsum "$IRsum_head";
-	    foreach $ev (sort keys %{$IRsum{$group}}){
+	    foreach my $ev (sort keys %{$IRsum{$group}}){
 		print IRsum "$ev\t$IRsum{$group}{$ev}[1]\t$IRsum{$group}{$ev}[2]\t$IRsum{$group}{$ev}[3]\t$IRsum{$group}{$ev}[4]\t$IRsum{$group}{$ev}[5]\t$IRsum{$group}{$ev}[6]\n";
 	    }
 	    close IRsum;
 	}
 	### MIC
-	open (MIC, ">$folder/to_combine/$group.micX") || errPrintDie "Cannot open micX output file";
+	open (MIC, ">to_combine/$group.micX") || errPrintDie "Cannot open micX output file";
 	print MIC "$MIC_head";
 	foreach my $ev (sort keys %{$MIC{$group}}){
 	    my $PSI_MIC_new = "";
-	    if (($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9])>0 && $MIC{$group}{$ev}[10] ne "NA" && $MIC{$group}{$ev}[9] ne "NA"){
-		$PSI_MIC_new=sprintf("%.2f",100*$MIC{$group}{$ev}[10]/($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9]));
+	    if ($MIC{$group}{$ev}[10] ne "NA" && $MIC{$group}{$ev}[9] ne "NA"){
+		if (($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9])>0){
+		    $PSI_MIC_new=sprintf("%.2f",100*$MIC{$group}{$ev}[10]/($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9]));
+		}
+		else {
+		    $PSI_MIC_new="NA";
+		}
 	    }
 	    else {
 		$PSI_MIC_new="NA";
@@ -466,7 +483,7 @@ foreach my $group (sort keys %list){
 	}
 	close MIC;
 	### EXSK
-	open (EXSK, ">$folder/to_combine/$group.exskX") || errPrintDie "Cannot open exskX output file";
+	open (EXSK, ">to_combine/$group.exskX") || errPrintDie "Cannot open exskX output file";
 	print EXSK "$EXSK_head";
 	foreach my $ev (sort keys %{$EXSK{$group}}){
 	    my $PSI_EXSK_new = "";
@@ -482,7 +499,7 @@ foreach my $group (sort keys %list){
 	}
 	close EXSK;
 	### MULTI
-	open (MULTI, ">$folder/to_combine/$group.MULTI3X") || errPrintDie "Cannot open MULTI3X output file";
+	open (MULTI, ">to_combine/$group.MULTI3X") || errPrintDie "Cannot open MULTI3X output file";
 	print MULTI "$MULTI_head";
 	foreach my $ev (sort keys %{$MULTIa{$group}}){
 	    my $PSI_MULTI_new = "";
@@ -494,13 +511,27 @@ foreach my $group (sort keys %list){
 	    }
 	    
 	    ### Recalculates complexity
-	    my  $from_S=$MULTIb{$group}{$ev}[19][2]+$MULTIb{$group}{$ev}[20][2]+$MULTIb{$group}{$ev}[21][2]; # reads coming only from the reference EEJs (refI1, refI2 and refE)
+	    $MULTIb{$group}{$ev}[19][2]=0 if (!defined $MULTIb{$group}{$ev}[19][2]);
+	    $MULTIb{$group}{$ev}[20][2]=0 if (!defined $MULTIb{$group}{$ev}[20][2]);
+	    $MULTIb{$group}{$ev}[21][2]=0 if (!defined $MULTIb{$group}{$ev}[21][2]);	    
+
+	    my $from_S=$MULTIb{$group}{$ev}[19][2]+$MULTIb{$group}{$ev}[20][2]+$MULTIb{$group}{$ev}[21][2]; # reads coming only from the reference EEJs (refI1, refI2 and refE)
 	    my $from_C=($MULTIb{$group}{$ev}[19][0]+$MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])-$from_S; # all other reads
 	    my $Q;
 	    if ($from_C > ($from_C+$from_S)/2) {$Q="C3";}
 	    elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q="C2";}
 	    elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q="C1";}
 	    else {$Q="S";}
+	    
+	    $MULTIa{$group}{$ev}[13]="" if (!defined $MULTIa{$group}{$ev}[13]);
+	    $MULTIa{$group}{$ev}[14]="" if (!defined $MULTIa{$group}{$ev}[14]);
+	    $MULTIa{$group}{$ev}[15]="" if (!defined $MULTIa{$group}{$ev}[15]);	    
+	    $MULTIa{$group}{$ev}[16]="" if (!defined $MULTIa{$group}{$ev}[16]);
+	    $dataMULTI_pre{$ev}="" if (!defined $dataMULTI_pre{$ev});
+	    $dataMULTI_mid{$ev}="" if (!defined $dataMULTI_mid{$ev});
+	    $MULTIb{$group}{$ev}[19][1]=0 if (!defined $MULTIb{$group}{$ev}[19][1]);
+	    $MULTIb{$group}{$ev}[20][1]=0 if (!defined $MULTIb{$group}{$ev}[20][1]);
+	    $MULTIb{$group}{$ev}[21][1]=0 if (!defined $MULTIb{$group}{$ev}[21][1]);
 	    
 	    print MULTI "$dataMULTI_pre{$ev}\t$PSI_MULTI_new\t$MULTIa{$group}{$ev}[13]\t$MULTIa{$group}{$ev}[14]\t$MULTIa{$group}{$ev}[15]\t$MULTIa{$group}{$ev}[16]\t$dataMULTI_mid{$ev}\t".
 		"$MULTIb{$group}{$ev}[19][0]=$MULTIb{$group}{$ev}[19][1]=$MULTIb{$group}{$ev}[19][2]\t".
@@ -510,11 +541,11 @@ foreach my $group (sort keys %list){
 	}
 	close MULTI;
 	### EEJ2
-	open (EEJ2, ">$folder/to_combine/$group.eej2") || errPrintDie "Cannot open eej2 output file";
+	open (EEJ2, ">to_combine/$group.eej2") || errPrintDie "Cannot open eej2 output file";
 	foreach my $ev (sort keys %{$EEJ{$group}}){
 	    my $pos="";
 	    for my $i (0..$#{$EEJpositions{$group}{$ev}}){
-		$pos.="$i:$EEJpositions{$group}{$ev}[$i]," if $EEJpos{$group}{$ev}[$i];
+		$pos.="$i:$EEJpositions{$group}{$ev}[$i]," if $EEJpositions{$group}{$ev}[$i];
 	    }
 	    chop($pos);
 	    print EEJ2 "$ev\t$EEJ{$group}{$ev}\tNA\t$pos\n";
