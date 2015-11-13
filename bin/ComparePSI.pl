@@ -53,8 +53,8 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "help" => \$helpFlag,
 			  "p_IR" => \$p_IR,
 			  "GO" => \$get_GO,
-			  "sp" => \$species,
-			  "dbDir" => \$dbDir,
+			  "sp=s" => \$species,
+			  "dbDir=s" => \$dbDir,
 			  "GO_file=s" => \$ID_file,
 			  "use_names" => \$use_names,
 			  "paired" => \$paired,
@@ -94,7 +94,7 @@ if (defined $get_GO){
 	$dbDir = abs_path($dbDir);
 	$dbDir .= "/$species";
 	errPrintDie "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
-	$ID_file = "$dbDir/$species.Event-Gene.IDs.txt";
+	$ID_file = "$dbDir/FILES/$species.Event-Gene.IDs.txt";
 	errPrintDie "The file with gene ID conversions does not exist in VASTDB" unless (-e $ID_file or $helpFlag);
     }
     elsif (defined $ID_file && !defined $use_names) { # will use user provided file
@@ -407,9 +407,9 @@ while (<PSI>){
 		    $doneEXSK{$ID_gene{$t[1]}}=1;		
 		}
 		else {
-		    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
+		    print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
 		    $doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
-		    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
+		    print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 		    $doneEXSK{$t[0]}=1 if (defined $t[0]);
 		}
 	    }
@@ -484,9 +484,9 @@ while (<PSI>){
 		    $doneEXSK{$ID_gene{$t[1]}}=1;		
 		}
 		else {
-		    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
+		    print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
 		    $doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
-		    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
+		    print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 		    $doneEXSK{$t[0]}=1 if (defined $t[0]);
 		}
 	    }
@@ -499,8 +499,8 @@ while (<PSI>){
 	    $doneBG{$ID_gene{$t[1]}}=1;
 	}
 	else {
-	    print BG "$t[0]\n" if (!defined $doneBG{$ID_gene{$t[1]}}) && (defined $t[0]);
-	    $doneBG{$ID_gene{$t[0]}}=1 if (defined $t[0]);
+	    print BG "$t[0]\n" if (!defined $doneBG{$t[0]}) && (defined $t[0]);
+	    $doneBG{$t[0]}=1 if (defined $t[0]);
 	}
     }
 }
