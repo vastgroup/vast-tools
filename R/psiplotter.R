@@ -112,7 +112,10 @@ option.list <- list(
   make_option(c("--gene"), type = "character", default = NULL,
               dest = "gene",
               help = "Filter events by the GENE column. Can be any 
-              valid R regular expression. [%default]")
+              valid R regular expression. [%default]"),
+  make_option(c("--debug"), type = "logical", default = FALSE,
+              meta="TRUE|FALSE", dest = "debug",
+              help = "Print out options list for debugging. [%default]")
 )
 parser <- OptionParser(option_list = option.list,
                        desc = desc,
@@ -141,6 +144,10 @@ if (length(opt$args) == 0) {
   stop("Missing arguments")
 }
 
+if (opt$options$debug) {
+  print(opt)
+}
+
 using_stdin <- FALSE
 file <- opt$args[1]
 if (file == "-") {
@@ -164,6 +171,7 @@ verbPrint(paste("\nPSI Plotter"))
 verbPrint(paste("\n// Input file:", ifelse(using_stdin, "STDIN", file)))
 verbPrint(paste("// Tissue Group file:",
                 ifelse(is.null(config_file), "Did not provide", config_file)))
+verbPrint(paste("// psiplot R package version:", v))
 
 all_events <- read.delim(file, stringsAsFactors=FALSE)
 if(is.null(config_file)) {
