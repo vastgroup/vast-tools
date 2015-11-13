@@ -28,7 +28,7 @@ OPTIONS:
   exit 1;
 }
 
-my $combineFolder = "$dbDir/SAM/$species";
+my $combineFolder = $ARGV[0];
 
 # One intermediary file that contains the raw and the corrected read counts
 my @files_counts=glob($combineFolder . "/*.summary_v2.txt"); # This contains raw and corrected counts

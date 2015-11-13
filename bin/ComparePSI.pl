@@ -221,7 +221,8 @@ errPrintDie "Column numbers do not seem 0-based or conversion did not work prope
 errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (($a1< 6 && $a1 != 0) || ($a2 < 6 && $a2 != 0) || ($a3 < 6 && $a3 != 0) || ($a4 < 6 && $a4 != 0) 
 									|| ($b1 < 6 && $b1 != 0) || ($b2 < 6 && $b2 != 0) || ($b3 < 6 && $b3 != 0) || ($b4 < 6 && $b4 != 0));
 
-print O "$head_row\tdPSI\n"; # it will print the original data + the dPSI of the averages
+#print O "$head_row\tdPSI\n"; # it will print the original data + the dPSI of the averages
+print O "$head_row\n"; # it will print the original data (for plot later)
 # representative names
 my $name_A=$head[$a1];
 my $name_B=$head[$b1];
@@ -373,7 +374,8 @@ while (<PSI>){
 	# does the diff AS test:
 	if ($dPSI > $min_dPSI && $min_B > $max_A+$min_range){ # if rep1 it will always meet the criteria
 	    $tally{$type}{UP}++;
-	    print O "$_\t$dPSI\n";
+#	    print O "$_\t$dPSI\n"; 
+	    print O "$_\n"; # dPSI is not printed so it can the be run with plot
 	    
 	    # print for GO
 	    if (defined$get_GO){
@@ -393,7 +395,8 @@ while (<PSI>){
 	}
 	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range){
 	    $tally{$type}{DOWN}++;
-	    print O "$_\t$dPSI\n";
+#	    print O "$_\t$dPSI\n";
+	    print O "$_\n";
 	    
 	    #print for GO
 	    if (defined$get_GO){
@@ -448,7 +451,8 @@ while (<PSI>){
 	
 	if ($av_paired_dPSI > $min_dPSI && $min_indiv_dPSI > $min_range){ 
 	    $tally{$type}{UP}++;
-	    print O "$_\t$av_paired_dPSI\n";
+#	    print O "$_\t$av_paired_dPSI\n";
+	    print O "$_\n";
 	    
 	    # print for GO
 	    if (defined $get_GO){
@@ -468,7 +472,8 @@ while (<PSI>){
 	}
 	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range){ 
 	    $tally{$type}{DOWN}++;
-	    print O "$_\t$av_paired_dPSI\n";
+#	    print O "$_\t$av_paired_dPSI\n";
+	    print O "$_\n";
 	    
 	    #print for GO
 	    if (defined $get_GO){
@@ -513,3 +518,4 @@ print "\tLong_AltEx\t$tally{AltEx}{DOWN}\t$tally{AltEx}{UP}\n";
 print "\tIntron_ret\t$tally{IR}{DOWN}\t$tally{IR}{UP}\n";
 print "\tAlt_3ss\t$tally{Alt3}{DOWN}\t$tally{Alt3}{UP}\n";
 print "\tAlt_5ss\t$tally{Alt5}{DOWN}\t$tally{Alt5}{UP}\n";
+print "\n";

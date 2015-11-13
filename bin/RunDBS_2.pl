@@ -130,20 +130,23 @@ if ($N != 0) {
     sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
     #my($verbRFlag) = ($verboseFlag) ? "T" : "F";
-
-    my @irFiles = glob(abs_path("to_combine") . "/*.IR");
+    
+    # To define version [02/10/15]; minimize changes for users
+    # $v => "" or "_v2" [v1/v2]
+    my $v;
+    my @irFiles;
+    if ($IR_version == 1){
+	$v="";
+	@irFiles = glob(abs_path("to_combine") . "/*.IR");
+    }
+    elsif ($IR_version == 2){
+	$v="_v2";
+	@irFiles = glob(abs_path("to_combine") . "/*.IR2");
+    }
+    
     $noIRflag = 1 if @irFiles == 0;
 
     unless($noIRflag) {
-	# To define version [02/10/15]; minimize changes for users
-        # $v => "" or "_v2" [v1/v2]
-	my $v;
-	if ($IR_version == 1){
-	    $v="";
-	}
-	elsif ($IR_version == 2){
-	    $v="_v2"; 
-	}
 	### Gets the PIRs for the Intron Retention pipeline
 	verbPrint "Building quality score table for intron retention (version $IR_version)\n";
 	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
