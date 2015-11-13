@@ -34,7 +34,7 @@ GetOptions("help"  	 => \$helpFlag,
 	   "o=s"         => \$outDir,
            "z"           => \$compress,
 	   "noIR"        => \$noIRflag,
-	   "IR_version"  => \$IR_version,
+	   "IR_version=i" => \$IR_version,
            "C"           => \$cRPKMCounts);
 
 our $EXIT_STATUS = 0;
@@ -64,7 +64,7 @@ sub verbPrint {
   }
 }
 
-if ($helpFlag or !defined($ARGV[0])){
+if ($helpFlag){
     print STDERR "
 Usage: vast-tools combine -o OUTPUTDIR [options]
 
