@@ -245,7 +245,7 @@ nplot <- min(nrow(all_events), opt$options$max)
 pb <- txtProgressBar(style = 3, file = stderr())
 for (i in 1:nplot) {
   result <- plot_event(all_events[i,], config = config,
-                       ylim(0,100),
+                       ylim = c(0,100),
                        errorbar = !opt$options$noErrorBar,
                        groupmean = opt$options$plotGroupMeans,
                        gridlines = opt$options$gridLines,
