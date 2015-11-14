@@ -138,16 +138,17 @@ while (<STDIN>) {
   if ($template{$l[1]}) {
     
     my @prefix = @{$template{$l[1]}};
+    my $eventType = $prefix[5];
 
     if ($newIDs{$prefix[1]}) {
 
       $prefix[1] = $newIDs{$prefix[1]};
       $prefix[5] = simplifyComplex($prefix[5]);     # simplify complex codes
 
-      print STDOUT join("\t", (@prefix, @sampleCols[@newOrder])) . "\n" 
-          unless $done{$l[2]};
+      print STDOUT join("\t", (@prefix, @sampleCols[@newOrder])) . "\n"
+          unless $done{$eventType}{$l[2]};
 
-      $done{$l[2]} = 1;
+      $done{$eventType}{$l[2]} = 1;
     }
   }
 }
