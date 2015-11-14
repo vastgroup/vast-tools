@@ -5,6 +5,7 @@ use Getopt::Long;
 use warnings;
 use strict;
 use Cwd qw(abs_path);
+use List::Util qw(sum);
 
 # INITIALIZE PATH AND FLAGS
 my $binPath = abs_path($0);
@@ -21,10 +22,12 @@ my $Q = "O[KW]\,.+?\,.+?\,.+?\,.+?\@"; # quality search
 my $input_file = $ARGV[0];
 my $output_file;
 my $min_dPSI = 15; # min dPSI difference (def=15)
-my $a1; my $a2=0; my $a3=0; my $a4=0;
-my $b1; my $b2=0; my $b3=0; my $b4=0;
-my $rep1 = 2; # number of replicates per type (def=2);
-my $rep2 = 2; # number of replicates per type (def=2);
+my $samplesA;
+my $samplesB;
+my @samplesA;
+my @samplesB;
+my $repA; # number of replicates per type
+my $repB; # number of replicates per type
 my $min_range = 5; # min dPSI between ranges
 my $noVLOW;
 my $p_IR;
@@ -33,20 +36,15 @@ my $get_GO;
 my $paired;
 my $use_names;
 my $folder;
+my $no_plot;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
-                          "repA=i" => \$rep1,
-                          "repB=i" => \$rep2,
                           "min_range=i" => \$min_range,
-                          "a1=s" => \$a1,
-                          "a2=s" => \$a2,
-                          "a3=s" => \$a3,
-                          "a4=s" => \$a4,
-                          "b1=s" => \$b1,
-                          "b2=s" => \$b2,
-                          "b3=s" => \$b3,
-                          "b4=s" => \$b4,
+			  "a=s" => \$samplesA,
+			  "samplesA=s" => \$samplesA,
+			  "b=s" => \$samplesB,
+			  "samplesB=s" => \$samplesB,
 			  "outFile=s" => \$output_file,
 			  "output=s" => \$folder,
 			  "o=s" => \$folder,
@@ -58,6 +56,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "GO_file=s" => \$ID_file,
 			  "use_names" => \$use_names,
 			  "paired" => \$paired,
+			  "no_plot" => \$no_plot,
 			  "noVLOW" => \$noVLOW
     );
 
@@ -103,26 +102,19 @@ if (defined $get_GO){
 }
 
 if (!defined($ARGV[0]) || $helpFlag){
-    die "\nUsage: vast-tools compare INCLUSION_LEVELS_FULL-root.tab -a1 sample_a1 (-a2 sample_a2) -b1 sample_b1 (-b2 sample_b2) [options]
+    die "\nUsage: vast-tools compare INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
-Compare two sample sets with 1,2, 3 or 4 replicates.
+Compare two sample sets to find differentially regulated AS events
 
 [General options] 
         --min_dPSI i             Minimum delta PSI of the averages (default 15)
         --min_range i            Minimum distance between the ranges of both groups (default 5)
         --outFile file           Output file name (default based on option parameters)
-        --repA i                 Number of replicates for group A (default 2)
-        --repB i                 Number of replicates for group B (default 2)
-        -a1                      Sub-sample name for rep 1 of sample A OR column number (0-based in INCLUSION table)
-        -a2                      Sub-sample name for rep 2 of sample A OR column number (0-based in INCLUSION table)
-        -a3                      Sub-sample name for rep 3 of sample A OR column number (0-based in INCLUSION table)
-        -a4                      Sub-sample name for rep 4 of sample A OR column number (0-based in INCLUSION table)
-        -b1                      Sub-sample name for rep 1 of sample B OR column number (0-based in INCLUSION table)
-        -b2                      Sub-sample name for rep 2 of sample B OR column number (0-based in INCLUSION table)
-        -b3                      Sub-sample name for rep 3 of sample B OR column number (0-based in INCLUSION table)
-        -b4                      Sub-sample name for rep 4 of sample B OR column number (0-based in INCLUSION table)
-        --noVLOW                 Do not use samples with VLOW coverage (default OFF)
+        -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
+        -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
+        --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --p_IR                   Filter IR b the p-value of the binomial test (default OFF)
+        --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
                                    - It uses min_dPSI as the minimum average of each paired dPSI
                                    - It uses min_range as the minumum dPSI for each paired comparison 
@@ -141,9 +133,15 @@ Compare two sample sets with 1,2, 3 or 4 replicates.
 }
 
 #### SANITY CHECKS
+errPrintDie "Need to provide at least one replicate for each group\n" if (!defined $samplesA or !defined $samplesB);
+# make the array with samples
+@samplesA = split(/\,/,$samplesA);
+@samplesB = split(/\,/,$samplesB);
+$repA = $#samplesA+1;
+$repB = $#samplesB+1;
 # for paired (repA must be the same as repB)
-errPrintDie "If paired comparison, the number of replicates must be the same\n" if (defined $paired) && ($rep1 != $rep2);
-errPrintDie "Need to provide at least one replicate for each group\n" if (!defined $a1 or !defined $b1);
+errPrintDie "If paired comparison, the number of replicates must be the same\n" if (defined $paired) && ($repA != $repB);
+
 
 # defining default output file name
 my ($root)=$ARGV[0]=~/.+\-(.+?)\./;
@@ -152,7 +150,7 @@ $tail.="-range$min_range" if (defined $min_range);
 $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
 $tail.="-paired" if (defined $paired);
-my $out_root="$root-reps$rep1"."_$rep2-dPSI$min_dPSI$tail";
+my $out_root="$root-dPSI$min_dPSI$tail";
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 
 
@@ -190,42 +188,35 @@ chomp($head_row);
 my @head=split(/\t/,$head_row);
 foreach my $i (6..$#head){
     if ($i%2==0){ # to match sample names with column number
-	$a1=$i if ($a1 eq $head[$i]);
-	if ($rep1 >= 2){
-	    $a2=$i if ($a2 eq $head[$i]);
+	foreach my $j (0..$#samplesA){
+	    $samplesA[$j] = $i if $samplesA[$j] eq $head[$i];
 	}
-	if ($rep1 >= 3){
-	    $a3=$i if ($a3 eq $head[$i]);
-	}
-	if ($rep1 >= 4){
-	    $a4=$i if ($a4 eq $head[$i]);
-	}
-	$b1=$i if ($b1 eq $head[$i]);
-	if ($rep2 >= 2){
-	    $b2=$i if ($b2 eq $head[$i]);
-	}
-	if ($rep2 >= 3){
-	    $b3=$i if ($b3 eq $head[$i]);
-	}
-	if ($rep2 >= 4){
-	    $b4=$i if ($b4 eq $head[$i]);
+	foreach my $j (0..$#samplesB){
+	    $samplesB[$j] = $i if $samplesB[$j] eq $head[$i];
 	}
     }
 }
 
 # check that columns provided are 0-based OR
 # if names were provided, that all columns were properly matched
-
-errPrintDie "Column numbers do not seem 0-based or conversion did not work properly\n" if ($a1%2 != 0 || ($a2%2 != 0 && $a2 != 0) || ($a3%2 != 0 && $a3 != 0) || ($a4%2 != 0 && $a4 != 0) 
-											       || $b1%2 != 0 || ($b2%2 != 0 && $b2 != 0) || ($b3%2 != 0 && $b3 != 0) || ($b4%2 != 0 && $b4 != 0));
-errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (($a1< 6 && $a1 != 0) || ($a2 < 6 && $a2 != 0) || ($a3 < 6 && $a3 != 0) || ($a4 < 6 && $a4 != 0) 
-									|| ($b1 < 6 && $b1 != 0) || ($b2 < 6 && $b2 != 0) || ($b3 < 6 && $b3 != 0) || ($b4 < 6 && $b4 != 0));
+my $kill_0based;
+my $kill_6lower;
+foreach my $s (@samplesA){
+    $kill_0based = 1 if $s%2 != 0;
+    $kill_6lower = 1 if $s < 6;
+}
+foreach my $s (@samplesB){
+    $kill_0based = 1 if $s%2 != 0;
+    $kill_6lower = 1 if $s < 6;
+}
+errPrintDie "Column numbers do not seem 0-based or conversion did not work properly\n" if (defined $kill_0based);
+errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (defined $kill_6lower);
 
 #print O "$head_row\tdPSI\n"; # it will print the original data + the dPSI of the averages
 print O "$head_row\n"; # it will print the original data (for plot later)
 # representative names
-my $name_A=$head[$a1];
-my $name_B=$head[$b1];
+my $name_A=$head[$samplesA[0]];
+my $name_B=$head[$samplesB[0]];
 $name_A=~s/(.+)\_.+/$1/; # usually the rep number/id is encoded as "_a"
 $name_B=~s/(.+)\_.+/$1/;
 
@@ -245,7 +236,9 @@ while (<PSI>){
     $_ =~ s/VLOW/N/g if (defined $noVLOW);
     chomp($_);
     my @t=split(/\t/,$_);
-    
+    my @PSI_A = ();
+    my @PSI_B = ();
+
     next if $t[3] == 0; # removes the internal Alt3 and Alt5 splice sites to avoid double counting
     
     # defines AS type
@@ -257,124 +250,50 @@ while (<PSI>){
     $type="Alt5" if $t[1]=~/ALTD/ || $t[5]=~/Alt5/;
 	
     # coverage check (requires good coverage for ALL replicates)
-    my $OK_1=0;
-    my $OK_2=0;
-    if ($rep1 == 1){
-	$OK_1=1 if ($t[$a1+1]=~/$Q/);
+    my $kill_coverage = 0;
+    foreach my $s (@samplesA){
+	$kill_coverage = 1 if ($t[$s+1]!~/$Q/); # kill if ANY of the samples does not meet the coverage criteria
+	push(@PSI_A,$t[$s]);
     }
-    elsif ($rep1 == 2){
-	$OK_1=1 if ($t[$a1+1]=~/$Q/ && $t[$a2+1]=~/$Q/);
+    foreach my $s (@samplesB){
+	$kill_coverage = 1 if ($t[$s+1]!~/$Q/); # kill if ANY of the samples does not meet the coverage criteria
+	push(@PSI_B,$t[$s]);
     }
-    elsif ($rep1 == 3){
-	$OK_1=1 if ($t[$a1+1]=~/$Q/ && $t[$a2+1]=~/$Q/ && $t[$a3+1]=~/$Q/);
-    }
-    elsif ($rep1 == 4){
-	$OK_1=1 if ($t[$a1+1]=~/$Q/ && $t[$a2+1]=~/$Q/ && $t[$a3+1]=~/$Q/ && $t[$a4+1]=~/$Q/);
-    }
-    if ($rep2 == 1){
-	$OK_2=1 if ($t[$b1+1]=~/$Q/);
-    }
-    elsif ($rep2 == 2){
-	$OK_2=1 if ($t[$b1+1]=~/$Q/ && $t[$b2+1]=~/$Q/);
-    }
-    elsif ($rep2 == 3){
-	$OK_2=1 if ($t[$b1+1]=~/$Q/ && $t[$b2+1]=~/$Q/ && $t[$b3+1]=~/$Q/);
-    }
-    elsif ($rep2 == 4){
-	$OK_2=1 if ($t[$b1+1]=~/$Q/ && $t[$b2+1]=~/$Q/ && $t[$b3+1]=~/$Q/ && $t[$b4+1]=~/$Q/);
-    }
+    next if ($kill_coverage == 1);
 
-    next if ($OK_1 ==0 || $OK_2 == 0);
-    
     # IR check (only checks the p if the p_IR is active)
     if (($type eq "IR") && (defined $p_IR)){ # only checks the p if the p_IR is active
-	my ($p_a1)=$t[$a1+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	next if $p_a1 < 0.05;
-	if ($rep1 >= 2){
-	    my ($p_a2)=$t[$a2+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	    next if $p_a2 < 0.05;
+	my $kill_pIR = 0;
+	foreach my $s (@samplesA){
+	    my ($temp_p)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
+	    $kill_pIR = 1 if $temp_p < 0.05;
 	}
-	if ($rep1 >= 3){
-	    my ($p_a3)=$t[$a3+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	    next if $p_a3 < 0.05;
+	foreach my $s (@samplesB){
+	    my ($temp_p)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
+	    $kill_pIR = 1 if $temp_p < 0.05;
 	}
-	if ($rep1 >= 4){
-	    my ($p_a4)=$t[$a4+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	    next if $p_a4 < 0.05;
-	}
-	my ($p_b1)=$t[$b1+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	next if $p_b1 < 0.05;
-	if ($rep2 >= 2){
-	    my ($p_b2)=$t[$b2+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	    next if $p_b2 < 0.05;
-	}
-	if ($rep2 >= 3){
-	    my ($p_b3)=$t[$b3+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	    next if $p_b3 < 0.05;	
-	}
-	if ($rep2 >= 4){ 
-	    my ($p_b4)=$t[$b4+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
-	    next if $p_b4 < 0.05;
-	}
+	next if ($kill_pIR == 1);
     }
     
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
-	my $PSI_A = "";
-	my $min_A = "";
-	my $max_A = "";
-	my $PSI_B = "";
-	my $min_B = "";
-	my $max_B = "";
+	# get PSIs
+	my $sum_A = sum(@PSI_A);
+	my $sum_B = sum(@PSI_B);
+	my $av_PSI_A = sprintf("%.2f",$sum_A/$repA);
+	my $av_PSI_B = sprintf("%.2f",$sum_B/$repB);
+	# get min and max (for ranges)
+	my $min_A = (sort{$b<=>$a}@PSI_A)[-1];
+	my $max_A = (sort{$a<=>$b}@PSI_A)[-1];
+	my $min_B = (sort{$b<=>$a}@PSI_B)[-1];
+	my $max_B = (sort{$a<=>$b}@PSI_B)[-1];
 
-	if ($rep1 == 1) {
-	    $PSI_A=sprintf("%.2f",$t[$a1]);
-	    $min_A=$t[$a1];
-	    $max_A=$t[$a1];
-	}
-	elsif ($rep1 == 2) {
-	    $PSI_A=sprintf("%.2f",($t[$a1]+$t[$a2])/2);
-	    $min_A=(sort{$b<=>$a} ($t[$a1],$t[$a2]))[-1];
-	    $max_A=(sort{$a<=>$b} ($t[$a1],$t[$a2]))[-1];
-	}
-	elsif ($rep1 == 3) {
-	    $PSI_A=sprintf("%.2f",($t[$a1]+$t[$a2]+$t[$a3])/3);
-	    $min_A=(sort{$b<=>$a} ($t[$a1],$t[$a2],$t[$a3]))[-1];
-	    $max_A=(sort{$a<=>$b} ($t[$a1],$t[$a2],$t[$a3]))[-1];
-	}
-	elsif ($rep1 == 4) {
-	    $PSI_A=sprintf("%.2f",($t[$a1]+$t[$a2]+$t[$a3]+$t[$a4])/4);
-	    $min_A=(sort{$b<=>$a} ($t[$a1],$t[$a2],$t[$a3],$t[$a4]))[-1];
-	    $max_A=(sort{$a<=>$b} ($t[$a1],$t[$a2],$t[$a3],$t[$a4]))[-1];
-	}
-	if ($rep2 == 1) {
-	    $PSI_B=sprintf("%.2f",$t[$b1]);
-	    $min_B=$t[$b1];
-	    $max_B=$t[$b1];
-	}
-	elsif ($rep2 == 2) {
-	    $PSI_B=sprintf("%.2f",($t[$b1]+$t[$b2])/2);
-	    $min_B=(sort{$b<=>$a} ($t[$b1],$t[$b2]))[-1];
-	    $max_B=(sort{$a<=>$b} ($t[$b1],$t[$b2]))[-1];
-	}
-	elsif ($rep2 == 3) {
-	    $PSI_B=sprintf("%.2f",($t[$b1]+$t[$b2]+$t[$b3])/3);
-	    $min_B=(sort{$b<=>$a} ($t[$b1],$t[$b2],$t[$b3]))[-1];
-	    $max_B=(sort{$a<=>$b} ($t[$b1],$t[$b2],$t[$b3]))[-1];
-	}
-	elsif ($rep2 == 4) {
-	    $PSI_B=sprintf("%.2f",($t[$b1]+$t[$b2]+$t[$b3]+$t[$b4])/4);
-	    $min_B=(sort{$b<=>$a} ($t[$b1],$t[$b2],$t[$b3],$t[$b4]))[-1];
-	    $max_B=(sort{$a<=>$b} ($t[$b1],$t[$b2],$t[$b3],$t[$b4]))[-1];
-	}
-	
 	# get dPSI
-	my $dPSI = $PSI_B-$PSI_A;
+	my $dPSI = $av_PSI_B-$av_PSI_A;
 	
 	# does the diff AS test:
 	if ($dPSI > $min_dPSI && $min_B > $max_A+$min_range){ # if rep1 it will always meet the criteria
 	    $tally{$type}{UP}++;
-#	    print O "$_\t$dPSI\n"; 
 	    print O "$_\n"; # dPSI is not printed so it can the be run with plot
 	    
 	    # print for GO
@@ -395,7 +314,6 @@ while (<PSI>){
 	}
 	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range){
 	    $tally{$type}{DOWN}++;
-#	    print O "$_\t$dPSI\n";
 	    print O "$_\n";
 	    
 	    #print for GO
@@ -415,43 +333,21 @@ while (<PSI>){
 	    }
 	}
     }
-    else { # if paired
-	my $dPSI_pair1;
-	my $dPSI_pair2;
-	my $dPSI_pair3;
-	my $dPSI_pair4;
-	my $min_indiv_dPSI;
-	my $max_indiv_dPSI;
-	my $av_paired_dPSI;
+    else { # if paired: calculates each pair's dPSI & the lower/higher of these
+	# get each dPSI and the average
+	my @dPSI_pairs = ();
+	for my $i (0..$#samplesA){ # ~ $repA-1
+	    $dPSI_pairs[$i] = sprintf("%.2f",$PSI_B[$i]-$PSI_A[$i]);
+	}
+	my $sum_paired_dPSI = sum(@dPSI_pairs);
+	my $av_paired_dPSI = sprintf("%.2f",$sum_paired_dPSI/$repA);
 
-	if ($rep1 == 2){
-	    $dPSI_pair1 = $t[$b1]-$t[$a1];
-	    $dPSI_pair2 = $t[$b2]-$t[$a2];
-	    $min_indiv_dPSI = (sort{$b<=>$a} ($dPSI_pair1,$dPSI_pair2))[-1];
-	    $max_indiv_dPSI = (sort{$a<=>$b} ($dPSI_pair1,$dPSI_pair2))[-1];
-	    $av_paired_dPSI = sprintf("%.2f",($dPSI_pair1+$dPSI_pair2)/2);
-	}
-	elsif ($rep1 == 3){
-	    $dPSI_pair1 = $t[$b1]-$t[$a1];
-	    $dPSI_pair2 = $t[$b2]-$t[$a2];
-	    $dPSI_pair3 = $t[$b3]-$t[$a3];
-	    $min_indiv_dPSI = (sort{$b<=>$a} ($dPSI_pair1,$dPSI_pair2,$dPSI_pair3))[-1];
-	    $max_indiv_dPSI = (sort{$a<=>$b} ($dPSI_pair1,$dPSI_pair2,$dPSI_pair3))[-1];
-	    $av_paired_dPSI = sprintf("%.2f",($dPSI_pair1+$dPSI_pair2+$dPSI_pair3)/3);
-	}
-	elsif ($rep1 == 4){
-	    $dPSI_pair1 = $t[$b1]-$t[$a1];
-	    $dPSI_pair2 = $t[$b2]-$t[$a2];
-	    $dPSI_pair3 = $t[$b3]-$t[$a3];
-	    $dPSI_pair4 = $t[$b4]-$t[$a4];
-	    $min_indiv_dPSI = (sort{$b<=>$a} ($dPSI_pair1,$dPSI_pair2,$dPSI_pair3,$dPSI_pair4))[-1];
-	    $max_indiv_dPSI = (sort{$a<=>$b} ($dPSI_pair1,$dPSI_pair2,$dPSI_pair3,$dPSI_pair4))[-1];
-	    $av_paired_dPSI = sprintf("%.2f",($dPSI_pair1+$dPSI_pair2+$dPSI_pair3+$dPSI_pair4)/4);
-	}
+	# get min and max (for min dPSI, pos and neg values)
+	my $min_indiv_dPSI = (sort{$b<=>$a}@dPSI_pairs)[-1];
+	my $max_indiv_dPSI = (sort{$a<=>$b}@dPSI_pairs)[-1];
 	
 	if ($av_paired_dPSI > $min_dPSI && $min_indiv_dPSI > $min_range){ 
 	    $tally{$type}{UP}++;
-#	    print O "$_\t$av_paired_dPSI\n";
 	    print O "$_\n";
 	    
 	    # print for GO
@@ -472,7 +368,6 @@ while (<PSI>){
 	}
 	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range){ 
 	    $tally{$type}{DOWN}++;
-#	    print O "$_\t$av_paired_dPSI\n";
 	    print O "$_\n";
 	    
 	    #print for GO
