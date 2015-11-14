@@ -445,7 +445,7 @@ unless (defined $no_plot){
     close CONFIG;
 
     # defining default width (default ~3 OK for 6 events)
-    my $width = sprintf("%.1f",$order/2);    
+    my $width = sprintf("%.1f",($order/2)+0.5);    
     
     system "$binPath/../R/psiplotter.R $folder/$output_file -c $folder/$config_file -W $width -u TRUE";
 }
