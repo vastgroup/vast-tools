@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib "$FindBin::RealBin/lib";
 use FuncBasics qw(:all);
 
 use Getopt::Long;
@@ -75,7 +75,8 @@ Usage: $0 sub-commands [options]
 
 [global options]
 	-h,--help	:	Print this message
-	-o,--output	:	Output directory (default vast_out)
+	-o,--output	:	Output directory (default vast_out; 
+                                    except for plot, which uses input file location)
 	--legacy	:	Use old input/output styles
 	--verbose	:	Print stderr
 
@@ -93,7 +94,7 @@ Usage: $0 sub-commands [options]
 if (! defined $outdir) {
     $outdir = DEFAULT_OUTDIR;
     $outdir = abs_path($outdir);
-    push @args, "--output=$outdir";
+    push @args, "--output=$outdir" unless ($subCommand eq "plot");
 } else {
     $outdir = abs_path($outdir);
 }
