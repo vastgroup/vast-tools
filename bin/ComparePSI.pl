@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+1;2c#!/usr/bin/perl
 ### General script to get differentially spliced events based on dPSI differences 
 
 use Getopt::Long;
@@ -424,20 +424,26 @@ unless (defined $no_plot){
     
     print CONFIG "Order\tSampleName\tGroupName\tRColorCode\n";
     my $order = 0;
+    my %column_seen;
     foreach my $i (@samplesA){
 	$order++;
+	$head[$i] = "X$head[$i]" if $head[$i]=~/^\d/;
 	print CONFIG "$order\t$head[$i]\t$name_A\tred\n";
+	$column_seen{$i} = 1;
     }
     foreach my $i (@samplesB){
 	$order++;
+	$head[$i] = "X$head[$i]" if $head[$i]=~/^\d/;
 	print CONFIG "$order\t$head[$i]\t$name_B\tblue\n";
+	$column_seen{$i} = 1;
     }
     unless (defined $plot_only_samples){
 	for my $i (6..$#head){
 	    if ($i%2 == 0){
-		if (!defined $samplesA[$i] && !defined $samplesB[$i]){
+		if (!defined $column_seen{$i}){
 		    $order++;
-		    print CONFIG "$order\t$head[$i]\t\tblack\n";
+		    $head[$i] = "X$head[$i]" if $head[$i]=~/^\d/;
+		    print CONFIG "$order\t$head[$i]\tOthers\tblack\n";
 		}
 	    }
 	}
@@ -445,7 +451,7 @@ unless (defined $no_plot){
     close CONFIG;
 
     # defining default width (default ~3 OK for 6 events)
-    my $width = sprintf("%.1f",($order/2)+0.5);    
+    my $width = sprintf("%.1f",($order/2)+2);    
     
     system "$binPath/../R/psiplotter.R $folder/$output_file -c $folder/$config_file -W $width -u TRUE";
 }
