@@ -64,7 +64,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "v" => \$verboseFlag,
-              		  "readLen=i" => \$readLength, # deprecated
+              		  "readLen=i" => \$readLength, # back again --MI
               		  "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
