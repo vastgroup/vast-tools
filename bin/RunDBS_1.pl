@@ -217,19 +217,24 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     $subtractedFq = $fq1;
     errPrint "Only for 50nt if genome subtracted\n" if $length!=50;
 } else {
-    # allow readlength to be given by -readLen x --TSW
-    if($readLength) {
-        $length = $readLength;
-        $fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/; 
-        $root = $1;
-    } 
-    else { # default behavior by --MI
-#        ($root,$length)=$fileName1=~/(\S+?)\_?1?\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Fixed regex --TSW
-        ($root,$length)=$fileName1=~/(\S+)\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; #Refixed regex --MI
-
-  	if(!defined($length) or $length eq "") { 
-	    errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
+    if ($runExprFlag || $onlyExprFlag){ # only if GE is actives checks if readLength is provided
+	# allow readlength to be given by -readLen x --TSW
+	if($readLength) {
+	    $length = $readLength;
+	    $fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;  # regex by --TSW
+	    $root = $1;
+	} 
+	else { # default behavior by --MI
+	    ($root,$length)=$fileName1=~/(\S+)\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; # regex by --MI
+	    if(!defined($length) or $length eq "") { 
+		errPrint "You must either give read length as -readLen i, or rename your fq files name-len.fq";
+	    }
 	}
+    }
+    else { # anything is valid here
+	$length = 50;
+	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/; 
+	$root = $1;
     }
     if ($pairedEnd){
 	$fq2 = abs_path($ARGV[1]);
@@ -273,11 +278,7 @@ if ($length >= 50){
     $difLE = $length-50;
     $le = 50;
 } 
-#elsif ($length >= 36){
-#    $difLE = $length - 36;
-#    $le = 36;
-#}
- elsif ($ribofoot) {
+elsif ($ribofoot) {
     $difLE = 0;
     $le = 32;
 } else {
