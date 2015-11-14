@@ -180,7 +180,7 @@ AND
 
 ### Alignment
 
-In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--trimStep`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). 
+In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--trimStep`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length or specify the reads have been genome substracted; see below).
 
 Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
@@ -192,7 +192,7 @@ Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), and chic
 default, the ``-sp`` option is ``Hsa``.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs plus
-cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). In order to obtain gene expression levels, the read length MUST be provided. This can be done either using the option ``--readLen`` or by naming the samples as follows: sample-rLe.fq.gz, and the read length will be automatically detected.
+cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). In order to obtain gene expression levels, the read length *must* be provided. This can be done either using the option ``--readLen`` or by naming the samples as follows: sample-rLe.fq.gz, so that the read length will be automatically detected. Read length is ONLY needed if ``--expr`` or ``--exprONLY`` is activated.
 In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name *.3bias will be created. This file contains information to estimate 3′ sequencing biases in the RNA-seq sample. Each of *.3bias file contains two rows:
 - For all mRNAs with >200 mapped reads throughout at least 2500 nt, it provides the percentage of reads within the last five 500-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
 - For all mRNAs with >500 mapped reads throughout at least 5000 nt, it provides the percentage of reads within the last five 1000-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
@@ -206,7 +206,7 @@ For example, to perform alignment with expression and 3′bias analysis on mouse
 If this alignment step needs to be repeated, the initial genome alignment step
 can be skipped by supplying the ``<sample>-<length>-e.fq`` file as input. VAST-TOOLS
 will recognize the \"-e.fq\" suffix and start at the splice junction alignment
-step. Gene expression analysis *cannot* be run from this stage (you must start
+step. Gene expression and intron retention analyses *cannot* be run from this stage (you must start
 from the raw reads).
 
 ~~~~
@@ -216,8 +216,35 @@ from the raw reads).
 Although you can specify two fastq files to vast-tools in a 'paired-end' format,
 the program treats both mates independently because of trimming, but will not double
 count the any trim or mate pair more than once  (see above). Reads must be given to the program
-such that `vast-tools align fwd-mate_1.fq.gz rev-mate_2.fq.gz` refers to two fastq
+such that `vast-tools align fwd_mate_1.fq.gz rev_mate_2.fq.gz` refers to two fastq
 files of identical line number where Read1 from file_1 is mated to Read1 from file_2. NOTE: if reads are downloaded from SRA as sra files, use ``fastq-dump --split-file ./sample.sra`` to generate separate fastq files for each paired-end (plus a third file with unmatched mates).
+
+Finally, from `vast-tools v1.0.0` it is possible to calculate intron retention using two slightly different approaches with the ``--IR_version 1/2`` option. `Version 1` is the one used in Braunschweig *et al* 2014. `Version 2` incorporates alternative exon-exon junction for skipping reads to obtain a more representative Percent Intron Retention at the transcript level.
+
+### Merging Outputs
+
+``vast-tools merge`` can be used to pull the ``align`` outputs from various samples together into a new set of output files. This can be used to merge replicates when the read coverage for the independent replicates is not deep enough for a proper AS analysis. Unlike gene expression analysis, where 20-30 million reads is usually enough, differential AS analyses require deep sequencing coverage. Otherwise, only PSIs for AS events in highly expressed genes will be confidentely estimated, biasing the results. Since VAST-TOOLS uses only junction reads for quantification, we recommend at least 70 million reads per sample, and ideally >150 million reads. In our experience, the fraction of AS events whose PSI can be confidently estimated with VAST-TOOLS scales linearly with both read depth and length (specially if paired end) up to 200-300 million reads (depending on library complexity, read length, etc.).
+
+``vast-tools merge`` needs a configuration file  that is provided through the ``--groups`` option. This file must have the following format: 
+
+~~~~
+Sub_sample_A1	Sample_A
+Sub_sample_A2	Sample_A
+Sub_sample_A2	Sample_A
+Sub_sample_B1	Sample_B
+Sub_sample_B2	Sample_B
+...
+~~~~
+
+And it will merge the outputs of subsamples A1, A2 and A3 into a new Sample_A set of outputs that can then be used for combine. 
+
+~~~~
+> vast-tools merge --groups config_file
+~~~~
+
+To merge cRPKM files from gene expression analysis, the option ``--expr`` needs to be provided. If so, ``vast-tools merge`` needs the species key (``--sp``) to upload the file with effective mappable positions per gene to recalculate cRPKMs. It is also possible to merge only cRPKM files by activating the option flag ``--exprONLY``.
+
+Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`) by using the option ``--move_to_PARTS``. 
 
 
 ### Combining Results 
@@ -230,6 +257,29 @@ intend to compare multiple samples.  This output file contains a value for the p
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga]
 ~~~~
+
+### Comparing PSI Between Samples
+
+``vast-tools compare`` identifies differentially spliced AS events between two groups (A and B) solely based on the difference in their average inclusion levels (dPSI = average_PSI_B - average_PSI_A). 
+
+It takes any number of replicates for each groups. Then, for each AS event, it first assesses that *ALL* samples have enough read coverage for the event (see `Combine output format` below). For intron retention, it is also possible to filter out introns based on a binomial test to assess appropriate balance of reads at the exon-intron junctions by using ``--p_IR`` (see Braunschweig *et al* 2014 for details). 
+
+For valid AS events, ``vast-tools compare`` then requires that the absolute dPSI is higher than a minimum provided as ``--min_dPSI``. In addition, it requires that the PSI distribution of the two groups do not overlap. This can be modified with the ``--min_range`` option, to provide higher (positive values) or lower (negative values) stringency. For example: 
+
+~~~~
+> vast-tools compare INCLUSION_TABLE.tab --min_dPSI 25 --min_range 5 --p_IR
+~~~~
+ 
+will identify those AS events with an absolute dPSI between the two groups higher than 25 and a minimum difference between the ranges of 5.
+
+paired
+
+outFile
+
+no_plot
+only_samples
+
+GO
 
 ### Differential Splicing Analysis
 
