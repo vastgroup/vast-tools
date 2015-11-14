@@ -451,9 +451,10 @@ unless (defined $no_plot){
     close CONFIG;
 
     # defining default width (default ~3 OK for 6 events)
-    my $width = sprintf("%.1f",($order/2)+2);    
-    
-    system "$binPath/../R/psiplotter.R $folder/$output_file -c $folder/$config_file -W $width -u TRUE";
+    my $mult = 1.3;
+    my $width = sprintf("%.1f",$mult*(($order/2)+2));    
+    my $heigth = sprintf("%.1f", $mult*(3.2));
+    system "$binPath/../R/psiplotter.R $folder/$output_file -c $folder/$config_file -W $width -H $heigth -u TRUE";
 }
 
 verbPrint "Printing summary statistics\n";
