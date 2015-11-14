@@ -12,7 +12,9 @@ Table of Contents:
 	- [Help](#help)
 	- [Quick Usage](#quick-usage)
 	- [Alignment](#alignment)
+	- [Merging Outputs](#merging-outputs)
 	- [Combining Results](#combining-results)
+	- [Comparing PSI Between Samples](#comparing-PSI-between-samples)
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
 - [Combine output format](#combine-output-format)
@@ -23,7 +25,7 @@ Table of Contents:
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling alternative splicing events in RNA-Seq data. 
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. 
 
 Requirements
 ------------
@@ -87,24 +89,23 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 
 For manual, install human (hsa), mouse (mmu), chicken (gga), or all of them to any location by:
 
-Human (hg19) - 6.0G [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz):
+Human (hg19) - 6.2G [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.hsa.7.3.14.tar.gz
-> tar xzvf vastdb.hsa.7.3.14.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz
+> tar xzvf vastdb.hsa.13.11.15.tar.gz
 ~~~~
-Mouse (mm9) - 7.9G [vastdb.mmu.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz):
+Mouse (mm9) - 5.6G [vastdb.mmu.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.13.11.15.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.mmu.7.3.14.tar.gz
-> tar xzvf vastdb.mmu.7.3.14.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.mmu.13.11.15.tar.gz
+> tar xzvf vastdb.mmu.13.11.15.tar.gz
 ~~~~
-Chicken (galGal3) - 1.4G [vastdb.gga.31.1.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.31.1.15.tar.gz):
+Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.gga.31.1.15.tar.gz
-> tar xzvf vastdb.gga.31.1.15.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz
+> tar xzvf vastdb.gga.13.11.15.tar.gz
 ~~~~
 
-If manually installed to central location, link the database files to vast-tools.0.0.1
-directory using:
+If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
 > ln -s <path to VASTDB> VASTDB
 ~~~~
@@ -152,15 +153,16 @@ the ``--output``, ``-dbDir`` and ``-sp`` flags!
 VAST-TOOLS can be run as simply as:
 
 ~~~~
-> vast-tools align tissueA-rep1.fq.gz
-> vast-tools align tissueA-rep2.fq.gz
-> vast-tools align tissueB-rep1.fq.gz
-> vast-tools align tissueB-rep2.fq.gz
+> vast-tools align tissueA_rep1.fq.gz
+> vast-tools align tissueA_rep2.fq.gz
+> vast-tools align tissueB_rep1.fq.gz
+> vast-tools align tissueB_rep2.fq.gz
 
 > vast-tools combine
 
-> vast-tools diff -a tissueA-rep1,tissueA-rep2 -b tissueB-rep1,tissueB-rep2 > INCLUSION-FILTERED.tab
-
+> vast-tools compare -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2
+OR
+> vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2 > INCLUSION-FILTERED.tab
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
 
@@ -169,11 +171,11 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 ``diff``.
 
 ~~~~
-> vast-tools align tissueA-rep1.fq.gz -c 8
+> vast-tools align tissueA_rep1.fq.gz -c 8
 ~~~~ 
 AND
 ~~~~
-> vast-tools diff -a tissueA-rep1,tissueA-rep2 -b tissueB-rep1,tissueB-rep2 -c 8 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2 -c 8 > INCLUSION-FILTERED.tab
 ~~~~
 
 ### Alignment
@@ -190,14 +192,15 @@ Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), and chic
 default, the ``-sp`` option is ``Hsa``.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs plus
-cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name *.3bias will be created. This file contains information to estimate 3′ sequencing biases in the RNA-seq sample. Each of *.3bias file contains two rows:
+cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). In order to obtain gene expression levels, the read length MUST be provided. This can be done either using the option ``--readLen`` or by naming the samples as follows: sample-rLe.fq.gz, and the read length will be automatically detected.
+In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name *.3bias will be created. This file contains information to estimate 3′ sequencing biases in the RNA-seq sample. Each of *.3bias file contains two rows:
 - For all mRNAs with >200 mapped reads throughout at least 2500 nt, it provides the percentage of reads within the last five 500-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
 - For all mRNAs with >500 mapped reads throughout at least 5000 nt, it provides the percentage of reads within the last five 1000-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
 
 For example, to perform alignment with expression and 3′bias analysis on mouse data:
 
 ~~~~
-> vast-tools align mouse_tissue.fq.gz -sp Mmu --expr
+> vast-tools align mouse_tissue.fq.gz --readLen N -sp Mmu --expr
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
