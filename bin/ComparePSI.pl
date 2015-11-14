@@ -37,6 +37,7 @@ my $paired;
 my $use_names;
 my $folder;
 my $no_plot;
+my $plot_only_samples;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -57,6 +58,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "use_names" => \$use_names,
 			  "paired" => \$paired,
 			  "no_plot" => \$no_plot,
+			  "samples_only" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
     );
 
@@ -115,6 +117,7 @@ Compare two sample sets to find differentially regulated AS events
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --p_IR                   Filter IR b the p-value of the binomial test (default OFF)
         --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
+        --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
                                    - It uses min_dPSI as the minimum average of each paired dPSI
                                    - It uses min_range as the minumum dPSI for each paired comparison 
@@ -179,7 +182,7 @@ if (defined $get_GO){
 }
 
 open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
-open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file\n"; # output file
+open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
 
 ### Common for all numbers of replicates
 # preparing the head
@@ -212,7 +215,6 @@ foreach my $s (@samplesB){
 errPrintDie "Column numbers do not seem 0-based or conversion did not work properly\n" if (defined $kill_0based);
 errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (defined $kill_6lower);
 
-#print O "$head_row\tdPSI\n"; # it will print the original data + the dPSI of the averages
 print O "$head_row\n"; # it will print the original data (for plot later)
 # representative names
 my $name_A=$head[$samplesA[0]];
@@ -231,6 +233,8 @@ $tally{AltEx}{DOWN}=0; $tally{AltEx}{UP}=0;
 $tally{IR}{DOWN}=0; $tally{IR}{UP}=0;
 $tally{Alt3}{DOWN}=0; $tally{Alt3}{UP}=0;
 $tally{Alt5}{DOWN}=0; $tally{Alt5}{UP}=0;
+
+verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
 
 while (<PSI>){
     $_ =~ s/VLOW/N/g if (defined $noVLOW);
@@ -399,7 +403,54 @@ while (<PSI>){
 	}
     }
 }
+close PSI;
+close O;
 
+if (defined $get_GO){
+    verbPrint "Preparing files for GO analysis\n";
+    sleep(1);
+    close BG;
+    close IR_DOWN;
+    close IR_UP;
+    close EXSK;
+}
+
+unless (defined $no_plot){
+    verbPrint "Plotting differentially spliced AS events\n";
+    my $config_file = $output_file;
+    $config_file =~ s/\..+$//; # ~ getting a root
+    $config_file.= ".config.txt";
+    open (CONFIG, ">$folder/$config_file");
+    
+    print CONFIG "Order\tSampleName\tGroupName\tRColorCode\n";
+    my $order = 0;
+    foreach my $i (@samplesA){
+	$order++;
+	print CONFIG "$order\t$head[$i]\t$name_A\tred\n";
+    }
+    foreach my $i (@samplesB){
+	$order++;
+	print CONFIG "$order\t$head[$i]\t$name_B\tblue\n";
+    }
+    unless (defined $plot_only_samples){
+	for my $i (6..$#head){
+	    if ($i%2 == 0){
+		if (!defined $samplesA[$i] && !defined $samplesB[$i]){
+		    $order++;
+		    print CONFIG "$order\t$head[$i]\t\tblack\n";
+		}
+	    }
+	}
+    }
+    close CONFIG;
+
+    # defining default width (default ~3 OK for 6 events)
+    my $width = sprintf("%.1f",$order/2);    
+    
+    system "$binPath/../R/psiplotter.R $folder/$output_file -c $folder/$config_file -W $width -u TRUE";
+}
+
+verbPrint "Printing summary statistics\n";
 my $extras = "";
 $extras.=", noVLOW" if (defined $noVLOW);
 $extras.=", p_IR" if (defined $p_IR);
