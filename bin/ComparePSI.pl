@@ -1,4 +1,4 @@
-1;2c#!/usr/bin/perl
+#!/usr/bin/perl
 ### General script to get differentially spliced events based on dPSI differences 
 
 use Getopt::Long;
