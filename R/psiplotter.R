@@ -245,10 +245,11 @@ nplot <- min(nrow(all_events), opt$options$max)
 pb <- txtProgressBar(style = 3, file = stderr())
 for (i in 1:nplot) {
   result <- plot_event(all_events[i,], config = config,
-             errorbar = !opt$options$noErrorBar,
-             groupmean = opt$options$plotGroupMeans,
-             gridlines = opt$options$gridLines,
-             cex.xaxis = 10, cex.yaxis = 10, cex.main = 8)
+                       ylim(0,100),
+                       errorbar = !opt$options$noErrorBar,
+                       groupmean = opt$options$plotGroupMeans,
+                       gridlines = opt$options$gridLines,
+                       cex.xaxis = 10, cex.yaxis = 10, cex.main = 8)
   setTxtProgressBar(pb, i/nplot)
 }
 setTxtProgressBar(pb, 1)
