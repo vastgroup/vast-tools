@@ -71,7 +71,8 @@ VAST-TOOLS looks for VASTDB inside its own directory
 
 **Automatic DB Installation:**
 
-Then you can automatically install the database files using:
+You can automatically install the database files (and any pre-requisite R
+packages) using:
 ~~~~
 > ./install.R
 ~~~~
