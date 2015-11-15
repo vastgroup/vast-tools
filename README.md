@@ -252,7 +252,7 @@ Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`)
 ``vast-tools combine`` will join all of the files sent to the same output
 directory found in <output_dir>/to_combine/, to form one final table in the main
 <output_dir> folder.  This is the file you give to ``compare`` or ``diff`` in the case that you
-intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined. In addition, the version of intron retention used in ``align`` needs to be specified. 
+intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined. In addition, the version of intron retention used in ``align`` needs can be specified using ``--IR_version``. 
 
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga] --IR_version [1|2]
