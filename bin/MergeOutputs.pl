@@ -83,11 +83,11 @@ if (!defined($groups) || $helpFlag){
 Merges vast-tools outputs from multiple subsamples into grouped samples
 
 OPTIONS: 
-        -g, --groups             File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
+        -g, --groups file        File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
         --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
         --dbDir db               Database directory (default VASTDB)
-        --IR_version             Version of the Intron Retention pipeline (1 or 2) (default 1)
+        --IR_version 1/2         Version of the Intron Retention pipeline (1 or 2) (default 1)
         --expr                   Merges cRPKM files (default OFF)
         --exprONLY               Merges only cRPKM files (default OFF)
         --move_to_PARTS          Moves the subsample files to PARTS\/ within output folders (default ON)

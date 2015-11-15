@@ -159,7 +159,7 @@ $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 
 ### To get the folder in which the input file is
 ($folder) = $input_file =~/(.+)\//; # empty if no match (i.e. local folder)
-$folder = "." if (!defined $folder);
+$folder = "." unless (defined $folder);
 
 # prepare to obtain gene IDs for GO analyses
 my %ID_gene;

@@ -10,7 +10,7 @@ my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
-my $sp = "Hsa"; #species Hsa by default
+my $sp; #species Hsa no longer default
 my $dbDir;
 
 my $verboseFlag = 1;
@@ -64,19 +64,19 @@ sub verbPrint {
   }
 }
 
-if ($helpFlag){
+if ($helpFlag or (!defined $sp)){
     print STDERR "
-Usage: vast-tools combine -o OUTPUTDIR [options]
+Usage: vast-tools combine -o OUTPUTDIR -sp [Hsa|Mmu|etc] [options]
 
 Combine multiple samples analyzed using \"vast-tools align\" into a single summary tables. 
 
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
-	--dbDir DBDIR		Database directory
-	-sp Hsa/Mmu/etc		Species selection
-	-z			Compress all output files using gzip
+	-sp Hsa/Mmu/etc		Species selection (mandatory)
 	--noIR			Don't run intron retention pipeline (default off)
         --IR_version 1/2        Version of the IR analysis (default 1)
+	--dbDir DBDIR		Database directory
+	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help message
 	-C			Create a cRPKM plus read counts summary table. By default, a
