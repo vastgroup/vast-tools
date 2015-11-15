@@ -27,9 +27,9 @@ downloadDb <- function(speUrl, speFile) {
    }
 }
 
-humanDbFile <- "vastdb.hsa.7.3.14.tar.gz"
-mouseDbFile <- "vastdb.mmu.7.3.14.tar.gz"
-chickenDbFile <- "vastdb.gga.31.1.15.tar.gz"
+humanDbFile <- "vastdb.hsa.13.11.15.tar.gz"
+mouseDbFile <- "vastdb.mmu.13.11.15.tar.gz"
+chickenDbFile <- "vastdb.gga.13.11.15.tar.gz"
 
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
