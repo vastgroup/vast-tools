@@ -14,7 +14,7 @@ Table of Contents:
 	- [Alignment](#alignment)
 	- [Merging Outputs](#merging-outputs)
 	- [Combining Results](#combining-results)
-	- [Comparing PSIs Between Samples](#comparing-PSIs-between-samples)
+	- [Comparing PSIs Between Samples](#comparing-psis-between-samples)
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
 - [Combine output format](#combine-output-format)
@@ -267,7 +267,7 @@ intend to compare multiple samples.  This output file contains a value for the p
 For valid AS events, ``vast-tools compare`` then requires that the absolute value of dPSI is higher than a threshold provided as ``--min_dPSI``. In addition, it requires that the PSI distribution of the two groups do not overlap. This can be modified with the ``--min_range`` option, to provide higher (positive values) or lower (negative values) stringency. For example: 
 
 ~~~~
-> vast-tools compare INCLUSION_TABLE.tab -a sampleA1,sampleA2 -b sampleB1,sampleB2 --min_dPSI 25 --min_range 5 --p_IR
+> vast-tools compare INCLUSION_TABLE.tab -a sampleA1,sampleA2 -b sampleB1,sampleB2 --min_dPSI 25 --min_range 5
 ~~~~
  
 will identify those AS events with an absolute dPSI between A and B higher than 25 and a minimum difference between the ranges of 5. By default, the comparison is not paired. A paired analysis can be done using the option ``--paired``. If provided, each A replicate is compared with the corresponding one in the B group. In this case, ``--min_dPSI`` is the minimum threshold for the average between each pair's dPSI, and ``--min_range`` is the minimum value *any* individual pair's dPSI can be. Summary statistics are printed for a tally of AS events by type that show higher sequence inclusion in group A or B.
