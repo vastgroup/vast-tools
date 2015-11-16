@@ -89,7 +89,7 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 
 For manual, install human (hsa), mouse (mmu), chicken (gga), or all of them to any location by:
 
-Human (hg19) - 6.2G [vastdb.hsa.7.3.14.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz):
+Human (hg19) - 6.2G [vastdb.hsa.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz
 > tar xzvf vastdb.hsa.13.11.15.tar.gz
