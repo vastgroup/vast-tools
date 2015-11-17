@@ -122,7 +122,7 @@ my %group;
 my %list;
 
 ### Loading group info
-$groups.="$binPath/../" if $groups !~ /^\//; # if relative path is provided
+$groups="$binPath/../$groups" if $groups !~ /^\//; # if relative path is provided
 open (GROUPS, $groups) || errPrintDie "Cannot open groupings: $groups\n";
 while (<GROUPS>){
     # cleaning in case they were made in Mac's excel
