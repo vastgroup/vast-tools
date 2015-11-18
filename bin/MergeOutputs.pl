@@ -277,7 +277,8 @@ unless (defined $exprONLY){
 		my @temp=split(/\t/,$_);
 		my $event=$temp[0];
 		for my $i (1..$#temp){
-		    $IRsum{$group{$root}}{$event}[$i]+=$temp[$i]; # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+		    $IRsum{$group{$root}}{$event}[$i]+=$temp[$i] unless ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+		    $IRsum{$group{$root}}{$event}[$i]=$temp[$i] if ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
 		}
 	    }
 	    close I;
