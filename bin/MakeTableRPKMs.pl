@@ -67,6 +67,7 @@ print $OUTPUT "$head\n" if $cRPKMCounts;
 print RPKM "$headRPKM\n";
 
 foreach my $gene (sort (keys %data)){
+    $names{$gene}="NA" if (!defined $names{$gene});
     print $OUTPUT "$gene\t$names{$gene}$data{$gene}\n" if $cRPKMCounts;
     print RPKM "$gene\t$names{$gene}$RPKM{$gene}\n";
 }
