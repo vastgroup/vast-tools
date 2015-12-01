@@ -106,6 +106,11 @@ $expr=1 if (defined $exprONLY);
 errPrintDie "Needs a file with the groupings\n" if (!defined $groups);
 errPrintDie "IR version must be either 1 or 2\n" if ($IR_version != 1 && $IR_version != 2);
 
+# get full path to group definition file
+# should come before we "leave" the working directory
+# from where user has called vast-tools merge
+my $groups_fullpath=abs_path($groups);
+
 verbPrint "Using VASTDB -> $dbDir" if (defined $expr);
 # change directories
 errPrintDie "The output directory \"$folder/to_combine\" does not exist" unless (-e "$folder/to_combine");
@@ -122,8 +127,7 @@ my %group;
 my %list;
 
 ### Loading group info
-$groups="$binPath/../$groups" if $groups !~ /^\//; # if relative path is provided
-open (GROUPS, $groups) || errPrintDie "Cannot open groupings: $groups\n";
+open (GROUPS, $groups_fullpath) || errPrintDie "Cannot open groupings: $groups_fullpath\n";
 while (<GROUPS>){
     # cleaning in case they were made in Mac's excel
     $_ =~ s/\r//g;
