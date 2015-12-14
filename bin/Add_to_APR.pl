@@ -57,8 +57,8 @@ close TEMPLATE;
 
 verbPrint "Loading and parsing data for each sample for $type_of_template\n";
 foreach my $file (@EXSK){
-	 my $fname = $file;
-	 $fname =~ s/^.*\///;
+    my $fname = $file;
+    $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
     $head.="\t$sample\t$sample-Q";
     $head_reads.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-e\t$sample-i1\t$sample-i2\t$sample-Q";
@@ -125,10 +125,11 @@ foreach $event (sort keys %ALL){
     $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
 
-	$PSI=sprintf("%.2f",$PSI{$event}{$sample});
-	$total_raw_reads=$Rexc{$event}{$sample}+$Rinc1{$event}{$sample}+$Rinc2{$event}{$sample};
-	$total_corr_reads=$exc{$event}{$sample}+$inc1{$event}{$sample}+$inc2{$event}{$sample};
-	$total_ref_reads=$RexcS{$event}{$sample}+$Rinc1S{$event}{$sample}+$Rinc2S{$event}{$sample};
+    $PSI=sprintf("%.2f",$PSI{$event}{$sample})  if $PSI{$event}{$sample}=~/\d/;
+    $PSI="NA"  if $PSI{$event}{$sample} eq "NA";
+    $total_raw_reads=$Rexc{$event}{$sample}+$Rinc1{$event}{$sample}+$Rinc2{$event}{$sample};
+    $total_corr_reads=$exc{$event}{$sample}+$inc1{$event}{$sample}+$inc2{$event}{$sample};
+    $total_ref_reads=$RexcS{$event}{$sample}+$Rinc1S{$event}{$sample}+$Rinc2S{$event}{$sample};
 
 	if ($type eq "MULTI3X"){
 #### Coverage scores. Score 1: Using all raw reads	

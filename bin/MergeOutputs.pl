@@ -203,6 +203,7 @@ if (defined $expr){
 		    $READS_EXPR{$group{$root}}{$gene}="NA";
 		}
 		else {
+		    $temp[2] = 0 if (!defined $temp[2]);
 		    $READS_EXPR{$group{$root}}{$gene}+=$temp[2];
 		    $TOTAL_READS_EXPR{$group{$root}}+=$temp[2];
 		}
@@ -433,6 +434,7 @@ foreach my $group (sort keys %list){
 
     ### EXPR
     if (defined $expr){
+	next if (-e "expr_out/$group.cRPKM");
 	open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file"; 
 	foreach my $g (sort keys %{$READS_EXPR{$group}}){
 	    my $cRPKM = "";
@@ -449,6 +451,7 @@ foreach my $group (sort keys %list){
     unless (defined $exprONLY){
 	### IR
 	if ($IR_version == 1){
+	    next if (-e "to_combine/$group.IR");
 	    open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
 	    print IR "$IR_head";
 	    foreach my $ev (sort keys %{$IR{$group}}){
@@ -457,6 +460,7 @@ foreach my $group (sort keys %list){
 	    close IR;
 	}
 	elsif ($IR_version == 2){
+	    next if (-e "to_combine/$group.IR2");
 	    open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
 	    print IR "$IR_head";
 	    foreach my $ev (sort keys %{$IR{$group}}){
@@ -464,6 +468,7 @@ foreach my $group (sort keys %list){
 	    }
 	    close IR;
 	    ### IRsum (only v2)
+	    next if (-e "to_combine/$group.IR.summary_v2.txt");
 	    open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
 	    print IRsum "$IRsum_head";
 	    foreach my $ev (sort keys %{$IRsum{$group}}){
@@ -472,6 +477,7 @@ foreach my $group (sort keys %list){
 	    close IRsum;
 	}
 	### MIC
+	next if (-e "to_combine/$group.micX");
 	open (MIC, ">to_combine/$group.micX") || errPrintDie "Cannot open micX output file";
 	print MIC "$MIC_head";
 	foreach my $ev (sort keys %{$MIC{$group}}){
@@ -491,6 +497,7 @@ foreach my $group (sort keys %list){
 	}
 	close MIC;
 	### EXSK
+	next if (-e "to_combine/$group.exskX");
 	open (EXSK, ">to_combine/$group.exskX") || errPrintDie "Cannot open exskX output file";
 	print EXSK "$EXSK_head";
 	foreach my $ev (sort keys %{$EXSK{$group}}){
@@ -507,6 +514,7 @@ foreach my $group (sort keys %list){
 	}
 	close EXSK;
 	### MULTI
+	next if (-e "to_combine/$group.MULTI3X");
 	open (MULTI, ">to_combine/$group.MULTI3X") || errPrintDie "Cannot open MULTI3X output file";
 	print MULTI "$MULTI_head";
 	foreach my $ev (sort keys %{$MULTIa{$group}}){
@@ -549,6 +557,7 @@ foreach my $group (sort keys %list){
 	}
 	close MULTI;
 	### EEJ2
+	next if (-e "to_combine/$group.eej2");
 	open (EEJ2, ">to_combine/$group.eej2") || errPrintDie "Cannot open eej2 output file";
 	foreach my $ev (sort keys %{$EEJ{$group}}){
 	    my $pos="";
