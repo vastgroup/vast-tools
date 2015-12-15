@@ -53,6 +53,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "p_IR" => \$p_IR,
 			  "GO" => \$get_GO,
 			  "sp=s" => \$species,
+			  "species=s" => \$species,
 			  "dbDir=s" => \$dbDir,
 			  "GO_file=s" => \$ID_file,
 			  "use_names" => \$use_names,
@@ -126,7 +127,7 @@ Compare two sample sets to find differentially regulated AS events
         --GO                     Generates gene lists for GO analysis (from default gene_ID)
         --GO_file file           To provide an alternative gene ID file for each event (default OFF)
         --use_names              Uses gene names (first column in INCLUSION table)
-        --species Hsa/etc        Three letter code for the database 
+        --species/-sp Hsa/etc    Three letter code for the database 
         --dbDir db               Database directory (default VASTDB)
 
 
