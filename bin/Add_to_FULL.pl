@@ -70,6 +70,12 @@ while (<$NEWID>) {
       die "Non-unique key value pair in $NEWID!\n";
   }
   $newIDs{$l[1]} = $l[0];
+  
+  # to correct a small discordance in old human/mouse IDs --MI [23/12/15]
+  if ($l[0] =~ /INT/ && $l[1] =~ /^\-/){
+      my $temp_ID = "NA".$l[1];
+      $newIDs{$temp_ID} = $l[0];
+  }
 }
 close $NEWID;
 
@@ -89,6 +95,12 @@ while (<$TEMPLATE>){
   }
 
   $template{$l[1]} = \@l;
+
+  # to correct a small discordance in old human/mouse IDs --MI [23/12/15]
+  if ($l[5] =~ /IR/ && $l[1] =~ /^\-/){
+      my $temp_ID = "NA".$l[1];
+      $template{$temp_ID} = \@l;
+  }
 }
 close $TEMPLATE;
 
