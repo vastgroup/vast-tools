@@ -437,7 +437,7 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
   * For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
   * For INT: *chromosome:C1exon=C2exon:strand*.
  * **Column 6**: Type of event.
-  * S, C1, C2, C3: exon skipping (EX) events quantified by the *a posteriori* or *a priori* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information).
+  * S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information).
   * MIC: exon skipping (EX) events quantified by the microexon pipeline.
   * IR-S: intron retention event with no other annotated overlapping alternative splicing event and/or alternative first/last exons.
   * IR-C: intron retention event with other annotated overlapping alternative splicing event(s) and/or alternative first/last exons (similar to Type C introns in Braunschweig *et al*, 2014).  
@@ -457,12 +457,12 @@ Then, for each combined sample, a pair of columns:
 
   * *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
   * *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). Always NA for intron retention events.
-  * *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the a posteriori or a priori modules; For intron retention events, numbers of reads mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format A=B=C)
+  * *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the *splice site-based* or *transcript-based* modules; For intron retention events, numbers of reads mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format A=B=C)
     - OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
     - B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
     - B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
     - Bl/Bn: low/no read coverage for splice junctions supporting inclusion.
-  * *Score 5*: Complexity of the event (only for exon skipping events quantified by the a posteriori or a priori modules); For intron retention events, p-value of a binomial test of balance between reads mapping to the upstream and downstream exon-intron junctions, modified by reads mapping to a 200-bp window in the centre of the intron (see Braunschweig et al., 2014).
+  * *Score 5*: Complexity of the event (only for exon skipping events quantified by the *splice site-based* or *transcript-based* modules); For intron retention events, p-value of a binomial test of balance between reads mapping to the upstream and downstream exon-intron junctions, modified by reads mapping to a 200-bp window in the centre of the intron (see Braunschweig et al., 2014).
     - S: percent of complex reads (i.e. those inclusion- and exclusion-supporting reads that do not map to the reference C1A, AC2 or C1C2 splice junctions) is < 5%.
     - C1: percent of complex reads is > 5% but < 20%.
     - C2: percent of complex reads is > 20% but < 50%.
