@@ -94,12 +94,13 @@ while (<$TEMPLATE>){
     die "Non-unique key value pair in $TEMPLATE!\n";
   }
 
-  $template{$l[1]} = \@l;
-
+  @l = @l[0..5]; # to make sure unexpected extras are not included --MI [30/12/15] (old: \@l)
+  $template{$l[1]} = \@l; 
+  
   # to correct a small discordance in old human/mouse IDs --MI [23/12/15]
   if ($l[5] =~ /IR/ && $l[1] =~ /^\-/){
       my $temp_ID = "NA".$l[1];
-      $template{$temp_ID} = \@l;
+      $template{$temp_ID} = \@l; 
   }
 }
 close $TEMPLATE;
