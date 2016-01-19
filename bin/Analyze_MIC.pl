@@ -113,72 +113,27 @@ foreach $event (sort (keys %eff)){
 	    foreach $n (sort (keys %{$eff{$event}{$ie}})){
 		($coord,$n2)=$n=~/(.+?)\=(.+)/;
 		$full="$event.$coord.$ie.$n2";
-		
-		if (($i,$j,$k,$l)=$ie=~/(.+?)\_(.+?)\_(.+?)\_(.+)/){ # for EEEEJ (i.e. junction of 4 exons)
-		    for $z (1..$total_exones){ # then it loops through each exon and compares to those in the EEEEJ
-			if ($z eq $i || $z eq $j || $z eq $k || $z eq $l){
-			    $OKinc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $inc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_inc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($i eq "C1" && $l eq "C2") {
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($i eq "C1" && $z<$l) {
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($z>$i && $l eq "C2") {
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($z>$i && $z<$l){
+
+		# Modified in the new version (18/01/16) --MI
+		@exons=split(/\_/,$ie); # array with all (micro)exons in the junctions
+		for $z (1..$total_exones){ # looping through all MICs in the group
+		    $INC_read="";
+		    foreach $exon (@exons){
+			$INC_read=1 if $z eq $exon; # i.e. $z is one of the exons in the junction
+		    }
+		    if ($INC_read){
+			$OKinc{$z}=1 if $eff{$event}{$ie}{$n}>0;
+			$inc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
+			$r_inc{$z}+=$reads{$event}{$ie}{$n};
+		    }
+		    else {
+			if (($exons[0] eq "C1" || $exons[0]<$z) && ($exons[$#exons] eq "C2" || $exons[$#exons] > $z)){
 			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
 			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
 			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
 			}
 		    }
-		}
-		elsif (($i,$j,$k)=$ie=~/(.+?)\_(.+?)\_(.+)/){ # for EEEEJ (i.e. junction of 3 exons)
-		    for $z (1..$total_exones){
-			if ($z eq $i || $z eq $j || $z eq $k){
-			    $OKinc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $inc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_inc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($i eq "C1" && $k eq "C2") {
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($i eq "C1" && $z<$k) {
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($z>$i && $k eq "C2") {
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-			elsif ($z>$i && $z<$k){
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
-			}
-		    }
-		}
-		elsif ($ie=~/C1\_C2/){
-		    for $z (1..$total_exones){
-			$OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			$exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			$r_exc{$z}+=$reads{$event}{$ie}{$n};
-		    }
-		}
+		} #### End of update
 	    }
 	}
 	for $z (1..$total_exones){ # Generates the actual event
