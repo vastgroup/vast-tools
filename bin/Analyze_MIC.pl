@@ -98,10 +98,10 @@ foreach $event (sort (keys %eff)){
 	if ($OKinc && $OKexc){ # i.e. if there is any mappable position for at least one inclusion (INC) and one exclusion (EXC) junction
 	    $PSI=sprintf("%.2f",100*$inc/($inc+$exc)) if ($inc+$exc)>0;
 	    $PSI="NA" if ($inc+$exc)==0;
-	    print O "$pre_data{$event}\t$PSI\t$r_exc\t$r_inc\t$exc\t$inc\n";
+	    print O "$pre_data{$event}\t$PSI\t$r_exc\t$r_inc\t$exc\t$inc\n" if (defined $pre_data{$event});
 	}
 	else {
-	    print O "$pre_data{$event}\tNA\tNA\tNA\tNA\tNA\n";
+	    print O "$pre_data{$event}\tNA\tNA\tNA\tNA\tNA\n" if (defined $pre_data{$event});
 	}
     }
     
@@ -143,10 +143,10 @@ foreach $event (sort (keys %eff)){
 	    if ($OKinc{$z} && $OKexc{$z}){
 		$PSI=sprintf("%.2f",100*$inc{$z}/($inc{$z}+$exc{$z})) if ($inc{$z}+$exc{$z})>0;
 		$PSI="NA" if ($inc{$z}+$exc{$z})==0;
-		print O "$pre_data{$eventN}\t$PSI\t$r_exc{$z}\t$r_inc{$z}\t$exc{$z}\t$inc{$z}\n";
+		print O "$pre_data{$eventN}\t$PSI\t$r_exc{$z}\t$r_inc{$z}\t$exc{$z}\t$inc{$z}\n" if (defined $pre_data{$eventN});
 	    }
 	    else {
-		print O "$pre_data{$eventN}\tne\tne\tne\tne\tne\n";
+		print O "$pre_data{$eventN}\tNA\tNA\tNA\tNA\tNA\n" if (defined $pre_data{$eventN});
 	    }
 	}
     }
