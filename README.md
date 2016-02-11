@@ -184,7 +184,7 @@ In this step, to increase the fraction of mapping junction reads within each RNA
 
 Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
-in the output directory as ``<sample>-<length>-e.fq``, where ``sample`` is the sample
+in the output directory as ``<sample>-<length>-e.fa.gz``, where ``sample`` is the sample
 name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
 compressed (via gzip) or uncompressed.
 
@@ -204,13 +204,13 @@ For example, to perform alignment with expression and 3′bias analysis on mouse
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
-can be skipped by supplying the ``<sample>-<length>-e.fq`` file as input. VAST-TOOLS
-will recognize the \"-e.fq\" suffix and start at the splice junction alignment
+can be skipped by supplying the ``<sample>-<length>-e.fa.gz`` file as input. VAST-TOOLS
+will recognize the \"-e.fa\" suffix and start at the splice junction alignment
 step. Gene expression and intron retention analyses *cannot* be run from this stage (you must start
 from the raw reads).
 
 ~~~~
-> vast-tools align mouse_tissue-e.fq.gz -sp Mmu
+> vast-tools align mouse_tissue-e.fa.gz -sp Mmu
 ~~~~
 
 Although you can specify two fastq files to vast-tools in a 'paired-end' format,
