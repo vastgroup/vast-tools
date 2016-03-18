@@ -36,7 +36,7 @@ VAST-TOOLS requires the following software:
   * optparse
   * RColorBrewer
   * reshape2
-  * ggplot2
+  * ggplot2 >= v2.0
   * MASS
   * devtools
   * [psiplot](https://github.com/kcha/psiplot)
