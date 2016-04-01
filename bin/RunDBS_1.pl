@@ -28,7 +28,7 @@ my $readLength = ""; # default.
 my $outdir;
 my $noIRflag = 0;  # don't run intron retention (for speed..)
 my $stringentIRflag = 0; # Run extra genome/eej subtraction step
-my $IR_version = 1; # IR version [09/Nov/2015]
+my $IR_version = 2; # IR version [09/Nov/2015] [new default 01/04/16]
 my $minReadNum;
 
 my $legacyFlag = 0;
@@ -153,7 +153,7 @@ OPTIONS:
 				(substantially increases speed) (default off)
 	--stringentIR		Don't run first filtering step of IR 
 				(this will increase speed a little) (default off)
-        --IR_version 1/2        Version of the Intron Retention analysis (default 1)
+        --IR_version 1/2        Version of the Intron Retention analysis (default 2)
 	--keep			Don't remove trimmed and genome-subtracted reads 
 				after use. (default off)
 	--findSubtracted	Set this flag to start alignment from genome-subtracted

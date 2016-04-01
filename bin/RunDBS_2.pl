@@ -22,7 +22,7 @@ my $outDir;
 my $compress = 0;
 
 my $noIRflag = 0; #don't use IR!
-my $IR_version = 1; # either 1 or 2
+my $IR_version = 2; # either 1 or 2
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 
@@ -74,7 +74,7 @@ OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 	-sp Hsa/Mmu/etc		Species selection (mandatory)
 	--noIR			Don't run intron retention pipeline (default off)
-        --IR_version 1/2        Version of the IR analysis (default 1)
+        --IR_version 1/2        Version of the IR analysis (default 2)
 	--dbDir DBDIR		Database directory
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages

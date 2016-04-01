@@ -33,7 +33,7 @@ opt.list <- list(
     make_option(c("-o", "--outDir"),   action="store",
                 default="raw_incl",
                 help="Location of output [default: <species>/%default]"),
-    make_option(c("--IR_version"),     action="store", default = 1,
+    make_option(c("--IR_version"),     action="store", default = 2,
                 help="Version of IR pipeline. V1 scores PIR based only on EEJ directly adjacent
                 to intron; v2 scores it based on all EEJs spanning the intron  [default: %default]"),
     make_option(c("-r", "--rmHigh"),   action="store_true", default = FALSE,

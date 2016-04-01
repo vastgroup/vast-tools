@@ -59,7 +59,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "use_names" => \$use_names,
 			  "paired" => \$paired,
 			  "no_plot" => \$no_plot,
-			  "samples_only" => \$plot_only_samples,
+			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
     );
 
