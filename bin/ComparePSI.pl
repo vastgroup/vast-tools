@@ -220,8 +220,8 @@ print O "$head_row\n"; # it will print the original data (for plot later)
 # representative names
 my $name_A=$head[$samplesA[0]];
 my $name_B=$head[$samplesB[0]];
-$name_A=~s/(.+)\_.+/$1/; # usually the rep number/id is encoded as "_a"
-$name_B=~s/(.+)\_.+/$1/;
+$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a" or "_1", but if it's only one, it's left as is
+$name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
 
 # Global variables for PSI analysis & GO
 my %doneIR_UP;

@@ -83,16 +83,20 @@ foreach $event (sort (keys %eff)){
 	foreach $n (sort (keys %{$eff{$event}{INC}})){ # loops through each inclusion EEEJ (when alternative C1, C2, splice sites, etc)
 	    ($coord,$n2)=$n=~/(.+?)\=(.+)/;
 	    $full="$event.$coord.INC.$n2";
-	    $OKinc=1 if $eff{$event}{INC}{$n}>0;
-	    $inc+=sprintf("%.2f",($read_length-15)*$reads{$event}{INC}{$n}/$eff{$event}{INC}{$n}) if $eff{$event}{INC}{$n}>0;
-	    $r_inc+=$reads{$event}{INC}{$n};
+	    if ($eff{$event}{INC}{$n}>0){
+		$OKinc=1;
+		$inc+=sprintf("%.2f",($read_length-15)*$reads{$event}{INC}{$n}/$eff{$event}{INC}{$n});
+		$r_inc+=$reads{$event}{INC}{$n};
+	    }
 	}
 	foreach $n (sort (keys %{$eff{$event}{EXC}})){ # loops through each exclusion EEJ (when alternative C1, C2, splice sites, etc)
 	    ($coord,$n2)=$n=~/(.+?)\=(.+)/;
 	    $full="$event.$coord.EXC.$n2";
-	    $OKexc=1 if $eff{$event}{EXC}{$n}>0;
-	    $exc+=sprintf("%.2f",($read_length-15)*$reads{$event}{EXC}{$n}/$eff{$event}{EXC}{$n}) if $eff{$event}{EXC}{$n}>0;
-	    $r_exc+=$reads{$event}{EXC}{$n};
+	    if ($eff{$event}{EXC}{$n}>0){
+		$OKexc=1;
+		$exc+=sprintf("%.2f",($read_length-15)*$reads{$event}{EXC}{$n}/$eff{$event}{EXC}{$n});
+		$r_exc+=$reads{$event}{EXC}{$n};
+	    }
 	}
 	
 	if ($OKinc && $OKexc){ # i.e. if there is any mappable position for at least one inclusion (INC) and one exclusion (EXC) junction
@@ -122,15 +126,19 @@ foreach $event (sort (keys %eff)){
 			$INC_read=1 if $z eq $exon; # i.e. $z is one of the exons in the junction
 		    }
 		    if ($INC_read){
-			$OKinc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			$inc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			$r_inc{$z}+=$reads{$event}{$ie}{$n};
+			if ($eff{$event}{$ie}{$n}>0){
+			    $OKinc{$z}=1;
+			    $inc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n});
+			    $r_inc{$z}+=$reads{$event}{$ie}{$n};
+			}
 		    }
 		    else {
 			if (($exons[0] eq "C1" || $exons[0]<$z) && ($exons[$#exons] eq "C2" || $exons[$#exons] > $z)){
-			    $OKexc{$z}=1 if $eff{$event}{$ie}{$n}>0;
-			    $exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n}) if $eff{$event}{$ie}{$n}>0;
-			    $r_exc{$z}+=$reads{$event}{$ie}{$n};
+			    if ($eff{$event}{$ie}{$n}>0){
+				$OKexc{$z}=1;
+				$exc{$z}+=sprintf("%.2f",($read_length-15)*$reads{$event}{$ie}{$n}/$eff{$event}{$ie}{$n});
+				$r_exc{$z}+=$reads{$event}{$ie}{$n};
+			    }
 			}
 		    }
 		} #### End of update
