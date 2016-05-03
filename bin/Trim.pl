@@ -112,13 +112,14 @@ while(my $fwd = <STDIN>) {
         my $S1 = substr($seq, $off, $targetLength);
         my $R1 = substr($rest, $off, $targetLength);
         my $subCode = substr(md5_hex($trimNum), 0, 4);
+	
         if($fastaFlag) {
-          print STDOUT "$name-$subCode\n$S1\n";
+	    print STDOUT "$name-$subCode\n$S1\n" unless $S1 =~ /\./; # added by --MI [03/05/16] (some reads have unexpected ".")
         } else {
-          print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n";
+	    print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n" unless$S1 =~ /\./; # added by --MI [03/05/16]
         }
         $trimNum++;
-        $acceptedFwd++;
+        $acceptedFwd++ unless $S1 =~ /\./; # added by --MI [03/05/16]
       }
       # NOW FOR PAIR IF EXISTS
       if($pairedFlag) {
@@ -127,12 +128,12 @@ while(my $fwd = <STDIN>) {
           my $R1 = substr($restRev, $off, $targetLength);
           my $subCode = substr(md5_hex($trimNum), 0, 4);
           if($fastaFlag) {
-            print STDOUT "$name-$subCode\n$S1\n";
+	      print STDOUT "$name-$subCode\n$S1\n" unless $S1 =~ /\./; # added by --MI [03/05/16]
           } else {
-            print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n";
+	      print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n" unless $S1 =~ /\./; # added by --MI [03/05/16]
           }
           $trimNum++;
-          $acceptedRev++;
+          $acceptedRev++ unless $S1 =~ /\./; # added by --MI [03/05/16]
         }
       }
       $total_fwd_accepted++ if $acceptedFwd;
