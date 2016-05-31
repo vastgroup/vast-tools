@@ -4,31 +4,35 @@ use warnings;
 use strict;
 use Cwd qw(abs_path);
 use Getopt::Long;
+use File::Copy 'move';
 
 # INITIALIZE
 my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
-my $sp; #species Hsa no longer default
+my $sp;              #species Hsa no longer default
 my $dbDir;
 
 my $verboseFlag = 1;
 my $helpFlag = 0;
 
-my $globalLen = 50; # testing? not file specific any longer --TSW
+my $globalLen = 50;  # testing? not file specific any longer --TSW
 
 my $outDir;
 my $compress = 0;
 
-my $noIRflag = 0; #don't use IR!
-my $IR_version = 2; # either 1 or 2
+my $noIRflag = 0;    # don't use IR!
+my $IR_version = 2;  # either 1 or 2
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 
+my $asmbly;          # for human and mouse: vts formats the output wrt. hg19/hg3, mm09/mm10 depending on user's choice of argument -a
+ 
 GetOptions("help"  	 => \$helpFlag,
 	   "dbDir=s"     => \$dbDir,
 	   "sp=s"        => \$sp,
+	   "a=s"         => \$asmbly,
 	   "verbose"     => \$verboseFlag,
 	   "output=s"    => \$outDir,
 	   "o=s"         => \$outDir,
@@ -73,6 +77,11 @@ Combine multiple samples analyzed using \"vast-tools align\" into a single summa
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 	-sp Hsa/Mmu/etc		Species selection (mandatory)
+	-a			Choice of assembly the output coordinates are defined in (available only for -sp Hsa or Mmu) 
+				For -sp Hsa: hg19 or hg38, (default hg19)
+				    - vast-tools works internally with hg19; if you choose hg38, the output gets lifted-over to hg38
+				For -sp Mmu: mm09 or mm10, (default mm09)
+				    - vast-tools works internally with mm09; if you choose mm10, the output gets lifted-over to mm10
 	--noIR			Don't run intron retention pipeline (default off)
         --IR_version 1/2        Version of the IR analysis (default 2)
 	--dbDir DBDIR		Database directory
@@ -93,6 +102,7 @@ errPrintDie "Need output directory" unless (defined $outDir);
 errPrintDie "The output directory $outDir does not exist" unless (-e $outDir);
 errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_version != 2);
 
+
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../VASTDB";
 }
@@ -108,6 +118,11 @@ mkdir("raw_reads") unless (-e "raw_reads"); # ^
 
 ### Settings:
 errPrintDie "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
+
+# get assembly specification for human
+if( $sp eq "Hsa" ){if(!defined($asmbly)){$asmbly="hg19";} unless($asmbly =~ /(hg19|hg38)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
+if( $sp eq "Mmu" ){if(!defined($asmbly)){$asmbly="mm09";} unless($asmbly =~ /(mm09|mm10)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
+
 
 my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
 my $N=$#files+1;
@@ -188,9 +203,19 @@ if ($N != 0) {
 	push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
     }
     
-    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N.tab";
+    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$asmbly$N.tab";
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
+    
+    # lift-over if necessary (hg19->hg38 or mm09->mm10)
+    if( $asmbly=~/(hg38|mm10)/ ){
+    	# select liftOvr dictionary
+    	my $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; if($asmbly eq "mm10"){$dictionary="lftOvr_dict_from_mm09_to_mm10.pdat";}
+    	# do liftOvr
+    	sysErrMsg "$binPath/LftOvr_INCLUSION_LEVELS_FULL.pl translate $finalOutput $dbDir/FILES/$dictionary ${finalOutput}.lifted";
+    	# move files
+    	move("${finalOutput}.lifted","${finalOutput}");
+    }
     
     verbPrint "Final table saved as: " . abs_path($finalOutput) ."\n";
     
