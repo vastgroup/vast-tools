@@ -116,7 +116,7 @@ Compare two sample sets to find differentially regulated AS events
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
-        --p_IR                   Filter IR b the p-value of the binomial test (default OFF)
+        --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
         --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)

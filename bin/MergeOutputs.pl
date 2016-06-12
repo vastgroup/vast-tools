@@ -27,6 +27,7 @@ my $expr; #activates merging of cRPKMs
 my $exprONLY; # if you want to do expr only, just write anything.
 my $move_to_PARTS; # to move the merged subfiles into the PARTS folder
 my $IR_version = 2; # version of IR pipeline [new default 01/04/16]
+my $noIR; # to avoid warnings
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "groups=s" => \$groups,
@@ -39,6 +40,7 @@ GetOptions(               "groups=s" => \$groups,
 			  "expr" => \$expr,
                           "exprONLY" => \$exprONLY,
                           "help" => \$helpFlag,
+                          "noIR" => \$noIR,
 			  "move_to_PARTS" => \$move_to_PARTS
     );
 
@@ -91,6 +93,7 @@ OPTIONS:
         --expr                   Merges cRPKM files (default OFF)
         --exprONLY               Merges only cRPKM files (default OFF)
         --move_to_PARTS          Moves the subsample files to PARTS\/ within output folders (default OFF)
+        --noIR                   Skips IR files
         --help                   Prints this help message
 
 
@@ -104,7 +107,7 @@ $expr=1 if (defined $exprONLY);
 
 # Sanity checks
 errPrintDie "Needs a file with the groupings\n" if (!defined $groups);
-errPrintDie "IR version must be either 1 or 2\n" if ($IR_version != 1 && $IR_version != 2);
+errPrintDie "IR version must be either 1 or 2\n" if ($IR_version != 1 && $IR_version != 2 && !defined $noIR);
 
 # get full path to group definition file
 # should come before we "leave" the working directory
@@ -222,72 +225,74 @@ else {
 
 unless (defined $exprONLY){
 ### For IR (v1 and v2)
-    verbPrint "Loading IR files (version $IR_version)\n";
-    if ($IR_version == 1){
-	my @files=glob("to_combine/*.IR"); 
-	foreach my $file (@files){
-	    my ($root)=$file=~/.+\/(.+?)\.IR/;
-	    next if (!defined $group{$root});
-	    $N_IR++; 
-	    
-	    verbPrint "  Processing $file\n";
-	    open (I, $file);
-	    $IR_head=<I>;
-	    while (<I>){
-		chomp;
-		my @temp=split(/\t/,$_);
-		my $event=$temp[0];
-		for my $i (1..$#temp){
-		    $IR{$group{$root}}{$event}[$i]+=$temp[$i];
+    if (!defined $noIR){
+	verbPrint "Loading IR files (version $IR_version)\n";
+	if ($IR_version == 1){
+	    my @files=glob("to_combine/*.IR"); 
+	    foreach my $file (@files){
+		my ($root)=$file=~/.+\/(.+?)\.IR/;
+		next if (!defined $group{$root});
+		$N_IR++; 
+		
+		verbPrint "  Processing $file\n";
+		open (I, $file);
+		$IR_head=<I>;
+		while (<I>){
+		    chomp;
+		    my @temp=split(/\t/,$_);
+		    my $event=$temp[0];
+		    for my $i (1..$#temp){
+			$IR{$group{$root}}{$event}[$i]+=$temp[$i];
+		    }
 		}
+		close I;
+		system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	    }
-	    close I;
-	    system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	}
-    }
-    elsif ($IR_version == 2){
-	my @files=glob("to_combine/*.IR2"); 
-	foreach my $file (@files){
-	    my ($root)=$file=~/.+\/(.+?)\.IR2/;
-	    next if (!defined $group{$root});
-	    $N_IR++; 
+	elsif ($IR_version == 2){
+	    my @files=glob("to_combine/*.IR2"); 
+	    foreach my $file (@files){
+		my ($root)=$file=~/.+\/(.+?)\.IR2/;
+		next if (!defined $group{$root});
+		$N_IR++; 
+		
+		verbPrint "  Processing $file\n";
+		open (I, $file);
+		$IR_head=<I>;
+		while (<I>){
+		    chomp;
+		    my @temp=split(/\t/,$_);
+		    my $event=$temp[0];
+		    for my $i (1..$#temp){
+			$IR{$group{$root}}{$event}[$i]+=$temp[$i];
+		    }
+		}
+		close I;
+		system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
+	    }
 	    
-	    verbPrint "  Processing $file\n";
-	    open (I, $file);
-	    $IR_head=<I>;
-	    while (<I>){
-		chomp;
-		my @temp=split(/\t/,$_);
-		my $event=$temp[0];
-		for my $i (1..$#temp){
-		    $IR{$group{$root}}{$event}[$i]+=$temp[$i];
+	    verbPrint "Loading IR.summary_v2.txt files\n"; # only in v2
+	    @files=glob("to_combine/*.IR.summary_v2.txt"); 
+	    foreach my $file (@files){
+		my ($root)=$file=~/.+\/(.+?)\.IR.summary_v2/;
+		next if (!defined $group{$root});
+		$N_IRsum++;
+		
+		verbPrint "  Processing $file\n";
+		open (I, $file) || errPrintDie "Can't open $file\n";
+		$IRsum_head=<I>;
+		while (<I>){
+		    chomp($_);
+		    my @temp=split(/\t/,$_);
+		    my $event=$temp[0];
+		    for my $i (1..$#temp){
+			$IRsum{$group{$root}}{$event}[$i]+=$temp[$i] unless ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+			$IRsum{$group{$root}}{$event}[$i]=$temp[$i] if ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+		    }
 		}
+		close I;
+		system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	    }
-	    close I;
-	    system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
-	}
-	
-	verbPrint "Loading IR.summary_v2.txt files\n"; # only in v2
-	@files=glob("to_combine/*.IR.summary_v2.txt"); 
-	foreach my $file (@files){
-	    my ($root)=$file=~/.+\/(.+?)\.IR.summary_v2/;
-	    next if (!defined $group{$root});
-	    $N_IRsum++;
-
-	    verbPrint "  Processing $file\n";
-	    open (I, $file) || errPrintDie "Can't open $file\n";
-	    $IRsum_head=<I>;
-	    while (<I>){
-		chomp($_);
-		my @temp=split(/\t/,$_);
-		my $event=$temp[0];
-		for my $i (1..$#temp){
-		    $IRsum{$group{$root}}{$event}[$i]+=$temp[$i] unless ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
-		    $IRsum{$group{$root}}{$event}[$i]=$temp[$i] if ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
-		}
-	    }
-	    close I;
-	    system "mv $file to_combine/PARTS/" if (defined $move_to_PARTS);
 	}
     }
     
@@ -422,8 +427,8 @@ unless (defined $exprONLY){
 
 ### Doing sample number check
     errPrintDie "Different number of samples in each Cassette module\n" if $N_EXSK != $N_MULTI || $N_EXSK != $N_MIC || $N_EXSK != $N_EEJ;
-    errPrintDie "Different number of samples in each IR file\n" if $N_IR != $N_IRsum && $IR_version == 2;
-    verbPrint "Warning: Number of IR samples doesn't match those of other events\n" if $N_IR != $N_EXSK;
+    errPrintDie "Different number of samples in each IR file\n" if ($N_IR != $N_IRsum && $IR_version == 2 && !defined $noIR);
+    verbPrint "Warning: Number of IR samples doesn't match those of other events\n" if ($N_IR != $N_EXSK && !defined $noIR);
     verbPrint "Warning: Number of EXPR samples ($N_expr) doesn't match those of other events ($N_EXSK)\n" if $N_expr != $N_EXSK && (defined $expr);
 } 
 
@@ -450,31 +455,33 @@ foreach my $group (sort keys %list){
     }
     unless (defined $exprONLY){
 	### IR
-	if ($IR_version == 1){
-	    next if (-e "to_combine/$group.IR");
-	    open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
-	    print IR "$IR_head";
-	    foreach my $ev (sort keys %{$IR{$group}}){
-		print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+	if (!defined $noIR){
+	    if ($IR_version == 1){
+		next if (-e "to_combine/$group.IR");
+		open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
+		print IR "$IR_head";
+		foreach my $ev (sort keys %{$IR{$group}}){
+		    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+		}
+		close IR;
 	    }
-	    close IR;
-	}
-	elsif ($IR_version == 2){
-	    next if (-e "to_combine/$group.IR2");
-	    open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
-	    print IR "$IR_head";
-	    foreach my $ev (sort keys %{$IR{$group}}){
-		print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+	    elsif ($IR_version == 2){
+		next if (-e "to_combine/$group.IR2");
+		open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
+		print IR "$IR_head";
+		foreach my $ev (sort keys %{$IR{$group}}){
+		    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+		}
+		close IR;
+		### IRsum (only v2)
+		next if (-e "to_combine/$group.IR.summary_v2.txt");
+		open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
+		print IRsum "$IRsum_head";
+		foreach my $ev (sort keys %{$IRsum{$group}}){
+		    print IRsum "$ev\t$IRsum{$group}{$ev}[1]\t$IRsum{$group}{$ev}[2]\t$IRsum{$group}{$ev}[3]\t$IRsum{$group}{$ev}[4]\t$IRsum{$group}{$ev}[5]\t$IRsum{$group}{$ev}[6]\n";
+		}
+		close IRsum;
 	    }
-	    close IR;
-	    ### IRsum (only v2)
-	    next if (-e "to_combine/$group.IR.summary_v2.txt");
-	    open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
-	    print IRsum "$IRsum_head";
-	    foreach my $ev (sort keys %{$IRsum{$group}}){
-		print IRsum "$ev\t$IRsum{$group}{$ev}[1]\t$IRsum{$group}{$ev}[2]\t$IRsum{$group}{$ev}[3]\t$IRsum{$group}{$ev}[4]\t$IRsum{$group}{$ev}[5]\t$IRsum{$group}{$ev}[6]\n";
-	    }
-	    close IRsum;
 	}
 	### MIC
 	next if (-e "to_combine/$group.micX");
