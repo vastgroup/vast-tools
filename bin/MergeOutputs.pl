@@ -436,45 +436,47 @@ unless (defined $exprONLY){
 verbPrint "Printing group files\n";
 foreach my $group (sort keys %list){
     verbPrint ">>> $group\n";
-
     ### EXPR
     if (defined $expr){
-	next if (-e "expr_out/$group.cRPKM");
-	open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file"; 
-	foreach my $g (sort keys %{$READS_EXPR{$group}}){
-	    my $cRPKM = "";
-	    if ($READS_EXPR{$group}{$g} eq "NA" || $eff{$g}==0){
-		$cRPKM="NA";
-	    }
-	    else {
+	unless (-e "expr_out/$group.cRPKM"){
+	    open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file"; 
+	    foreach my $g (sort keys %{$READS_EXPR{$group}}){
+		my $cRPKM = "";
+		if ($READS_EXPR{$group}{$g} eq "NA" || $eff{$g}==0){
+		    $cRPKM="NA";
+		}
+		else {
 		$cRPKM=sprintf("%.2f",1000000*(1000*$READS_EXPR{$group}{$g}/$eff{$g})/$TOTAL_READS_EXPR{$group}); 
+		}
+		print EXPR "$g\t$cRPKM\t$READS_EXPR{$group}{$g}\n";
 	    }
-	    print EXPR "$g\t$cRPKM\t$READS_EXPR{$group}{$g}\n";
+	    close EXPR;
 	}
-	close EXPR;
     }
     unless (defined $exprONLY){
 	### IR
 	if (!defined $noIR){
-	    if ($IR_version == 1){
-		next if (-e "to_combine/$group.IR");
-		open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
-		print IR "$IR_head";
-		foreach my $ev (sort keys %{$IR{$group}}){
-		    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
-		}
-		close IR;
-	    }
-	    elsif ($IR_version == 2){
-		next if (-e "to_combine/$group.IR2");
+	  if ($IR_version == 1){
+	    	unless (-e "to_combine/$group.IR"){
+			open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
+			print IR "$IR_head";
+			foreach my $ev (sort keys %{$IR{$group}}){
+			    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+			}
+			close IR;
+	    	}
+	}
+	elsif ($IR_version == 2){
+	    unless (-e "to_combine/$group.IR2"){
 		open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
 		print IR "$IR_head";
 		foreach my $ev (sort keys %{$IR{$group}}){
 		    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
 		}
 		close IR;
-		### IRsum (only v2)
-		next if (-e "to_combine/$group.IR.summary_v2.txt");
+	    }
+	    ### IRsum (only v2)
+	    unless (-e "to_combine/$group.IR.summary_v2.txt"){
 		open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
 		print IRsum "$IRsum_head";
 		foreach my $ev (sort keys %{$IRsum{$group}}){
@@ -484,95 +486,99 @@ foreach my $group (sort keys %list){
 	    }
 	}
 	### MIC
-	next if (-e "to_combine/$group.micX");
-	open (MIC, ">to_combine/$group.micX") || errPrintDie "Cannot open micX output file";
-	print MIC "$MIC_head";
-	foreach my $ev (sort keys %{$MIC{$group}}){
-	    my $PSI_MIC_new = "";
-	    if ($MIC{$group}{$ev}[10] ne "NA" && $MIC{$group}{$ev}[9] ne "NA"){
-		if (($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9])>0){
-		    $PSI_MIC_new=sprintf("%.2f",100*$MIC{$group}{$ev}[10]/($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9]));
+	unless (-e "to_combine/$group.micX"){
+	    open (MIC, ">to_combine/$group.micX") || errPrintDie "Cannot open micX output file";
+	    print MIC "$MIC_head";
+	    foreach my $ev (sort keys %{$MIC{$group}}){
+		my $PSI_MIC_new = "";
+		if ($MIC{$group}{$ev}[10] ne "NA" && $MIC{$group}{$ev}[9] ne "NA"){
+		    if (($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9])>0){
+			$PSI_MIC_new=sprintf("%.2f",100*$MIC{$group}{$ev}[10]/($MIC{$group}{$ev}[10]+$MIC{$group}{$ev}[9]));
+		    }
+		    else {
+			$PSI_MIC_new="NA";
+		    }
 		}
 		else {
 		    $PSI_MIC_new="NA";
 		}
+		print MIC "$dataMIC{$ev}\t$PSI_MIC_new\t$MIC{$group}{$ev}[7]\t$MIC{$group}{$ev}[8]\t$MIC{$group}{$ev}[9]\t$MIC{$group}{$ev}[10]\n";
 	    }
-	    else {
-		$PSI_MIC_new="NA";
-	    }
-	    print MIC "$dataMIC{$ev}\t$PSI_MIC_new\t$MIC{$group}{$ev}[7]\t$MIC{$group}{$ev}[8]\t$MIC{$group}{$ev}[9]\t$MIC{$group}{$ev}[10]\n";
+	    close MIC;
 	}
-	close MIC;
 	### EXSK
-	next if (-e "to_combine/$group.exskX");
-	open (EXSK, ">to_combine/$group.exskX") || errPrintDie "Cannot open exskX output file";
-	print EXSK "$EXSK_head";
-	foreach my $ev (sort keys %{$EXSK{$group}}){
-	    my $PSI_EXSK_new = "";
-	    if (($EXSK{$group}{$ev}[19]+($EXSK{$group}{$ev}[20]+$EXSK{$group}{$ev}[21])/2)>0){
-		$PSI_EXSK_new=sprintf("%.2f",100*($EXSK{$group}{$ev}[20]+$EXSK{$group}{$ev}[21])/(($EXSK{$group}{$ev}[20]+$EXSK{$group}{$ev}[21])+2*$EXSK{$group}{$ev}[19]));
+	unless (-e "to_combine/$group.exskX"){
+	    open (EXSK, ">to_combine/$group.exskX") || errPrintDie "Cannot open exskX output file";
+	    print EXSK "$EXSK_head";
+	    foreach my $ev (sort keys %{$EXSK{$group}}){
+		my $PSI_EXSK_new = "";
+		if (($EXSK{$group}{$ev}[19]+($EXSK{$group}{$ev}[20]+$EXSK{$group}{$ev}[21])/2)>0){
+		    $PSI_EXSK_new=sprintf("%.2f",100*($EXSK{$group}{$ev}[20]+$EXSK{$group}{$ev}[21])/(($EXSK{$group}{$ev}[20]+$EXSK{$group}{$ev}[21])+2*$EXSK{$group}{$ev}[19]));
+		}
+		else {
+		    $PSI_EXSK_new="NA";
+		}
+		print EXSK "$dataEXSK_pre{$ev}\t$PSI_EXSK_new\t$EXSK{$group}{$ev}[13]\t$EXSK{$group}{$ev}[14]".
+		    "\t$EXSK{$group}{$ev}[15]\t$EXSK{$group}{$ev}[16]\t.\tS\t$EXSK{$group}{$ev}[19]\t$EXSK{$group}{$ev}[20]".
+		    "\t$EXSK{$group}{$ev}[21]\t$dataEXSK_post{$ev}\n";
 	    }
-	    else {
-		$PSI_EXSK_new="NA";
-	    }
-	    print EXSK "$dataEXSK_pre{$ev}\t$PSI_EXSK_new\t$EXSK{$group}{$ev}[13]\t$EXSK{$group}{$ev}[14]".
-		"\t$EXSK{$group}{$ev}[15]\t$EXSK{$group}{$ev}[16]\t.\tS\t$EXSK{$group}{$ev}[19]\t$EXSK{$group}{$ev}[20]".
-		"\t$EXSK{$group}{$ev}[21]\t$dataEXSK_post{$ev}\n";
+	    close EXSK;
 	}
-	close EXSK;
 	### MULTI
-	next if (-e "to_combine/$group.MULTI3X");
-	open (MULTI, ">to_combine/$group.MULTI3X") || errPrintDie "Cannot open MULTI3X output file";
-	print MULTI "$MULTI_head";
-	foreach my $ev (sort keys %{$MULTIa{$group}}){
-	    my $PSI_MULTI_new = "";
-	    if ((($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0])>0){
-		$PSI_MULTI_new=sprintf("%.2f",100*($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])/(($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0]));
+	unless (-e "to_combine/$group.MULTI3X"){
+	    open (MULTI, ">to_combine/$group.MULTI3X") || errPrintDie "Cannot open MULTI3X output file";
+	    print MULTI "$MULTI_head";
+	    foreach my $ev (sort keys %{$MULTIa{$group}}){
+		my $PSI_MULTI_new = "";
+		if ((($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0])>0){
+		    $PSI_MULTI_new=sprintf("%.2f",100*($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])/(($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0]));
+		}
+		else {
+		    $PSI_MULTI_new="NA";
+		}
+		
+		### Recalculates complexity
+		$MULTIb{$group}{$ev}[19][2]=0 if (!defined $MULTIb{$group}{$ev}[19][2]);
+		$MULTIb{$group}{$ev}[20][2]=0 if (!defined $MULTIb{$group}{$ev}[20][2]);
+		$MULTIb{$group}{$ev}[21][2]=0 if (!defined $MULTIb{$group}{$ev}[21][2]);	    
+		
+		my $from_S=$MULTIb{$group}{$ev}[19][2]+$MULTIb{$group}{$ev}[20][2]+$MULTIb{$group}{$ev}[21][2]; # reads coming only from the reference EEJs (refI1, refI2 and refE)
+		my $from_C=($MULTIb{$group}{$ev}[19][0]+$MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])-$from_S; # all other reads
+		my $Q;
+		if ($from_C > ($from_C+$from_S)/2) {$Q="C3";}
+		elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q="C2";}
+		elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q="C1";}
+		else {$Q="S";}
+		
+		$MULTIa{$group}{$ev}[13]="" if (!defined $MULTIa{$group}{$ev}[13]);
+		$MULTIa{$group}{$ev}[14]="" if (!defined $MULTIa{$group}{$ev}[14]);
+		$MULTIa{$group}{$ev}[15]="" if (!defined $MULTIa{$group}{$ev}[15]);	    
+		$MULTIa{$group}{$ev}[16]="" if (!defined $MULTIa{$group}{$ev}[16]);
+		$dataMULTI_pre{$ev}="" if (!defined $dataMULTI_pre{$ev});
+		$dataMULTI_mid{$ev}="" if (!defined $dataMULTI_mid{$ev});
+		$MULTIb{$group}{$ev}[19][1]=0 if (!defined $MULTIb{$group}{$ev}[19][1]);
+		$MULTIb{$group}{$ev}[20][1]=0 if (!defined $MULTIb{$group}{$ev}[20][1]);
+		$MULTIb{$group}{$ev}[21][1]=0 if (!defined $MULTIb{$group}{$ev}[21][1]);
+		
+		print MULTI "$dataMULTI_pre{$ev}\t$PSI_MULTI_new\t$MULTIa{$group}{$ev}[13]\t$MULTIa{$group}{$ev}[14]\t$MULTIa{$group}{$ev}[15]\t$MULTIa{$group}{$ev}[16]\t$dataMULTI_mid{$ev}\t".
+		    "$MULTIb{$group}{$ev}[19][0]=$MULTIb{$group}{$ev}[19][1]=$MULTIb{$group}{$ev}[19][2]\t".
+		    "$MULTIb{$group}{$ev}[20][0]=$MULTIb{$group}{$ev}[20][1]=$MULTIb{$group}{$ev}[20][2]\t".
+		    "$MULTIb{$group}{$ev}[21][0]=$MULTIb{$group}{$ev}[21][1]=$MULTIb{$group}{$ev}[21][2]\t".
+		    "$Q\t$dataMULTI_post{$ev}\n";
 	    }
-	    else {
-		$PSI_MULTI_new="NA";
-	    }
-	    
-	    ### Recalculates complexity
-	    $MULTIb{$group}{$ev}[19][2]=0 if (!defined $MULTIb{$group}{$ev}[19][2]);
-	    $MULTIb{$group}{$ev}[20][2]=0 if (!defined $MULTIb{$group}{$ev}[20][2]);
-	    $MULTIb{$group}{$ev}[21][2]=0 if (!defined $MULTIb{$group}{$ev}[21][2]);	    
-
-	    my $from_S=$MULTIb{$group}{$ev}[19][2]+$MULTIb{$group}{$ev}[20][2]+$MULTIb{$group}{$ev}[21][2]; # reads coming only from the reference EEJs (refI1, refI2 and refE)
-	    my $from_C=($MULTIb{$group}{$ev}[19][0]+$MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])-$from_S; # all other reads
-	    my $Q;
-	    if ($from_C > ($from_C+$from_S)/2) {$Q="C3";}
-	    elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q="C2";}
-	    elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q="C1";}
-	    else {$Q="S";}
-	    
-	    $MULTIa{$group}{$ev}[13]="" if (!defined $MULTIa{$group}{$ev}[13]);
-	    $MULTIa{$group}{$ev}[14]="" if (!defined $MULTIa{$group}{$ev}[14]);
-	    $MULTIa{$group}{$ev}[15]="" if (!defined $MULTIa{$group}{$ev}[15]);	    
-	    $MULTIa{$group}{$ev}[16]="" if (!defined $MULTIa{$group}{$ev}[16]);
-	    $dataMULTI_pre{$ev}="" if (!defined $dataMULTI_pre{$ev});
-	    $dataMULTI_mid{$ev}="" if (!defined $dataMULTI_mid{$ev});
-	    $MULTIb{$group}{$ev}[19][1]=0 if (!defined $MULTIb{$group}{$ev}[19][1]);
-	    $MULTIb{$group}{$ev}[20][1]=0 if (!defined $MULTIb{$group}{$ev}[20][1]);
-	    $MULTIb{$group}{$ev}[21][1]=0 if (!defined $MULTIb{$group}{$ev}[21][1]);
-	    
-	    print MULTI "$dataMULTI_pre{$ev}\t$PSI_MULTI_new\t$MULTIa{$group}{$ev}[13]\t$MULTIa{$group}{$ev}[14]\t$MULTIa{$group}{$ev}[15]\t$MULTIa{$group}{$ev}[16]\t$dataMULTI_mid{$ev}\t".
-		"$MULTIb{$group}{$ev}[19][0]=$MULTIb{$group}{$ev}[19][1]=$MULTIb{$group}{$ev}[19][2]\t".
-		"$MULTIb{$group}{$ev}[20][0]=$MULTIb{$group}{$ev}[20][1]=$MULTIb{$group}{$ev}[20][2]\t".
-		"$MULTIb{$group}{$ev}[21][0]=$MULTIb{$group}{$ev}[21][1]=$MULTIb{$group}{$ev}[21][2]\t".
-		"$Q\t$dataMULTI_post{$ev}\n";
+	    close MULTI;
 	}
-	close MULTI;
 	### EEJ2
-	next if (-e "to_combine/$group.eej2");
-	open (EEJ2, ">to_combine/$group.eej2") || errPrintDie "Cannot open eej2 output file";
-	foreach my $ev (sort keys %{$EEJ{$group}}){
-	    my $pos="";
-	    for my $i (0..$#{$EEJpositions{$group}{$ev}}){
-		$pos.="$i:$EEJpositions{$group}{$ev}[$i]," if $EEJpositions{$group}{$ev}[$i];
+	unless (-e "to_combine/$group.eej2"){
+	    open (EEJ2, ">to_combine/$group.eej2") || errPrintDie "Cannot open eej2 output file";
+	    foreach my $ev (sort keys %{$EEJ{$group}}){
+		my $pos="";
+		for my $i (0..$#{$EEJpositions{$group}{$ev}}){
+		    $pos.="$i:$EEJpositions{$group}{$ev}[$i]," if $EEJpositions{$group}{$ev}[$i];
+		}
+		chop($pos);
+		print EEJ2 "$ev\t$EEJ{$group}{$ev}\tNA\t$pos\n";
 	    }
-	    chop($pos);
-	    print EEJ2 "$ev\t$EEJ{$group}{$ev}\tNA\t$pos\n";
 	}
     }
 }
