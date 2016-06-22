@@ -89,15 +89,15 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 
 For manual, install human (hsa), mouse (mmu), chicken (gga), or all of them to any location by:
 
-Human (hg19) - 6.2G [vastdb.hsa.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz):
+Human (hg19) - 6.2G [vastdb.hsa.22.06.16.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.22.06.16.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.hsa.13.11.15.tar.gz
-> tar xzvf vastdb.hsa.13.11.15.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.hsa.22.06.16.tar.gz
+> tar xzvf vastdb.hsa.22.06.16.tar.gz
 ~~~~
-Mouse (mm9) - 5.6G [vastdb.mmu.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.13.11.15.tar.gz):
+Mouse (mm9) - 5.6G [vastdb.mmu.22.06.16.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.22.06.16.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.mmu.13.11.15.tar.gz
-> tar xzvf vastdb.mmu.13.11.15.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.mmu.22.06.16.tar.gz
+> tar xzvf vastdb.mmu.22.06.16.tar.gz
 ~~~~
 Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz):
 ~~~~
@@ -254,6 +254,7 @@ Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`)
 directory found in <output_dir>/to_combine/, to form one final table in the main
 <output_dir> folder.  This is the file you give to ``compare`` or ``diff`` in the case that you
 intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined. In addition, the version of intron retention used in ``align`` needs can be specified using ``--IR_version``. 
+From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This need to be provided using the ``-a`` option. (Output in mm10 and hg38 need an extra file in VASTDB. If you have downloaded a VASTDB version older than vastdb.*.22.06.16, you will need to download the following patch: [PATCH_mm10-hg38.tar.gz](http://vastdb.crg.eu/libs/PATCH_mm10-hg38.tar.gz)
 
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga] --IR_version [1|2]
