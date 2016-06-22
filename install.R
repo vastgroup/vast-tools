@@ -27,8 +27,8 @@ downloadDb <- function(speUrl, speFile) {
    }
 }
 
-humanDbFile <- "vastdb.hsa.13.11.15.tar.gz"
-mouseDbFile <- "vastdb.mmu.13.11.15.tar.gz"
+humanDbFile <- "vastdb.hsa.22.06.16.tar.gz"
+mouseDbFile <- "vastdb.mmu.22.06.16.tar.gz"
 chickenDbFile <- "vastdb.gga.13.11.15.tar.gz"
 
 
