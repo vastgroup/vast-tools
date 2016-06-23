@@ -77,11 +77,13 @@ Combine multiple samples analyzed using \"vast-tools align\" into a single summa
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 	-sp Hsa/Mmu/etc		Species selection (mandatory)
-	-a			Choice of assembly the output coordinates are defined in (available only for -sp Hsa or Mmu) 
+	-a			Genome assembly of the output coordinates (only for -sp Hsa or Mmu) 
 				For -sp Hsa: hg19 or hg38, (default hg19)
-				    - vast-tools works internally with hg19; if you choose hg38, the output gets lifted-over to hg38
+				    - vast-tools works internally with hg19; 
+                                      if you choose hg38, the output gets lifted-over to hg38
 				For -sp Mmu: mm9 or mm10, (default mm9)
-				    - vast-tools will work internally with mm9; if you choose mm10, the output gets lifted-over to mm10
+				    - vast-tools will work internally with mm9; 
+                                      if you choose mm10, the output gets lifted-over to mm10
 	--noIR			Don't run intron retention pipeline (default off)
         --IR_version 1/2        Version of the IR analysis (default 2)
 	--dbDir DBDIR		Database directory
