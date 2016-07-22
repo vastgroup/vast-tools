@@ -237,7 +237,9 @@ Sub_sample_B2	Sample_B
 ...
 ~~~~
 
-And it will merge the outputs of subsamples A1, A2 and A3 into a new Sample_A set of outputs that can then be used for combine.
+The subsample names must be identical to the first part of the file names of the RNAseq data before the first occurrence of a dot in the file name; usually everything until the file ending .fq.gz .
+For paired-end RNAseq data, the subsample name is defined by the first RNAseq file used during the align step.
+``vast-tools merge`` will then merge the outputs of subsamples A1, A2 and A3 into a new Sample_A set of outputs that can then be used for combine.
 
 ~~~~
 > vast-tools merge --groups config_file
