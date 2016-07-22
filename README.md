@@ -226,7 +226,7 @@ Finally, from `vast-tools v1.0.0` it is possible to calculate intron retention u
 
 ``vast-tools merge`` can be used to pull the ``align`` outputs from various samples together into a new set of output files. This can be used to merge replicates when the read coverage for the independent replicates is not deep enough for a proper AS analysis. Unlike gene expression analysis, where 20-30 million reads is usually enough, differential AS analyses require deep sequencing coverage. Otherwise, only PSIs for AS events in highly expressed genes will be confidentely estimated, biasing the results. Since VAST-TOOLS uses only junction reads for quantification, we recommend at least 70 million reads per sample, and ideally >150 million reads. In our experience, the fraction of AS events whose PSI can be confidently estimated with VAST-TOOLS scales linearly with both read depth and length (specially if paired end) up to 200-300 million reads (depending on library complexity, read length, etc.). ``vast-tools merge`` is OPTIONAL; it is not needed in order to run ``vast-tools combine``.
 
-``vast-tools merge`` needs a configuration file  that is provided through the ``--groups`` option. This file must have the following format: 
+``vast-tools merge`` needs a configuration file  that is provided through the ``--groups`` option. This file must have two TAB-separated columns like this:
 
 ~~~~
 Sub_sample_A1	Sample_A
@@ -237,7 +237,7 @@ Sub_sample_B2	Sample_B
 ...
 ~~~~
 
-And it will merge the outputs of subsamples A1, A2 and A3 into a new Sample_A set of outputs that can then be used for combine. 
+And it will merge the outputs of subsamples A1, A2 and A3 into a new Sample_A set of outputs that can then be used for combine.
 
 ~~~~
 > vast-tools merge --groups config_file
