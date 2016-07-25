@@ -27,7 +27,7 @@ my $IR_version = 2;  # either 1 or 2
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 
-my $asmbly;          # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
+my $asmbly;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
  
 GetOptions("help"  	 => \$helpFlag,
 	   "dbDir=s"     => \$dbDir,
@@ -121,9 +121,13 @@ mkdir("raw_reads") unless (-e "raw_reads"); # ^
 ### Settings:
 errPrintDie "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
 
-# get assembly specification for human
-if( $sp eq "Hsa" ){if(!defined($asmbly)){$asmbly="hg19";} unless($asmbly =~ /(hg19|hg38)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
-if( $sp eq "Mmu" ){if(!defined($asmbly)){$asmbly="mm9";} unless($asmbly =~ /(mm9|mm10)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
+# if species is not human nor mouse, we override $asmbly ignoring potential user input
+if($sp ne "Hsa" && $sp ne "Mmu"){$asmbly="";}
+# get assembly specification for human and mouse
+if( $sp eq "Hsa" ){if(!defined($asmbly)){$asmbly="hg19";}; unless($asmbly =~ /(hg19|hg38)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
+if( $sp eq "Mmu" ){if(!defined($asmbly)){$asmbly="mm9";};  unless($asmbly =~ /(mm9|mm10)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
+# we add leading "-" for convenience during defining output file name later 
+if($asmbly ne ""){$asmbly="-".$asmbly;}
 
 
 my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
@@ -205,14 +209,14 @@ if ($N != 0) {
 	push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
     }
     
-    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N-$asmbly.tab";
+    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N$asmbly.tab";
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
     
     # lift-over if necessary (hg19->hg38 or mm9->mm10)
     if( $asmbly=~/(hg38|mm10)/ ){
     	# select liftOvr dictionary
-    	my $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; if($asmbly eq "mm10"){$dictionary="lftOvr_dict_from_mm9_to_mm10.pdat";}
+    	my $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; if($asmbly=~/mm10/){$dictionary="lftOvr_dict_from_mm9_to_mm10.pdat";}
     	# do liftOvr
     	sysErrMsg "$binPath/LftOvr_INCLUSION_LEVELS_FULL.pl translate $finalOutput $dbDir/FILES/$dictionary ${finalOutput}.lifted";
     	# move files
