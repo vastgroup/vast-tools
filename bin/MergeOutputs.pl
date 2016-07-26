@@ -121,11 +121,6 @@ chdir($folder) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $folder";
 
 
-if (defined $move_to_PARTS){
-    system "mkdir to_combine/PARTS" unless (-e "to_combine/PARTS");
-    system "mkdir expr_out/PARTS" unless (-e "expr_out/PARTS") || (!defined $expr);    
-}
-
 my %group;
 my %list;
 
@@ -139,8 +134,33 @@ while (<GROUPS>){
     my @temp = split(/\t/,$_);
     $group{$temp[0]}=$temp[1];
     $list{$temp[1]}=1;
+    
+    # check if all necessary files exists; if not the groups file might contain incorrect subsample names
+    my $tmp_file="expr_out/${temp[0]}.cRPKM";
+    if($expr && !(-e $tmp_file)){errPrintDie "File $tmp_file does not exist. Probable reason: wrong subsample names in group-definition file OR vast-tools align was run without mapping for expression analysis.";}
+    unless(defined $exprONLY){
+    	 $tmp_file="to_combine/${temp[0]}.IR";if($IR_version==2){$tmp_file="to_combine/${temp[0]}.IR2"};
+	 if(!defined $noIR && !(-e $tmp_file)){goto STOPSCRIPT;}
+    	 $tmp_file="to_combine/${temp[0]}.IR.summary_v2.txt";
+    	 if(!defined $noIR && $IR_version==2 && !(-e $tmp_file)){goto STOPSCRIPT;}
+	 foreach $tmp_file (("to_combine/${temp[0]}.micX"
+	 		    ,"to_combine/${temp[0]}.eej2"
+	 		    ,"to_combine/${temp[0]}.exskX"
+	 		    ,"to_combine/${temp[0]}.MULTI3X")){
+	 	if(!(-e $tmp_file)){goto STOPSCRIPT;}	 	
+	 }
+    }
+    $tmp_file=0;
+    STOPSCRIPT: if($tmp_file){errPrintDie "File $tmp_file does not exist. Probable reason: wrong subsample names in group-definition file.";}
 }
 close GROUPS;
+
+
+if (defined $move_to_PARTS){
+    system "mkdir to_combine/PARTS" unless (-e "to_combine/PARTS");
+    system "mkdir expr_out/PARTS" unless (-e "expr_out/PARTS") || (!defined $expr);    
+}
+
 
 ### variables for merging:
 my $N_expr = 0; # number of merged expression files
