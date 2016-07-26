@@ -446,7 +446,7 @@ foreach my $group (sort keys %list){
 		    $cRPKM="NA";
 		}
 		else {
-		$cRPKM=sprintf("%.2f",1000000*(1000*$READS_EXPR{$group}{$g}/$eff{$g})/$TOTAL_READS_EXPR{$group}); 
+		    $cRPKM=sprintf("%.2f",1000000*(1000*$READS_EXPR{$group}{$g}/$eff{$g})/$TOTAL_READS_EXPR{$group}); 
 		}
 		print EXPR "$g\t$cRPKM\t$READS_EXPR{$group}{$g}\n";
 	    }
@@ -456,33 +456,34 @@ foreach my $group (sort keys %list){
     unless (defined $exprONLY){
 	### IR
 	if (!defined $noIR){
-	  if ($IR_version == 1){
+	    if ($IR_version == 1){
 	    	unless (-e "to_combine/$group.IR"){
-			open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
-			print IR "$IR_head";
-			foreach my $ev (sort keys %{$IR{$group}}){
-			    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
-			}
-			close IR;
+		    open (IR, ">to_combine/$group.IR") || errPrintDie "Cannot open IR output file";
+		    print IR "$IR_head";
+		    foreach my $ev (sort keys %{$IR{$group}}){
+			print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+		    }
+		    close IR;
 	    	}
-	}
-	elsif ($IR_version == 2){
-	    unless (-e "to_combine/$group.IR2"){
-		open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
-		print IR "$IR_head";
-		foreach my $ev (sort keys %{$IR{$group}}){
-		    print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
-		}
-		close IR;
 	    }
-	    ### IRsum (only v2)
-	    unless (-e "to_combine/$group.IR.summary_v2.txt"){
-		open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
-		print IRsum "$IRsum_head";
-		foreach my $ev (sort keys %{$IRsum{$group}}){
-		    print IRsum "$ev\t$IRsum{$group}{$ev}[1]\t$IRsum{$group}{$ev}[2]\t$IRsum{$group}{$ev}[3]\t$IRsum{$group}{$ev}[4]\t$IRsum{$group}{$ev}[5]\t$IRsum{$group}{$ev}[6]\n";
+	    elsif ($IR_version == 2){
+		unless (-e "to_combine/$group.IR2"){
+		    open (IR, ">to_combine/$group.IR2") || errPrintDie "Cannot open IR output file";
+		    print IR "$IR_head";
+		    foreach my $ev (sort keys %{$IR{$group}}){
+			print IR "$ev\t$IR{$group}{$ev}[1]\t$IR{$group}{$ev}[2]\t$IR{$group}{$ev}[3]\t$IR{$group}{$ev}[4]\n";
+		    }
+		    close IR;
 		}
-		close IRsum;
+		### IRsum (only v2)
+		unless (-e "to_combine/$group.IR.summary_v2.txt"){
+		    open (IRsum, ">to_combine/$group.IR.summary_v2.txt") || errPrintDie "Cannot open IRsum output file";
+		    print IRsum "$IRsum_head";
+		    foreach my $ev (sort keys %{$IRsum{$group}}){
+			print IRsum "$ev\t$IRsum{$group}{$ev}[1]\t$IRsum{$group}{$ev}[2]\t$IRsum{$group}{$ev}[3]\t$IRsum{$group}{$ev}[4]\t$IRsum{$group}{$ev}[5]\t$IRsum{$group}{$ev}[6]\n";
+		    }
+		    close IRsum;
+		}
 	    }
 	}
 	### MIC
