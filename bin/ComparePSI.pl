@@ -146,7 +146,51 @@ $repB = $#samplesB+1;
 # for paired (repA must be the same as repB)
 errPrintDie "If paired comparison, the number of replicates must be the same\n" if (defined $paired) && ($repA != $repB);
 
+### To get the folder in which the input file is
+($folder) = $input_file =~/(.+)\//; # empty if no match (i.e. local folder)
+$folder = "." unless (defined $folder);
 
+
+#### opens INCLUSION TABLE
+open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
+
+# Common for all numbers of replicates
+# preparing the head
+my $head_row=<PSI>;
+chomp($head_row);
+my @head=split(/\t/,$head_row);
+foreach my $i (6..$#head){
+    if ($i%2==0){ # to match sample names with column number
+	foreach my $j (0..$#samplesA){
+	    $samplesA[$j] = $i if $samplesA[$j] eq $head[$i];
+	}
+	foreach my $j (0..$#samplesB){
+	    $samplesB[$j] = $i if $samplesB[$j] eq $head[$i];
+	}
+    }
+}
+# check that columns provided are 0-based OR
+# if names were provided, that all columns were properly matched
+my $kill_0based;
+my $kill_6lower;
+foreach my $s (@samplesA){
+    $kill_0based = 1 if $s%2 != 0;
+    $kill_6lower = 1 if $s < 6;
+}
+foreach my $s (@samplesB){
+    $kill_0based = 1 if $s%2 != 0;
+    $kill_6lower = 1 if $s < 6;
+}
+errPrintDie "Column numbers do not seem 0-based or conversion did not work properly\n" if (defined $kill_0based);
+errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (defined $kill_6lower);
+
+# gets representative names
+my $name_A=$head[$samplesA[0]];
+my $name_B=$head[$samplesB[0]];
+$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a" or "_1", but if it's only one, it's left as is
+$name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
+
+####### Output file
 # defining default output file name
 my ($root)=$ARGV[0]=~/.+\-(.+?)\./;
 my $tail = ""; # to be added to the output name
@@ -154,15 +198,12 @@ $tail.="-range$min_range" if (defined $min_range);
 $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
 $tail.="-paired" if (defined $paired);
+$tail.="_$name_A-vs-$name_B";
 my $out_root="$root-dPSI$min_dPSI$tail";
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
+open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
 
-
-### To get the folder in which the input file is
-($folder) = $input_file =~/(.+)\//; # empty if no match (i.e. local folder)
-$folder = "." unless (defined $folder);
-
-# prepare to obtain gene IDs for GO analyses
+#### prepare to obtain gene IDs for GO analyses
 my %ID_gene;
 if (defined $get_GO){
     
@@ -182,53 +223,15 @@ if (defined $get_GO){
     open (EXSK, ">$folder/AltEx-$out_root.txt") or errPrintDie "Can't open GO output files";
 }
 
-open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
-open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
-
-### Common for all numbers of replicates
-# preparing the head
-my $head_row=<PSI>;
-chomp($head_row);
-my @head=split(/\t/,$head_row);
-foreach my $i (6..$#head){
-    if ($i%2==0){ # to match sample names with column number
-	foreach my $j (0..$#samplesA){
-	    $samplesA[$j] = $i if $samplesA[$j] eq $head[$i];
-	}
-	foreach my $j (0..$#samplesB){
-	    $samplesB[$j] = $i if $samplesB[$j] eq $head[$i];
-	}
-    }
-}
-
-# check that columns provided are 0-based OR
-# if names were provided, that all columns were properly matched
-my $kill_0based;
-my $kill_6lower;
-foreach my $s (@samplesA){
-    $kill_0based = 1 if $s%2 != 0;
-    $kill_6lower = 1 if $s < 6;
-}
-foreach my $s (@samplesB){
-    $kill_0based = 1 if $s%2 != 0;
-    $kill_6lower = 1 if $s < 6;
-}
-errPrintDie "Column numbers do not seem 0-based or conversion did not work properly\n" if (defined $kill_0based);
-errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (defined $kill_6lower);
-
-print O "$head_row\n"; # it will print the original data (for plot later)
-# representative names
-my $name_A=$head[$samplesA[0]];
-my $name_B=$head[$samplesB[0]];
-$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a" or "_1", but if it's only one, it's left as is
-$name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
-
-# Global variables for PSI analysis & GO
+#### Global variables for PSI analysis & GO
 my %doneIR_UP;
 my %doneIR_DOWN;
 my %doneEXSK;
 my %doneBG;
 my %tally;
+my %tally_total; # to count the total number of AS events with good coverage
+my %tally_total_AS; # to count the total number of AS events within the compared samples
+
 $tally{MIC}{DOWN}=0; $tally{MIC}{UP}=0;
 $tally{AltEx}{DOWN}=0; $tally{AltEx}{UP}=0;
 $tally{IR}{DOWN}=0; $tally{IR}{UP}=0;
@@ -236,7 +239,9 @@ $tally{Alt3}{DOWN}=0; $tally{Alt3}{UP}=0;
 $tally{Alt5}{DOWN}=0; $tally{Alt5}{UP}=0;
 
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
+print O "$head_row\n"; # it will print the original data (for plot later)
 
+### starts the actual analysis
 while (<PSI>){
     $_ =~ s/VLOW/N/g if (defined $noVLOW);
     chomp($_);
@@ -279,20 +284,24 @@ while (<PSI>){
 	}
 	next if ($kill_pIR == 1);
     }
+
+    # get PSIs
+    my $sum_A = sum(@PSI_A);
+    my $sum_B = sum(@PSI_B);
+    my $av_PSI_A = sprintf("%.2f",$sum_A/$repA);
+    my $av_PSI_B = sprintf("%.2f",$sum_B/$repB);
+    # get min and max (for ranges)
+    my $min_A = (sort{$b<=>$a}@PSI_A)[-1];
+    my $max_A = (sort{$a<=>$b}@PSI_A)[-1];
+    my $min_B = (sort{$b<=>$a}@PSI_B)[-1];
+    my $max_B = (sort{$a<=>$b}@PSI_B)[-1];
+
+    ### To count the total number of AS events considered 
+    $tally_total_AS{$type}++ if ($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10;
+    $tally_total{$type}++;
     
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
-	# get PSIs
-	my $sum_A = sum(@PSI_A);
-	my $sum_B = sum(@PSI_B);
-	my $av_PSI_A = sprintf("%.2f",$sum_A/$repA);
-	my $av_PSI_B = sprintf("%.2f",$sum_B/$repB);
-	# get min and max (for ranges)
-	my $min_A = (sort{$b<=>$a}@PSI_A)[-1];
-	my $max_A = (sort{$a<=>$b}@PSI_A)[-1];
-	my $min_B = (sort{$b<=>$a}@PSI_B)[-1];
-	my $max_B = (sort{$a<=>$b}@PSI_B)[-1];
-
 	# get dPSI
 	my $dPSI = $av_PSI_B-$av_PSI_A;
 	
@@ -466,10 +475,10 @@ $extras.=", paired" if (defined $paired);
 
 print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras\n";
 print "*** Summary statistics:\n";
-print "\tAS_TYPE\tHigher_in_$name_A\tHigher_in_$name_B\n";
-print "\tMicroexons\t$tally{MIC}{DOWN}\t$tally{MIC}{UP}\n";
-print "\tLong_AltEx\t$tally{AltEx}{DOWN}\t$tally{AltEx}{UP}\n";
-print "\tIntron_ret\t$tally{IR}{DOWN}\t$tally{IR}{UP}\n";
-print "\tAlt_3ss\t$tally{Alt3}{DOWN}\t$tally{Alt3}{UP}\n";
-print "\tAlt_5ss\t$tally{Alt5}{DOWN}\t$tally{Alt5}{UP}\n";
+print "\tAS_TYPE\tHigher_in_$name_A\tHigher_in_$name_B\tTOTAL_EV\tTOTAL_AS(10<PSI<90)\n";
+print "\tMicroexons\t$tally{MIC}{DOWN}\t$tally{MIC}{UP}\t$tally_total{MIC}\t$tally_total_AS{MIC}\n";
+print "\tLong_AltEx\t$tally{AltEx}{DOWN}\t$tally{AltEx}{UP}\t$tally_total{AltEx}\t$tally_total_AS{AltEx}\n";
+print "\tIntron_ret\t$tally{IR}{DOWN}\t$tally{IR}{UP}\t$tally_total{IR}\t$tally_total_AS{IR}\n";
+print "\tAlt_3ss\t$tally{Alt3}{DOWN}\t$tally{Alt3}{UP}\t$tally_total{Alt3}\t$tally_total_AS{Alt3}\n";
+print "\tAlt_5ss\t$tally{Alt5}{DOWN}\t$tally{Alt5}{UP}\t$tally_total{Alt5}\t$tally_total_AS{Alt5}\n";
 print "\n";
