@@ -195,7 +195,7 @@ if($cmd eq "build_dict"){
 			if(@fs2==1){
 				@fs3=split("\\+",$fs2[0]);
 				for(my $i=0;$i<@fs3;$i++){$coord_new=$coords{"$chr:$fs3[$i]"};if(defined($coord_new)){push(@fs3_new,$coord_new);}}
-				if(@fs3==1 && @fs3_new<1 || @fs3>1 && @fs3_new<2){print "skip2\n";$skip_this_event=1;goto END_OF_EVENTLOOP;}
+				if(@fs3==1 && @fs3_new<1 || @fs3>1 && @fs3_new<2){$skip_this_event=1;goto END_OF_EVENTLOOP;}
 			}
 			
 			$fullco_col="$chr:".join("+",@{sort_num_up_a(\@fs3_new)})."-".join("+",@{sort_num_up_a(\@fs4_new)}).",".$fs[1];
