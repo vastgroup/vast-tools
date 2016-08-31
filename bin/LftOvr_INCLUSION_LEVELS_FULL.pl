@@ -150,20 +150,32 @@ if($cmd eq "build_dict"){
 		# old coordinates could not be translated into new coordinates
 		if(!defined($coord_new_1) || !defined($coord_new_2) ){$skip_this_event=1;goto END_OF_EVENTLOOP;}
 
-		# check if region still has same length
-		if($coord_old_1 ne "" && $coord_old_2 ne ""){
-			# length of region should be the same with old and new coordinates
-			if($coord_old_2-$coord_old_1 != $coord_new_2-$coord_new_1){$skip_this_event=1;goto END_OF_EVENTLOOP;}
-		}
-
 		# event id and COORD column translated into new coordinates
 		$coord_col="$chr:$coord_new_1-$coord_new_2";
 		#################
 
-
 		# translate FULLCO column
 		$fullco_old=$FULLCOORD{$event_id};
 		($as_type,$chr,$rest)=split(":",$fullco_old);		
+
+		# length check for regions
+		if($coord_old_1 ne "" && $coord_old_2 ne ""){
+			my $len_old=$coord_old_2-$coord_old_1+1;
+			my $len_new=$coord_new_2-$coord_new_1+1;			
+			if($len_new==0 || ($coord_old_1<$coord_old_2 && $coord_new_1>$coord_new_2) || ($coord_old_1>$coord_old_2 && $coord_new_1<$coord_new_2)){$skip_this_event=1;goto END_OF_EVENTLOOP;}
+			
+			if($as_type =~ /Alt5/ || $as_type =~ /Alt3/){
+				# length of region should be the same with old and new coordinates
+				if($len_old != $len_new){$skip_this_event=1;goto END_OF_EVENTLOOP;}
+			}elsif($as_type =~ /IR/){
+				# length of retained introns should not change more than 5 x
+				if($len_old/$len_new < 1/5 || $len_old/$len_new > 5){$skip_this_event=1;goto END_OF_EVENTLOOP;}
+			}else{
+				# length of skipped exons should change at most by 3 nt
+				if(abs($len_new-$len_old)>3){$skip_this_event=1;goto END_OF_EVENTLOOP;}
+			}
+		}
+
 
 		# TAKE CARE: the chromosome annotation of the examples actually does not exists in the $rest variable, e.g., for chr17:56424894+56424890-56424945,56424602 $rest=56424894+56424890-56424945,56424602
 		if($as_type =~ /Alt5/){ # chr17:56424894+56424890-56424945,56424602  chr17:3+2-4,1 -> case 1 (- strand)
