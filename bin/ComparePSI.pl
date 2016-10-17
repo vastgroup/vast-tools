@@ -313,10 +313,12 @@ while (<PSI>){
 	    # print for GO
 	    if (defined$get_GO){
 		unless ($use_names){
-		    print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
-		    $doneIR_UP{$ID_gene{$t[1]}}=1;
-		    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-		    $doneEXSK{$ID_gene{$t[1]}}=1;
+		    if (defined $ID_gene{$t[1]}){
+			print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
+			$doneIR_UP{$ID_gene{$t[1]}}=1;
+			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			$doneEXSK{$ID_gene{$t[1]}}=1;
+		    }
 		}
 		else {
 		    print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
@@ -333,10 +335,12 @@ while (<PSI>){
 	    #print for GO
 	    if (defined$get_GO){
 		unless ($use_names){
-		    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
-		    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
-		    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-		    $doneEXSK{$ID_gene{$t[1]}}=1;		
+		    if (defined $ID_gene{$t[1]}){
+			print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
+			$doneIR_DOWN{$ID_gene{$t[1]}}=1;
+			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			$doneEXSK{$ID_gene{$t[1]}}=1;	
+		    }
 		}
 		else {
 		    print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
@@ -367,10 +371,12 @@ while (<PSI>){
 	    # print for GO
 	    if (defined $get_GO){
 		unless ($use_names){
-		    print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
-		    $doneIR_UP{$ID_gene{$t[1]}}=1;
-		    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-		    $doneEXSK{$ID_gene{$t[1]}}=1;
+		    if (defined $ID_gene{$t[1]}){
+			print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
+			$doneIR_UP{$ID_gene{$t[1]}}=1;
+			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			$doneEXSK{$ID_gene{$t[1]}}=1;
+		    }
 		}
 		else {
 		    print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
@@ -387,10 +393,12 @@ while (<PSI>){
 	    #print for GO
 	    if (defined $get_GO){
 		unless ($use_names){
-		    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
-		    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
-		    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-		    $doneEXSK{$ID_gene{$t[1]}}=1;		
+		    if (defined $ID_gene{$t[1]}){
+			print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
+			$doneIR_DOWN{$ID_gene{$t[1]}}=1;
+			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			$doneEXSK{$ID_gene{$t[1]}}=1;	
+		    }	
 		}
 		else {
 		    print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
@@ -404,8 +412,10 @@ while (<PSI>){
     # prints out the genes for BG
     if (defined $get_GO){
 	unless ($use_names){
-	    print BG "$ID_gene{$t[1]}\n" if (!defined $doneBG{$ID_gene{$t[1]}});
-	    $doneBG{$ID_gene{$t[1]}}=1;
+	    if (defined $ID_gene{$t[1]}){
+		print BG "$ID_gene{$t[1]}\n" if (!defined $doneBG{$ID_gene{$t[1]}});
+		$doneBG{$ID_gene{$t[1]}}=1;
+	    }
 	}
 	else {
 	    print BG "$t[0]\n" if (!defined $doneBG{$t[0]}) && (defined $t[0]);
