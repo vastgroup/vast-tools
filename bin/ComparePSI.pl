@@ -120,8 +120,8 @@ Compare two sample sets to find differentially regulated AS events
         --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
-                                   - It uses min_dPSI as the minimum average of each paired dPSI
-                                   - It uses min_range as the minumum dPSI for each paired comparison 
+                                   - min_dPSI: minimum value for the average of each paired dPSI
+                                   - min_range: minumum value the smallest paired dPSI can take
     
 [GO options]
         --GO                     Generates gene lists for GO analysis (from default gene_ID)
