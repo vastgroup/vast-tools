@@ -64,7 +64,6 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "legacy" => \$legacyFlag,
 			  "verbose" => \$verboseFlag,
 			  "v" => \$verboseFlag,
-              		  "readLen=i" => \$readLength, # back again --MI
               		  "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
@@ -84,6 +83,38 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  );
 
 our $EXIT_STATUS = 0;
+
+
+sub extractReadLen {  # extracts automatically read length from fastq or fastq.gz file
+	my $fn=$_[0]; # extracts the first 5000 reads and if all have the same length, returns this length
+	              # if they don't have all the same length, returns -1
+	
+	my $fh;
+	if(isZipped($fn)){
+		open ( $fh, "-|", "gzip -dc $fn") or errPrintDie("$!");
+	}else{
+		open( $fh , $fn ) or errPrintDie("$!");
+	}
+	
+	my $maxN=5000;
+	my $c=0;
+	my $check=1;
+	my $readL;
+	while(<$fh>){if($check){if(substr($_,0,1) ne "@"){errPrintDie("Sequence data must be provided in FASTQ format but file $fn does not look like FASTQ format (first line does not start with @).");}$check=0;}
+		chomp;
+		$c++;
+		if($c % 4==2){
+			unless($readL){$readL=length($_);
+			}else{ 
+				if($readL != length($_)){$readL=-1;last;}
+			}
+		}
+		if($c/4 > $maxN){last;}
+	}
+	close($fh);
+	
+return($readL);
+}
 
 sub sysErrMsg {
   my @sysCommand = @_;
@@ -135,14 +166,14 @@ if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]
 
 Align a single RNA-Seq sample to VASTDB genome and junction libraries.
+Length of reads must be at least 50 nt; for expression analysis, all reads
+must be of same length.
 
 OPTIONS:
 	--sp Hsa/Mmu/Gga	Three letter code for the database (default Hsa)
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
-        --readLen i             Read length of input reads
-                                (If not provided, fastq files MUST be named Sample-length.fq.gz)
 	--expr			For expression analyses: -expr 
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
@@ -210,6 +241,7 @@ my($root, $length);
 $fileName1 =~ s/^.*\///g; # strip path
 
 my $genome_sub = 0;
+my $length2="";
 if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     $genome_sub=1;
     ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq|fastq|fa)(\.gz)?/;  #Fixed regex --TSW
@@ -218,34 +250,44 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     errPrint "Only for 50nt if genome subtracted\n" if $length!=50;
 } else {
     if ($runExprFlag || $onlyExprFlag){ # only if GE is actives checks if readLength is provided
-	# allow readlength to be given by -readLen x --TSW
-	if($readLength) {
-	    $length = $readLength;
-	    $fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;  # regex by --TSW
-	    $root = $1;
-	} 
-	else { # default behavior by --MI
-	    ($root,$length)=$fileName1=~/(\S+)\-(\d{1,4})\.(fastq|fq|fasta|fa)(\.gz)?/; # regex by --MI
-	    if(!defined($length) or $length eq "") { 
-		errPrintDie "You must either give read length as -readLen i, or rename your fq files name-len.fq";
-	    }
+	if($ribofoot){  # length is set already in ribofoot mode
+		$length=$readLength;  # set to 32
+	}else{
+		$length=extractReadLen($fq1);
 	}
+	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;  # regex by --TSW
+	$root = $1;
     }
     else { # anything is valid here
-	$length = 50;
+	$length=extractReadLen($fq1);
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/; 
 	$root = $1;
     }
     if ($pairedEnd){
 	$fq2 = abs_path($ARGV[1]);
+	$length2=extractReadLen($fq2);
 	$fileName2 = $fq2;
 	$fileName2 =~ s/^.*\///g; # strip path
     }
     $fq = $zipped ? "$root-50.fq.gz" : "$root-50.fq"; #only fastq files are allowed at this point; default trimmed length = 50
 }
 
+# print "$fileName1\n$fq1\n$length\n;"; die ""; # for debugging.
+
 #verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
 ###
+
+unless($fq2){verbPrint("Input RNA-seq file(s): $fq1");}else{verbPrint("Input RNA-seq file(s): $fq1 and $fq2");}
+
+# something went wrong with extraction of root of filenames
+if($root eq ""){ errPrintDie("Could not extract the base name from the RNA-seq input files, which must look like *.(fastq|fastq.gz|fq|fq.gz|fasta|fasta.gz|fa|fa.gz)");}
+
+unless($fq2){verbPrint("Detected read length(s): $length (-1 means variable length)");}else{verbPrint("Detected read length(s): $length and $length2 (-1 means variable length)");}
+if(($onlyExprFlag || $runExprFlag) && $length == -1){ # XXX reads are of variable length
+	verbPrint("Reads are of variable lengths in file $fq1.\nExpression analysis turned off as for this all reads must be of the same length."); 
+	if($onlyExprFlag){exit(1);}
+	$runExprFlag=0;
+}
 
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
