@@ -180,7 +180,7 @@ AND
 
 ### Alignment
 
-In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length or specify the reads have been genome substracted; see below).
+In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length or specify the reads have been genome substracted; see below).
 
 Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
@@ -191,8 +191,7 @@ compressed (via gzip) or uncompressed.
 Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), and chicken (Gga). By
 default, the ``-sp`` option is ``Hsa``.
 
-To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs plus
-cRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). In order to obtain gene expression levels, the read length *must* be provided. This can be done either using the option ``--readLen`` or by naming the samples as follows: sample-rLe.fq.gz, so that the read length will be automatically detected. Read length is ONLY needed if ``--expr`` or ``--exprONLY`` is activated. cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
+To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs pluscRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
 
 In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name *.3bias will be created. This file contains information to estimate 3′ sequencing biases in the RNA-seq sample. Each of *.3bias file contains two rows:
 - For all mRNAs with >200 mapped reads throughout at least 2500 nt, it provides the percentage of reads within the last five 500-nt windows, starting from the 3′-most window. The last column corresponds to the number of probed genes.
@@ -201,7 +200,7 @@ In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name
 For example, to perform alignment with expression and 3′bias analysis on mouse data:
 
 ~~~~
-> vast-tools align mouse_tissue.fq.gz --readLen N -sp Mmu --expr
+> vast-tools align mouse_tissue.fq.gz -sp Mmu --expr
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
@@ -211,7 +210,7 @@ step. Gene expression and intron retention analyses *cannot* be run from this st
 from the raw reads).
 
 ~~~~
-> vast-tools align mouse_tissue-e.fa.gz -sp Mmu
+> vast-tools align mouse_tissue-50-e.fa.gz -sp Mmu
 ~~~~
 
 Although you can specify two fastq files to vast-tools in a 'paired-end' format,
