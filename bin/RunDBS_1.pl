@@ -299,8 +299,8 @@ unless($fq2){verbPrint("Input RNA-seq file(s): $fq1");}else{verbPrint("Input RNA
 # if something went wrong with extraction of root of filenames
 if($root eq ""){ errPrintDie("Could not extract the base name from the RNA-seq input files, which must look like *.(fastq|fastq.gz|fq|fq.gz|fasta|fasta.gz|fa|fa.gz)");}
 
-unless($fq2){verbPrint("Most common read length detected: $length ($percF\%)");}
-else{verbPrint("Most common read lengths detected (fq1 & fq2): $length ($percF\%) and $length2 ($percF2\%)");}
+unless($fq2){verbPrint("Most common read length detected for fq1: $length ($percF\%)");}
+else{verbPrint("Most common read lengths detected for fq1 & fq2: $length ($percF\%) and $length2 ($percF2\%)");}
 
 #if(($onlyExprFlag || $runExprFlag) && $length == -1){ # XXX reads are of variable length
 #	verbPrint("Reads are of variable lengths in file $fq1.\nExpression analysis turned off as for this all reads must be of the same length."); 
