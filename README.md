@@ -105,6 +105,7 @@ Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/
 > tar xzvf vastdb.gga.13.11.15.tar.gz
 ~~~~
 
+
 If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
 > ln -s <path to VASTDB> VASTDB
@@ -180,15 +181,14 @@ AND
 
 ### Alignment
 
-In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length or specify the reads have been genome substracted; see below).
+In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read or specify the reads have been genome substracted; see below).
 
 Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
-in the output directory as ``<sample>-<length>-e.fa.gz``, where ``sample`` is the sample
-name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
-compressed (via gzip) or uncompressed.
+in the output directory as ``<sample>-50-e.fa.gz``, where ``sample`` is the sample
+name. The input reads can be compressed (via gzip) or uncompressed.
 
-Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), and chicken (Gga). By
+Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), chicken (Gga), and planarian (Sme). By
 default, the ``-sp`` option is ``Hsa``.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs pluscRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
@@ -204,7 +204,7 @@ For example, to perform alignment with expression and 3′bias analysis on mouse
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
-can be skipped by supplying the ``<sample>-<length>-e.fa.gz`` file as input. VAST-TOOLS
+can be skipped by supplying the ``<sample>-50-e.fa.gz`` file as input. VAST-TOOLS
 will recognize the \"-e.fa\" suffix and start at the splice junction alignment
 step. Gene expression and intron retention analyses *cannot* be run from this stage (you must start
 from the raw reads).
