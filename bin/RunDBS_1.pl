@@ -2,9 +2,12 @@
 
 # Authors:
 # Original Draft: Manuel Irimia, 2011-2014 
-# 						mirimia@gmail.com
+# 			      	mirimia@gmail.com
 # Reworked: Tim Sterne-Weiler & Kevin Ha, 2014
 # 				tim.sterne.weiler@utoronto.ca & k.ha@mail.utoronto.ca 
+# Updates and improvements: Andre Gohr & Manuel Irimia, 2015-present
+#                               andre.gohr@crg.eu & mirimia@gmail.com
+
 use warnings;
 use strict;
 use Cwd qw(abs_path);
@@ -88,6 +91,7 @@ our $EXIT_STATUS = 0;
 sub extractReadLen {  # extracts automatically read length from fastq or fastq.gz file
 	my $fn=$_[0]; # extracts the first 5000 reads and if all have the same length, returns this length
 	              # if they don't have all the same length, returns -1
+	              # From 24/12/16: they can have different lengths, but only those >= 50 are used
 	
 	my $fh;
 	if(isZipped($fn)){
@@ -100,20 +104,36 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 	my $c=0;
 	my $check=1;
 	my $readL;
+	my %tally_readL;
+	my $total=1;
+	my $perc;
 	while(<$fh>){if($check){if(substr($_,0,1) ne "@"){errPrintDie("Sequence data must be provided in FASTQ format but file $fn does not look like FASTQ format (first line does not start with @).");}$check=0;}
 		chomp;
 		$c++;
 		if($c % 4==2){
-			unless($readL){$readL=length($_);
-			}else{ 
-				if($readL != length($_)){$readL=-1;last;}
+			unless($readL){
+			    $readL=length($_);
+			    $tally_readL{$readL}=1;
+			}
+			else{ 
+#			    if($readL != length($_)){$readL=-1;last;} # not need to 
+			    $readL=length($_);
+			    $tally_readL{$readL}++ if defined $tally_readL{$readL};
+			    $tally_readL{$readL}=1 if !defined $tally_readL{$readL};
+			    $total++;
 			}
 		}
 		if($c/4 > $maxN){last;}
 	}
 	close($fh);
-	
-return($readL);
+
+	### to get the most common length
+	foreach my $temp_readL (sort {$a<=>$b} keys %tally_readL){
+	    $perc = sprintf("%.2f",100*$tally_readL{$temp_readL}/$total);
+	    $readL=$temp_readL;
+	}
+
+	return($readL,$perc);
 }
 
 sub sysErrMsg {
@@ -203,7 +223,7 @@ OPTIONS:
 
 ";
 
-  exit $EXIT_STATUS;
+    exit $EXIT_STATUS;
 }
 
 # Command line flags here
@@ -242,6 +262,7 @@ $fileName1 =~ s/^.*\///g; # strip path
 
 my $genome_sub = 0;
 my $length2="";
+my($percF,$percF2);
 if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     $genome_sub=1;
     ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq|fastq|fa)(\.gz)?/;  #Fixed regex --TSW
@@ -251,43 +272,41 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
 } else {
     if ($runExprFlag || $onlyExprFlag){ # only if GE is actives checks if readLength is provided
 	if($ribofoot){  # length is set already in ribofoot mode
-		$length=$readLength;  # set to 32
+	    $length=$readLength;  # set to 32
 	}else{
-		$length=extractReadLen($fq1);
+	    ($length,$percF)=extractReadLen($fq1); # it doesn't really matter any more (24/12/16)
 	}
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;  # regex by --TSW
 	$root = $1;
     }
     else { # anything is valid here
-	$length=extractReadLen($fq1);
+	($length,$percF)=extractReadLen($fq1);
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/; 
 	$root = $1;
     }
     if ($pairedEnd){
 	$fq2 = abs_path($ARGV[1]);
-	$length2=extractReadLen($fq2);
+	($length2,$percF2)=extractReadLen($fq2);
 	$fileName2 = $fq2;
 	$fileName2 =~ s/^.*\///g; # strip path
     }
     $fq = $zipped ? "$root-50.fq.gz" : "$root-50.fq"; #only fastq files are allowed at this point; default trimmed length = 50
 }
-
-# print "$fileName1\n$fq1\n$length\n;"; die ""; # for debugging.
-
-#verbPrint "$fileName1\n$fq1\n;"; die ""; # for debugging.
 ###
 
 unless($fq2){verbPrint("Input RNA-seq file(s): $fq1");}else{verbPrint("Input RNA-seq file(s): $fq1 and $fq2");}
 
-# something went wrong with extraction of root of filenames
+# if something went wrong with extraction of root of filenames
 if($root eq ""){ errPrintDie("Could not extract the base name from the RNA-seq input files, which must look like *.(fastq|fastq.gz|fq|fq.gz|fasta|fasta.gz|fa|fa.gz)");}
 
-unless($fq2){verbPrint("Detected read length(s): $length (-1 means variable length)");}else{verbPrint("Detected read length(s): $length and $length2 (-1 means variable length)");}
-if(($onlyExprFlag || $runExprFlag) && $length == -1){ # XXX reads are of variable length
-	verbPrint("Reads are of variable lengths in file $fq1.\nExpression analysis turned off as for this all reads must be of the same length."); 
-	if($onlyExprFlag){exit(1);}
-	$runExprFlag=0;
-}
+unless($fq2){verbPrint("Most common read length detected: $length ($percF\%)");}
+else{verbPrint("Most common read lengths detected (fq1 & fq2): $length ($percF\%) and $length2 ($percF2\%)");}
+
+#if(($onlyExprFlag || $runExprFlag) && $length == -1){ # XXX reads are of variable length
+#	verbPrint("Reads are of variable lengths in file $fq1.\nExpression analysis turned off as for this all reads must be of the same length."); 
+#	if($onlyExprFlag){exit(1);}
+#	$runExprFlag=0;
+#}
 
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
@@ -324,9 +343,8 @@ elsif ($ribofoot) {
     $difLE = 0;
     $le = 32;
 } else {
-    errPrint "Minimum reads length: 50nt\n";
+    errPrint "Minimum reads length has to be 50nt\n";
 }
-#errPrint "Reads <50nt not available for Human\n" if $le==36 && $species eq "Hsa"; # --MI deprecated 11/11/15
 #####
 
 if ($EXIT_STATUS) {
@@ -347,8 +365,10 @@ if (!$genome_sub and !$useGenSub){
 #     }
 
      $cmd = getPrefixCmd($cmd);
-     $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -";
-
+#    24/12/16 --MI
+#    $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -"; 
+     $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+     
      verbPrint "Calculating cRPKMs\n";
      sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff expr_out/$root > expr_out/$root\.cRPKM";
  }
@@ -380,7 +400,7 @@ $keep_trimmed=1 if $trimmed; #keeps the original file provided as pre-trimmed in
 my $cmd = getPrefixCmd($fq);
 
 unless($trimmed) {
-    my $trimArgs = "--stepSize $trimStep";
+    my $trimArgs = "--stepSize $trimStep -v"; # before, verbose by default (24/12/16)
     $trimArgs .= " --fasta" if(!$fastaOnly);
     $trimArgs .= " --once" if($trimOnceFlag);
     $trimArgs .= " --targetLen $trimLen" if(defined($trimLen));
@@ -390,7 +410,7 @@ unless($trimmed) {
     } 
     
     verbPrint "Trimming fastq sequences to $le nt sequences";
-    ## Add min read depth!
+    ## Add min read depth?
     # Renamed fa/fq --MI [11/11/15]
     if ($fastaOnly){
 	sysErrMsg("bash", "-c", "$cmd | $binPath/Trim.pl $trimArgs | gzip -c > $root-$le.fq.gz");
