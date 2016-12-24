@@ -3,6 +3,9 @@
 # Author: Tim Sterne-Weiler, 2014
 # tim.sterne.weiler@utoronto.ca
 
+# Updates: Manuel Irimia, 2015-present
+# mirimia@gmail.com
+
 argv <- commandArgs(trailingOnly = F)
 scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
 
@@ -30,11 +33,13 @@ downloadDb <- function(speUrl, speFile) {
 humanDbFile <- "vastdb.hsa.22.06.16.tar.gz"
 mouseDbFile <- "vastdb.mmu.22.06.16.tar.gz"
 chickenDbFile <- "vastdb.gga.13.11.15.tar.gz"
+planariaDbFile <- "vastdb.sme.13.11.15.tar.gz"
 
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
 mouseUrl <- joinStr("http://vastdb.crg.eu/libs/", mouseDbFile)
 chickenUrl <- joinStr("http://vastdb.crg.eu/libs/", chickenDbFile)
+planariaUrl <- joinStr("http://vastdb.crg.eu/libs/", planariaDbFile)
 #
 
 writeLines("Looking for VAST Database [VASTDB]")
@@ -43,7 +48,7 @@ if(!file.exists("VASTDB")) {
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
   if(as.character(auto) == 'y') {
-    writeLines("OK I will try... Please choose database [hg19/mm9/galGal3/all] [h/m/g/a]")
+    writeLines("OK I will try... Please choose database [hg19/mm9/galGal3/smed31/all] [h/m/g/p/a]")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
@@ -55,6 +60,9 @@ if(!file.exists("VASTDB")) {
     }
     if(db == 'g' || db == 'a') {
       downloadDb(chickenUrl, chickenDbFile)
+    }
+    if(db == 'p' || db == 'a') {
+      downloadDb(planariaUrl, planariaDbFile)
     }
   }
 } else {
