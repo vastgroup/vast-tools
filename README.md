@@ -104,7 +104,11 @@ Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/
 > wget http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz
 > tar xzvf vastdb.gga.13.11.15.tar.gz
 ~~~~
-
+Planarian (v31) - 942M [vastdb.sme.31.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz
+> tar xzvf vastdb.sme.31.11.15.tar.gz
+~~~~
 
 If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
