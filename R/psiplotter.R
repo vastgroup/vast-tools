@@ -123,7 +123,7 @@ parser <- OptionParser(option_list = option.list,
 opt <- parse_args(parser, args = args, positional_arguments = TRUE)
 
 # Load remaining packages
-loadPackages(c("psiplot", "methods"), local.lib=paste(c(scriptPath,"/Rlib"),
+loadPackages(c("psiplot", "methods", "labeling"), local.lib=paste(c(scriptPath,"/Rlib"),
                                                        collapse=""))
 
 # Check for correct version of psiplot
