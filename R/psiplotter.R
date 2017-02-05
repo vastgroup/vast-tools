@@ -3,7 +3,7 @@
 # Author: Kevin Ha, 2014
 # k.ha@mail.utoronto.ca
 
-# Copyright (C) 2014 Kevin Ha
+# Copyright (C) 2014-2017 Kevin Ha
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the "Software"),
@@ -240,7 +240,6 @@ verbPrint(paste("// Width = ", round(W, 2), "in, Height =", round(H, 2), "in"))
 
 #### Plot ##########################################################
 pdf(outfile, width = W, height = H)
-par(mfrow = c(1,1), las = 2) #3 graphs per row; 2=label always perpendicular to the axis
 nplot <- min(nrow(all_events), opt$options$max)
 pb <- txtProgressBar(style = 3, file = stderr())
 for (i in 1:nplot) {
@@ -250,6 +249,7 @@ for (i in 1:nplot) {
                        groupmean = opt$options$plotGroupMeans,
                        gridlines = opt$options$gridLines,
                        cex.xaxis = 10, cex.yaxis = 10, cex.main = 8)
+  print(result)
   setTxtProgressBar(pb, i/nplot)
 }
 setTxtProgressBar(pb, 1)
