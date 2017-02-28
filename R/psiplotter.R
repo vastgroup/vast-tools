@@ -249,7 +249,7 @@ for (i in 1:nplot) {
                        groupmean = opt$options$plotGroupMeans,
                        gridlines = opt$options$gridLines,
                        cex.xaxis = 10, cex.yaxis = 10, cex.main = 8)
-  print(result)
+#  print(result)
   setTxtProgressBar(pb, i/nplot)
 }
 setTxtProgressBar(pb, 1)
