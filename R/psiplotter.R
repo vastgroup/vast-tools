@@ -37,10 +37,12 @@ loadPackages(c("optparse"), local.lib=paste(c(scriptPath,"/Rlib"),
 
 args <- commandArgs(TRUE)
 
-desc <- "Script for generating PSI plots (scatterplot) across samples.
+desc <- "Script for generating PSI (or cRPKM) plots (scatterplot) across samples.
 
 Input:
-  PSI data - one AS event per row - using the standard PSI format
+  One of the following:
+
+  1) PSI data - one AS event per row - using the standard PSI format
       e.g. GENE  EVENT  COORD  LENGTH FullCO  COMPLEX  Tissue1 Tissue1_Q ...
   Recommended to use only a subset of AS events instead of the full table
   otherwise the resulting PDF file will be very large. Use option -m/--max to limit
@@ -49,10 +51,13 @@ Input:
   PSI values that are \"NA\" or have \"NA\" quality scores will not be plotted
   (not point will be drawn).
 
+  2) cRPKM data - one gene per row - using the standard cRPKM format
+  Use option \"--expr TRUE\" to enable this mode.
+
   If no input file is provided, standard input will be used.
 
 Output:
-  A PDF file will be created with one PSI plot per page.
+  A PDF file will be created with one PSI/cRPKM plot per page.
 
 Customizing plots [optional]:
   The color and ordering of samples can be customized by supplying a plot
@@ -104,15 +109,17 @@ option.list <- list(
               --config option. [%default]"),
   make_option(c("-W", "--width"), type = "numeric", default = NULL, dest = "width",
               help = "Width of graphics region in inches (similar to width in
-              pdf()) [%default]"),
+              pdf()) [default: automatic]"),
   make_option(c("-H", "--height"), type = "numeric", default = NULL,
               dest = "height",
               help = "Height of graphics region in inches (similar to height in
-              pdf()) [%default]"),
-  make_option(c("--gene"), type = "character", default = NULL,
-              dest = "gene",
-              help = "Filter events by the GENE column. Can be any 
+              pdf()) [default: automatic]"),
+  make_option(c("--gene"), type = "character", default = NULL, dest = "gene",
+              help = "Filter events by the GENE column. Can be any
               valid R regular expression. [%default]"),
+  make_option(c("--expr"), type = "logical", default = FALSE, dest = "crpkm",
+              meta = "TRUE|FALSE",
+              help = "Plot cRPKM instead of PSI. [%default]"),
   make_option(c("--debug"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "debug",
               help = "Print out options list for debugging. [%default]")
@@ -123,10 +130,10 @@ parser <- OptionParser(option_list = option.list,
 opt <- parse_args(parser, args = args, positional_arguments = TRUE)
 
 # Load remaining packages
-loadPackages(c("psiplot", "methods", "labeling"), local.lib=paste(c(scriptPath,"/Rlib"),
-                                                       collapse=""))
+loadPackages(c("psiplot", "methods", "labeling"),
+             local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
-# Check for correct version of psiplot
+# Check for correct version of psiplot ########################################
 v <- as.character(packageVersion('psiplot'))
 # The minimum required version of psiplot
 required <- '2.0.0'
@@ -137,8 +144,14 @@ if (compareVersion(v, required) == -1) {
              "See https://github.com/kcha/psiplot for additional details.")
   )
 }
+suggested <- '2.1.1'
+if (opt$options$crpkm && compareVersion(v, suggested) == -1) {
+  warning(paste("For plotting cRPKMs, please consider updating",
+                "your psiplot package to", suggested, "or higher.\n Some bugs",
+                "have been squashed in these updates!"))
+}
 
-# Check options
+# Check options ###############################################################
 if (length(opt$args) == 0) {
   print_help(parser)
   stop("Missing arguments")
@@ -154,7 +167,7 @@ if (file == "-") {
     file <- file('stdin')
     using_stdin <- TRUE
 } else if (!file.exists(file)) {
-  stop(paste("Input PSI file", file, "doesn't exist!"))
+  stop(paste("Input file", file, "doesn't exist!"))
 }
 
 config_file <- opt$options$config
@@ -182,27 +195,34 @@ if(is.null(config_file)) {
   nsamples <- length(which(colnames(all_events) %in% config$SampleName))
 }
 
-# Filter list if necessary
+# Check input file contains GENE or NAME column ###############################
+if ((opt$options$crpkm && !grepl("^NAME", colnames(all_events)[2]))
+    || (!opt$options$crpkm && !grepl("^GENE", colnames(all_events)[1]))) {
+  stop(paste("Invalid column names. Does your input file contain the correct",
+             "header?\nIf plotting with cRPKM file, set --expr=TRUE."))
+}
+
+# Filter list if necessary ####################################################
 if (!is.null(opt$options$gene)) {
-  all_events <- all_events[grep(opt$options$gene, all_events$GENE),]
-  
+  if (opts$options$crpkm) {
+    all_events <- all_events[grep(opt$options$gene, all_events$NAME),]
+  } else {
+    all_events <- all_events[grep(opt$options$gene, all_events$GENE),]
+  }
+
   if (nrow(all_events) == 0) {
     stop("No matching events found.")
   } else {
-    verbPrint(paste("// Filtered", nrow(all_events), "events that match pattern", 
+    verbPrint(paste("// Filtered", nrow(all_events), "events that match pattern",
                     opt$options$gene))
   }
 }
 
-
 # Perform some checks #########################################################
-if (!grepl("^GENE", colnames(all_events)[1])) {
-  stop("Invalid column names. Does your input file contain the correct header?")
-}
-
 if (nrow(all_events) > opt$options$max) {
-  warning(paste("Too many entries in input file. Plotting only the first",
-                opt$options$max, ". Try splitting your input file into smaller",
+  warning(paste("Too many entries in input file, which would produce a very",
+                "large PDF file. Only the first", opt$options$max, " events",
+                "will be plotted. Try splitting your input file into smaller",
                 "files and running them separately."))
 }
 
@@ -214,9 +234,10 @@ if (!is.null(opt$options$config)) {
 }
 
 # Set output file
-outfile <- paste0("PSI_plots.pdf")
+suffix <- ifelse(opt$options$crpkm, "cRPKM_plots.pdf", "PSI_plots.pdf")
+outfile <- suffix
 if (!using_stdin) {
-  outfile <- sub("\\.[^.]*(\\.gz)?$", ".PSI_plots.pdf", basename(file))
+  outfile <- sub("\\.[^.]*(\\.gz)?$", paste0(".", suffix), basename(file))
 }
 
 # Check if output directory was specified
@@ -243,13 +264,22 @@ pdf(outfile, width = W, height = H)
 nplot <- min(nrow(all_events), opt$options$max)
 pb <- txtProgressBar(style = 3, file = stderr())
 for (i in 1:nplot) {
-  result <- plot_event(all_events[i,], config = config,
-                       ylim = c(0,100),
-                       errorbar = !opt$options$noErrorBar,
-                       groupmean = opt$options$plotGroupMeans,
-                       gridlines = opt$options$gridLines,
-                       cex.xaxis = 10, cex.yaxis = 10, cex.main = 8)
-#  print(result)
+  if (opt$options$crpkm) {
+    result <- suppressWarnings(plot_expr(all_events[i,], config = config,
+                                         groupmean = opt$options$plotGroupMeans,
+                                         gridlines = opt$options$gridLines,
+                                         cex.xaxis = 10, cex.yaxis = 10, cex.main = 8,
+                                         plot = FALSE))
+  } else {
+    result <- suppressWarnings(plot_event(all_events[i,], config = config,
+                                          ylim = c(0,100),
+                                          errorbar = !opt$options$noErrorBar,
+                                          groupmean = opt$options$plotGroupMeans,
+                                          gridlines = opt$options$gridLines,
+                                          cex.xaxis = 10, cex.yaxis = 10, cex.main = 8,
+                                          plot = FALSE))
+  }
+  print(result)
   setTxtProgressBar(pb, i/nplot)
 }
 setTxtProgressBar(pb, 1)
