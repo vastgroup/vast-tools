@@ -227,7 +227,7 @@ if($ribofoot) {
 }
 
 ## Getting sample name and length:
-my $fq1 = abs_path($ARGV[0]);
+my $fq1 = $ARGV[0];
 my $fq2;
 my $fq;     # takes the fastq file to be processed at each step
 
@@ -264,7 +264,7 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
 	$root = $1;
     }
     if ($pairedEnd){
-	$fq2 = abs_path($ARGV[1]);
+	$fq2 = $ARGV[1];
 	$length2=extractReadLen($fq2);
 	$fileName2 = $fq2;
 	$fileName2 =~ s/^.*\///g; # strip path
