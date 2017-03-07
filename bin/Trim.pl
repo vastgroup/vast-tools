@@ -6,7 +6,7 @@ use Getopt::Long;
 
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 
-my $verboseFlag = 1;
+my $verboseFlag = 0;
 my $stepSize = 25;
 
 my $hackLen = 50;

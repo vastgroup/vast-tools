@@ -104,6 +104,11 @@ Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/
 > wget http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz
 > tar xzvf vastdb.gga.13.11.15.tar.gz
 ~~~~
+Planarian (v31) - 942M [vastdb.sme.31.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz
+> tar xzvf vastdb.sme.31.11.15.tar.gz
+~~~~
 
 If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
@@ -180,15 +185,14 @@ AND
 
 ### Alignment
 
-In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length or specify the reads have been genome substracted; see below).
+In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length (legacy) or specify the reads have been genome substracted; see below).
 
 Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
-in the output directory as ``<sample>-<length>-e.fa.gz``, where ``sample`` is the sample
-name and ``length`` is the trimmed read length (e.g. 50). The input reads can be
-compressed (via gzip) or uncompressed.
+in the output directory as ``<sample>-50-e.fa.gz``, where ``sample`` is the sample
+name. The input reads can be compressed (via gzip) or uncompressed.
 
-Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), and chicken (Gga). By
+Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), chicken (Gga), and planarian (Sme). By
 default, the ``-sp`` option is ``Hsa``.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs pluscRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
@@ -204,7 +208,7 @@ For example, to perform alignment with expression and 3′bias analysis on mouse
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
-can be skipped by supplying the ``<sample>-<length>-e.fa.gz`` file as input. VAST-TOOLS
+can be skipped by supplying the ``<sample>-50-e.fa.gz`` file as input. VAST-TOOLS
 will recognize the \"-e.fa\" suffix and start at the splice junction alignment
 step. Gene expression and intron retention analyses *cannot* be run from this stage (you must start
 from the raw reads).
@@ -263,17 +267,21 @@ From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 co
 
 ### Comparing PSIs Between Samples
 
-``vast-tools compare`` identifies differentially spliced AS events between two groups (A and B) solely based on the difference in their average inclusion levels (i.e. ΔPSI = average_PSI_B - average_PSI_A). 
+``vast-tools compare`` identifies differentially spliced AS events between two groups (A and B) based mainly on the difference in their average inclusion levels (i.e. ΔPSI = average_PSI_B - average_PSI_A). 
 
 ``vast-tools compare`` takes any number of replicates for each group, provided either as sample names or column numbers (0-based) in the INCLUSION table. Then, it first filters out those AS events that do not have enough read coverage in *ALL* replicates (see [Combine Output Format](#combine-output-format) below for information on coverage thresholds). For intron retention, it is possible to filter out introns also based on a binomial test to assess appropriate balance of reads at the two exon-intron junctions by using ``--p_IR`` (see Braunschweig *et al* 2014 for details). 
 
-For valid AS events, ``vast-tools compare`` then requires that the absolute value of ΔPSI is higher than a threshold provided as ``--min_dPSI``. In addition, it requires that the PSI distribution of the two groups do not overlap. This can be modified with the ``--min_range`` option, to provide higher (positive values) or lower (negative values) stringency. For example: 
+For valid AS events, ``vast-tools compare`` then requires that the absolute value of ΔPSI is higher than a threshold provided as ``--min_dPSI``. In addition, it requires that the PSI distribution of the two groups do not overlap. This can be modified with the ``--min_range`` option, to provide higher or lower stringency. For example: 
 
 ~~~~
 > vast-tools compare INCLUSION_TABLE.tab -a sampleA1,sampleA2 -b sampleB1,sampleB2 --min_dPSI 25 --min_range 5
 ~~~~
  
-will identify those AS events with an absolute ΔPSI between A and B higher than 25 and a minimum difference between the ranges of 5. By default, the comparison is not paired. A paired analysis can be done using the option ``--paired``. If provided, each A replicate is compared with the corresponding one in the B group. In this case, ``--min_dPSI`` is the minimum threshold for the average between each pair's ΔPSI, and ``--min_range`` is the minimum value *any* individual pair's ΔPSI can be. Summary statistics are printed for a tally of AS events by type that show higher sequence inclusion in group A or B.
+will identify those AS events with an absolute ΔPSI between A and B higher than 25 and a minimum difference between the ranges of 5 (i.e. the maximum PSI value of group A and the minimum value of group B, if ΔPSI is positive, and the minimum PSI value of group A and the maximum value of group B, if ΔPSI is negative). ``--min_range`` can also take negative values to allow the PSI distributions of groups A and B to overlap to a defined extent (e.g. if ``--min_range -100``, events will be called as differentially spliced as long as |ΔPSI| > N when ``--min_dPSI N``).
+
+By default, the comparison is not paired. A paired analysis can be done using the option ``--paired``. If provided, each A replicate is compared with the corresponding one in group B. In this case, ``--min_dPSI`` is the minimum threshold for the average between each pair's ΔPSI, and ``--min_range`` is the minimum value *any* individual pair's ΔPSI can be (i.e. all individual ΔPSI's absolute values have to be larger than the value provided as ``--min_range`` and they all have to have the same sign [positive or negative]). 
+
+Summary statistics are printed for a tally of AS events by type that show higher sequence inclusion in group A or B, the total number of events in ``vast-tools`` that have been profiled (i.e. that pass any applied filter), and the subset of the latter that are alternatively spliced in at least one of the compared samples (10<PSI<90).
 
 Differentially spliced AS events are printed out to an output file. The name of this file is generated by default based on the parameters used, but it can also be provided using ``--outFile``. The file is created in the directory of the input file. The selected events are then plotted automatically using ``vast-tools plot`` (see below), using a config file generated based on the type and order of the replicates provided as input. By default, all samples in the INCLUSION file are plotted, but it is possible to plot only the compared samples providing the ``only_samples`` option. The plotting step can be skipped by activating the ``--no_plot`` flag.
 
