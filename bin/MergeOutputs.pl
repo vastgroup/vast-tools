@@ -239,7 +239,7 @@ if (defined $expr){
 		my $gene=$temp[0];
 		foreach my $group (@{$file_2_groups{$root}}){
 			if ($temp[1] eq "NA" || $temp[1] eq "ne"){
-		    		$READS_EXPR{$group}{$gene}="NA";
+		    		$READS_EXPR{$group}{$gene}="NA";   # XXX check with Manu's answer
 			}
 			else {
 		    		$temp[2] = 0 if (!defined $temp[2]);
@@ -327,7 +327,7 @@ unless (defined $exprONLY){
 		    my @temp=split(/\t/,$_);
 		    my $event=$temp[0];
 		    foreach my $group (@{$file_2_groups{$root}}){
-		    	for my $i (1..$#temp){
+		    	for my $i (1..$#temp){   # XXX check with Manu's answer
 				$IRsum{$group}{$event}[$i]+=$temp[$i] unless ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
 				$IRsum{$group}{$event}[$i]=$temp[$i] if ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
 		    	}
@@ -355,9 +355,11 @@ unless (defined $exprONLY){
 	    my @temp=split(/\t/,$_);
 	    my $event=$temp[1];
 	    $dataMIC{$event}=join("\t",@temp[0..5]);
-	    for my $i (7..$#temp){ # Raw_reads_exc  Raw_reads_inc  Corr_reads_exc  Corr_reads_inc
-		$MIC{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
-		$MIC{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
+	    foreach my $group (@{$file_2_groups{$root}}){
+	    	for my $i (7..$#temp){ # Raw_reads_exc  Raw_reads_inc  Corr_reads_exc  Corr_reads_inc
+			$MIC{$group}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
+			$MIC{$group}{$event}[$i]="NA" if $temp[$i] eq "NA";    # XXX check with Manu's answer
+	    	}
 	    }
 	}
 	### Needs to recalculate PSI: from 9 and 10
@@ -379,13 +381,13 @@ unless (defined $exprONLY){
 	    chomp($_);
 	    my @temp=split(/\t/,$_);
 	    my $event="$temp[0]\t$temp[1]";
-	    $EEJ{$group{$root}}{$event}+=$temp[2];
+	    foreach my $group (@{$file_2_groups{$root}}){ $EEJ{$group}{$event}+=$temp[2]; }
 	    
 	    my $tot_control=0;
 	    my @positions=split(/\,/,$temp[4]);
 	    foreach my $pos (@positions){
 		my ($p,$n)=$pos=~/(\d+?)\:(\d+)/;
-		$EEJpositions{$group{$root}}{$event}[$p]+=$n;
+		foreach my $group (@{$file_2_groups{$root}}){ $EEJpositions{$group}{$event}[$p]+=$n; }
 		$tot_control+=$n;
 	    }
 	    errPrint "Sum of positions ne total provided for $event in $file\n" if $tot_control ne $temp[2];
@@ -412,15 +414,13 @@ unless (defined $exprONLY){
 	    $temp[25]="" if (!defined $temp[25]);
 	    $dataEXSK_pre{$event}=join("\t",@temp[0..11]);
 	    $dataEXSK_post{$event}=join("\t",@temp[22..25]);
-	    for my $i (13..16){ # PSI  Reads_exc  Reads_inc1  Reads_inc2  Sum_of_reads  .  Complexity  Corrected_Exc  Corrected_Inc1  Corrected_Inc2
-		# only 13-16 and 19-21 really
-		$EXSK{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
-		$EXSK{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
-	    }
-	    for my $i (19..21){ # PSI  Reads_exc  Reads_inc1  Reads_inc2  Sum_of_reads  .  Complexity  Corrected_Exc  Corrected_Inc1  Corrected_Inc2
-		# only 13-16 and 19-21 really
-		$EXSK{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
-		$EXSK{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
+	    
+	    foreach my $group (@{$file_2_groups{$root}}){
+	    	for my $i (13..16,19..21){ # PSI  Reads_exc  Reads_inc1  Reads_inc2  Sum_of_reads  .  Complexity  Corrected_Exc  Corrected_Inc1  Corrected_Inc2
+			# only 13-16 and 19-21 really
+			$EXSK{$group}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA";
+			$EXSK{$group}{$event}[$i]="NA" if $temp[$i] eq "NA";
+		}
 	    }
 	}
 	### Needs to recalculate PSI: from 20+21 and 19
@@ -449,18 +449,20 @@ unless (defined $exprONLY){
 	    $dataMULTI_mid{$event}=join("\t",@temp[17..18]);
 	    $dataMULTI_post{$event}=join("\t",@temp[23..25]);
 	    
-	    for my $i (13..16){ # only sum of raw reads 
-		$MULTIa{$group{$root}}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA" && (defined $temp[$i]);
-		$MULTIa{$group{$root}}{$event}[$i]="NA" if $temp[$i] eq "NA";
-	    }
-	    for my $i (19..21){ 
-		my ($a,$b,$c)=$temp[$i]=~/(.*?)\=(.*?)\=(.*)/;
-		$MULTIb{$group{$root}}{$event}[$i][0]+=$a if $a ne "NA" && $a=~/\d/;
-		$MULTIb{$group{$root}}{$event}[$i][0]="NA" if $a eq "NA";
-		$MULTIb{$group{$root}}{$event}[$i][1]+=$b if $b ne "NA" && $b=~/\d/;
-		$MULTIb{$group{$root}}{$event}[$i][1]="NA" if $b eq "NA";
-		$MULTIb{$group{$root}}{$event}[$i][2]+=$c if $c ne "NA" && $c=~/\d/;
-		$MULTIb{$group{$root}}{$event}[$i][2]="NA" if $c eq "NA";
+	    foreach my $group (@{$file_2_groups{$root}}){
+	    	for my $i (13..16){ # only sum of raw reads 
+			$MULTIa{$group}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA" && (defined $temp[$i]);
+			$MULTIa{$group}{$event}[$i]="NA" if $temp[$i] eq "NA";
+	    	}
+	    	for my $i (19..21){ 
+			my ($a,$b,$c)=$temp[$i]=~/(.*?)\=(.*?)\=(.*)/;
+			$MULTIb{$group}{$event}[$i][0]+=$a if $a ne "NA" && $a=~/\d/;
+			$MULTIb{$group}{$event}[$i][0]="NA" if $a eq "NA";
+			$MULTIb{$group}{$event}[$i][1]+=$b if $b ne "NA" && $b=~/\d/;
+			$MULTIb{$group}{$event}[$i][1]="NA" if $b eq "NA";
+			$MULTIb{$group}{$event}[$i][2]+=$c if $c ne "NA" && $c=~/\d/;
+			$MULTIb{$group}{$event}[$i][2]="NA" if $c eq "NA";
+	    	}
 	    }
 	}
 	### Needs to recalculate PSI: from 20a+21a and 19a
