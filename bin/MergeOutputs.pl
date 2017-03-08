@@ -133,6 +133,11 @@ while (<GROUPS>){
     $_ =~ s/\r//g;
     $_ =~ s/\"//g;
     chomp($_);
+    
+    my $chk_line=$_;
+    $chk_line =~ s/\s//g; # delete all white spaces
+    if(length($chk_line)==0){next;} 
+    
     my @temp = split(/\t/,$_);
     
     if(!defined($file_2_groups{$temp[0]})){$file_2_groups{$temp[0]}=[];}  # for each file stores the groups it should get merged into 
@@ -167,7 +172,7 @@ close GROUPS;
 # output warning if one file will be merged into the same group several times; maybe this is a mistake!
 foreach my $fn (keys %file_grpchk){foreach my $gr (keys %{$file_grpchk{$fn}}){
 	my $num=$file_grpchk{$fn}->{$gr};
-	if($num>1){verbPrint "Attention: sample $fn gets merged ",$num," times into group $gr.\n";}
+	if($num>1){verbPrint("Attention: sample $fn gets merged $num times into group $gr.\n");}
 }}
 
 
