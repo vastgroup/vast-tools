@@ -121,8 +121,10 @@ chdir($folder) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $folder";
 
 
-my %group;
-my %list;
+my %groups;
+my %files_2b_merged;
+my %file_2_groups;
+my %file_grpchk;
 
 ### Loading group info
 open (GROUPS, $groups_fullpath) || errPrintDie "Cannot open groupings: $groups_fullpath\n";
@@ -132,9 +134,16 @@ while (<GROUPS>){
     $_ =~ s/\"//g;
     chomp($_);
     my @temp = split(/\t/,$_);
-    $group{$temp[0]}=$temp[1];
-    $list{$temp[1]}=1;
     
+    if(!defined($file_2_groups{$temp[0]})){$file_2_groups{$temp[0]}=[];}  # for each file stores the groups it should get merged into 
+    push(@{$file_2_groups{$temp[0]}},$temp[1]);                           # if a file should get merged several times into the same group, we store this group several times
+    							                  # the same file might get merged into different groups
+    if(!defined($file_grpchk{$temp[0]})){$file_grpchk{$temp[0]}={};}
+    $file_grpchk{$temp[0]}->{$temp[1]}++;
+
+    $groups{$temp[1]}=1;
+    $files_2b_merged{$temp[0]}=1;
+
     # check if all necessary files exists; if not the groups file might contain incorrect subsample names
     my $tmp_file="expr_out/${temp[0]}.cRPKM";
     if($expr && !(-e $tmp_file)){errPrintDie "File $tmp_file does not exist. Probable reason: wrong subsample names in group-definition file OR vast-tools align was run without mapping for expression analysis.";}
@@ -154,6 +163,12 @@ while (<GROUPS>){
     STOPSCRIPT: if($tmp_file){errPrintDie "File $tmp_file does not exist. Probable reason: wrong subsample names in group-definition file.";}
 }
 close GROUPS;
+
+# output warning if one file will be merged into the same group several times; maybe this is a mistake!
+foreach my $fn (keys %file_grpchk){foreach my $gr (keys %{$file_grpchk{$fn}}){
+	my $num=$file_grpchk{$fn}->{$gr};
+	if($num>1){verbPrint "Attention: sample $fn gets merged ",$num," times into group $gr.\n";}
+}}
 
 
 if (defined $move_to_PARTS){
@@ -213,7 +228,7 @@ if (defined $expr){
 	my @files=glob("expr_out/*.cRPKM");
 	foreach my $file (@files){
 	    my ($root)=$file=~/.+\/(.+?)\.cRPKM/;
-	    next if !$group{$root};
+	    next if !$files_2b_merged{$root};
 	    $N_expr++;
 	    
 	    verbPrint "  Processing $file\n";
@@ -222,14 +237,16 @@ if (defined $expr){
 		chomp;
 		my @temp=split(/\t/,$_);
 		my $gene=$temp[0];
-		if ($temp[1] eq "NA" || $temp[1] eq "ne"){
-		    $READS_EXPR{$group{$root}}{$gene}="NA";
-		}
-		else {
-		    $temp[2] = 0 if (!defined $temp[2]);
-		    $READS_EXPR{$group{$root}}{$gene}+=$temp[2];
-		    $TOTAL_READS_EXPR{$group{$root}}+=$temp[2];
-		}
+		foreach my $group (@{$file_2_groups{$root}}){
+			if ($temp[1] eq "NA" || $temp[1] eq "ne"){
+		    		$READS_EXPR{$group}{$gene}="NA";
+			}
+			else {
+		    		$temp[2] = 0 if (!defined $temp[2]);
+		    		$READS_EXPR{$group}{$gene}+=$temp[2];
+		    		$TOTAL_READS_EXPR{$group}+=$temp[2];
+			}
+	    	}
 	    }
 	    close I;
 	    system "mv $file expr_out/PARTS/" if (defined $move_to_PARTS);
@@ -251,7 +268,7 @@ unless (defined $exprONLY){
 	    my @files=glob("to_combine/*.IR"); 
 	    foreach my $file (@files){
 		my ($root)=$file=~/.+\/(.+?)\.IR/;
-		next if (!defined $group{$root});
+		next if !$files_2b_merged{$root};
 		$N_IR++; 
 		
 		verbPrint "  Processing $file\n";
@@ -261,8 +278,10 @@ unless (defined $exprONLY){
 		    chomp;
 		    my @temp=split(/\t/,$_);
 		    my $event=$temp[0];
-		    for my $i (1..$#temp){
-			$IR{$group{$root}}{$event}[$i]+=$temp[$i];
+		    foreach my $group (@{$file_2_groups{$root}}){
+		    	for my $i (1..$#temp){
+				$IR{$group}{$event}[$i]+=$temp[$i];
+		    	}
 		    }
 		}
 		close I;
@@ -273,7 +292,7 @@ unless (defined $exprONLY){
 	    my @files=glob("to_combine/*.IR2"); 
 	    foreach my $file (@files){
 		my ($root)=$file=~/.+\/(.+?)\.IR2/;
-		next if (!defined $group{$root});
+		next if !$files_2b_merged{$root};
 		$N_IR++; 
 		
 		verbPrint "  Processing $file\n";
@@ -283,8 +302,10 @@ unless (defined $exprONLY){
 		    chomp;
 		    my @temp=split(/\t/,$_);
 		    my $event=$temp[0];
-		    for my $i (1..$#temp){
-			$IR{$group{$root}}{$event}[$i]+=$temp[$i];
+		    foreach my $group (@{$file_2_groups{$root}}){
+		    	for my $i (1..$#temp){
+				$IR{$group}{$event}[$i]+=$temp[$i];
+		    	}
 		    }
 		}
 		close I;
@@ -295,7 +316,7 @@ unless (defined $exprONLY){
 	    @files=glob("to_combine/*.IR.summary_v2.txt"); 
 	    foreach my $file (@files){
 		my ($root)=$file=~/.+\/(.+?)\.IR.summary_v2/;
-		next if (!defined $group{$root});
+		next if !$files_2b_merged{$root};
 		$N_IRsum++;
 		
 		verbPrint "  Processing $file\n";
@@ -305,9 +326,11 @@ unless (defined $exprONLY){
 		    chomp($_);
 		    my @temp=split(/\t/,$_);
 		    my $event=$temp[0];
-		    for my $i (1..$#temp){
-			$IRsum{$group{$root}}{$event}[$i]+=$temp[$i] unless ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
-			$IRsum{$group{$root}}{$event}[$i]=$temp[$i] if ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+		    foreach my $group (@{$file_2_groups{$root}}){
+		    	for my $i (1..$#temp){
+				$IRsum{$group}{$event}[$i]+=$temp[$i] unless ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+				$IRsum{$group}{$event}[$i]=$temp[$i] if ($temp[$i] eq "ne"); # in v2 it has 6 elements 1..6 (corr counts and raw counts)
+		    	}
 		    }
 		}
 		close I;
@@ -321,7 +344,7 @@ unless (defined $exprONLY){
     my @files=glob("to_combine/*.micX");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.micX/;
-	next if (!defined $group{$root});
+	next if !$files_2b_merged{$root};
 	$N_MIC++;
 
 	verbPrint "  Processing $file\n";
@@ -347,7 +370,7 @@ unless (defined $exprONLY){
     @files=glob("to_combine/*.eej2");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.eej2/;
-	next if (!defined $group{$root});
+	next if !$files_2b_merged{$root};
 	$N_EEJ++;
 
 	verbPrint "  Processing $file\n";
@@ -376,7 +399,7 @@ unless (defined $exprONLY){
     @files=glob("to_combine/*.exskX");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.exskX/;
-	next if (!defined $group{$root});
+	next if !$files_2b_merged{$root};
 	$N_EXSK++;
 	
 	verbPrint "  Processing $file\n";
@@ -410,7 +433,7 @@ unless (defined $exprONLY){
     @files=glob("to_combine/*.MULTI3X");
     foreach my $file (@files){
 	my ($root)=$file=~/.+\/(.+?)\.MULTI3X/;
-	next if (!defined $group{$root});
+	next if !$files_2b_merged{$root};
 	$N_MULTI++;
 
 	verbPrint "  Processing $file\n";
@@ -454,7 +477,7 @@ unless (defined $exprONLY){
 
 ### Print output files
 verbPrint "Printing group files\n";
-foreach my $group (sort keys %list){
+foreach my $group (sort keys %groups){
     verbPrint ">>> $group\n";
     ### EXPR
     if (defined $expr){
