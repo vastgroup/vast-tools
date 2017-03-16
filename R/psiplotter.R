@@ -159,6 +159,7 @@ if (length(opt$args) == 0) {
 
 if (opt$options$debug) {
   print(opt)
+  print(sessionInfo())
 }
 
 using_stdin <- FALSE
