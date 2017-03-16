@@ -32,7 +32,7 @@ Requirements
 
 VAST-TOOLS requires the following software:
  * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
- * R 3.0.1 or higher, with the following packages installed (see Installation Section):
+ * R 3.1 or higher, with the following packages installed (see Installation Section):
    * optparse
    * RColorBrewer
    * reshape2
