@@ -254,7 +254,7 @@ if (is.null(opt$options$output)) {
 }
 
 # Set width and height of graphics
-W <- ifelse(is.null(opt$options$width), 3.5 + 0.1*max(0, nsamples - 8),
+W <- ifelse(is.null(opt$options$width), 3.5 + 0.12*max(0, nsamples - 8),
             opt$options$width)
 H <- ifelse(is.null(opt$options$height), 3.2 + 0.05*max(0, nsamples - 8),
             opt$options$height)
@@ -269,7 +269,7 @@ for (i in 1:nplot) {
     result <- suppressWarnings(plot_expr(all_events[i,], config = config,
                                          groupmean = opt$options$plotGroupMeans,
                                          gridlines = opt$options$gridLines,
-                                         cex.xaxis = 10, cex.yaxis = 10, cex.main = 8,
+                                         cex.xaxis = 9, cex.yaxis = 10, cex.main = 8,
                                          plot = FALSE))
   } else {
     result <- suppressWarnings(plot_event(all_events[i,], config = config,
@@ -277,7 +277,7 @@ for (i in 1:nplot) {
                                           errorbar = !opt$options$noErrorBar,
                                           groupmean = opt$options$plotGroupMeans,
                                           gridlines = opt$options$gridLines,
-                                          cex.xaxis = 10, cex.yaxis = 10, cex.main = 8,
+                                          cex.xaxis = 9, cex.yaxis = 10, cex.main = 8,
                                           plot = FALSE))
   }
   print(result)
