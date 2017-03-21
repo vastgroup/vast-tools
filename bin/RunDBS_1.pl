@@ -10,7 +10,7 @@
 
 use warnings;
 use strict;
-use Cwd qw(abs_path);
+use Cwd qw(abs_path cwd);
 use Getopt::Long;
 
 # INITIALIZE PATH AND FLAGS--TSW
@@ -248,11 +248,20 @@ if($ribofoot) {
 
 ## Getting sample name and length:
 my $fq1 = $ARGV[0];
+unless(substr($fq1,0,1) eq "/" ){# file path is relative
+	$fq1=cwd() . "/$fq1";    #  add to file path current working directory; necessary because later we change the working directory
+}
 my $fq2;
+if($pairedEnd){
+	$fq2 = $ARGV[1];
+	unless(substr($fq2,0,1) eq "/" ){# file path is relative
+		$fq2=cwd() . "/$fq2";    #  add to file path current working directory; necessary because later we change the working directory
+	}
+}
+
 my $fq;     # takes the fastq file to be processed at each step
 
 my $fileName1 = $fq1;
-my $fileName2;
 my $zipped = isZipped($fq1);
 my $subtractedFq;
 
@@ -285,10 +294,7 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
 	$root = $1;
     }
     if ($pairedEnd){
-	$fq2 = $ARGV[1];
 	($length2,$percF2)=extractReadLen($fq2);
-	$fileName2 = $fq2;
-	$fileName2 =~ s/^.*\///g; # strip path
     }
     $fq = $zipped ? "$root-50.fq.gz" : "$root-50.fq"; #only fastq files are allowed at this point; default trimmed length = 50
 }
