@@ -274,7 +274,7 @@ my $length2="";
 my($percF,$percF2);
 if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     $genome_sub=1;
-    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq|fastq|fa)(\.gz)?/;  #Fixed regex --TSW
+    ($root,$length)=$fileName1=~/(\S+?)\-(\d{1,4})\-e\.(fastq|fq|fasta|fa)(\.gz)?/;  #Fixed regex --TSW
     $fq=$&;
     $subtractedFq = $fq1;
     errPrint "Only for 50nt if genome subtracted\n" if $length!=50;
@@ -316,7 +316,7 @@ else{verbPrint("Most common read lengths detected for fq1 & fq2: $length ($percF
 
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
-errPrint "The output directory \"$outdir\" does not exist" unless (-e $outdir);
+mkdir($outdir) unless (-e $outdir);
 chdir($outdir) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $outdir";
 mkdir("to_combine") unless (-e "to_combine");

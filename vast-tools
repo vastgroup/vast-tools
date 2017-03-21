@@ -100,10 +100,6 @@ if (! defined $outdir) {
 }
 
 
-unless($helpFlag or !defined($ARGV[0])) { 
-  mkdir($outdir) unless (-e $outdir);
-}
-
 ## Nuts and Bolts...
 if($subCommand eq "align") {
   $EXIT_STATUS = system("$path/bin/RunDBS_1.pl @args");
