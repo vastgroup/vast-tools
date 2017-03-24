@@ -284,6 +284,7 @@ for (i in 1:nplot) {
   setTxtProgressBar(pb, i/nplot)
 }
 setTxtProgressBar(pb, 1)
+close(pb)
 verbPrint("")
 dev.off()
 
