@@ -348,7 +348,12 @@ if ($length >= 50){
 elsif ($ribofoot) {
     $difLE = 0;
     $le = 32;
-} else {
+} 
+elsif ($trimLen){
+    $difLE = 0;
+    $le = 50; # even if trimLen is shorter
+} 
+else {
     errPrint "Minimum reads length has to be 50nt\n";
 }
 #####
@@ -373,7 +378,12 @@ if (!$genome_sub and !$useGenSub){
      $cmd = getPrefixCmd($cmd);
 #    24/12/16 --MI
 #    $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -"; 
-     $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+     if (defined($trimLen)){
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+     }
+     else {
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+     }
      
      verbPrint "Calculating cRPKMs\n";
      sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff expr_out/$root > expr_out/$root\.cRPKM";
