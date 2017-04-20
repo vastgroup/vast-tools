@@ -205,7 +205,7 @@ if ((opt$options$crpkm && !grepl("^NAME", colnames(all_events)[2]))
 
 # Filter list if necessary ####################################################
 if (!is.null(opt$options$gene)) {
-  if (opts$options$crpkm) {
+  if (opt$options$crpkm) {
     all_events <- all_events[grep(opt$options$gene, all_events$NAME),]
   } else {
     all_events <- all_events[grep(opt$options$gene, all_events$GENE),]
