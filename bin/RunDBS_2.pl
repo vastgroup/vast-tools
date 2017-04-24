@@ -23,6 +23,7 @@ my $outDir;
 my $compress = 0;
 
 my $noIRflag = 0;    # don't use IR!
+my $onlyIRflag = 0; # only run intron retention
 my $IR_version = 2;  # either 1 or 2
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
@@ -38,6 +39,7 @@ GetOptions("help"  	 => \$helpFlag,
 	   "o=s"         => \$outDir,
            "z"           => \$compress,
 	   "noIR"        => \$noIRflag,
+	   "onlyIR"      => \$onlyIRflag,
 	   "IR_version=i" => \$IR_version,
            "C"           => \$cRPKMCounts);
 
@@ -85,6 +87,7 @@ OPTIONS:
 				    - vast-tools will work internally with mm9; 
                                       if you choose mm10, the output gets lifted-over to mm10
 	--noIR			Don't run intron retention pipeline (default off)
+        --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
 	--dbDir DBDIR		Database directory
 	-z			Compress all output files using gzip
@@ -129,26 +132,41 @@ if( $sp eq "Mmu" ){if(!defined($asmbly)){$asmbly="mm9";};  unless($asmbly =~ /(m
 # we add leading "-" for convenience during defining output file name later 
 if($asmbly ne ""){$asmbly="-".$asmbly;}
 
+my @files;
+my $N = 0;
 
-my @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
-my $N=$#files+1;
+if ($onlyIRflag){
+    if ($IR_version == 1){
+	@files=glob("to_combine/*IR"); #gathers all IR files
+    }
+    else {
+	@files=glob("to_combine/*IR2"); #gathers all IR2 files
+    }
+    $N=$#files+1;
+}
+else {
+   @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).                                                                                                                                                                                                                                               
+   $N=$#files+1;
+}
 
 if ($N != 0) {
-    ### Gets the PSIs for the events in the a posteriori pipeline
-    verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
-    sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-    ### Gets the PSIs for the a priori, SIMPLE
-    verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
-    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-    ### Gets the PSIs for the a priori, COMPLEX
-    verbPrint "Building Table for MULTI (a priori pipeline, multiexon)\n";
-    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-    ### Gets the PSIs for the MIC pipeline
-    verbPrint "Building Table for MIC (microexons)\n";
-    sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+    unless ($onlyIRflag){
+	### Gets the PSIs for the events in the a posteriori pipeline
+	verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
+	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	
+	### Gets the PSIs for the a priori, SIMPLE
+	verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
+	sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	
+	### Gets the PSIs for the a priori, COMPLEX
+	verbPrint "Building Table for MULTI (a priori pipeline, multiexon)\n";
+	sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	
+	### Gets the PSIs for the MIC pipeline
+	verbPrint "Building Table for MIC (microexons)\n";
+	sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+    }
 
     #my($verbRFlag) = ($verboseFlag) ? "T" : "F";
     
@@ -188,25 +206,34 @@ if ($N != 0) {
     #"raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
     #"-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
 
-    ### Gets PSIs for ALT5ss and adds them to the general database
-    verbPrint "Building Table for Alternative 5'ss choice events\n";
-    sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-    ### Gets PSIs for ALT3ss and adds them to the general database
-    verbPrint "Building Table for Alternative 3'ss choice events\n";
-    sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
+    unless ($onlyIRflag){
+	### Gets PSIs for ALT5ss and adds them to the general database
+	verbPrint "Building Table for Alternative 5'ss choice events\n";
+	sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	
+	### Gets PSIs for ALT3ss and adds them to the general database
+	verbPrint "Building Table for Alternative 3'ss choice events\n";
+	sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+    }
+    
     ### Combine results into unified "FULL" table
     verbPrint "Combining results into a single table\n";
-    my @input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
-                    "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
-                    "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
-                    "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
-                    "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
-                    "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
-
-    unless($noIRflag) {
-	push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
+    my @input;
+    
+    if ($onlyIRflag){
+	@input = ("raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
+    }
+    else {
+	@input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
+	
+	unless($noIRflag) {
+	    push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
+	}
     }
     
     my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N$asmbly.tab";

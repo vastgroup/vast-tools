@@ -30,6 +30,7 @@ my $cores = 1; #default
 my $readLength = ""; # default.
 my $outdir;
 my $noIRflag = 0;  # don't run intron retention (for speed..)
+my $onlyIRflag = 0; # only run intron retention
 my $stringentIRflag = 0; # Run extra genome/eej subtraction step
 my $IR_version = 2; # IR version [09/Nov/2015] [new default 01/04/16]
 my $minReadNum;
@@ -70,6 +71,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
               		  "output=s" => \$outdir,
 			  "o=s" => \$outdir,
 			  "noIR" => \$noIRflag,
+			  "onlyIR" => \$onlyIRflag,
 			  "stringentIR" => \$stringentIRflag,
 			  "IR_version=i" => \$IR_version, 
 			  "keep" => \$keepFlag,
@@ -202,6 +204,7 @@ OPTIONS:
 				supply a specific bowtie program here (default `bowtie`)
 	--noIR			Don't run intron retention pipeline 
 				(substantially increases speed) (default off)
+        --onlyIR                Only run intron retention pipeline (default off) 
 	--stringentIR		Don't run first filtering step of IR 
 				(this will increase speed a little) (default off)
         --IR_version 1/2        Version of the Intron Retention analysis (default 2)
@@ -442,18 +445,20 @@ unless($trimmed) {
 
  
 #### Get effective reads (i.e. genome subtraction).
- $subtractedFq = "$root-$le-e.fa.gz" if !$useGenSub;
- $subtractedFq = "$root-$le-e.fq.gz" if $useGenSub;
- unless(-e $subtractedFq and $useGenSub) {
-   verbPrint "Doing genome subtraction\n";
-   # Force bash shell to support process substitution
-   $cmd = getPrefixCmd($fq);
-   $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
-   sysErrMsg("bash", "-c", $cmd);
- } else {
-   verbPrint "Found $subtractedFq. Skipping genome subtraction step...\n"; 
- }
-
+$subtractedFq = "$root-$le-e.fa.gz" if !$useGenSub;
+$subtractedFq = "$root-$le-e.fq.gz" if $useGenSub;
+unless ($onlyIRflag){
+    unless(-e $subtractedFq and $useGenSub) {
+	verbPrint "Doing genome subtraction\n";
+	# Force bash shell to support process substitution
+	$cmd = getPrefixCmd($fq);
+	$cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+	sysErrMsg("bash", "-c", $cmd);
+    } 
+    else {
+	verbPrint "Found $subtractedFq. Skipping genome subtraction step...\n"; 
+    }
+}
 
 ####
 
@@ -464,30 +469,32 @@ if ($EXIT_STATUS) {
 #### Map to the EEJ:
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 my $preCmd = getPrefixCmd($subtractedFq);
-verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
-                "$dbDir/FILES/$species"."_COMBI-M-$le - | " .
-             "cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
-             "$binPath/Analyze_COMBI.pl deprecated " .
-             "$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
-
-verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
-                "$dbDir/FILES/EXSK-$le - | " .
-             "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
-             "$binPath/Analyze_EXSK.pl $runArgs";
-
-verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
-                "$dbDir/FILES/MULTI-$le - | " .
-             "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
-             "$binPath/Analyze_MULTI.pl $runArgs";
-
-verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
-                "$dbDir/FILES/$species"."_MIC-$le - | ".
-            " cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
-            " $binPath/Analyze_MIC.pl $runArgs";
+unless ($onlyIRflag){
+    verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
+    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+	"$dbDir/FILES/$species"."_COMBI-M-$le - | " .
+	"cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
+	"$binPath/Analyze_COMBI.pl deprecated " .
+	"$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
+    
+    verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
+    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+	"$dbDir/FILES/EXSK-$le - | " .
+	"cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
+	"$binPath/Analyze_EXSK.pl $runArgs";
+    
+    verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
+    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+	"$dbDir/FILES/MULTI-$le - | " .
+	"cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
+	"$binPath/Analyze_MULTI.pl $runArgs";
+    
+    verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
+    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+	"$dbDir/FILES/$species"."_MIC-$le - | ".
+	" cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
+	" $binPath/Analyze_MIC.pl $runArgs";
+}
 
 # Align to intron retention mapped reads here..
 unless (($genome_sub and $useGenSub)  or $noIRflag) {
@@ -528,8 +535,10 @@ unless($keepFlag or $keep_trimmed) {
 }
 
 unless($keepFlag) {
-  verbPrint "Cleaning up $subtractedFq!";
-  sysErrMsg "rm $subtractedFq";
+    unless ($onlyIRflag){
+	verbPrint "Cleaning up $subtractedFq!";
+	sysErrMsg "rm $subtractedFq";
+    }
 }
 
 unless($noIRflag || $IR_version == 2) {  # --UB
