@@ -75,24 +75,25 @@ close TEMPLATE;
 ###
 verbPrint "Loading EEJ read counts data\n";
 foreach $file (@EEJ){
-	  my $fname = $file;
-     $fname =~ s/^.*\///;
+    my $fname = $file;
+    $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
 #    ($sample)=$file=~/COMBI\-[A-Z]\-\d+?\-(.+)\./;
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-ReC\t$sample-Ri1C\t$sample-Ri2C\t$sample-Q";
-
+    
     open (EEJ, $file);
     while (<EEJ>){
-		chomp;
-		@t=split(/\t/);
-		$gene=$t[0];
-		$eej=$t[1];
-		$event="$gene-$eej";
-
+	chomp;
+	@t=split(/\t/);
+	$gene=$t[0];
+	$eej=$t[1];
+	$event="$gene-$eej";
+	
         $reads{$sample}{$event}=$t[2];
         ($donor,$acceptor)=$eej=~/(\d+?)\-(\d+)/;
-        $last_acceptor{$gene}=$acceptor if $last_acceptor{$gene}<$acceptor; # keeps track of the last used acceptor
+	$last_acceptor{$gene}=$acceptor if $last_acceptor{$gene}<$acceptor || !$last_acceptor{$gene}; # keeps track of the last used acceptor
+	$last_donor{$gene}=$donor if $last_donor{$gene}<$donor || !$last_donor{$gene}; # keeps track of the last used donor
     }
     close EEJ;
 }
@@ -127,10 +128,10 @@ foreach $event (sort (keys %ALL)){
 
     foreach $file (@EEJ){
 #	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;
-     my $fname = $file;
-    $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
-     $length = $samLen;
+	my $fname = $file;
+	$fname =~ s/^.*\///;
+	($sample)=$fname=~/^(.*)\..*$/;
+	$length = $samLen;
 	$exc=$inc1=$inc2=$Rexc=$Rinc1=$Rinc2=0; # empty temporary variables for read counts
 	
 	# data from the reference EEJ (C1A, AC2, C1C2)
@@ -150,8 +151,8 @@ foreach $event (sort (keys %ALL)){
 	($d1,$a2)=$eej_exc=~/\-(\d+?)\-(\d+)/;
 	($a1)=$eej_inc1=~/\-\d+?\-(\d+)/;
 	($d2)=$eej_inc2=~/\-(\d+?)\-\d+/;
-
-    #### To calculate "complex" PSIs
+	
+	#### To calculate "complex" PSIs
 	$Rexc1C=$Rexc2C=$exc1C=$exc2C=$inc1C=$inc2C=$excC=$Rinc1C=$Rinc2C=$RexcC=0; # empty temporary variables for read counts for each sample
 
 	### Inclusion reads
@@ -176,7 +177,7 @@ foreach $event (sort (keys %ALL)){
 		$exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
 		$Rexc1C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
 	    }
-	    for $i ($d1+1..$last_acceptor{$gene}){
+	    for $i ($d1+1..$last_donor{$gene}){
 		if (($D_CO{$gene}{$i} < $A_CO{$gene}{$a1} && $strand eq "+") || ($D_CO{$gene}{$i} > $A_CO{$gene}{$a1} && $strand eq "-")){
 		    $temp_eej="$gene-$i-$a2";
 		    $exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
