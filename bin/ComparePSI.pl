@@ -192,16 +192,20 @@ $name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
 
 ####### Output file
 # defining default output file name
-my ($root)=$ARGV[0]=~/.+\-(.+?)\./;
+my ($root)=$ARGV[0]=~/.+?\-(.+?)\./;
 my $tail = ""; # to be added to the output name
 $tail.="-range$min_range" if (defined $min_range); 
 $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
-my $out_root="$root-dPSI$min_dPSI$tail";
+my $out_root="$root-dPSI$min_dPSI$tail" unless (defined $output_file);
+($out_root)=$output_file=~/([^\/]+)\./ if (defined $output_file && $output_file=~/[^\/]+\./);
+($out_root)=$output_file=~/([^\/]+)/ if (defined $output_file && $output_file!~/[^\/]+\./);
+
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
+
 
 #### prepare to obtain gene IDs for GO analyses
 my %ID_gene;
