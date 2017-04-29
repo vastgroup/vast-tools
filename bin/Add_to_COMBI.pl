@@ -17,6 +17,7 @@ my $sp;
 my $samLen;
 my $verboseFlag;
 my $legacyFlag;
+my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
 			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
@@ -159,41 +160,53 @@ foreach $event (sort (keys %ALL)){
 	for $i (0..$d2-1){ # loops through all donors in the gene from the first to d2-1
 	    if ((($D_CO{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $i != $d1){
 		$temp_eej="$gene-$i-$a1";
-		$inc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
-		$Rinc1C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
+		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
+		    $inc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    $Rinc1C+=$reads{$sample}{$temp_eej};
+		}
 	    }
 	}
 	for $i ($a1+1..$last_acceptor{$gene}){ # loops through all acceptors in the gene from a1+1 to the last
 	    if ((($A_CO{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO{$gene}{$i} < $donor_coord && $strand eq "-")) && $i != $a2){
 		$temp_eej="$gene-$d2-$i";
-		$inc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
-		$Rinc2C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
+		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
+		    $inc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    $Rinc2C+=$reads{$sample}{$temp_eej};
+		}
 	    }
 	}
 	### Exclusion reads (It does NOT take all EEJs around the alternative exon, but only those including C1 or C2.)
 	if (!$ALL_EXC_EEJ){
 	    for $i (0..$d1-1){
 		$temp_eej="$gene-$i-$a2";
-		$exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
-		$Rexc1C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
+		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
+		    $exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    $Rexc1C+=$reads{$sample}{$temp_eej};
+		}
 	    }
 	    for $i ($d1+1..$last_donor{$gene}){
 		if (($D_CO{$gene}{$i} < $A_CO{$gene}{$a1} && $strand eq "+") || ($D_CO{$gene}{$i} > $A_CO{$gene}{$a1} && $strand eq "-")){
 		    $temp_eej="$gene-$i-$a2";
-		    $exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
-		    $Rexc1C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
+		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
+			$exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+			$Rexc1C+=$reads{$sample}{$temp_eej};
+		    }
 		}
 	    }
 	    for $i ($a2+1..$last_acceptor{$gene}){
 		$temp_eej="$gene-$d1-$i";
-		$exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
-		$Rexc2C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
+		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
+		    $exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    $Rexc2C+=$reads{$sample}{$temp_eej};
+		}
 	    }
 	    for $i (0..$a2-1){
 		if (($A_CO{$gene}{$i} > $D_CO{$gene}{$d2} && $strand eq "+") || ($A_CO{$gene}{$i} < $D_CO{$gene}{$d2} && $strand eq "-")){
 		    $temp_eej="$gene-$d1-$i";
-		    $exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej} if $eff{$length}{$temp_eej}>0;
-		    $Rexc2C+=$reads{$sample}{$temp_eej} if $eff{$length}{$temp_eej}>0;
+		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
+			$exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+			$Rexc2C+=$reads{$sample}{$temp_eej};
+		    }
 		}
 	    }
             $excC=$exc1C+$exc2C;
@@ -205,7 +218,7 @@ foreach $event (sort (keys %ALL)){
 		for $j ($a1+1..$last_acceptor{$gene}){
 		    if (($D_CO{$gene}{$i} < $acceptor_coord && $A_CO{$gene}{$j} > $donor_coord && $str eq "+") || ($D_CO{$gene}{$i} > $acceptor_coord && $A_CO{$gene}{$j} < $donor_coord && $str eq "-")){
 			$temp_eej="$gene-$i-$j";
-			if ($eff{$length}{$temp_eej}>0){
+			if ($eff{$length}{$temp_eej} >= $min_eff_complex){
 			    $excC+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
 			    $RexcC+=$reads{$sample}{$temp_eej};
 			}
