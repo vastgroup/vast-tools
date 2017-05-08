@@ -76,7 +76,7 @@ Prepares and filters a vast-tools output for general analyses.
         --noVLOW                Do not use samples with VLOW coverage (default OFF)
         --p_IR                  Filter IR by the p-value of the binomial test (default OFF)
         --onlyEXSK              Outputs only EXSK events (default OFF)
-        --add_namea             Adds gene name to the event_ID. E.g. Mta1=MmuEX0029874 (default OFF)
+        --add_names             Adds gene name to the event_ID. E.g. Mta1=MmuEX0029874 (default OFF)
         --log                   Print the summary stats into a file (default OFF)
 
 
