@@ -89,7 +89,7 @@ errPrintDie "*** You can only define a minimum fraction or absolute number of sa
 errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if !$min_N && !$min_Fraction;
 
 open (I, $input_file) || die "Can't open input file\n";
-open (O, ">$output_file") || die "Can't open output file\n";
+open (O, ">$output_file") || die "Can't open output file ($output_file)\n";
 
 ### saying hi:
 verbPrint "Cleaning and filtering $ARGV[0]\n";
