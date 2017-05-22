@@ -180,7 +180,11 @@ $min_Fraction="NA" if !$min_Fraction;
 ### Print summary and LOG
 open (LOG, ">$log_file") if $log;
 print LOG "OPTIONS: $command_line\n\n";
-print "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD\n";
+
+$extras=" --noVOW" if $noVLOW;
+$extras.=" --pIR" if $p_IR;
+
+print "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
 print LOG "TOTAL # of Events:$todos\n";
 print "TOTAL # of Events: $todos\n";
 foreach $type (sort keys %tally_type){
