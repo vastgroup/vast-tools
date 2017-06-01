@@ -103,6 +103,7 @@ chomp($head);
 for $i (6..$#H){
     if ($i%2==0){
 	print O "\t$H[$i]";
+        $TISSUES{$H[$i]}=1;
 	$max_N++;
     }
 }
@@ -165,13 +166,11 @@ while (<I>){
 }
 
 ### this scores the number of events missing in each sample
-foreach $ev (sort (keys %tallyNA)){
-    if ($OK{$ev}){
+foreach $ev (sort keys %OK){
 	$todos++;
-	foreach $tis (sort (keys %{$tallyNA{$ev}})){
+	foreach $tis (sort (keys %TISSUES)){
 	    $CUENTA{$tis}++ if $tallyNA{$ev}{$tis};
 	}
-    }
 }
 
 $min_N="NA" if !$min_N;
@@ -193,7 +192,8 @@ foreach $type (sort keys %tally_type){
 }
 print LOG "\nTISSUE\tMISSING\t\%\n";
 print "\nTISSUE\tMISSING\t\%\n";
-foreach $tis (sort (keys %CUENTA)){
+foreach $tis (sort (keys %TISSUES)){
+    $CUENTA{$tis}=0 if !$CUENTA{$tis};
     $perc=sprintf("%.2f",100*$CUENTA{$tis}/$todos);
     print LOG "$tis\t$CUENTA{$tis}\t$perc\n";
     print "$tis\t$CUENTA{$tis}\t$perc\n";
