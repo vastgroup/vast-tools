@@ -38,6 +38,7 @@ my $use_names;
 my $folder;
 my $no_plot;
 my $plot_only_samples;
+my $print_dPSI;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -58,6 +59,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "GO_file=s" => \$ID_file,
 			  "use_names" => \$use_names,
 			  "paired" => \$paired,
+			  "print_dPSI" => \$print_dPSI,
 			  "no_plot" => \$no_plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
@@ -117,6 +119,8 @@ Compare two sample sets to find differentially regulated AS events
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
+        --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
+                                   - It does not allow ploting.
         --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
@@ -150,6 +154,8 @@ errPrintDie "If paired comparison, the number of replicates must be the same\n" 
 ($folder) = $input_file =~/(.+)\//; # empty if no match (i.e. local folder)
 $folder = "." unless (defined $folder);
 
+#### Check if plot and print_dPSI are active together
+errPrintDie "print_dPSI cannot be used with plot (please use --no_plot)\n" if (defined $print_dPSI) && (!defined $no_plot);
 
 #### opens INCLUSION TABLE
 open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
@@ -199,13 +205,13 @@ $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
+$tail.="-with_dPSI" if (defined $print_dPSI);
 my $out_root="$root-dPSI$min_dPSI$tail" unless (defined $output_file);
 ($out_root)=$output_file=~/([^\/]+)\./ if (defined $output_file && $output_file=~/[^\/]+\./);
 ($out_root)=$output_file=~/([^\/]+)/ if (defined $output_file && $output_file!~/[^\/]+\./);
 
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
-
 
 #### prepare to obtain gene IDs for GO analyses
 my %ID_gene;
@@ -243,8 +249,12 @@ $tally{Alt3}{DOWN}=0; $tally{Alt3}{UP}=0; $tally_total_AS{Alt3}=0; $tally_total{
 $tally{Alt5}{DOWN}=0; $tally{Alt5}{UP}=0; $tally_total_AS{Alt5}=0; $tally_total{Alt5}=0;
 
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
-print O "$head_row\n"; # it will print the original data (for plot later)
-
+unless (defined $print_dPSI){
+    print O "$head_row\n"; # it will print the original data (for plot later)
+}
+else {
+    print O "$head_row\tdPSI\n"; # it will print the original data + dPSI
+}
 ### starts the actual analysis
 while (<PSI>){
     $_ =~ s/VLOW/N/g if (defined $noVLOW);
@@ -312,7 +322,12 @@ while (<PSI>){
 	# does the diff AS test:
 	if ($dPSI > $min_dPSI && $min_B > $max_A+$min_range){ # if rep1 it will always meet the criteria
 	    $tally{$type}{UP}++;
-	    print O "$_\n"; # dPSI is not printed so it can the be run with plot
+	    unless (defined $print_dPSI){
+		print O "$_\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+		print O "$_\t$dPSI\n";
+	    }
 	    
 	    # print for GO
 	    if (defined$get_GO){
@@ -334,8 +349,14 @@ while (<PSI>){
 	}
 	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range){
 	    $tally{$type}{DOWN}++;
-	    print O "$_\n";
-	    
+
+	    unless (defined $print_dPSI){
+		print O "$_\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+		print O "$_\t$dPSI\n";
+	    }
+
 	    #print for GO
 	    if (defined$get_GO){
 		unless ($use_names){
@@ -370,7 +391,12 @@ while (<PSI>){
 	
 	if ($av_paired_dPSI > $min_dPSI && $min_indiv_dPSI > $min_range){ 
 	    $tally{$type}{UP}++;
-	    print O "$_\n";
+	    unless (defined $print_dPSI){
+		print O "$_\n";
+	    }
+	    else {
+		print O "$_\t$av_paired_dPSI\n";
+	    }
 	    
 	    # print for GO
 	    if (defined $get_GO){
@@ -392,8 +418,13 @@ while (<PSI>){
 	}
 	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range){ 
 	    $tally{$type}{DOWN}++;
-	    print O "$_\n";
-	    
+	    unless (defined $print_dPSI){
+		print O "$_\n";
+	    }
+	    else {
+		print O "$_\t$av_paired_dPSI\n";
+	    }
+
 	    #print for GO
 	    if (defined $get_GO){
 		unless ($use_names){
