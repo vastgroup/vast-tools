@@ -272,8 +272,13 @@ open (EVENTS, $input_file_fullpath) || errPrintDie "Can't open event list";
 
 my $head = <EVENTS>;
 chomp($head);
-print OUTs "$head\t$head_PSIs\tVastID\n";
-print OUTc "$head\t$head_PSIs\tVastID\n";
+print OUTs "$head$head_PSIs\tVastID\n";
+print OUTc "$head$head_PSIs\tVastID\n";
+
+# get a string with as many NAs as head_PSIs has elements; this string will be output for all not-mappable exons
+my $NAs="";
+for(my $i=0;$i<@{[split("\t",$head_PSIs)]};$i++){$NAs.="\tNA";}
+
 
 my %tally_matches;
 while (<EVENTS>){
@@ -387,8 +392,8 @@ while (<EVENTS>){
 	
 	if (!defined $C1 || !defined $C2 || !defined $Aa || !defined $Ad) {
 #	    errPrint "Cannot map all coordinates for event in gene $gene \[line $line\]";
-	    print OUTs "\tNA\tCoord_not_mappable\n";
-	    print OUTc "\tNA\tCoord_not_mappable\n";
+	    print OUTs "$NAs\n";
+	    print OUTc "$NAs\n";
 	    $tally_matches{AltEx}{NO}++;
 	}
 	else {
