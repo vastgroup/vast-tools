@@ -183,6 +183,7 @@ print LOG "OPTIONS: $command_line\n\n";
 $extras=" --noVOW" if $noVLOW;
 $extras.=" --pIR" if $p_IR;
 
+print LOG "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
 print "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
 print LOG "TOTAL # of Events:$todos\n";
 print "TOTAL # of Events: $todos\n";
