@@ -440,41 +440,81 @@ while (<EVENTS>){
 		my $inc2C = 0; my $Rinc2C = 0;
 		my $excC = 0; my $RexcC = 0;
 
-		for my $i (0..$Ad-1){ # loops through all donors in the gene from the first to d2-1
-		    if ((($D_CO{$gene}{$i} < $i_co && $strand eq "+") || ($D_CO{$gene}{$i} > $f_co && $strand eq "-")) && $i != $C1){
-			my $temp_eej="$gene-$i-$Aa";
-			$reads{$sample}{$temp_eej} = 0 if !defined $reads{$sample}{$temp_eej};
+		#### Inclusion
+                for my $i (0..$Ad-1){ # loops through all donors in the gene from the first to d2-1
+                    if ((($D_CO{$gene}{$i} < $i_co && $strand eq "+") || ($D_CO{$gene}{$i} > $f_co && $strand eq "-")) && $i != $C1){
+                        my $temp_eej="$gene-$i-$Aa";
+                        $reads{$sample}{$temp_eej} = 0 if !defined $reads{$sample}{$temp_eej};
 			
-			if (defined $eff{50}{$temp_eej} && $eff{50}{$temp_eej}>0){
-			    $inc1C+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
-			    $Rinc1C+=$reads{$sample}{$temp_eej};
+                        if (defined $eff{50}{$temp_eej} && $eff{50}{$temp_eej}>0){
+                            $inc1C+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+                            $Rinc1C+=$reads{$sample}{$temp_eej};
+                        }
+                    }
+                }
+                for my $i ($Aa+1..$last_acceptor{$gene}){ # loops through all acceptors in the gene from a1+1 to the last
+                    if ((($A_CO{$gene}{$i} > $f_co && $strand eq "+") || ($A_CO{$gene}{$i} < $i_co && $strand eq "-")) && $i != $C2){
+                        my $temp_eej="$gene-$Ad-$i";
+                        $reads{$sample}{$temp_eej} = 0 if !defined $reads{$sample}{$temp_eej};
+                        if (defined $eff{50}{$temp_eej} && $eff{50}{$temp_eej}>0){
+                            $inc2C+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+                            $Rinc2C+=$reads{$sample}{$temp_eej};
+                        }
+                    }
+                }
+
+		### Exclusion reads (It does NOT take all EEJs around the alternative exon, but only those including C1 or C2.)
+		for my $i (0..$C1-1){ # $d1 => $C1, $a1 => $Aa, $d2 => $Ad, $a2 => $C2 
+		    my $temp_eej="$gene-$i-$C2";
+		    if ($eff{50}{$temp_eej} >= 1){
+			$reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
+			$excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+			$RexcC+=$reads{$sample}{$temp_eej};
+		    }
+		}
+		for my $i ($C1+1..$Ad-1){
+		    if (($D_CO{$gene}{$i} < $A_CO{$gene}{$Aa} && $strand eq "+") || ($D_CO{$gene}{$i} > $A_CO{$gene}{$Aa} && $strand eq "-")){
+			my $temp_eej="$gene-$i-$C2";
+			if ($eff{$length}{$temp_eej} >= 1){
+			    $reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
+			    $excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+			    $RexcC+=$reads{$sample}{$temp_eej};
 			}
 		    }
 		}
-		for my $i ($Aa+1..$last_acceptor{$gene}){ # loops through all acceptors in the gene from a1+1 to the last
-		    if ((($A_CO{$gene}{$i} > $f_co && $strand eq "+") || ($A_CO{$gene}{$i} < $i_co && $strand eq "-")) && $i != $C2){
-			my $temp_eej="$gene-$Ad-$i";
-			$reads{$sample}{$temp_eej} = 0 if !defined $reads{$sample}{$temp_eej};
-			if (defined $eff{50}{$temp_eej} && $eff{50}{$temp_eej}>0){
-			    $inc2C+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
-			    $Rinc2C+=$reads{$sample}{$temp_eej};
+		for my $i ($C2+1..$last_acceptor{$gene}){
+		    my $temp_eej="$gene-$C1-$i";
+		    if ($eff{$length}{$temp_eej} >= 1){
+			$reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
+			$excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+			$RexcC+=$reads{$sample}{$temp_eej};
+		    }
+		}
+		for my $i ($Ad+1..$C2-1){
+		    if (($A_CO{$gene}{$i} > $D_CO{$gene}{$Ad} && $strand eq "+") || ($A_CO{$gene}{$i} < $D_CO{$gene}{$Ad} && $strand eq "-")){
+			my $temp_eej="$gene-$C1-$i";
+			if ($eff{$length}{$temp_eej} >= 1){
+			    $reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
+			    $excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+			    $RexcC+=$reads{$sample}{$temp_eej};
 			}
 		    }
 		}
-		### exclusion
-		for my $i (0..$Ad-1){
-		    for my $j ($Aa+1..$last_acceptor{$gene}){
-			if (($D_CO{$gene}{$i} < $i_co && $A_CO{$gene}{$j} > $f_co && $strand eq "+") || 
-			    ($D_CO{$gene}{$i} > $f_co && $A_CO{$gene}{$j} < $i_co && $strand eq "-")) {
-			    my $temp_eej="$gene-$i-$j";
-			    if (defined $eff{50}{$temp_eej} && $eff{50}{$temp_eej} > 0  && ($i != $C1 || $j != $C2)){
-				$reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
-				$excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
-				$RexcC+=$reads{$sample}{$temp_eej};
-			   }
-			}
-		    }
-		}
+#####
+	    ### exclusion (21/06/17) --MI
+#	    for my $i (0..$Ad-1){
+#		for my $j ($Aa+1..$last_acceptor{$gene}){
+#		    if (($D_CO{$gene}{$i} < $i_co && $A_CO{$gene}{$j} > $f_co && $strand eq "+") || 
+#			($D_CO{$gene}{$i} > $f_co && $A_CO{$gene}{$j} < $i_co && $strand eq "-")) {
+#			my $temp_eej="$gene-$i-$j";
+#			if (defined $eff{50}{$temp_eej} && $eff{50}{$temp_eej} > 0  && ($i != $C1 || $j != $C2)){
+#				$reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
+#				$excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
+#				$RexcC+=$reads{$sample}{$temp_eej};
+#			}
+#		    }
+#		}
+#	    }
 		
 		### sum of reads
 		my $reads_inc1_all = $reads_inc1 + $Rinc1C;
@@ -486,7 +526,7 @@ while (<EVENTS>){
 		my $Creads_exc_all = sprintf ("%.2f",$Creads_exc + $excC);
 		my $total_Creads_all = $Creads_inc1_all + $Creads_inc2_all + $Creads_exc_all;
 		
-
+		
 #### Coverage scores. Score 1: Using all raw reads
 		if (($reads_exc >= 20 || (($reads_inc1 >= 20 && $reads_inc2 >= 15) || ($reads_inc1 >= 15 && $reads_inc2 >= 20))) && $total_reads>=100){
 		    $Q_simple="SOK";
