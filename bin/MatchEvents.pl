@@ -475,7 +475,7 @@ while (<EVENTS>){
 		for my $i ($C1+1..$Ad-1){
 		    if (($D_CO{$gene}{$i} < $A_CO{$gene}{$Aa} && $strand eq "+") || ($D_CO{$gene}{$i} > $A_CO{$gene}{$Aa} && $strand eq "-")){
 			my $temp_eej="$gene-$i-$C2";
-			if ($eff{$length}{$temp_eej} >= 1){
+			if ($eff{50}{$temp_eej} >= 1){
 			    $reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
 			    $excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
 			    $RexcC+=$reads{$sample}{$temp_eej};
@@ -484,7 +484,7 @@ while (<EVENTS>){
 		}
 		for my $i ($C2+1..$last_acceptor{$gene}){
 		    my $temp_eej="$gene-$C1-$i";
-		    if ($eff{$length}{$temp_eej} >= 1){
+		    if ($eff{50}{$temp_eej} >= 1){
 			$reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
 			$excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
 			$RexcC+=$reads{$sample}{$temp_eej};
@@ -493,7 +493,7 @@ while (<EVENTS>){
 		for my $i ($Ad+1..$C2-1){
 		    if (($A_CO{$gene}{$i} > $D_CO{$gene}{$Ad} && $strand eq "+") || ($A_CO{$gene}{$i} < $D_CO{$gene}{$Ad} && $strand eq "-")){
 			my $temp_eej="$gene-$C1-$i";
-			if ($eff{$length}{$temp_eej} >= 1){
+			if ($eff{50}{$temp_eej} >= 1){
 			    $reads{$sample}{$temp_eej} = 0 if (!defined $reads{$sample}{$temp_eej});
 			    $excC+=$reads{$sample}{$temp_eej}/$eff{50}{$temp_eej};
 			    $RexcC+=$reads{$sample}{$temp_eej};
