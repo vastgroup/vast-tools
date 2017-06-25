@@ -167,7 +167,7 @@ while (<I>){
 
 ### this scores the number of events missing in each sample
 foreach $ev (sort keys %OK){
-	$todos++;
+	$total_events++;
 	foreach $tis (sort (keys %TISSUES)){
 	    $CUENTA{$tis}++ if $tallyNA{$ev}{$tis};
 	}
@@ -181,12 +181,12 @@ open (LOG, ">$log_file") if $log;
 print LOG "OPTIONS: $command_line\n\n";
 
 $extras=" --noVOW" if $noVLOW;
-$extras.=" --pIR" if $p_IR;
+$extras.=" --p_IR" if $p_IR;
 
 print LOG "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
 print "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
-print LOG "TOTAL # of Events:$todos\n";
-print "TOTAL # of Events: $todos\n";
+print LOG "TOTAL # of Events: $total_events\n";
+print "TOTAL # of Events: $total_events\n";
 foreach $type (sort keys %tally_type){
     print LOG "$type\t$tally_type{$type}\n";
     print "$type\t$tally_type{$type}\n";
@@ -195,7 +195,7 @@ print LOG "\nTISSUE\tMISSING\t\%\n";
 print "\nTISSUE\tMISSING\t\%\n";
 foreach $tis (sort (keys %TISSUES)){
     $CUENTA{$tis}=0 if !$CUENTA{$tis};
-    $perc=sprintf("%.2f",100*$CUENTA{$tis}/$todos);
+    $perc=sprintf("%.2f",100*$CUENTA{$tis}/$total_events);
     print LOG "$tis\t$CUENTA{$tis}\t$perc\n";
     print "$tis\t$CUENTA{$tis}\t$perc\n";
 }
