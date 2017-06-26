@@ -180,7 +180,8 @@ $min_Fraction="NA" if !$min_Fraction;
 open (LOG, ">$log_file") if $log;
 print LOG "OPTIONS: $command_line\n\n";
 
-$extras=" --noVOW" if $noVLOW;
+$extras="";
+$extras.=" --noVOW" if $noVLOW;
 $extras.=" --p_IR" if $p_IR;
 
 print LOG "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
