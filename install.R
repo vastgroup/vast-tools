@@ -19,10 +19,11 @@ writeLines(joinStr("Using ", R.Version()$version.string));
 source(paste(c(scriptPath,"/R/Rlib/include.R"), collapse=""))
 
 downloadDb <- function(speUrl, speFile) {
+   system("mkdir -p VASTDB")
    if(system(joinStr("wget ", speUrl)) > 0) {
      stop(joinStr("Cannot download ", speUrl))
    }
-   if(system(joinStr("tar xzvf ", speFile)) > 0) {
+   if(system(joinStr("tar xzvf ", speFile, " -C VASTDB")) > 0) {
      stop(joinStr("Cannot tar xzvf ", speFile))
    }
    if(system(joinStr("rm ", speFile)) > 0) {
