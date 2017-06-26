@@ -48,48 +48,48 @@ foreach $file (@files){
 
 	# Quality scores (only coverage)
 	$Q="";
-   my $raw_reads_exc=$t[7];
-   my $raw_reads_inc=$t[8];
-   my $corr_reads_exc=$t[9];
-   my $corr_reads_inc=$t[10];
+	my $raw_reads_exc=$t[7];
+	my $raw_reads_inc=$t[8];
+	my $corr_reads_exc=$t[9];
+	my $corr_reads_inc=$t[10];
 #### Score 1: Using all raw reads                                                                                                       
-   if (($raw_reads_exc+$raw_reads_inc)>=100){$Q="SOK";}
-   elsif ($raw_reads_exc>=20 || $raw_reads_inc >=20){$Q="OK";}
-   elsif ($raw_reads_exc>=15 || $raw_reads_inc >=15){$Q="LOW";}
-   elsif ($raw_reads_exc>=10 || $raw_reads_inc >=10){$Q="VLOW";}
-   else {$Q="N";}
+	if (($raw_reads_exc+$raw_reads_inc)>=100){$Q="SOK";}
+	elsif ($raw_reads_exc>=20 || $raw_reads_inc >=20){$Q="OK";}
+	elsif ($raw_reads_exc>=15 || $raw_reads_inc >=15){$Q="LOW";}
+	elsif ($raw_reads_exc>=10 || $raw_reads_inc >=10){$Q="VLOW";}
+	else {$Q="N";}
 #### Score 2: Using all corrected reads                                                                                                 
-   if (($corr_reads_exc+$corr_reads_inc)>=100){$Q.=",SOK";}
-   elsif ($corr_reads_exc>=20 || $corr_reads_inc>=20){$Q.=",OK";}
-   elsif ($corr_reads_exc>=15 || $corr_reads_inc>=15){$Q.=",LOW";}
-   elsif ($corr_reads_exc>=10 || $corr_reads_inc>=10){$Q.=",VLOW";}
-   else {$Q.=",N";}
+	if (($corr_reads_exc+$corr_reads_inc)>=100){$Q.=",SOK";}
+	elsif ($corr_reads_exc>=20 || $corr_reads_inc>=20){$Q.=",OK";}
+	elsif ($corr_reads_exc>=15 || $corr_reads_inc>=15){$Q.=",LOW";}
+	elsif ($corr_reads_exc>=10 || $corr_reads_inc>=10){$Q.=",VLOW";}
+	else {$Q.=",N";}
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads                                                                       
-   if (($raw_reads_exc+$raw_reads_inc)>=100){$Q.=",SOK";}
-   elsif ($raw_reads_exc>=20 || $raw_reads_inc>=20){$Q.=",OK";}
-   elsif ($raw_reads_exc>=15 || $raw_reads_inc>=15){$Q.=",LOW";}
-   elsif ($raw_reads_exc>=10 || $raw_reads_inc>=10){$Q.=",VLOW";}
-   else {$Q.=",N";}
+	if (($raw_reads_exc+$raw_reads_inc)>=100){$Q.=",SOK";}
+	elsif ($raw_reads_exc>=20 || $raw_reads_inc>=20){$Q.=",OK";}
+	elsif ($raw_reads_exc>=15 || $raw_reads_inc>=15){$Q.=",LOW";}
+	elsif ($raw_reads_exc>=10 || $raw_reads_inc>=10){$Q.=",VLOW";}
+	else {$Q.=",N";}
 #### No scores 4 and 5 for microexon pipeline.	
 	$Q.=",na,na";
-
-   ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
-   ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
-   ### These values are added to the qual score and used to infer the posterior distribution
-   unless($legacyFlag) {
-     my $totalN = $raw_reads_inc + $raw_reads_exc;
-     my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-     unless($t[6] eq "NA" or $totalN < 2) {
-       $pPSI = $t[6] / 100;
-       #$exValOfInc = $pPSI * $totalN;
-       #$exValOfExc = (1-$pPSI) * $totalN;
-       $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
-       $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
-     }
-     # ALTER QUAL OUTPUT HERE>>
-     $Q .= "\@$exValOfInc,$exValOfExc";
-   }
-
+	
+	### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
+	### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+	### These values are added to the qual score and used to infer the posterior distribution
+	unless($legacyFlag) {
+	    my $totalN = $raw_reads_inc + $raw_reads_exc;
+	    my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+	    unless($t[6] eq "NA" or $totalN < 2) {
+		$pPSI = $t[6] / 100;
+		#$exValOfInc = $pPSI * $totalN;
+		#$exValOfExc = (1-$pPSI) * $totalN;
+		$exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+		$exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
+	    }
+	    # ALTER QUAL OUTPUT HERE>>
+	    $Q .= "\@$exValOfInc,$exValOfExc";
+	}
+	
 	$PSI{$event}.="\t$t[6]\t$Q";
 	$read_counts{$event}.="\t".join("\t",@t[7..10])."\t$t[6]=$Q";
     }
