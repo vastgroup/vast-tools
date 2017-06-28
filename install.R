@@ -45,11 +45,11 @@ planariaUrl <- joinStr("http://vastdb.crg.eu/libs/", planariaDbFile)
 
 writeLines("Looking for VAST Database [VASTDB]")
 if(!file.exists("VASTDB")) {
-  writeLines("Cannot find 'VASTDB'.. Do you want me to download it for you? [y/n]")
+  cat("Cannot find 'VASTDB'.. Do you want me to download it for you? [y/n]: ")
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
   if(as.character(auto) == 'y') {
-    writeLines("Please choose database [hg19 -> h / mm9 -> m / galGal3 -> g / smed31 -> p / all -> a]: ")
+    cat("Please choose database [hg19 -> h / mm9 -> m / galGal3 -> g / smed31 -> p / all -> a]: ")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
