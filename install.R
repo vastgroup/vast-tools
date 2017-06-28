@@ -49,7 +49,7 @@ if(!file.exists("VASTDB")) {
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
   if(as.character(auto) == 'y') {
-    writeLines("OK I will try... Please choose database [hg19/mm9/galGal3/smed31/all] [h/m/g/p/a]")
+    writeLines("Please choose database [hg19 -> h / mm9 -> m / galGal3 -> g / smed31 -> p / all -> a]: ")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
