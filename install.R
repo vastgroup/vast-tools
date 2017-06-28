@@ -23,7 +23,7 @@ downloadDb <- function(speUrl, speFile) {
    if(system(joinStr("wget ", speUrl)) > 0) {
      stop(joinStr("Cannot download ", speUrl))
    }
-   if(system(joinStr("tar xzvf ", speFile, " -C VASTDB")) > 0) {
+   if(system(paste("tar xzvf ", speFile, " -C VASTDB")) > 0) {
      stop(joinStr("Cannot tar xzvf ", speFile))
    }
    if(system(joinStr("rm ", speFile)) > 0) {
