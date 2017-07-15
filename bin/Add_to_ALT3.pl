@@ -189,7 +189,7 @@ foreach $event_root (sort (keys %ALL)){
            unless($legacyFlag) {
              my $totalN = $total_raw_reads_ALL;
              my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-             unless($PSI[$i] eq "NA" or $totalN < 2) {
+             unless($PSI[$i] eq "NA" or $totalN == 0) {
                $pPSI = $PSI[$i] / 100;
                #$exValOfInc = $pPSI * $totalN;
                #$exValOfExc = (1-$pPSI) * $totalN;

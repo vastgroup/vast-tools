@@ -79,7 +79,7 @@ foreach $file (@files){
 	unless($legacyFlag) {
 	    my $totalN = $raw_reads_inc + $raw_reads_exc;
 	    my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-	    unless($t[6] eq "NA" or $totalN < 2) {
+	    unless($t[6] eq "NA" or $totalN == 0) {
 		$pPSI = $t[6] / 100;
 		#$exValOfInc = $pPSI * $totalN;
 		#$exValOfExc = (1-$pPSI) * $totalN;
