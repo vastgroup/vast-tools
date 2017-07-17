@@ -397,11 +397,13 @@ while (<EVENTS>){
 	    $tally_matches{AltEx}{NO}++;
 	}
 	else {
-	    $tally_matches{AltEx}{YES}++;
 	    ### making three ref junctions
 	    my $inc1 = "$gene-$C1-$Aa";
 	    my $inc2 = "$gene-$Ad-$C2";
 	    my $exc = "$gene-$C1-$C2";
+
+	    next if !$eff{50}{$inc1} || !$eff{50}{$inc2} || !$eff{50}{$exc}; #i.e. any of the basic have no mappability
+	    $tally_matches{AltEx}{YES}++; # no mappablity already discounted
 	    
 	    foreach my $sample (@samples){
 		my $reads_inc1 = $reads{$sample}{$inc1};
