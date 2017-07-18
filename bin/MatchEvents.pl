@@ -403,12 +403,12 @@ while (<EVENTS>){
 	    my $exc = "$gene-$C1-$C2";
 	    
 	    #i.e. any of the basic have no mappability
-	    if (!$eff{50}{$inc1} || !$eff{50}{$inc2} || !$eff{50}{$exc}){
+	    if ($eff{50}{$inc1}<2 || !$eff{50}{$inc2}<2 || !$eff{50}{$exc}<2){
 		print OUTs "$NAs\n";
 		print OUTc "$NAs\n";
 		$tally_matches{AltEx}{NO}++;
 	    }
-	    next if !$eff{50}{$inc1} || !$eff{50}{$inc2} || !$eff{50}{$exc};
+	    next if ($eff{50}{$inc1}<2 || $eff{50}{$inc2}<2 || $eff{50}{$exc}<2);
 
 	    $tally_matches{AltEx}{YES}++; # no mappablity already discounted
 	    
