@@ -272,7 +272,7 @@ foreach $event (sort keys %ALL){
    unless($legacyFlag) {
      my $totalN = $Rexc{$event}{$sample} + $Rinc1{$event}{$sample} + $Rinc2{$event}{$sample};
      my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-     unless($PSI eq "NA" or $totalN < 2) {
+     unless($PSI eq "NA" or $totalN == 0) {
        $pPSI = $PSI / 100;
        #$exValOfInc = $pPSI * $totalN;
    	 #$exValOfExc = (1-$pPSI) * $totalN;
