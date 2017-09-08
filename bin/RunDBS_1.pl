@@ -109,26 +109,57 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 	my %tally_readL;
 	my $total=1;
 	my $perc;
-	while(<$fh>){if($check){if(substr($_,0,1) ne "@"){errPrintDie("Sequence data must be provided in FASTQ format but file $fn does not look like FASTQ format (first line does not start with @).");}$check=0;}
-		chomp;
-		$c++;
-		if($c % 4==2){
-			unless($readL){
-			    $readL=length($_);
-			    $tally_readL{$readL}=1;
+	if($fn =~ /(\S+)\.(fastq|fq)(\.gz)?/){  # FASTQ files
+		while(<$fh>){if($check){if(substr($_,0,1) ne "@"){errPrintDie("Sequence data must be provided in FASTQ format but file $fn does not look like FASTQ format (first line does not start with @).");}$check=0;}
+			chomp;
+			$c++;
+			if($c % 4==2){
+				unless($readL){
+			    	$readL=length($_);
+			    	$tally_readL{$readL}=1;
+				}
+				else{ 
+			    	$readL=length($_);
+			    	$tally_readL{$readL}++ if defined $tally_readL{$readL};
+			    	$tally_readL{$readL}=1 if !defined $tally_readL{$readL};
+			    	$total++;
+				}
 			}
-			else{ 
-#			    if($readL != length($_)){$readL=-1;last;} # not need to 
-			    $readL=length($_);
-			    $tally_readL{$readL}++ if defined $tally_readL{$readL};
-			    $tally_readL{$readL}=1 if !defined $tally_readL{$readL};
-			    $total++;
-			}
+			if($c/4 > $maxN){last;}
 		}
-		if($c/4 > $maxN){last;}
+	}elsif($fn =~ /(\S+)\.(fasta|fa)(\.gz)?/){  # FASTA files
+		my $read="";
+		my $str_tmp;
+		while(<$fh>){
+			if($c>$maxN){last;}
+			chomp;
+			$str_tmp=substr($_,0,1);
+			if(length($_)==0){next;}
+			if($str_tmp eq "#"){next;}
+			if($str_tmp eq ">"){
+				if($read ne ""){
+					$c++;
+					unless($readL){
+			    			$readL=length($read);
+			    			$tally_readL{$readL}=1;
+					}else{ 
+			    			$readL=length($read);
+			    			$tally_readL{$readL}++ if defined $tally_readL{$readL};
+			    			$tally_readL{$readL}=1 if !defined $tally_readL{$readL};
+			    			$total++;
+					}
+				}
+				$read="";next;
+			}
+			$read.=$_;
+		}
+	}else{
+		errPrintDie("Type of sequence file $fn cannot be deduced from file name (must end with fastq|fq|fasta|fa (.gz).");
 	}
+	
+	
 	close($fh);
-
+	
 	### to get the most common length
 	foreach my $temp_readL (sort {$a<=>$b} keys %tally_readL){
 	    $perc = sprintf("%.2f",100*$tally_readL{$temp_readL}/$total);
@@ -137,6 +168,7 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 
 	return($readL,$perc);
 }
+
 
 sub sysErrMsg {
   my @sysCommand = @_;
