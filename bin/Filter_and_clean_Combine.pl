@@ -60,7 +60,7 @@ $root_out.="-noVLOW" if $noVLOW;
 $root_out.="-p_IR" if $p_IR;
 $root_out.="-onlyEXSK" if $onlyEXSK;
 
-$output_file="$root_out-Tidy.tab";
+$output_file="$root_out-Tidy.tab" unless $output_file;
 $log_file="$root_out-Tidy.log" if $log;
 
 if (!$ARGV[0] || $helpFlag){
