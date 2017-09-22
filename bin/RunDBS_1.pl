@@ -54,6 +54,8 @@ my $keep_trimmed= 0; # to keep the original file when pre-trimmed
 
 my $ribofoot = 0; # flag for ribosome footprinting libraries
 
+my $resume = 0;   # if this flag is set, vast-tools tries to resume a previous run 
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
@@ -84,7 +86,8 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
                           "mismatchNum=i" => \$bowtieV,
                           "preTrimmed" => \$trimmed,
                           "useFastq" => \$fastaOnly,
-			  "riboFoot" => \$ribofoot
+			  "riboFoot" => \$ribofoot,
+			  "resume" =>\$resume
 			  );
 
 our $EXIT_STATUS = 0;
@@ -172,6 +175,7 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 
 sub sysErrMsg {
   my @sysCommand = @_;
+  if($resume){print STDERR "... --resumed!\n";return(1);}
   not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
@@ -204,6 +208,15 @@ sub getPrefixCmd {
   my $file = shift;
   my $prefix = isZipped($file) ? "gzip -dc $file" : "cat $file";
   return $prefix;
+}
+
+sub checkResumeOption{
+  my @files_to_be_checked=@_;   # if any of these files exists, we can skip the next computation 
+  if($resume == 0){return(1);}
+  $resume=0;   # assume we need to execute the next command
+  foreach my $file_to_be_checked (@files_to_be_checked){
+  	if(-e $file_to_be_checked){$resume=1;last;}  # except if one of these files exist
+  }
 }
 
 my $inpType = !$fastaOnly ? "-f" : "-q"; 
@@ -251,6 +264,7 @@ OPTIONS:
 					(only output from Trim.pl, default off)
 	--useFastq		This option is only necessary if you have pre-trimmed reads 
 					in fastq not fasta format (default off)
+	--resume		Resume a previous run using previous intermediate results
 	-h, --help		Print this help message
 
 
@@ -401,7 +415,7 @@ if (!$genome_sub and !$useGenSub){
  my $cmd;
 #### Expression analysis (it maps only the first $le nucleotides of the read)
  if ($runExprFlag || $onlyExprFlag){
-     verbPrint "Mapping reads against mRNA sequences";
+     verbPrint "Mapping RNAseq reads against mRNA sequences";
 
 #### Only the first $le nucleotides of the forward read --MI 25/12/14
 #     if ($pairedEnd) {
@@ -421,6 +435,7 @@ if (!$genome_sub and !$useGenSub){
      }
      
      verbPrint "Calculating cRPKMs\n";
+     checkResumeOption("$root-$le.fq.gz","$root-$le.fa.gz","to_combine/$root.eej2","to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt");
      sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff expr_out/$root > expr_out/$root\.cRPKM";
  }
  if ($onlyExprFlag){
@@ -460,7 +475,8 @@ unless($trimmed) {
 	$trimArgs .= " --paired $pairFq";
     } 
     
-    verbPrint "Trimming fastq sequences to $le nt sequences";
+    verbPrint "Trimming RNAseq reads to $le nt sequences";
+    checkResumeOption("to_combine/$root.eej2","to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt");
     ## Add min read depth?
     # Renamed fa/fq --MI [11/11/15]
     if ($fastaOnly){
@@ -475,21 +491,17 @@ unless($trimmed) {
 }
 ####
 
- 
+
 #### Get effective reads (i.e. genome subtraction).
 $subtractedFq = "$root-$le-e.fa.gz" if !$useGenSub;
 $subtractedFq = "$root-$le-e.fq.gz" if $useGenSub;
 unless ($onlyIRflag){
-    unless(-e $subtractedFq and $useGenSub) {
-	verbPrint "Doing genome subtraction\n";
-	# Force bash shell to support process substitution
-	$cmd = getPrefixCmd($fq);
-	$cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
-	sysErrMsg("bash", "-c", $cmd);
-    } 
-    else {
-	verbPrint "Found $subtractedFq. Skipping genome subtraction step...\n"; 
-    }
+    verbPrint "Doing genome subtraction\n";
+    # Force bash shell to support process substitution
+    $cmd = getPrefixCmd($fq);
+    $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+    checkResumeOption("to_combine/$root.eej2","to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt");
+    sysErrMsg("bash", "-c", $cmd);
 }
 
 ####
@@ -503,29 +515,33 @@ my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
 my $preCmd = getPrefixCmd($subtractedFq);
 unless ($onlyIRflag){
     verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
+    checkResumeOption("to_combine/$root.exskX");
     sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/$species"."_COMBI-M-$le - | " .
 	"cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
 	"$binPath/Analyze_COMBI.pl deprecated " .
-	"$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";
+	"$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";   # produces to_combine/$root.eej2
     
     verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
+    checkResumeOption("to_combine/$root.MULTI3X");
     sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/EXSK-$le - | " .
 	"cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
-	"$binPath/Analyze_EXSK.pl $runArgs";
+	"$binPath/Analyze_EXSK.pl $runArgs";                                 # produces to_combine/$root.exskX
     
     verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
+    checkResumeOption("to_combine/$root.micX");
     sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/MULTI-$le - | " .
 	"cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
-	"$binPath/Analyze_MULTI.pl $runArgs";
-    
+	"$binPath/Analyze_MULTI.pl $runArgs";                                # produces to_combine/$root.MULTI3X
+
     verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
+    checkResumeOption("to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt","tmp/resume_tmp.txt");
     sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/$species"."_MIC-$le - | ".
 	" cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
-	" $binPath/Analyze_MIC.pl $runArgs";
+	" $binPath/Analyze_MIC.pl $runArgs";                                 # produces to_combine/$root.micX
 }
 
 # Align to intron retention mapped reads here..
@@ -547,37 +563,43 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
   }
   
   $preCmd = getPrefixCmd($fq);
+  checkResumeOption("to_combine/$root.IR","to_combine/$root.IR2");
   sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
               "$dbDir/FILES/$species.IntronJunctions.$type.$le.8 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
-              "$binPath/RI_summarize$v.pl - $runArgs";
+              "$binPath/RI_summarize$v.pl - $runArgs";                       # produces to_combine/$root.IR.summary.txt or to_combine/$root.IR.summary_v2.txt
+  checkResumeOption("tmp/resume_tmp.txt");
   sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
-              "$binPath/RI_summarize_introns$v.pl - $runArgs";
+              "$binPath/RI_summarize_introns$v.pl - $runArgs";               # produces /to_combine/$root.IR or /to_combine/$root.IR2 
 } else {
   verbPrint "Skipping intron retention step...\n";
 }
 
 unless($keepFlag or $keep_trimmed) {
   verbPrint "Cleaning $fq files!";
-  sysErrMsg "rm $fq";
+  sysErrMsg "rm -f $fq";
 }
 
 unless($keepFlag) {
     unless ($onlyIRflag){
 	verbPrint "Cleaning up $subtractedFq!";
-	sysErrMsg "rm $subtractedFq";
+	sysErrMsg "rm -f $subtractedFq";
     }
 }
 
 unless($noIRflag || $IR_version == 2) {  # --UB
     my $juncAnnotationFile = "./to_combine/$root.IR.summary.txt";
     verbPrint "Cleaning up $juncAnnotationFile!";
-    sysErrMsg "rm $juncAnnotationFile";
+    sysErrMsg "rm -f $juncAnnotationFile";
 }
+
+# generate an empty control file for resume option 
+# allows us a complete resume if previous run did complete successfully
+open(my $fh,">tmp/resume_tmp.txt");print $fh "run has completed successfully";close($fh);
 
 
 verbPrint "Completed " . localtime;
