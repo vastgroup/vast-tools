@@ -425,13 +425,16 @@ if (!$genome_sub and !$useGenSub){
 #     }
 
      $cmd = getPrefixCmd($cmd);
+     my $bowtie_fa_fq_switch="-q";                                            # FASTQ
+     if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_switch="-f";}  # FASTA
+     
 #    24/12/16 --MI
 #    $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -"; 
      if (defined($trimLen)){
-	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bowtie_fa_fq_switch -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
      else {
-	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie $bowtie_fa_fq_switch -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
      
      verbPrint "Calculating cRPKMs\n";
