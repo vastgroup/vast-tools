@@ -18,6 +18,7 @@ Table of Contents:
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
 - [Combine output format](#combine-output-format)
+- [Interconnection with VastDB](#vastdb)
 - [Issues](#issues)
 - [Contributions](#contributions)
 - [Citation](#citation)
@@ -498,7 +499,6 @@ Then, for each combined sample, a pair of columns:
 Interconnection with VastDB
 ---------------------------
 [VastDB](http://vastdb.crg.eu/) is a web server that is tightly interconnected with VAST-TOOLS. [VastDB](http://vastdb.crg.eu/) contains information about AS events profiled by VAST-TOOLS for several species. It contains basic information about the events (including sequences, splice site strength, overlap with protein domains and disordered regions) and PSI quantifications for a large range of cell and tissue types and developmental stages, as profiled by VAST-TOOLS. Events have stable IDs that are identical in VAST-TOOLS and [VastDB](http://vastdb.crg.eu/). Therefore, results obtained using VAST-TOOLS can be directly checked in [VastDB](http://vastdb.crg.eu/) to obtain physiological information about the AS events of interest. Moreover, [VastDB](http://vastdb.crg.eu/) provides event-level orthology information, allowing to compare information across the different species included in [VastDB](http://vastdb.crg.eu/) and VAST-TOOLS. Finally, general gene-level information is also provided, including quantifications of expression using cRPKMs.
-
 
 Issues
 ------
