@@ -7,7 +7,7 @@ Table of Contents:
 - [Requirements](#requirements)
 - [Installation](#installation)
 	- [VAST-TOOLS](#vast-tools-1)
-	- [VASTDB](#vastdb)
+	- [VASTDB Libraries](#vastdb-libraries)
 - [Usage](#usage)
 	- [Help](#help)
 	- [Quick Usage](#quick-usage)
@@ -18,6 +18,7 @@ Table of Contents:
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
 - [Combine output format](#combine-output-format)
+- [Interconnection with VastDB web](#interconnection-with-vastdb-web)
 - [Issues](#issues)
 - [Contributions](#contributions)
 - [Citation](#citation)
@@ -25,7 +26,7 @@ Table of Contents:
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. 
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server.
 
 Requirements
 ------------
@@ -62,14 +63,18 @@ for the latest release or to get the latest development version, simply clone th
 > git clone https://github.com/vastgroup/vast-tools.git
 ~~~~
 
-### VASTDB
+### VASTDB Libraries
 
-VASTDB must be downloaded separately and can be saved in the VAST-TOOLS 
+VASTDB libraries must be downloaded separately and can be saved in the VAST-TOOLS 
 directory, or in an external location. If the latter, the path of VASTDB 
 must be supplied to `vast-tools` via `--dbDir` or alternatively, a symbolic 
 link can be created in the root of VAST-TOOLS directory. By default, 
 VAST-TOOLS looks for VASTDB inside its own directory 
 (e.g. `~/bin/vast-tools/VASTDB`).
+
+In addition to these libraries, [VastDB](http://vastdb.crg.eu/) also refers to a web server
+that provides information about AS events profiled by VAST-TOOLS through their stable
+VastID (e.g. [HsaEX0040388](http://vastdb.crg.eu/wiki/Event:HsaEX0040388@Genome:hg19)).
 
 **Automatic DB Installation:**
 
@@ -103,6 +108,16 @@ Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz
 > tar xzvf vastdb.gga.13.11.15.tar.gz
+~~~~
+Zebrafish (danRer10) - 2.1G [vastdb.dre.10.03.17.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.10.03.17.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.dre.10.03.17.tar.gz
+> tar xzvf vastdb.dre.10.03.17.tar.gz
+~~~~
+Sea urchin (Spur3.1) - 1.2G [vastdb.spu.10.03.17.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.10.03.17.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.spu.10.03.17.tar.gz
+> tar xzvf vastdb.spu.10.03.17.tar.gz
 ~~~~
 Planarian (v31) - 942M [vastdb.sme.31.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz):
 ~~~~
@@ -462,7 +477,7 @@ Then, for each combined sample, a pair of columns:
     - For EX: OK/LOW/VLOW: (i) ≥20/15/10 actual reads (i.e. before mappability correction) mapping to all exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two groups of inclusion splice junctions (upstream or downstream the alternative exon), and ≥15/10/5 to the other group of inclusion splice junctions.
     - For EX (microexon module): OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to the sum of inclusion splice junctions.
     - For INT: OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of skipping splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two inclusion exon-intron junctions (the 5' or 3' of the intron), and ≥15/10/5 to the other inclusion splice junctions.
-    - For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/20/10 actual reads mapping to the sum of all splice junctions involved in the specific event.
+    - For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/25/15 actual reads mapping to the sum of all splice junctions involved in the specific event.
     - For any type of event: SOK: same thresholds as OK, but a total number of reads ≥100.
     - For any type of event: N: does not meet the minimum threshold (VLOW).
 
@@ -481,6 +496,10 @@ Then, for each combined sample, a pair of columns:
     - NA: low coverage event.
   * inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
 
+Interconnection with VastDB Web
+-------------------------------
+[VastDB](http://vastdb.crg.eu/) is a web server that is tightly interconnected with VAST-TOOLS. [VastDB](http://vastdb.crg.eu/) contains information about AS events profiled by VAST-TOOLS for several species. It contains basic information about the events (including sequences, splice site strength, overlap with protein domains and disordered regions) and PSI quantifications for a large range of cell and tissue types and developmental stages, as profiled by VAST-TOOLS. Events have stable IDs that are identical in VAST-TOOLS and [VastDB](http://vastdb.crg.eu/). Therefore, results obtained using VAST-TOOLS can be directly checked in [VastDB](http://vastdb.crg.eu/) to obtain physiological information about the AS events of interest. Moreover, [VastDB](http://vastdb.crg.eu/) provides event-level orthology information, allowing to compare information across the different species included in [VastDB](http://vastdb.crg.eu/) and VAST-TOOLS. Finally, general gene-level information is also provided, including quantifications of expression using cRPKMs.
+
 Issues
 ------
 Please report all bugs and issues using the GitHub [issue tracker]
@@ -488,17 +507,21 @@ Please report all bugs and issues using the GitHub [issue tracker]
 
 Contributions
 -------------
-* Manuel Irimia
-* Nuno Barbosa-Morais 
-* Ulrich Braunschweig 
-* Sandy Pan
-* Kevin Ha
-* Tim Sterne-Weiler
+* Manuel Irimia (CRG)
+* Andre Gohr (CRG)
+* Nuno Barbosa-Morais (iMM)
+* Ulrich Braunschweig (UofT)
+* Kevin Ha (UofT)
+* Tim Sterne-Weiler (UofT)
 
 Citation
 --------
 
-* VAST-TOOLS:
+* `vast-tools` main paper, including benchmarking and [VastDB](http://vastdb.crg.eu/):
+
+Tapial, J., Ha, K.C.H., Sterne-Weiler, T., Gohr, A., Braunschweig, U., Hermoso-Pulido, A., Quesnel-Vallières, M., Permanyer, J., Sodaei, R., Marquez, Y., Cozzuto, L., Wang, X., Gómez-Velázquez, M., Rayón, M., Manzanares, M., Ponomarenko, J., Blencowe, B.J., Irimia, M. (2017). An Alternative Splicing Atlas Reveals New Regulatory Programs and Genes Simultaneously Expressing Multiple Major Isoforms in Vertebrates. Genome Res, 27(10):1759-1768
+
+* `vast-tools` original paper:
 
 Irimia, M., Weatheritt, R.J., Ellis, J., Parikshak, N.N., Gonatopoulos-Pournatzis, T., Babor, M., Quesnel-Vallières, M., Tapial, J., Raj, B., O’Hanlon, D., Barrios-Rodiles, M., Sternberg, M.J.E., Cordes, S.P., Roth, F.P., Wrana, J.L., Geschwind, D.H., Blencowe, B.B. (2014). A highly conserved program of neuronal microexons is misregulated in autistic brains. *Cell*, 59:1511-23.
 
@@ -509,6 +532,15 @@ Braunschweig, U., Barbosa-Morais, N.L., Pan, Q., Nachman, E., Alipahani, B., Gon
 * Chicken database:
 
 Gueroussov, S., Gonatopoulos-Pournatzis, T., Irimia, M., Raj, B., Lin, Z.Y., Gingras, A.C., Blencowe, B.J. (2015). An alternative splicing event amplifies evolutionary differences between vertebrates. *Science*, 349:868-73
+
+* Planarian database: 
+
+Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians. Elife, 5:e16797. 
+
+* Zebrafish and sea urchin databases:
+
+Burguera, D., Marquez, Y., Racioppi, C., Permanyer, J., Torres-Mendez, T., Esposito, R., Albuixech, B., Fanlo, L., D'Agostino, Y., Gohr, A., Navas-Perez, E., Riesgo, A., Cuomo, C., Benvenuto, G., Christiaen, L.A., Martí, E., D'Aniello, S., Spagnuolo, A., Ristoratore, F., Arnone, M.I., Garcia-Fernàndez, J., Irimia, M. (2017). Evolutionary recruitment of flexible Esrp-dependent splicing programs into diverse embryonic morphogenetic processes. Nat Commun, In press.
+
 
 References
 ----------
