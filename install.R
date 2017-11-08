@@ -34,12 +34,16 @@ downloadDb <- function(speUrl, speFile) {
 humanDbFile <- "vastdb.hsa.22.06.16.tar.gz"
 mouseDbFile <- "vastdb.mmu.22.06.16.tar.gz"
 chickenDbFile <- "vastdb.gga.13.11.15.tar.gz"
+DreDbFile <- "vastdb.dre.10.03.17.tar.gz"
+SpuDbFile <- "vastdb.spu.10.03.17.tar.gz"
 planariaDbFile <- "vastdb.sme.13.11.15.tar.gz"
 
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
 mouseUrl <- joinStr("http://vastdb.crg.eu/libs/", mouseDbFile)
 chickenUrl <- joinStr("http://vastdb.crg.eu/libs/", chickenDbFile)
+DreUrl <- joinStr("http://vastdb.crg.eu/libs/", DreDbFile)
+SpuUrl <- joinStr("http://vastdb.crg.eu/libs/", SpuDbFile)
 planariaUrl <- joinStr("http://vastdb.crg.eu/libs/", planariaDbFile)
 #
 
@@ -49,7 +53,7 @@ if(!file.exists("VASTDB")) {
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
   if(as.character(auto) == 'y') {
-    cat("Please choose database [hg19 -> h / mm9 -> m / galGal3 -> g / smed31 -> p / all -> a]: ")
+    cat("Please choose database [hg19 -> h / mm9 -> m / galGal3 -> g / danRer10 -> z / Spur31 -> s smed31 -> p / all -> a]: ")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
@@ -61,6 +65,12 @@ if(!file.exists("VASTDB")) {
     }
     if(db == 'g' || db == 'a') {
       downloadDb(chickenUrl, chickenDbFile)
+    }
+    if(db == 'z' || db == 'a') {
+      downloadDb(DreUrl, DreDbFile)
+    }
+    if(db == 's' || db == 'a') {
+      downloadDb(SpuUrl, SpuDbFile)
     }
     if(db == 'p' || db == 'a') {
       downloadDb(planariaUrl, planariaDbFile)
