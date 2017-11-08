@@ -152,21 +152,21 @@ foreach $event_root (sort (keys %ALL)){
 	### Score 1
 	$Q="SOK" if $total_raw_reads_ALL >= 100;
 	$Q="OK" if $total_raw_reads_ALL >= 40 && $total_raw_reads_ALL < 100;
-        $Q="LOW" if $total_raw_reads_ALL >= 20 && $total_raw_reads_ALL < 40;
-        $Q="VLOW" if $total_raw_reads_ALL >= 10 && $total_raw_reads_ALL < 20;
-        $Q="N" if $total_raw_reads_ALL < 10;
+        $Q="LOW" if $total_raw_reads_ALL >= 25 && $total_raw_reads_ALL < 40;
+        $Q="VLOW" if $total_raw_reads_ALL >= 15 && $total_raw_reads_ALL < 25;
+        $Q="N" if $total_raw_reads_ALL < 15;
         ### Score 2
         $Q.=",SOK" if $total_corr_reads_ALL >= 100;
         $Q.=",OK" if $total_corr_reads_ALL >= 40 && $total_corr_reads_ALL < 100;
-	$Q.=",LOW" if $total_corr_reads_ALL >= 20 && $total_corr_reads_ALL < 40;
-        $Q.=",VLOW" if $total_corr_reads_ALL >= 10 && $total_corr_reads_ALL < 20;
-        $Q.=",N" if $total_corr_reads_ALL < 10;
+	$Q.=",LOW" if $total_corr_reads_ALL >= 25 && $total_corr_reads_ALL < 40;
+        $Q.=",VLOW" if $total_corr_reads_ALL >= 15 && $total_corr_reads_ALL < 25;
+        $Q.=",N" if $total_corr_reads_ALL < 15;
         ### Score 3 (instead of Score 4, read count)
         $Q.=",SOK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 100;
         $Q.=",OK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 40 && $total_raw_reads_S < 100;
-	$Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 20 && $total_raw_reads_S < 40;
-        $Q.=",VLOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 10 && $total_raw_reads_S < 20;
-        $Q.=",N,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S < 10;
+	$Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 25 && $total_raw_reads_S < 40;
+        $Q.=",VLOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 15 && $total_raw_reads_S < 25;
+        $Q.=",N,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S < 15;
 
         #### Score 5: COMPLEXITY
         $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
