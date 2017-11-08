@@ -54,7 +54,7 @@ sub verbPrint {
 #$root=~s/.+\///;
 $root_out=$root;
 $root_out.="-minN_$min_N" if $min_N;
-$root_out.="-minFr_$min_Fr" if $min_Fr;
+$root_out.="-minFr_$min_Fr" if $min_Fraction;
 $root_out.="-minSD_$min_SD";
 $root_out.="-noVLOW" if $noVLOW;
 $root_out.="-p_IR" if $p_IR;
