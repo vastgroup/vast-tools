@@ -211,7 +211,7 @@ sub getPrefixCmd {
 }
 
 sub checkResumeOption{
-  my @files_to_be_checked=@_;   # if any of these files exists, we can skip the next computation 
+  my @files_to_be_checked=@_;   # if any of these files exist, we can skip the next computation 
   if($resume == 0){return(1);}
   $resume=0;   # assume we need to execute the next command
   foreach my $file_to_be_checked (@files_to_be_checked){
