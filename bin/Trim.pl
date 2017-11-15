@@ -13,7 +13,7 @@ my $hackLen = 50;
 my $targetLength = 50;
 
 my $pairedEndFile;
-my $fastaFlag = 0;
+my $fastaFlag = 0;   # output will be FASTA, otherwise FASTQ | output will be FASTA too if input is FASTA   
 my $onceTrim = 0;
 
 Getopt::Long::Configure("no_auto_abbrev");
@@ -73,6 +73,7 @@ if(defined($pairedEndFile)) {
 my $trimNum = 1;
 ### Parses the original reads
 my $lineCounter = 1;
+my $input_is_fasta=0;
 while(my $fwd = <STDIN>) {
   chomp $fwd;
 
@@ -84,17 +85,18 @@ while(my $fwd = <STDIN>) {
 
   my $mod = $lineCounter % 4;
   if ($mod == 1) {
-      #$name = $fwd;
       $rand = md5_base64($fwd);
-      #$rand = randString(32);
-      my $preChar = ($fastaFlag ? ">" : "@");
-      $name = "$preChar$rand";
-  } elsif ($mod == 2) {
+      $name = $rand;
+      if(substr($fwd,0,1) eq ">"){$input_is_fasta=1;}
+  }
+  if ($mod == 2) {
       $seq = $fwd;
       $seqRev = $rev if($pairedFlag);
-  } elsif ($mod == 3) {
+  }
+  if ($mod == 3) {
       $name2 = "\+$rand";
-  } elsif ($mod == 0) {
+  }
+  if ($mod == 0 || ($mod == 2 && $input_is_fasta)) {
       $rest = $fwd;
       $restRev = $rev if($pairedFlag);
   
@@ -113,10 +115,10 @@ while(my $fwd = <STDIN>) {
         my $R1 = substr($rest, $off, $targetLength);
         my $subCode = substr(md5_hex($trimNum), 0, 4);
 	
-        if($fastaFlag) {
-	    print STDOUT "$name-$subCode\n$S1\n" unless $S1 =~ /\./; # added by --MI [03/05/16] (some reads have unexpected ".")
+        if($fastaFlag || $input_is_fasta) {
+	    print STDOUT ">$name-$subCode\n$S1\n" unless $S1 =~ /\./; # added by --MI [03/05/16] (some reads have unexpected ".")
         } else {
-	    print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n" unless$S1 =~ /\./; # added by --MI [03/05/16]
+	    print STDOUT "\@$name-$subCode\n$S1\n$name2-$subCode\n$R1\n" unless$S1 =~ /\./; # added by --MI [03/05/16]
         }
         $trimNum++;
         $acceptedFwd++ unless $S1 =~ /\./; # added by --MI [03/05/16]
@@ -127,10 +129,10 @@ while(my $fwd = <STDIN>) {
           my $S1 = substr($seqRev, $off, $targetLength);
           my $R1 = substr($restRev, $off, $targetLength);
           my $subCode = substr(md5_hex($trimNum), 0, 4);
-          if($fastaFlag) {
-	      print STDOUT "$name-$subCode\n$S1\n" unless $S1 =~ /\./; # added by --MI [03/05/16]
+          if($fastaFlag || $input_is_fasta) {
+	      print STDOUT ">$name-$subCode\n$S1\n" unless $S1 =~ /\./; # added by --MI [03/05/16]
           } else {
-	      print STDOUT "$name-$subCode\n$S1\n$name2-$subCode\n$R1\n" unless $S1 =~ /\./; # added by --MI [03/05/16]
+	      print STDOUT "\@$name-$subCode\n$S1\n$name2-$subCode\n$R1\n" unless $S1 =~ /\./; # added by --MI [03/05/16]
           }
           $trimNum++;
           $acceptedRev++ unless $S1 =~ /\./; # added by --MI [03/05/16]
@@ -138,6 +140,8 @@ while(my $fwd = <STDIN>) {
       }
       $total_fwd_accepted++ if $acceptedFwd;
       $total_rev_accepted++ if $acceptedRev;
+      
+      if($input_is_fasta){$lineCounter+=2;}
   }
   $lineCounter++;
 }
