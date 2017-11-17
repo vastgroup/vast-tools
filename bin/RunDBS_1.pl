@@ -420,7 +420,7 @@ my $bt_norc="";  # option for Bowtie to map only to fwd strand
 #### Check if paired-end reads are strand specific
 # If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($strandaware){
-	my $minNMappingReads=1000;   # at least so many reads from all 10000 reads must get mapped
+	my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
 	my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
 	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
 	
@@ -441,8 +441,7 @@ if($strandaware){
         }
         
 	if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
-		warn "Reads don't look like being strand-specific. Vast-tools will continue in strand-unaware mode!\n";
-		$strandaware=0;
+		die "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
 	}else{
 		my $fn_tmp="";   
 		if($percR1n>=$minThresh){ $fn_tmp=$fq1; }elsif($pairedEnd){ $fn_tmp=$fq2; }   # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
