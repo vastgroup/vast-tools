@@ -23,6 +23,7 @@ my $bowtie = "bowtie"; # by default;
 my $species = "Hsa"; # by default;
 my $dbDir; #default
 my $pairedEnd = 0; # no by default
+my $strandaware=0;   # strand-aware mode? Only available for paired-end reads.
 my $runExprFlag = 0; # no by default
 my $onlyExprFlag = 0; # no by default
 my $trim;
@@ -411,25 +412,67 @@ if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
 }
 
+
+#### Check if paired-end reads are strand specific
+# If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
+if($pairedEnd && $strandaware){
+	
+	sub rvcmplt{
+		$_=$_[0];
+		#tr/ACGTacgt\[\]/TGCAtgca\]\[/;
+		tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/;
+		$_=reverse;	
+		return($_);
+	}
+	
+	my $minNMappingReads=1000;   # at least so many reads from all 10000 reads must get mapped
+	my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific. 
+	
+        my $N=40000; # check 10K fastq seqs
+        my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=20000;}
+        my ($p1,$n1,$p2,$n2,$fh)=(0,0,0,0,undef);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
+        open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or die "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
+        open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or die "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
+	
+        my ($percR1p,$percR1n,$percR2p,$percR2n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)),($p2/($p2+$n2)),($n2/($p2+$n2)) );
+
+	print "Strand-specificity test:  fraction of uniquely mapped paired-end reads ( r1->+ / r1->- / r2->+ / r2->- )=(".$percR1p." / ".$percR1n." / ".$percR2p." / ".$percR2n.")\n";
+
+	if($percR1n<$minThresh && $percR2n<$minThresh){
+		warn "Paired-end data don't look like strand-specific\n";
+	}else{
+		my $fn_tmp;
+		if($percR1n>=$minThresh){ $fn_tmp=$fq1; }else{ $fn_tmp=$fq2; }
+		
+		# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
+		my $fn_out=$fn_tmp.".".join("",@{["A".."Z"]}[  map { 26*rand } ( 1..10 ) ])."";
+		open($fh,$fn_tmp) or die "$!"; open(my $out,">$fn_out" ) or die "$!";
+		my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
+			if($c==1){print $out "$l\n";}
+			if($c==2){print $out rvcmplt(substr($l,1,length($l)))."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
+			if($c==3){print $out "$l\n";}
+			if($c==4){print $out reverse($l)."\n"; $c=0;}
+		}
+		move($fn_out,$fn_tmp) or die "$!";
+	}
+}
+
+
+
+
 if (!$genome_sub and !$useGenSub){
  my $cmd;
 #### Expression analysis (it maps only the first $le nucleotides of the read)
  if ($runExprFlag || $onlyExprFlag){
      verbPrint "Mapping RNAseq reads against mRNA sequences";
 
-#### Only the first $le nucleotides of the forward read --MI 25/12/14
-#     if ($pairedEnd) {
-#         $cmd = "$fq1 $fq2";  # altered this to cat both for/rev reads into bowtie.
-#     } else {
-         $cmd = "$fq1";
-#     }
-
+     $cmd = "$fq1";
      $cmd = getPrefixCmd($cmd);
      my $bowtie_fa_fq_flag="-q";
      if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";}
 
 #    24/12/16 --MI
-#    $cmd .= " | $bowtie -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -"; 
+#    $cmd .= " | - -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -"; 
      if (defined($trimLen)){
 	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
