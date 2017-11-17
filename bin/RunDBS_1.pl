@@ -64,6 +64,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "c=i" => \$cores, 
 			  "cores=i" => \$cores,
 			  "expr" => \$runExprFlag,
+			  "strandaware" => \$strandaware,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
 			  "help" => \$helpFlag,
@@ -242,6 +243,8 @@ OPTIONS:
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
+	--strandaware           Map strand-specific paired-end RNA-seq data strand-specifically
+	                        to AS events to remove bias due to antisense transcription
 	--expr			For expression analyses: -expr 
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
@@ -416,34 +419,23 @@ if ($EXIT_STATUS) {
 #### Check if paired-end reads are strand specific
 # If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($pairedEnd && $strandaware){
-	
-	sub rvcmplt{
-		$_=$_[0];
-		#tr/ACGTacgt\[\]/TGCAtgca\]\[/;
-		tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/;
-		$_=reverse;	
-		return($_);
-	}
-	
 	my $minNMappingReads=1000;   # at least so many reads from all 10000 reads must get mapped
-	my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific. 
+	my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
 	
-        my $N=40000; # check 10K fastq seqs
+        my $N=40000; # check 10K fastq reads 
         my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=20000;}
         my ($p1,$n1,$p2,$n2,$fh)=(0,0,0,0,undef);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
         open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or die "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
         open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or die "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
 	
         my ($percR1p,$percR1n,$percR2p,$percR2n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)),($p2/($p2+$n2)),($n2/($p2+$n2)) );
-
 	print "Strand-specificity test:  fraction of uniquely mapped paired-end reads ( r1->+ / r1->- / r2->+ / r2->- )=(".$percR1p." / ".$percR1n." / ".$percR2p." / ".$percR2n.")\n";
 
-	if($percR1n<$minThresh && $percR2n<$minThresh){
-		warn "Paired-end data don't look like strand-specific\n";
+	if($percR1n<$minThresh && $percR2n<$minThresh){	warn "Paired-end data don't look like strand-specific\n";
 	}else{
 		my $fn_tmp;
 		if($percR1n>=$minThresh){ $fn_tmp=$fq1; }else{ $fn_tmp=$fq2; }
-		
 		# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
 		my $fn_out=$fn_tmp.".".join("",@{["A".."Z"]}[  map { 26*rand } ( 1..10 ) ])."";
 		open($fh,$fn_tmp) or die "$!"; open(my $out,">$fn_out" ) or die "$!";
@@ -456,7 +448,10 @@ if($pairedEnd && $strandaware){
 		move($fn_out,$fn_tmp) or die "$!";
 	}
 }
-
+# set Bowtie argument --norc for strandaware mode
+my $bt_norc="--norc";
+unless($strandaware){$bt_norc="";}
+ 
 
 
 
@@ -472,12 +467,12 @@ if (!$genome_sub and !$useGenSub){
      if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";}
 
 #    24/12/16 --MI
-#    $cmd .= " | - -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -"; 
+#    $cmd .= " | - -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -";
      if (defined($trimLen)){
-	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bt_norc $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
      else {     	
-	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie $bt_norc $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
      
      verbPrint "Calculating cRPKMs\n";
@@ -545,7 +540,7 @@ unless ($onlyIRflag){
     verbPrint "Doing genome subtraction\n";
     # Force bash shell to support process substitution
     $cmd = getPrefixCmd($fq);
-    $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+    $cmd .= " | $bowtie $bt_norc -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
     checkResumeOption("to_combine/$root.eej2","to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt");
     sysErrMsg("bash", "-c", $cmd);
 }
@@ -562,7 +557,7 @@ my $preCmd = getPrefixCmd($subtractedFq);
 unless ($onlyIRflag){
     verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
     checkResumeOption("to_combine/$root.exskX");
-    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+    sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/$species"."_COMBI-M-$le - | " .
 	"cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
 	"$binPath/Analyze_COMBI.pl deprecated " .
@@ -570,21 +565,21 @@ unless ($onlyIRflag){
     
     verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
     checkResumeOption("to_combine/$root.MULTI3X");
-    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+    sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/EXSK-$le - | " .
 	"cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
 	"$binPath/Analyze_EXSK.pl $runArgs";                                 # produces to_combine/$root.exskX
     
     verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") MULTI EEJ library and Analyzing...\n";
     checkResumeOption("to_combine/$root.micX");
-    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+    sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/MULTI-$le - | " .
 	"cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
 	"$binPath/Analyze_MULTI.pl $runArgs";                                # produces to_combine/$root.MULTI3X
 
     verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
     checkResumeOption("to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt","tmp/resume_tmp.txt");
-    sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+    sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/$species"."_MIC-$le - | ".
 	" cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
 	" $binPath/Analyze_MIC.pl $runArgs";                                 # produces to_combine/$root.micX
@@ -610,13 +605,13 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
   
   $preCmd = getPrefixCmd($fq);
   checkResumeOption("to_combine/$root.IR","to_combine/$root.IR2");
-  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+  sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
               "$dbDir/FILES/$species.IntronJunctions.$type.$le.8 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize$v.pl - $runArgs";                       # produces to_combine/$root.IR.summary.txt or to_combine/$root.IR.summary_v2.txt
   checkResumeOption("tmp/resume_tmp.txt");
-  sysErrMsg "$preCmd | $bowtie $inpType -p $cores -m 1 -v $bowtieV " .
+  sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
