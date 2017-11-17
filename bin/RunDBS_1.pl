@@ -548,7 +548,7 @@ unless ($onlyIRflag){
     verbPrint "Doing genome subtraction\n";
     # Force bash shell to support process substitution
     $cmd = getPrefixCmd($fq);
-    $cmd .= " | $bowtie $bt_norc -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
+    $cmd .= " | $bowtie -p $cores $inpType -m 1 -v 2 --un >(gzip > $subtractedFq) --max /dev/null $dbDir/FILES/gDNA - /dev/null";
     checkResumeOption("to_combine/$root.eej2","to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt");
     sysErrMsg("bash", "-c", $cmd);
 }
