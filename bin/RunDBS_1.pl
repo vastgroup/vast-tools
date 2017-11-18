@@ -456,7 +456,7 @@ if($strandaware){
         		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
 	        }
 
-		my ($fn_tmp,$fn_out)=("","");
+		my ($fn_tmp,$fn_out,$out)=("","",undef);
 		if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
 			errPrintDie "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
 		}else{
@@ -464,7 +464,8 @@ if($strandaware){
 			if($fn_tmp){
 				# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
 				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
-				open($fh,$fn_tmp) or die "$!"; open(my $out,">$fn_out" ) or die "$!";
+				open($fh,"".getPrefixCmd($fn_tmp)." |") or die "$!"; 
+				if(isZipped($fn_tmp)){open($out,"| gzip -c > $fn_out" ) or die "$!";}else{open($out,">fn_out") or die "$!";}
 				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
 					if($c==1){print $out "$l\n";}
 					if($c==2){print $out rvcmplt($l)."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
