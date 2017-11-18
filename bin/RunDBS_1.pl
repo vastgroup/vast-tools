@@ -467,7 +467,7 @@ if($strandaware){
 				open($fh,$fn_tmp) or die "$!"; open(my $out,">$fn_out" ) or die "$!";
 				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
 					if($c==1){print $out "$l\n";}
-					if($c==2){print $out rvcmplt(substr($l,1,length($l)))."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
+					if($c==2){print $out rvcmplt($l)."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
 					if($c==3){print $out "$l\n";}
 					if($c==4){print $out reverse($l)."\n"; $c=0;}
 				}
