@@ -416,51 +416,68 @@ if ($EXIT_STATUS) {
 }
 
 
-my $bt_norc="";  # option for Bowtie to map only to fwd strand
-#### Check if paired-end reads are strand specific
-# If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
+my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc 
+#### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($strandaware){
-	my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
-	my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
-	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
-	
-        my $N=40000; # check 10K fastq reads 
-        my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=20000;}
-        my ($p1,$n1,$p2,$n2,$fh)=(0,0,0,0,undef);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
-        my ($percR1p,$percR1n,$percR2p,$percR2n);
-        
-        open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or die "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
-        if($p1==0 && $n1==0){die "No reads (first reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
-        ($percR1p,$percR1n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)) );
-        print "Strand-specificity test:\n   fraction of first reads mapping to fwd / rev strand = $percR1p / $percR1n\n";
-        if($pairedEnd){  # same for second reads of each pair
-        	open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or die "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
-        	if($p2==0 && $n2==0){die "No reads (second reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
-        	($percR2p,$percR2n)=( ($p2/($p2+$n2)),($n2/($p2+$n2)) );
-        	print "   fraction of second reads mapping to fwd / rev strand = $percR2p / $percR2n\n";
-        }
-        
-	if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
-		die "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
-	}else{
-		my $fn_tmp="";   
-		if($percR1n>=$minThresh){ $fn_tmp=$fq1; }elsif($pairedEnd){ $fn_tmp=$fq2; }   # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
-		if($fn_tmp){
-			# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
-			my $fn_out=$fn_tmp.".".join("",@{["A".."Z"]}[  map { 26*rand } ( 1..10 ) ])."";
-			open($fh,$fn_tmp) or die "$!"; open(my $out,">$fn_out" ) or die "$!";
-			my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
-				if($c==1){print $out "$l\n";}
-				if($c==2){print $out rvcmplt(substr($l,1,length($l)))."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
-				if($c==3){print $out "$l\n";}
-				if($c==4){print $out reverse($l)."\n"; $c=0;}
-			}
-			move($fn_out,$fn_tmp) or die "$!";
+	verbPrint "Strand-specificity test for given reads";
+	checkResumeOption("$tmpDir/strand_specificity_check.txt");
+	my $fh;
+	if($resume){
+		print verbPrint "... --resumed!\n";
+		$bt_norc="--norc";
+		# extract information on temporary read input with re-oriented reads
+		open($fh,"$tmpDir/strand_specificity_check.txt") or errPrintDie "$1"; chomp(my $line=<$fh>); close($fh);
+		my @fs=split("\t",$line); 
+		if(@fs==2){  # Is only 2 if file contains an entry with two tab-separated true file names. If file names are empty strings, the length will be 1.
+			if($fq1==$fs[0]){$fq1=$fs[1];
+			}elsif($fq2==$fs[0]){$fq2=$fs[1];
+			}else{ $resume=0;}  # something seems to be wrong; deactivate resume and re-do strand-specificity check
 		}
 	}
+	
+	unless($resume){
+		my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
+		my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+		sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
+	
+        	my $N=40000; # check 10K fastq reads 
+        	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=20000;}
+        	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
+        	my ($percR1p,$percR1n,$percR2p,$percR2n);
 
-	if($strandaware){$bt_norc="--norc";}  # set Bowtie argument --norc for strandaware mode
-}
+        	open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
+        	if($p1==0 && $n1==0){die "No reads (first reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
+        	($percR1p,$percR1n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)) );
+        	verbPrint "   fraction of first reads mapping to fwd / rev strand : $percR1p / $percR1n";
+        	if($pairedEnd){  # same for second reads of each pair
+        		open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
+	        	if($p2==0 && $n2==0){die "No reads (second reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
+        		($percR2p,$percR2n)=( ($p2/($p2+$n2)),($n2/($p2+$n2)) );
+        		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
+	        }
+
+		my ($fn_tmp,$fn_out)=("","");
+		if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
+			errPrintDie "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
+		}else{
+			if($percR1n>=$minThresh){ $fn_tmp=$fq1;}elsif($pairedEnd){ $fn_tmp=$fq2;}   # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
+			if($fn_tmp){
+				# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
+				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
+				open($fh,$fn_tmp) or die "$!"; open(my $out,">$fn_out" ) or die "$!";
+				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
+					if($c==1){print $out "$l\n";}
+					if($c==2){print $out rvcmplt(substr($l,1,length($l)))."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
+					if($c==3){print $out "$l\n";}
+					if($c==4){print $out reverse($l)."\n"; $c=0;}
+				}
+			}
+		}
+		$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
+		# Generate a control file for resume option. Allows us a detect resume for strand-specificity check.
+		open($fh,">$tmpDir/strand_specificity_check.txt");print $fh "$fn_tmp\t$fn_out";close($fh);
+	} # unless resume
+} # if strandaware option given
 
 
 if (!$genome_sub and !$useGenSub){
@@ -618,7 +635,7 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize$v.pl - $runArgs";                       # produces to_combine/$root.IR.summary.txt or to_combine/$root.IR.summary_v2.txt
-  checkResumeOption("tmp/resume_tmp.txt");
+  checkResumeOption("$tmpDir/resume.txt");
   sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
@@ -646,9 +663,8 @@ unless($noIRflag || $IR_version == 2) {  # --UB
     sysErrMsg "rm -f $juncAnnotationFile";
 }
 
-# generate an empty control file for resume option 
-# allows us a complete resume if previous run did complete successfully
-open(my $fh,">tmp/resume_tmp.txt");print $fh "run has completed successfully";close($fh);
+# Generate a control file for resume option. Allows us a complete resume if previous run did complete successfully.
+open(my $fh,">$tmpDir/resume.txt");print $fh "Run completed successfully";close($fh);
 
 
 verbPrint "Completed " . localtime;
