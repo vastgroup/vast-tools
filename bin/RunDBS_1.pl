@@ -466,6 +466,7 @@ if($strandaware){
 				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
 				open($fh,"".getPrefixCmd($fn_tmp)." |") or die "$!"; 
 				if(isZipped($fn_tmp)){open($out,"| gzip -c > $fn_out" ) or die "$!";}else{open($out,">fn_out") or die "$!";}
+				verbPrint "   reverse-complementing reads from $fn_tmp; writing into $fn_out";
 				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
 					if($c==1){print $out "$l\n";}
 					if($c==2){print $out rvcmplt($l)."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
