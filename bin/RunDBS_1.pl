@@ -417,6 +417,7 @@ if ($EXIT_STATUS) {
 
 
 my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc 
+my $fin_revcmlt_reads="";
 #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($strandaware){
 	verbPrint "Strand-specificity test for given reads";
@@ -465,6 +466,7 @@ if($strandaware){
 			if($fn_tmp){
 				# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
 				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
+				$fin_revcmlt_reads=$fn_out;
 				open($fh,"".getPrefixCmd($fn_tmp)." |") or die "$!"; 
 				if(isZipped($fn_tmp)){open($out,"| gzip -c > $fn_out" ) or die "$!";}else{open($out,">fn_out") or die "$!";}
 				verbPrint "   reverse-complementing reads from $fn_tmp; writing into $fn_out";
@@ -669,6 +671,8 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 # Generate a control file for resume option. Allows us a complete resume if previous run did complete successfully.
 open(my $fh,"$tmpDir/".pop([split("/",$fq1)]).".resume");close($fh);
 
+# delete temporary file with reverse-complemented reads
+if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS;
