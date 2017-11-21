@@ -420,13 +420,14 @@ my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc
 #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($strandaware){
 	verbPrint "Strand-specificity test for given reads";
-	checkResumeOption("$tmpDir/strand_specificity_check.txt");
+	my $resume_fn="$tmpDir/".pop([split("/",$fq1)]).".ssrd";
+	checkResumeOption("$resume_fn");
 	my $fh;
 	if($resume){
 		print verbPrint "... --resumed!\n";
 		$bt_norc="--norc";
 		# extract information on temporary read input with re-oriented reads
-		open($fh,"$tmpDir/strand_specificity_check.txt") or errPrintDie "$1"; chomp(my $line=<$fh>); close($fh);
+		open($fh,"$resume_fn") or errPrintDie "$!"; chomp(my $line=<$fh>); close($fh);
 		my @fs=split("\t",$line); 
 		if(@fs==2){  # Is only 2 if file contains an entry with two tab-separated true file names. If file names are empty strings, the length will be 1.
 			if($fq1==$fs[0]){$fq1=$fs[1];
@@ -434,7 +435,7 @@ if($strandaware){
 			}else{ $resume=0;}  # something seems to be wrong; deactivate resume and re-do strand-specificity check
 		}
 	}
-	
+
 	unless($resume){
 		my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
 		my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
@@ -456,7 +457,7 @@ if($strandaware){
         		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
 	        }
 
-		my ($fn_tmp,$fn_out,$out)=("","",undef);
+		my ($fn_tmp,$fn_out,$out)=($fq1,$fq1,undef);
 		if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
 			errPrintDie "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
 		}else{
@@ -477,7 +478,7 @@ if($strandaware){
 		}
 		$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
 		# Generate a control file for resume option. Allows us a detect resume for strand-specificity check.
-		open($fh,">$tmpDir/strand_specificity_check.txt");print $fh "$fn_tmp\t$fn_out";close($fh);
+		open($fh,">$resume_fn");print $fh "$fn_tmp\t$fn_out";close($fh);
 	} # unless resume
 } # if strandaware option given
 
@@ -637,7 +638,7 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize$v.pl - $runArgs";                       # produces to_combine/$root.IR.summary.txt or to_combine/$root.IR.summary_v2.txt
-  checkResumeOption("$tmpDir/resume.txt");
+  checkResumeOption("$tmpDir/".pop([split("/",$fq1)]).".resume");
   sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
@@ -666,7 +667,7 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 }
 
 # Generate a control file for resume option. Allows us a complete resume if previous run did complete successfully.
-open(my $fh,">$tmpDir/resume.txt");print $fh "Run completed successfully";close($fh);
+open(my $fh,"$tmpDir/".pop([split("/",$fq1)]).".resume");close($fh);
 
 
 verbPrint "Completed " . localtime;
