@@ -669,7 +669,7 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 }
 
 # Generate a control file for resume option. Allows us a complete resume if previous run did complete successfully.
-open(my $fh,"$tmpDir/".pop([split("/",$fq1)]).".resume");close($fh);
+open(my $fh,">$tmpDir/".pop([split("/",$fq1)]).".resume");print $fh "finished successfully";close($fh);
 
 # delete temporary file with reverse-complemented reads
 if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
