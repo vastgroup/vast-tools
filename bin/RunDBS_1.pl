@@ -64,7 +64,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "c=i" => \$cores, 
 			  "cores=i" => \$cores,
 			  "expr" => \$runExprFlag,
-			  "strandaware" => \$strandaware,
+			  "s" => \$strandaware,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
 			  "help" => \$helpFlag,
@@ -243,7 +243,7 @@ OPTIONS:
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
-	--strandaware           Map reads strand-specifically to AS events to remove bias due 
+	--s                     Map reads strand-specifically to AS events to remove bias due 
 	                        to antisense transcription. Only available for strand-specific reads.
 	--expr			For expression analyses: -expr 
 				(PSIs plus cRPKM calculations) (default off)
@@ -418,6 +418,7 @@ if ($EXIT_STATUS) {
 
 my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc 
 my $fin_revcmlt_reads="";
+my $mapcorr_fileswitch="";  # change of file names with mappability correction (needs to change in strand-aware mode)
 #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($strandaware){
 	verbPrint "Strand-specificity test for given reads";
@@ -427,6 +428,7 @@ if($strandaware){
 	if($resume){
 		print verbPrint "... --resumed!\n";
 		$bt_norc="--norc";
+		$mapcorr_fileswitch="-SS";  # ending of files with mappability correction factors for strand-AWARE mode
 		# extract information on temporary read input with re-oriented reads
 		open($fh,"$resume_fn") or errPrintDie "$!"; chomp(my $line=<$fh>); close($fh);
 		my @fs=split("\t",$line); 
@@ -479,6 +481,7 @@ if($strandaware){
 			}
 		}
 		$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
+		$mapcorr_fileswitch="-SS";  # ending of files with mappability correction factors for strand-AWARE mode
 		# Generate a control file for resume option. Allows us a detect resume for strand-specificity check.
 		open($fh,">$resume_fn");print $fh "$fn_tmp\t$fn_out";close($fh);
 	} # unless resume
@@ -507,7 +510,7 @@ if (!$genome_sub and !$useGenSub){
      
      verbPrint "Calculating cRPKMs\n";
      checkResumeOption("$root-$le.fq.gz","$root-$le.fa.gz","to_combine/$root.eej2","to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt");
-     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-$le.eff expr_out/$root > expr_out/$root\.cRPKM";
+     sysErrMsg "$cmd | $binPath/expr_RPKM.pl - $dbDir/EXPRESSION/$species"."_mRNA-${le}${mapcorr_fileswitch}.eff expr_out/$root > expr_out/$root\.cRPKM";
  }
  if ($onlyExprFlag){
      print STDERR "Expression analysis done\n";
@@ -582,7 +585,7 @@ if ($EXIT_STATUS) {
 }
 
 #### Map to the EEJ:
-my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root";
+my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; if($strandaware){$runArgs .=" -s"}
 my $preCmd = getPrefixCmd($subtractedFq);
 unless ($onlyIRflag){
     verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
@@ -591,7 +594,7 @@ unless ($onlyIRflag){
 	"$dbDir/FILES/$species"."_COMBI-M-$le - | " .
 	"cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
 	"$binPath/Analyze_COMBI.pl deprecated " .
-	"$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA.eff $runArgs";   # produces to_combine/$root.eej2
+	"$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA${mapcorr_fileswitch}.eff $runArgs";   # produces to_combine/$root.eej2
     
     verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
     checkResumeOption("to_combine/$root.MULTI3X");

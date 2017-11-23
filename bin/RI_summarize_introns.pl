@@ -12,16 +12,18 @@ my $dbDir;
 my $sp;
 my $rle;
 my $root;
+my $standaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$rle, "root=s" => \$root);
+           "readLen=i" => \$rle, "root=s" => \$root, "s" => \$strandaware);
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 my $maxcount = $rle - 15;
 
 # Getting mappability information (from output of uniquecount.IJ.pl)
 my %ucount;
 
-my $ucountFile = "$dbDir/FILES/$sp.Introns.sample.200.$rle.uniquecount.txt";
+my $ucountFile = "$dbDir/FILES/$sp.Introns.sample${mapcorr_fileswitch}.200.$rle.uniquecount.txt";
 my $UC = openFileHandle($ucountFile);
 while(<$UC>){
     chomp($_);

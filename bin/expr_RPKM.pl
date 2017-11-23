@@ -9,14 +9,17 @@ use Getopt::Long;
 my $sp;
 my $dbDir;
 my $root;
+my $strandaware=0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,  "s" => \$strandaware);
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 if ($ARGV[0] eq "--help" || !$ARGV[0]){
-    print "expr_RPKM.pl mRNA.out mRNA.eff out_dir/root\n\n";
+    print "expr_RPKM.pl mRNA.out mRNA${mapcorr_fileswitch}.eff out_dir/root\n\n";
     die "Script to calculate cRPKMs from read counts per gene, provided a file with mappability\n";
 }
 $root=$ARGV[2];
+
 
 ### Loads effective lengths (i.e. mappable positions per transcript).
 open (MAPPABILITY, $ARGV[1]) || die "Needs file with effective lengths (mappability file) as \$ARGV[1]\n";

@@ -16,9 +16,12 @@ my $dbDir;
 my $sp;
 my $read_length;
 my $root;
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-			  "readLen=i" => \$read_length, "root=s" => \$root);
+			  "readLen=i" => \$read_length, "root=s" => \$root, "s" => \$strandaware);
+
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 ### DEPRECATED --TSW
 #$file=$ARGV[0];
@@ -31,7 +34,7 @@ GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
 
 
 ### Loads mappability/effective lengths
-open (EFF, "$dbDir/FILES/$sp"."_MIC-$read_length-gDNA.eff2") || die "Needs file with effective length for each EEEJ\n";
+open (EFF, "$dbDir/FILES/$sp"."_MIC-$read_length-gDNA${mapcorr_fileswitch}.eff2") || die "Needs file with effective length for each EEEJ\n";
 while (<EFF>){ #loads the effective length in the hash \%eff
     chomp;
     @t=split(/\t/);

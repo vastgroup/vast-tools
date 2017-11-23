@@ -28,6 +28,7 @@ my $exprONLY; # if you want to do expr only, just write anything.
 my $move_to_PARTS; # to move the merged subfiles into the PARTS folder
 my $IR_version = 2; # version of IR pipeline [new default 01/04/16]
 my $noIR; # to avoid warnings
+my $strandaware=0;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "groups=s" => \$groups,
@@ -41,9 +42,11 @@ GetOptions(               "groups=s" => \$groups,
                           "exprONLY" => \$exprONLY,
                           "help" => \$helpFlag,
                           "noIR" => \$noIR,
-			  "move_to_PARTS" => \$move_to_PARTS
+			  "move_to_PARTS" => \$move_to_PARTS,
+			  "s" => \$strandaware);
     );
 
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 our $EXIT_STATUS = 0;
 
@@ -89,6 +92,8 @@ OPTIONS:
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
         --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
         --dbDir db               Database directory (default VASTDB)
+        --s                      Map reads strand-specifically to AS events to remove bias due 
+	                         to antisense transcription. Only available for strand-specific reads.
         --IR_version 1/2         Version of the Intron Retention pipeline (1 or 2) (default 2)
         --expr                   Merges cRPKM files (default OFF)
         --exprONLY               Merges only cRPKM files (default OFF)
@@ -218,7 +223,7 @@ my %MULTIb;
 verbPrint "Doing merging for Expression files only\n" if (defined $exprONLY);
 
 if (defined $expr){
-    $effective = "$dbDir/EXPRESSION/$species"."_mRNA-50.eff";
+    $effective = "$dbDir/EXPRESSION/$species"."_mRNA-50${mapcorr_fileswitch}.eff";
     if (-e $effective){
 	verbPrint "Loading Effective data\n";
 	open (EFF, $effective) || errPrintDie "Cannot find the file with effective positions\n";

@@ -15,9 +15,12 @@ my $dbDir;
 my $sp;
 my $length;
 my $root;
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$length, "root=s" => \$root);
+           "readLen=i" => \$length, "root=s" => \$root,  "s" => \$strandaware);
+
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 #($sp,$length)=$ARGV[0]=~/(\S{3})MULTI\-(\d+?)\-/; # uniform format
 #($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output    # DEPRECATED --TSW
@@ -41,7 +44,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ### Loads mappability for each EEJ
-open (MAPPABILITY, "$dbDir/FILES/MULTI-$length-gDNA.eff") || die "Can't find mappability file for MULTI\n";
+open (MAPPABILITY, "$dbDir/FILES/MULTI-$length-gDNA${mapcorr_fileswitch}.eff") || die "Can't find mappability file for MULTI\n";
 while (<MAPPABILITY>){
     chomp;
     @t=split(/\t/);

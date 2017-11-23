@@ -16,10 +16,12 @@ my $dbDir;
 my $sp;
 my $rle;
 my $root;
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$rle, "root=s" => \$root);
+           "readLen=i" => \$rle, "root=s" => \$root  "s" => \$strandaware);
 
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 my $maxcount = $rle - 15;
 my $type = "ALL"; # added to incorporate all COMBI-B EEJs.
 
@@ -28,7 +30,7 @@ my %ucount;
 my %transcripts;
 
 # just to get the transcript per gene in COMBI
-my $ucountFile = "$dbDir/FILES/$sp.IntronJunctions.$type.$rle.8.uniquecount.txt"; 
+my $ucountFile = "$dbDir/FILES/$sp.IntronJunctions.$type${mapcorr_fileswitch}.$rle.8.uniquecount.txt"; 
 open (EFF, $ucountFile);
 while (<EFF>){
     chomp($_);

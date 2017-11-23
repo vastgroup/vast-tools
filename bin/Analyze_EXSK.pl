@@ -15,9 +15,12 @@ my $dbDir;
 my $sp;
 my $length;
 my $root;
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$length, "root=s" => \$root);
+           "readLen=i" => \$length, "root=s" => \$root, "s" => \$strandaware);
+
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 
 #($sp,$length)=$ARGV[0]=~/(.{3})EXSK\-(\d+?)\-/; # input file format
@@ -38,7 +41,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ### Loads mappability information
-open (MAPPABILITY, "$dbDir/FILES/EXSK-$length-gDNA.eff") || die "No Mappability for $sp\n";
+open (MAPPABILITY, "$dbDir/FILES/EXSK-$length-gDNA${mapcorr_fileswitch}.eff") || die "No Mappability for $sp\n";
 while (<MAPPABILITY>){
     chomp;
     @t=split(/\t/);
