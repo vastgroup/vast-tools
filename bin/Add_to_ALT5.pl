@@ -14,9 +14,12 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-			  "verbose=i" => \$verboseFlag);
+			  "verbose=i" => \$verboseFlag, "s" => \$strandaware);
+			  
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 sub verbPrint {
   my $verbMsg = shift;
@@ -46,7 +49,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 @EEJ=glob("to_combine/*.ee*");
-@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA${mapcorr_fileswitch}.ef*");
 die "Needs effective\n" if !@EFF;
 
 verbPrint "Loading Effective files:\n";

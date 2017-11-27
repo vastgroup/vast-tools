@@ -18,9 +18,13 @@ my $samLen;
 my $verboseFlag;
 my $legacyFlag;
 my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
+			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag
+			  , "s" => \$strandaware);
+
+my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 sub verbPrint {
   my $verbMsg = shift;
@@ -36,7 +40,7 @@ die "Needs Species key\n" if !defined($sp);
 $COMB="M"; # Only available version
 
 @EEJ=glob("to_combine/*.ee*"); # is this right? --TSW
-@EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
+@EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA${mapcorr_fileswitch}.ef*");
 die "[vast combine combi error] Needs effective from database!\n" if !@EFF;
 
 ###
