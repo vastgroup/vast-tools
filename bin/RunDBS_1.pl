@@ -433,8 +433,8 @@ if($strandaware){
 		open($fh,"$resume_fn") or errPrintDie "$!"; chomp(my $line=<$fh>); close($fh);
 		my @fs=split("\t",$line); 
 		if(@fs==2){  # Is only 2 if file contains an entry with two tab-separated true file names. If file names are empty strings, the length will be 1.
-			if($fq1 eq $fs[0]){$fq1=$fs[1];
-			}elsif($fq2 eq $fs[0]){$fq2=$fs[1];
+			if($fq1 eq $fs[0]){$fq1=$fs[1];     $fin_revcmlt_reads=$fs[1];
+			}elsif($fq2 eq $fs[0]){$fq2=$fs[1]; $fin_revcmlt_reads=$fs[1];
 			}else{ $resume=0;}  # something seems to be wrong; deactivate resume and re-do strand-specificity check
 		}
 	}
