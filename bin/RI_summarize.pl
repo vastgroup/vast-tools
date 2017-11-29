@@ -15,7 +15,7 @@ my $root;
 my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$rle, "root=s" => \$root, "s" => \$strandaware););
+           "readLen=i" => \$rle, "root=s" => \$root, "s" => \$strandaware);
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 my $maxcount = $rle - 15;

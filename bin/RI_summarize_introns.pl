@@ -12,7 +12,7 @@ my $dbDir;
 my $sp;
 my $rle;
 my $root;
-my $standaware=0;
+my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
            "readLen=i" => \$rle, "root=s" => \$root, "s" => \$strandaware);
