@@ -31,20 +31,19 @@ my $noIR; # to avoid warnings
 my $strandaware=0;
 
 Getopt::Long::Configure("no_auto_abbrev");
-GetOptions(               "groups=s" => \$groups,
-			  "g=s" => \$groups,
-			  "dbDir=s" => \$dbDir,
-                          "outDir=s" => \$folder,
-                          "o=s" => \$folder,
-			  "IR_version=i" => \$IR_version,
-			  "sp=s" => \$species,
-			  "expr" => \$expr,
-                          "exprONLY" => \$exprONLY,
-                          "help" => \$helpFlag,
-                          "noIR" => \$noIR,
-			  "move_to_PARTS" => \$move_to_PARTS,
-			  "s" => \$strandaware);
-    );
+GetOptions("groups=s" => \$groups,
+	"g=s" => \$groups,
+	"dbDir=s" => \$dbDir,
+	"outDir=s" => \$folder,
+	"o=s" => \$folder,
+	"IR_version=i" => \$IR_version,
+	"sp=s" => \$species,
+	"expr" => \$expr,
+	"exprONLY" => \$exprONLY,
+	"help" => \$helpFlag,
+	"noIR" => \$noIR,
+	"move_to_PARTS" => \$move_to_PARTS,
+	"s" => \$strandaware);
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
