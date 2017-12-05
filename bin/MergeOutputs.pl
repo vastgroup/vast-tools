@@ -91,8 +91,7 @@ OPTIONS:
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
         --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
         --dbDir db               Database directory (default VASTDB)
-        --s                      Map reads strand-specifically to AS events to remove bias due 
-	                         to antisense transcription. Only available for strand-specific reads.
+        --s                      strand-aware mode; Must be used when align was run in strand-aware mode.
         --IR_version 1/2         Version of the Intron Retention pipeline (1 or 2) (default 2)
         --expr                   Merges cRPKM files (default OFF)
         --exprONLY               Merges only cRPKM files (default OFF)
