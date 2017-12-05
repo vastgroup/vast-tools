@@ -123,7 +123,6 @@ errPrintDie "The output directory \"$folder/to_combine\" does not exist" unless 
 chdir($folder) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $folder";
 
-
 my %groups;
 my %files_2b_merged;
 my %file_2_groups;
@@ -160,12 +159,10 @@ while (<GROUPS>){
 	 if(!defined $noIR && !(-e $tmp_file)){goto STOPSCRIPT;}
     	 $tmp_file="to_combine/${temp[0]}.IR.summary_v2.txt";
     	 if(!defined $noIR && $IR_version==2 && !(-e $tmp_file)){goto STOPSCRIPT;}
-	 foreach $tmp_file (("to_combine/${temp[0]}.micX"
-	 		    ,"to_combine/${temp[0]}.eej2"
-	 		    ,"to_combine/${temp[0]}.exskX"
-	 		    ,"to_combine/${temp[0]}.MULTI3X")){
-	 	if(!(-e $tmp_file)){goto STOPSCRIPT;}	 	
-	 }
+	 $tmp_file="to_combine/${temp[0]}.micX";unless(-e $tmp_file){goto STOPSCRIPT;}
+	 $tmp_file="to_combine/${temp[0]}.eej2";unless(-e $tmp_file){goto STOPSCRIPT;}
+	 $tmp_file="to_combine/${temp[0]}.exskX";unless(-e $tmp_file){goto STOPSCRIPT;}
+	 $tmp_file="to_combine/${temp[0]}.MULTI3X";unless(-e $tmp_file){goto STOPSCRIPT;}
     }
     $tmp_file=0;
     STOPSCRIPT: if($tmp_file){errPrintDie "File $tmp_file does not exist. Probable reason: wrong subsample names in group-definition file.";}
