@@ -611,7 +611,7 @@ unless ($onlyIRflag){
 	"$binPath/Analyze_MULTI.pl $runArgs";                                # produces to_combine/$root.MULTI3X
 
     verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-    checkResumeOption("to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt","tmp/resume_tmp.txt");
+    checkResumeOption("to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt","$tmpDir/".pop([split("/",$fq1)]).".resume");
     sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/$species"."_MIC-$le - | ".
 	" cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
