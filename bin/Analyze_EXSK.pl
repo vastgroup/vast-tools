@@ -85,7 +85,12 @@ print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_of_reads\t.\tComplexity\tCo
 ### Calculating PSIs
 $cle=$length-15; #read length for correction.
 foreach $event (sort (keys %eff)){
-    $eI1=$eI2=$eE=$I1=$I2=$E=$rI1=$rI2=$rE=""; #empty temporary variables in each loop
+    $eI1=$eI2=$eE=$I1=$I2=$E=$rI1=$rI2=$rE=""; # empty temporary variables in each loop
+
+    if(!defined($pre_data{$event})){next;}	# skip events coming from "Mappability information" (%eff) which are not in Template.1.txt (%pre_data)
+						# This filter was necessary after introducing the strandaware mode, because being strandaware we have available some
+						# events more which were/are not avaibale in strand-unaware mode, but Template.1.txt contains information for events
+						# in strand-unaware mode only. 
 
     foreach $eej (sort (keys %{$eff{$event}})){
 	($exons)=$eej=~/(.+?)\_.+?\_.+?\_\d+/;
