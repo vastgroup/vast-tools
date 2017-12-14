@@ -237,7 +237,7 @@ Length of reads must be at least 50 nt; for expression analysis, all reads
 must be of same length.
 
 OPTIONS:
-	--sp Hsa/Mmu/Gga	Three letter code for the database (default Hsa)
+	--sp Hsa/Mmu/etc	Three letter code for the database (default Hsa)
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
