@@ -178,6 +178,7 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 sub sysErrMsg {
   my @sysCommand = @_;
   if($resume){print STDERR "... --resumed!\n";return(1);}
+  #print "\n".join(" ",@sysCommand)."\n";
   not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
@@ -361,12 +362,6 @@ if($root eq ""){ errPrintDie("Could not extract the base name from the RNA-seq i
 unless($fq2){verbPrint("Most common read length detected for fq1: $length ($percF\%)");}
 else{verbPrint("Most common read lengths detected for fq1 & fq2: $length ($percF\%) and $length2 ($percF2\%)");}
 
-#if(($onlyExprFlag || $runExprFlag) && $length == -1){ # XXX reads are of variable length
-#	verbPrint("Reads are of variable lengths in file $fq1.\nExpression analysis turned off as for this all reads must be of the same length."); 
-#	if($onlyExprFlag){exit(1);}
-#	$runExprFlag=0;
-#}
-
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
 mkdir($outdir) unless (-e $outdir);
@@ -452,11 +447,13 @@ if($strandaware){
         	open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
         	if($p1==0 && $n1==0){die "No reads (first reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
         	($percR1p,$percR1n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)) );
+#($percR1p,$percR1n)=(0.00561572402727637,0.994384275972724);
         	verbPrint "   fraction of first reads mapping to fwd / rev strand : $percR1p / $percR1n";
         	if($pairedEnd){  # same for second reads of each pair
         		open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
 	        	if($p2==0 && $n2==0){die "No reads (second reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
         		($percR2p,$percR2n)=( ($p2/($p2+$n2)),($n2/($p2+$n2)) );
+#($percR2p,$percR2n)=(0.994384275972724,0.00561572402727637);
         		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
 	        }
 
@@ -464,7 +461,7 @@ if($strandaware){
 		if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
 			errPrintDie "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
 		}else{
-			if($percR1n>=$minThresh){ $fn_tmp=$fq1;}elsif($pairedEnd){ $fn_tmp=$fq2;}   # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
+			if($percR1n>=$minThresh){ $fn_tmp=$fq1; $fq1=$fn_tmp;}elsif($pairedEnd){ $fn_tmp=$fq2; $fq2=$fn_tmp;}   # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
 			if($fn_tmp){
 				# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
 				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
@@ -478,6 +475,7 @@ if($strandaware){
 					if($c==3){print $out "$l\n";}
 					if($c==4){print $out reverse($l)."\n"; $c=0;}
 				}
+				close($fh);
 			}
 		}
 		$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
