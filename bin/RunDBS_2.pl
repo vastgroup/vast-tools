@@ -13,6 +13,7 @@ $binPath =~ s/\/$0$//;
 
 my $sp;              #species Hsa no longer default
 my $dbDir;
+my $strandaware=0;
 
 my $verboseFlag = 1;
 my $helpFlag = 0;
@@ -41,7 +42,10 @@ GetOptions("help"  	 => \$helpFlag,
 	   "noIR"        => \$noIRflag,
 	   "onlyIR"      => \$onlyIRflag,
 	   "IR_version=i" => \$IR_version,
-           "C"           => \$cRPKMCounts);
+           "C"           => \$cRPKMCounts,
+           "s" => \$strandaware);
+
+my $ss_arg=""; if($strandaware){$ss_arg="--s";}
 
 our $EXIT_STATUS = 0;
 
@@ -86,6 +90,9 @@ OPTIONS:
 				For -sp Mmu: mm9 or mm10, (default mm9)
 				    - vast-tools will work internally with mm9; 
                                       if you choose mm10, the output gets lifted-over to mm10
+        --s                     Strandaware mode of vast-tools. If vast-tools align was (not) run 
+                                with --s, vast-tools combine must (not) be run with --s. 
+                                must be run with --s, too.  
 	--noIR			Don't run intron retention pipeline (default off)
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
@@ -153,7 +160,7 @@ if ($N != 0) {
     unless ($onlyIRflag){
 	### Gets the PSIs for the events in the a posteriori pipeline
 	verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
-	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag $ss_arg";
 	
 	### Gets the PSIs for the a priori, SIMPLE
 	verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
@@ -188,7 +195,7 @@ if ($N != 0) {
     unless($noIRflag) {
 	### Gets the PIRs for the Intron Retention pipeline
 	verbPrint "Building quality score table for intron retention (version $IR_version)\n";
-	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
+	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir $ss_arg " . abs_path("to_combine");
 	verbPrint "Building Table for intron retention (version $IR_version)\n";
 	sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
 	    " -c " . abs_path("to_combine") .
@@ -209,11 +216,11 @@ if ($N != 0) {
     unless ($onlyIRflag){
 	### Gets PSIs for ALT5ss and adds them to the general database
 	verbPrint "Building Table for Alternative 5'ss choice events\n";
-	sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag $ss_arg";
 	
 	### Gets PSIs for ALT3ss and adds them to the general database
 	verbPrint "Building Table for Alternative 3'ss choice events\n";
-	sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag $ss_arg";
     }
     
     ### Combine results into unified "FULL" table
