@@ -15,9 +15,11 @@ my $dbDir;
 my $sp;
 my $length;
 my $root;
+my $strandaware=0;  # dummy; to prevent GetOptions getting confused between -sp and -s 
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$length, "root=s" => \$root);
+           "readLen=i" => \$length, "root=s" => \$root, , "s" => \$strandaware);
+
 
 # ARGV[0] is now a dummy variable.
 #system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
