@@ -178,7 +178,7 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 sub sysErrMsg {
   my @sysCommand = @_;
   if($resume){print STDERR "... --resumed!\n";return(1);}
-  #print "\n".join(" ",@sysCommand)."\n";
+#  print "\n".join(" ",@sysCommand)."\n";
   not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
@@ -457,11 +457,19 @@ if($strandaware){
         		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
 	        }
 
-		my ($fn_tmp,$fn_out,$out)=($fq1,$fq1,undef);
+		my ($fn_tmp,$fn_out,$out)=(undef,undef,undef);
 		if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
-			errPrintDie "Reads don't look like being strand-specific, but -strandaware option is choosen.\n";
+			errPrintDie "Reads don't look like being strand-specific, but strand-aware option --s was given.\n";
 		}else{
-			if($percR1n>=$minThresh){ $fn_tmp=$fq1; $fq1=$fn_tmp;}elsif($pairedEnd){ $fn_tmp=$fq2; $fq2=$fn_tmp;}   # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
+			if($percR1n>=$minThresh){ 
+				$fn_tmp=$fq1; 
+				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
+				$fq1=$fn_out;
+			}elsif($pairedEnd){ # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
+				$fn_tmp=$fq2; 				
+				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
+				$fq2=$fn_out;
+			}   			
 			if($fn_tmp){
 				# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
 				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
@@ -476,6 +484,7 @@ if($strandaware){
 					if($c==4){print $out reverse($l)."\n"; $c=0;}
 				}
 				close($fh);
+				close($out);
 			}
 		}
 		$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
@@ -673,7 +682,7 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 open(my $fh,">$tmpDir/".pop([split("/",$fq1)]).".resume");print $fh "finished successfully";close($fh);
 
 # delete temporary file with reverse-complemented reads
-if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
+#if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS;
