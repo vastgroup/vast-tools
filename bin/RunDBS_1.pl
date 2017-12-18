@@ -682,7 +682,7 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 open(my $fh,">$tmpDir/".pop([split("/",$fq1)]).".resume");print $fh "finished successfully";close($fh);
 
 # delete temporary file with reverse-complemented reads
-#if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
+if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS;
