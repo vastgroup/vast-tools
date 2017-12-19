@@ -17,6 +17,7 @@ Table of Contents:
 	- [Comparing PSIs Between Samples](#comparing-psis-between-samples)
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
+	- [Simplifying Combine Table](#simplifying-combine-table)
 - [Combine output format](#combine-output-format)
 - [Interconnection with VastDB web](#interconnection-with-vastdb-web)
 - [Issues](#issues)
@@ -92,7 +93,7 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 ~~~~
 **Manual DB Installation:**
 
-For manual, install human (hsa), mouse (mmu), chicken (gga), or all of them to any location by:
+For manual, install each species or all of them to any location by:
 
 Human (hg19) - 6.2G [vastdb.hsa.22.06.16.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.22.06.16.tar.gz):
 ~~~~
@@ -152,7 +153,7 @@ required R packages using the following commands:
 Usage
 -----
 
-VAST-TOOLS contains four main sub-commands: align, combine, diff, and plot. The
+VAST-TOOLS contains several main sub-commands: align, combine, merge, tidy, compare, diff, and plot. The
 following provides a quick introduction on how to run the tool:
 
 ### Help
@@ -495,6 +496,11 @@ Then, for each combined sample, a pair of columns:
     - C3: percent of complex reads is > 50%.
     - NA: low coverage event.
   * inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
+
+### Simplifying Combine Table
+
+As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
+
 
 Interconnection with VastDB Web
 -------------------------------

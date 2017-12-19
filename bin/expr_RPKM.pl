@@ -126,8 +126,14 @@ $B_av_3=sprintf("%.2f",$B_perc[2]/($B_tot_genes+0.001));
 $B_av_4=sprintf("%.2f",$B_perc[3]/($B_tot_genes+0.001));
 $B_av_5=sprintf("%.2f",$B_perc[4]/($B_tot_genes+0.001));
 
-print BIAS3 "$sub_root\t500nt\t$A_av_1\t$A_av_2\t$A_av_3\t$A_av_4\t$A_av_5\t$A_tot_genes\n";
-print BIAS3 "$sub_root\t1000nt\t$B_av_1\t$B_av_2\t$B_av_3\t$B_av_4\t$B_av_5\t$B_tot_genes\n";
+
+### To get the 3'bias score (>0 => 3'bias; < 0 => 5'bias) [05/12/17]
+$score_500 = sprintf("%.3f",(5*$A_av_1/100)+(4*$A_av_2/100)+(3*$A_av_3/100)+(2*$A_av_4/100)+(1*$A_av_5/100)-3);
+$score_1000 = sprintf("%.3f",(5*$B_av_1/100)+(4*$B_av_2/100)+(3*$B_av_3/100)+(2*$B_av_4/100)+(1*$B_av_5/100)-3);
+
+print BIAS3 "Sample\tTest\tSegment_1\tSegment_2\tSegment_3\tSegment_4\tSegment_5\tTotal_genes\t3pScore\n";
+print BIAS3 "$sub_root\t500nt\t$A_av_1\t$A_av_2\t$A_av_3\t$A_av_4\t$A_av_5\t$A_tot_genes\t$score_500\n";
+print BIAS3 "$sub_root\t1000nt\t$B_av_1\t$B_av_2\t$B_av_3\t$B_av_4\t$B_av_5\t$B_tot_genes\t$score_1000\n";
 
 ### Calculating cRPKMs and finalizing
 foreach $gene (sort (keys %effective_length)){
