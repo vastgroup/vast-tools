@@ -22,13 +22,13 @@ my $dbDir; # directory of VASTDB
 my $species; # needed to run expr merge automatically
 my $groups; # list with the groupings: sample1_rep1\tgroup_1\n sample1_rep2\tgroup_1\n...
 my $folder; # actual folder where the vast-tools outputs are (the to_combine folder!)
+my $mapcorr_fileswitch="";
 my $effective; #effective file for expression. Obtained automatically from VASTDB
 my $expr; #activates merging of cRPKMs
 my $exprONLY; # if you want to do expr only, just write anything.
 my $move_to_PARTS; # to move the merged subfiles into the PARTS folder
 my $IR_version = 2; # version of IR pipeline [new default 01/04/16]
 my $noIR; # to avoid warnings
-my $strandaware=0;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions("groups=s" => \$groups,
@@ -42,10 +42,8 @@ GetOptions("groups=s" => \$groups,
 	"exprONLY" => \$exprONLY,
 	"help" => \$helpFlag,
 	"noIR" => \$noIR,
-	"move_to_PARTS" => \$move_to_PARTS,
-	"s" => \$strandaware);
+	"move_to_PARTS" => \$move_to_PARTS);
 
-my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
 our $EXIT_STATUS = 0;
 
@@ -91,7 +89,6 @@ OPTIONS:
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
         --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
         --dbDir db               Database directory (default VASTDB)
-        --s                      strand-aware mode; Must be used when align was run in strand-aware mode.
         --IR_version 1/2         Version of the Intron Retention pipeline (1 or 2) (default 2)
         --expr                   Merges cRPKM files (default OFF)
         --exprONLY               Merges only cRPKM files (default OFF)
@@ -127,6 +124,8 @@ my %groups;
 my %files_2b_merged;
 my %file_2_groups;
 my %file_grpchk;
+my %file_is_ss;
+my %group_is_ss;
 
 ### Loading group info
 open (GROUPS, $groups_fullpath) || errPrintDie "Cannot open groupings: $groups_fullpath\n";
@@ -150,9 +149,13 @@ while (<GROUPS>){
 
     $groups{$temp[1]}=1;
     $files_2b_merged{$temp[0]}=1;
+    my $tmp_file="to_combine/${temp[0]}.info";
+    open(my $fh,$tmp_file) or goto STOPSCRIPT;
+    chomp(my $l=<$fh>);my @fs=split("\t",$l);close($fh);
+    if($fs[@fs-2] eq "-SS"){$file_is_ss{$temp[0]}=1;}
 
     # check if all necessary files exists; if not the groups file might contain incorrect subsample names
-    my $tmp_file="expr_out/${temp[0]}.cRPKM";
+    $tmp_file="expr_out/${temp[0]}.cRPKM";
     if($expr && !(-e $tmp_file)){errPrintDie "File $tmp_file does not exist. Probable reason: wrong subsample names in group-definition file OR vast-tools align was run without mapping for expression analysis.";}
     unless(defined $exprONLY){
     	 $tmp_file="to_combine/${temp[0]}.IR";if($IR_version==2){$tmp_file="to_combine/${temp[0]}.IR2"};
@@ -169,17 +172,32 @@ while (<GROUPS>){
 }
 close GROUPS;
 
+# check if all files within each group are either all strand-specific or strand-unspecific
+foreach my $grp (keys %groups){
+	my ($N_ss,$N_nss)=(0,0);
+	foreach my $f (keys %file_2_groups){
+		foreach my $grp2 (@{$file_2_groups{$f}}){
+			if($grp2 eq $grp){
+				if($file_is_ss{$f}){$N_ss++;}else{$N_nss++};
+			}
+		}
+	}
+	if($N_ss>0 && $N_nss>0){errPrintDie "Files to be merged into group $grp are a mixture of strand-specific and strand-unspecific data which cannot be merged."}
+	if($N_ss>0){$group_is_ss{$grp}=1;}
+}
+
+
 # output warning if one file will be merged into the same group several times; maybe this is a mistake!
 foreach my $fn (keys %file_grpchk){foreach my $gr (keys %{$file_grpchk{$fn}}){
 	my $num=$file_grpchk{$fn}->{$gr};
 	if($num>1){verbPrint("Attention: sample $fn gets merged $num times into group $gr.\n");}
 }}
 
-
 if (defined $move_to_PARTS){
     system "mkdir to_combine/PARTS" unless (-e "to_combine/PARTS");
     system "mkdir expr_out/PARTS" unless (-e "expr_out/PARTS") || (!defined $expr);    
 }
+
 
 
 ### variables for merging:
@@ -191,7 +209,8 @@ my $N_EEJ = 0;
 my $N_MULTI = 0;
 my $N_EXSK = 0;
 
-my %eff;
+my %eff_nss;
+my %eff_ss;
 my %READS_EXPR;
 my %TOTAL_READS_EXPR;
 my %IR;
@@ -218,17 +237,13 @@ my %MULTIb;
 verbPrint "Doing merging for Expression files only\n" if (defined $exprONLY);
 
 if (defined $expr){
-    $effective = "$dbDir/EXPRESSION/$species"."_mRNA-50${mapcorr_fileswitch}.eff";
-    if (-e $effective){
+
 	verbPrint "Loading Effective data\n";
-	open (EFF, $effective) || errPrintDie "Cannot find the file with effective positions\n";
-	while (<EFF>){
-	    chomp;
-	    my @temp=split(/\t/,$_);
-	    $eff{$temp[0]}=$temp[1];
-	}
-	close EFF;
-	
+	open (EFF, "$dbDir/EXPRESSION/$species"."_mRNA-50.eff") or errPrintDie "$!";
+	while (<EFF>){ chomp; my @temp=split(/\t/,$_); $eff_nss{$temp[0]}=$temp[1]; } close EFF;
+	open (EFF, "$dbDir/EXPRESSION/$species"."_mRNA-50-SS.eff") or errPrintDie "$!";
+	while (<EFF>){ chomp; my @temp=split(/\t/,$_); $eff_ss{$temp[0]}=$temp[1]; } close EFF;
+		
 	verbPrint "Loading Expression files\n";
 	my @files=glob("expr_out/*.cRPKM");
 	foreach my $file (@files){
@@ -256,13 +271,7 @@ if (defined $expr){
 	    close I;
 	    system "mv $file expr_out/PARTS/" if (defined $move_to_PARTS);
 	}
-    }
-    else {
-	errPrintDie "$effective file does not exist\n";
-    }
-}
-else {
-    verbPrint "Warning: Not merging Expression data\n" unless (defined $expr); 
+
 }
 
 unless (defined $exprONLY){
@@ -489,7 +498,9 @@ foreach my $group (sort keys %groups){
     ### EXPR
     if (defined $expr){
 	unless (-e "expr_out/$group.cRPKM"){
-	    open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file"; 
+	    my %eff;
+	    open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file";
+	    if($group_is_ss{$group}){%eff=%eff_ss}else{%eff=%eff_nss}
 	    foreach my $g (sort keys %{$READS_EXPR{$group}}){
 		my $cRPKM = "";
 		if ($READS_EXPR{$group}{$g} eq "NA" || $eff{$g}==0){
