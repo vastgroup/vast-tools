@@ -23,7 +23,7 @@ my $bowtie = "bowtie"; # by default;
 my $species = "Hsa"; # by default;
 my $dbDir; #default
 my $pairedEnd = 0; # no by default
-my $strandaware=0;   # strand-aware mode? Only available for paired-end reads.
+my $notstrandaware=0;   # no by default
 my $runExprFlag = 0; # no by default
 my $onlyExprFlag = 0; # no by default
 my $trim;
@@ -64,7 +64,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "c=i" => \$cores, 
 			  "cores=i" => \$cores,
 			  "expr" => \$runExprFlag,
-			  "s" => \$strandaware,
+			  "ns" => \$notstrandaware,
 			  "exprONLY" => \$onlyExprFlag,
 			  "trim=s" => \$trim,
 			  "help" => \$helpFlag,
@@ -244,8 +244,7 @@ OPTIONS:
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
-	--s                     Map reads strand-specifically to AS events to remove bias due 
-	                        to antisense transcription. Only available for strand-specific reads.
+	--ns                    RNA-seq reads are treated as if they were strand-unspecific
 	--expr			For expression analyses: -expr 
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
@@ -344,7 +343,7 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
     }
     else { # anything is valid here
 	($length,$percF)=extractReadLen($fq1);
-	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/; 
+	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;
 	$root = $1;
     }
     if ($pairedEnd){
@@ -369,6 +368,14 @@ chdir($outdir) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $outdir";
 mkdir("to_combine") unless (-e "to_combine");
 mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
+# create info file for this RNAseq data set
+open(my $info_file,"to_cmbine/".pop([split("/",$fq1)]).".info") or die "$!";
+if($fq2){print $info_file "paired\t$fq1\t$fq2";}else{print $info_file "single\t$fq1";}
+if($notstrandaware){
+	print $info_file "\t$species\t--ns (should be treated as strand-unspecific data)";
+}else{
+	print $info_file "\t$species\t--s (check if data is strand-specific)";
+}
 
 # set default tmpDir for sort;
 verbPrint "Setting tmp directory..";
@@ -415,84 +422,80 @@ my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc
 my $fin_revcmlt_reads="";
 my $mapcorr_fileswitch="";  # change of file names with mappability correction (needs to change in strand-aware mode)
 #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
-if($strandaware){
+if($notstrandaware){
+	print $info_file "\tnot strand-specific NA NA NA NA\t"
+}else{
 	verbPrint "Strand-specificity test for given reads";
-	my $resume_fn="$tmpDir/".pop([split("/",$fq1)]).".ssrd";
-	checkResumeOption("$resume_fn");
-	my $fh;
-	if($resume){
+	open(my $fh,$info_file) or die "$!";chomp (my $l=<$fh>);close($fh);my @fs=split("\t",$l);
+	if($fs[@fs-1] eq "done"){
 		print verbPrint "... --resumed!\n";
-		$bt_norc="--norc";
-		$mapcorr_fileswitch="-SS";  # ending of files with mappability correction factors for strand-AWARE mode
-		# extract information on temporary read input with re-oriented reads
-		open($fh,"$resume_fn") or errPrintDie "$!"; chomp(my $line=<$fh>); close($fh);
-		my @fs=split("\t",$line); 
-		if(@fs==2){  # Is only 2 if file contains an entry with two tab-separated true file names. If file names are empty strings, the length will be 1.
-			if($fq1 eq $fs[0]){$fq1=$fs[1];     $fin_revcmlt_reads=$fs[1];
-			}elsif($fq2 eq $fs[0]){$fq2=$fs[1]; $fin_revcmlt_reads=$fs[1];
-			}else{ $resume=0;}  # something seems to be wrong; deactivate resume and re-do strand-specificity check
-		}
+		$bt_norc=$fs[@fs-3];
+		$mapcorr_fileswitch=$fs[@fs-2];  # ending of files with mappability correction factors for strand-AWARE mode
+		$fq1=$fs[1];
+		if($fs[0] eq "paired"){ $fq2=$fs[2]; }
 	}
 
 	unless($resume){
 		my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
-		my $minThresh=0.7;           # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+		my $minThresh=0.2;         # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+		my ($fh,$fh2);
 		sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
-	
+
         	my $N=40000; # check 10K fastq reads 
         	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=20000;}
         	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
-        	my ($percR1p,$percR1n,$percR2p,$percR2n);
+        	my ($percR1p,$percR1n,$percR2p,$percR2n)=("NA","NA","NA","NA");
 
         	open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
-        	if($p1==0 && $n1==0){die "No reads (first reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
+        	if($p1+$n1<500){die "Too few first reads (<500) could be mapped to mRNA library for detecting strand-orientation of reads. Maybe wrong species selected?";}
         	($percR1p,$percR1n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)) );
-#($percR1p,$percR1n)=(0.00561572402727637,0.994384275972724);
         	verbPrint "   fraction of first reads mapping to fwd / rev strand : $percR1p / $percR1n";
+
         	if($pairedEnd){  # same for second reads of each pair
         		open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
-	        	if($p2==0 && $n2==0){die "No reads (second reads) could be mapped to mRNA library for detecting strand-orientation of reads";}
+	        	if($p2+$n2<500){die "Too few second reads (<500) could be mapped to mRNA library for detecting strand-orientation of reads. Maybe wrong species selected?";}
         		($percR2p,$percR2n)=( ($p2/($p2+$n2)),($n2/($p2+$n2)) );
-#($percR2p,$percR2n)=(0.994384275972724,0.00561572402727637);
         		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
 	        }
-
-		my ($fn_tmp,$fn_out,$out)=(undef,undef,undef);
-		if((!$pairedEnd && $percR1n<$minThresh) || ($pairedEnd && $percR1n<$minThresh && $percR2n<$minThresh)){	
-			errPrintDie "Reads don't look like being strand-specific, but strand-aware option --s was given.\n";
+		
+		if(($percR2n eq "NA" && $percR1n<$minThresh) || ($percR1n<$minThresh && $percR2n<$minThresh)){
+			print $info_file "\tdata assumed to be not strand-specific $percR1p $percR1n $percR2p $percR2n";
+			$notstrandaware=1;
 		}else{
-			if($percR1n>=$minThresh){ 
-				$fn_tmp=$fq1; 
-				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
-				$fq1=$fn_out;
-			}elsif($pairedEnd){ # if we are given single-end reads, these might be already ok, in which case we don't need to reverse-complement any reads.
-				$fn_tmp=$fq2; 				
-				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
-				$fq2=$fn_out;
-			}   			
-			if($fn_tmp){
-				# reverse complement all reads in $fn_tmp  -> makes all reads mapping to strand + of mRNA library
-				$fn_out="$tmpDir/".pop([split("/",$fn_tmp)]);
-				$fin_revcmlt_reads=$fn_out;
-				open($fh,"".getPrefixCmd($fn_tmp)." |") or die "$!"; 
-				if(isZipped($fn_tmp)){open($out,"| gzip -c > $fn_out" ) or die "$!";}else{open($out,">fn_out") or die "$!";}
-				verbPrint "   reverse-complementing reads from $fn_tmp; writing into $fn_out";
-				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
-					if($c==1){print $out "$l\n";}
-					if($c==2){print $out rvcmplt($l)."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
-					if($c==3){print $out "$l\n";}
-					if($c==4){print $out reverse($l)."\n"; $c=0;}
+			my $fn;
+			print $info_file "\tdata assumed to be strand-specific $percR1p $percR1n $percR2p $percR2n";
+			for(my $i=0;$i<2;$i++){
+				if($i==0){
+					if($percR1n<$minThresh){print $info_file "\t$fq1";next;}
+					open($fh,"".getPrefixCmd($fq1)." |");
+					$fn="$tmpDir/".pop([split("/",$fq1)]);
+					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
+					verbPrint "   reverse-complementing reads from $fq1; writing into $fn";
+					$fq1=$fn;
 				}
-				close($fh);
-				close($out);
+				if($i==1){
+					if($percR2n<$minThresh){print $info_file "\t$fq2";next;}
+					open($fh,"".getPrefixCmd($fq2)." |");
+					$fn="$tmpDir/".pop([split("/",$fq2)]);
+					if(isZipped($fq2)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
+					verbPrint "   reverse-complementing reads from $fq2; writing into $fn";
+					$fq2=$fn;
+				}
+				print $info_file "\t$fn";
+				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
+					if($c==1){print $fh2 "$l\n";}
+					if($c==2){print $fh2 rvcmplt($l)."\n";  if($bowtie_fa_fq_flag eq "-f"){$c=0;}}
+					if($c==3){print $fh2 "$l\n";}
+					if($c==4){print $fh2 reverse($l)."\n"; $c=0;}
+				}
+				close($fh);close($fh2);
 			}
+			$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
+			$mapcorr_fileswitch="-SS";  # ending of files with mappability correction factors for strand-AWARE mode
 		}
-		$bt_norc="--norc";  # set Bowtie argument --norc for strandaware mode
-		$mapcorr_fileswitch="-SS";  # ending of files with mappability correction factors for strand-AWARE mode
-		# Generate a control file for resume option. Allows us a detect resume for strand-specificity check.
-		open($fh,">$resume_fn");print $fh "$fn_tmp\t$fn_out";close($fh);
+		print $info_file "\t$bt_norc\t$mapcorr_fileswitch\tdone";
 	} # unless resume
-} # if strandaware option given
+}
 
 
 if (!$genome_sub and !$useGenSub){
@@ -592,7 +595,7 @@ if ($EXIT_STATUS) {
 }
 
 #### Map to the EEJ:
-my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; if($strandaware){$runArgs .=" -s"}
+my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; unless($notstrandaware){$runArgs .=" -s"}
 my $preCmd = getPrefixCmd($subtractedFq);
 unless ($onlyIRflag){
     verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
