@@ -369,7 +369,7 @@ verbPrint "Setting output directory to $outdir";
 mkdir("to_combine") unless (-e "to_combine");
 mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 # create info file for this RNAseq data set
-open(my $info_file,"to_cmbine/".pop([split("/",$fq1)]).".info") or die "$!";
+open(my $info_file,"to_cmbine/$root".".info") or die "$!";
 if($fq2){print $info_file "paired\t$fq1\t$fq2";}else{print $info_file "single\t$fq1";}
 if($notstrandaware){
 	print $info_file "\t$species\t--ns (should be treated as strand-unspecific data)";
@@ -419,7 +419,6 @@ if ($EXIT_STATUS) {
 
 
 my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc 
-my $fin_revcmlt_reads="";
 my $mapcorr_fileswitch="";  # change of file names with mappability correction (needs to change in strand-aware mode)
 #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($notstrandaware){
@@ -496,7 +495,7 @@ if($notstrandaware){
 		print $info_file "\t$bt_norc\t$mapcorr_fileswitch\tdone";
 	} # unless resume
 }
-
+close($info_file);
 
 if (!$genome_sub and !$useGenSub){
  my $cmd;
@@ -683,9 +682,6 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 
 # Generate a control file for resume option. Allows us a complete resume if previous run did complete successfully.
 open(my $fh,">$tmpDir/".pop([split("/",$fq1)]).".resume");print $fh "finished successfully";close($fh);
-
-# delete temporary file with reverse-complemented reads
-if($fin_revcmlt_reads){unlink($fin_revcmlt_reads);}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS;
