@@ -369,7 +369,7 @@ verbPrint "Setting output directory to $outdir";
 mkdir("to_combine") unless (-e "to_combine");
 mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 # create info file for this RNAseq data set
-open(my $info_file,">to_cmbine/$root".".info") or die "$!";
+open(my $info_file,">to_combine/$root".".info") or die "$!";
 if($fq2){print $info_file "paired\t$fq1\t$fq2";}else{print $info_file "single\t$fq1";}
 if($notstrandaware){
 	print $info_file "\t$species\t--ns (should be treated as strand-unspecific data)";
