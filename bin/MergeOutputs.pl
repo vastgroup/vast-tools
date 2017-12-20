@@ -182,8 +182,10 @@ foreach my $grp (keys %groups){
 			}
 		}
 	}
-	if($N_ss>0 && $N_nss>0){errPrintDie "Files to be merged into group $grp are a mixture of strand-specific and strand-unspecific data which cannot be merged."}
-	if($N_ss>0){$group_is_ss{$grp}=1;}
+	if($N_ss>0 && $N_nss>0){
+		verbPrint("Attention: group $grp consists of $N_ss strand-specific and $N_nss strand-unspecific samples. Mappability correction for this group will be done in strand-unspecific mode.\n");
+	}
+	if($N_ss>0 && $N_nss==0){$group_is_ss{$grp}=1;}
 }
 
 
