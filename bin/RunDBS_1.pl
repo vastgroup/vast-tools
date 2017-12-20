@@ -422,7 +422,7 @@ my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc
 my $mapcorr_fileswitch="";  # change of file names with mappability correction (needs to change in strand-aware mode)
 #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
 if($notstrandaware){
-	print $info_file "\tnot strand-specific NA NA NA NA\t"
+	print $info_file "\tdue to given argument -ns, data are treated as being not strand-specific NA NA NA NA\t\t$bt_norc\t$mapcorr_fileswitch\tdone";
 }else{
 	verbPrint "Strand-specificity test for given reads";
 	open(my $fh,$info_file) or die "$!";chomp (my $l=<$fh>);close($fh);my @fs=split("\t",$l);
@@ -430,8 +430,8 @@ if($notstrandaware){
 		print verbPrint "... --resumed!\n";
 		$bt_norc=$fs[@fs-3];
 		$mapcorr_fileswitch=$fs[@fs-2];  # ending of files with mappability correction factors for strand-AWARE mode
-		$fq1=$fs[1];
-		if($fs[0] eq "paired"){ $fq2=$fs[2]; }
+		$fq1=$fs[@fs-4];
+		if($fs[0] eq "paired"){ ($fq1,$fq2)=($fs[@fs-5],$fs[@fs-4]); }
 	}
 
 	unless($resume){
