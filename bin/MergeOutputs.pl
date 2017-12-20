@@ -173,7 +173,9 @@ while (<GROUPS>){
 close GROUPS;
 
 # check if all files within each group are either all strand-specific or strand-unspecific
+# and output info files for groups which are needed in RunDBS_2.pl for deciding which mappability correction should be applied
 foreach my $grp (keys %groups){
+	open(my $fh,">to_combine/${grp}.info");
 	my ($N_ss,$N_nss)=(0,0);
 	foreach my $f (keys %file_2_groups){
 		foreach my $grp2 (@{$file_2_groups{$f}}){
@@ -184,8 +186,16 @@ foreach my $grp (keys %groups){
 	}
 	if($N_ss>0 && $N_nss>0){
 		verbPrint("Attention: group $grp consists of $N_ss strand-specific and $N_nss strand-unspecific samples. Mappability correction for this group will be done in strand-unspecific mode.\n");
+		print $fh "\t\tdone"; # means strand-unspecific
 	}
-	if($N_ss>0 && $N_nss==0){$group_is_ss{$grp}=1;}
+	if($N_ss>0 && $N_nss==0){
+		$group_is_ss{$grp}=1;
+		print $fh "--norc\t-SS\tdone"; # means strand-specific
+	}
+	if($N_ss==0 && $N_nss>0){
+		print $fh "\t\tdone"; # means strand-unspecific
+	}
+	close($fh);
 }
 
 
