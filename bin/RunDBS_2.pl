@@ -78,7 +78,7 @@ if ($helpFlag or (!defined $sp)){
     print STDERR "
 Usage: vast-tools combine -o OUTPUTDIR -sp [Hsa|Mmu|etc] [options]
 
-Combine multiple samples analyzed using \"vast-tools align\" into a single summary tables. 
+Combine multiple samples analyzed using \"vast-tools align\" into a single summary table. 
 
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
@@ -90,9 +90,7 @@ OPTIONS:
 				For -sp Mmu: mm9 or mm10, (default mm9)
 				    - vast-tools will work internally with mm9; 
                                       if you choose mm10, the output gets lifted-over to mm10
-        --s                     Strandaware mode of vast-tools. If vast-tools align was (not) run 
-                                with --s, vast-tools combine must (not) be run with --s. 
-                                must be run with --s, too.  
+        --s                     Strand-aware mode: I
 	--noIR			Don't run intron retention pipeline (default off)
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
