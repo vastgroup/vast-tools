@@ -14,12 +14,9 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
-my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-			  "verbose=i" => \$verboseFlag, "s" => \$strandaware);
-			  
-my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
+			  "verbose=i" => \$verboseFlag);
 
 sub verbPrint {
   my $verbMsg = shift;
@@ -49,10 +46,9 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 @EEJ=glob("to_combine/*.ee*");
-@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA${mapcorr_fileswitch}.ef*");
-die "Needs effective\n" if !@EFF;
-
-verbPrint "Loading Effective files:\n";
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
+die "Needs strand-unspecific effective\n" if !@EFF;
+verbPrint "Loading Effective files (strand-unspecific):\n";
 foreach $file (@EFF){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
     verbPrint "Loading: $file\tLength: $length\n";
@@ -62,11 +58,28 @@ foreach $file (@EFF){
 	@t=split(/\t/);
 	($gene,$donor,$acceptor)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-\d+?\_\d+/;
 	$eej="$gene-$donor-$acceptor";
-	$eff{$length}{$eej}=$t[1];
+	$eff_ns{$length}{$eej}=$t[1];
     }
     close MAPPABILITY;
 }
 
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA-SS.ef*");
+die "Needs strand-specific effective (strand-specific)\n" if !@EFF;
+foreach $file (@EFF){
+    ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
+    verbPrint "Loading: $file\tLength: $length\n";
+    open (MAPPABILITY, $file);
+    while (<MAPPABILITY>){
+	chomp;
+	@t=split(/\t/);
+	($gene,$donor,$acceptor)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-\d+?\_\d+/;
+	$eej="$gene-$donor-$acceptor";
+	$eff_ss{$length}{$eej}=$t[1];
+    }
+    close MAPPABILITY;
+}
+
+my %ss;
 verbPrint "Loading EEJ data for ALT5\n";
 foreach $file (@EEJ){
    # ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./; DEPRECATED --TSW
@@ -78,6 +91,12 @@ foreach $file (@EEJ){
     # generates headings
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Ri\t$sample-Rtot\t$sample-Q";
+    
+    unless(-e "to_combine/{$sample}.info"){ die "Do not find to_combine/{$sample}.info. You might need to run vast-tools align again.";}
+    open(my $fh_info,"to_combine/{$sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    my @fs=split("\t",$line);
+    if($fs[@fs-2] eq "-SS"){$is_ss{$sample}=1}
+    
 
     # Loads EEJ files
     open (EEJ, $file);
@@ -101,6 +120,7 @@ open (COUNTs, ">raw_reads/RAW_READS_ALT5-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
+my %eff;
 verbPrint "Starting PSI quantifications\n";
 foreach $event_root (sort keys %ALL){
     ($gene,$junctions)=$event_root=~/(.+?)\-(.+)/;
@@ -127,6 +147,9 @@ foreach $event_root (sort keys %ALL){
 	@corr_inc_reads_S=@raw_inc_reads_S=(); # Simple reads for each donor
 	@corr_inc_reads_ALL=@raw_inc_reads_ALL=(); # Complex reads for each donor
 	@PSI=(); # Percent splice site usage for each donor
+	
+	# set mappability correction accordingly
+	if($is_ss{$sample}){%eff=%eff_ss}else{%eff=%eff_ns}
 	
 	$max_mappability=$length-15;
 	for $i (0..$#junctions){ #does Simple read counts

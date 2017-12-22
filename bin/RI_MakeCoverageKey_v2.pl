@@ -10,13 +10,11 @@ use Getopt::Long;
 
 my $helpFlag = 0;
 my $dbDir=".";
-my $species = $ARGV[0];
-my $strandaware=0;   # only for compatibility of signature of RI_MakeCoverageKey.pl and RI_MakeCoverageKey_v2.pl 
+my $species = $ARGV[0]; 
 
 GetOptions("help"     => \$helpFlag,
             "dbDir=s" => \$dbDir,
             "sp=s"    => \$species,
-            "s"       => \$strandaware
 );
 
 if ($helpFlag) {

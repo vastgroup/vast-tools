@@ -18,13 +18,9 @@ my $samLen;
 my $verboseFlag;
 my $legacyFlag;
 my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
-my $strandaware=0;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag
-			  , "s" => \$strandaware);
-
-my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
+			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
 
 sub verbPrint {
   my $verbMsg = shift;
@@ -40,12 +36,12 @@ die "Needs Species key\n" if !defined($sp);
 $COMB="M"; # Only available version
 
 @EEJ=glob("to_combine/*.ee*"); # is this right? --TSW
-@EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA${mapcorr_fileswitch}.ef*");
-die "[vast combine combi error] Needs effective from database!\n" if !@EFF;
+@EFF_ns=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*"); die "[vast combine combi error] Needs effective (strand-unspecific) from database!\n" if !@EFF_ns;
+@EFF_ss=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA-SS.ef*"); die "[vast combine combi error] Needs effective (strand-specific) from database!\n" if !@EFF_ss;
 
 ###
-verbPrint "Loading Mappability for each EEJ and length:\n";
-foreach $file (@EFF){
+verbPrint "Loading strand-unspecific mappability for each EEJ and length:\n";
+foreach $file (@EFF_ns){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
     verbPrint "Loading: $file\tLength: $length\n";
     open (MAPPABILITY, $file);
@@ -54,11 +50,30 @@ foreach $file (@EFF){
 	@t=split(/\t/);
 	($gene,$donor,$acceptor,$donor_coord,$acceptor_coord)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
 	$eej="$gene-$donor-$acceptor";
-	$eff{$length}{$eej}=$t[1];
+	$eff_ns{$length}{$eej}=$t[1];
 
 	# keeps the coordinate for each donor/acceptor
-	$D_CO{$gene}{$donor}=$donor_coord;
-        $A_CO{$gene}{$acceptor}=$acceptor_coord;
+	$D_CO_ns{$gene}{$donor}=$donor_coord;
+        $A_CO_ns{$gene}{$acceptor}=$acceptor_coord;
+    }
+    close MAPPABILITY;
+}
+
+verbPrint "Loading strand-specific mappability for each EEJ and length:\n";
+foreach $file (@EFF_ss){
+    ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
+    verbPrint "Loading: $file\tLength: $length\n";
+    open (MAPPABILITY, $file);
+    while (<MAPPABILITY>){
+	chomp;
+	@t=split(/\t/);
+	($gene,$donor,$acceptor,$donor_coord,$acceptor_coord)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
+	$eej="$gene-$donor-$acceptor";
+	$eff_ss{$length}{$eej}=$t[1];
+
+	# keeps the coordinate for each donor/acceptor
+	$D_CO_ss{$gene}{$donor}=$donor_coord;
+	$A_CO_ss{$gene}{$acceptor}=$acceptor_coord;
     }
     close MAPPABILITY;
 }
@@ -78,14 +93,19 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ###
+my %is_ss=();  # get strand-specific samples / groups
 verbPrint "Loading EEJ read counts data\n";
 foreach $file (@EEJ){
     my $fname = $file;
     $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
-#    ($sample)=$file=~/COMBI\-[A-Z]\-\d+?\-(.+)\./;
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-ReC\t$sample-Ri1C\t$sample-Ri2C\t$sample-Q";
+    
+    unless(-e "to_combine/{$sample}.info"){ die "Do not find to_combine/{$sample}.info. You might need to run vast-tools align again.";}
+    open(my $fh_info,"to_combine/{$sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    my @fs=split("\t",$line);
+    if($fs[@fs-2] eq "-SS"){$is_ss{$sample}=1}
     
     open (EEJ, $file);
     while (<EEJ>){
@@ -110,6 +130,7 @@ open (COUNTs, ">raw_reads/RAW_READS_COMBI-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
+my (%eff,%D_CO,%A_CO);
 verbPrint "Quantifying PSIs\n";
 foreach $event (sort (keys %ALL)){
     print PSIs "$ALL{$event}" if $event;
@@ -138,6 +159,9 @@ foreach $event (sort (keys %ALL)){
 	($sample)=$fname=~/^(.*)\..*$/;
 	$length = $samLen;
 	$exc=$inc1=$inc2=$Rexc=$Rinc1=$Rinc2=0; # empty temporary variables for read counts
+	
+	# set mappability correction accordingly
+	if($is_ss{$sample}){%eff=%eff_ss;%D_CO=%D_CO_ss;%A_CO=%A_CO_ss;}else{%eff=%eff_ns;%D_CO=%D_CO_ns;%A_CO=%A_CO_ns;}
 	
 	# data from the reference EEJ (C1A, AC2, C1C2)
 	# corrected read counts
