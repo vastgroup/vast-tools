@@ -424,15 +424,15 @@ my $mapcorr_fileswitch="";  # change of file names with mappability correction (
 if($notstrandaware){
 	print $info_file "\tdue to given argument -ns, data are treated as being not strand-specific NA NA NA NA\t\t$bt_norc\t$mapcorr_fileswitch\tdone";
 }else{
-	verbPrint "Strand-specificity test for given reads";
-	open(my $fh,$info_file) or die "$!";chomp (my $l=<$fh>);close($fh);my @fs=split("\t",$l);
-	if($fs[@fs-1] eq "done"){
-		print verbPrint "... --resumed!\n";
-		$bt_norc=$fs[@fs-3];
-		$mapcorr_fileswitch=$fs[@fs-2];  # ending of files with mappability correction factors for strand-AWARE mode
-		$fq1=$fs[@fs-4];
-		if($fs[0] eq "paired"){ ($fq1,$fq2)=($fs[@fs-5],$fs[@fs-4]); }
-	}
+	#verbPrint "Strand-specificity test for given reads";
+	#open(my $fh,$info_file) or die "$!";chomp (my $l=<$fh>);close($fh);my @fs=split("\t",$l);
+	#if($fs[@fs-1] eq "done"){
+	#	print verbPrint "... --resumed!\n";
+	#	$bt_norc=$fs[@fs-3];
+	#	$mapcorr_fileswitch=$fs[@fs-2];  # ending of files with mappability correction factors for strand-AWARE mode
+	#	$fq1=$fs[@fs-4];
+	#	if($fs[0] eq "paired"){ ($fq1,$fq2)=($fs[@fs-5],$fs[@fs-4]); }
+	#}
 
 	unless($resume){
 		my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
