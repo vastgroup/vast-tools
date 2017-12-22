@@ -383,7 +383,9 @@ unless(defined($tmpDir)) {
 unless($EXIT_STATUS > 0) {
   verbPrint "Set tmp directory to $tmpDir!";
 }
-mkdir("$tmpDir/tmp_read_files") or die "$!";
+unless(-e "$tmpDir/tmp_read_files"){
+	mkdir("$tmpDir/tmp_read_files") or die "$!";
+}
 
 
 #length options:
