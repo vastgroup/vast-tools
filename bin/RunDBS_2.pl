@@ -19,7 +19,7 @@ my $helpFlag = 0;
 
 my $globalLen = 50;  # testing? not file specific any longer --TSW
 
-my $outDir;
+my $outDir="vast_out";
 my $compress = 0;
 
 my $noIRflag = 0;    # don't use IR!
