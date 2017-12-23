@@ -60,7 +60,7 @@ close MAPPABILITY;
 my %samples;
 my %corrected_reads;
 my %raw_reads;
-my %mappability;
+my $mappability_href;
 foreach my $file (@files){
     my ($sample)=$file=~/([^\/]+)\.IR$/;
     $samples{$sample}=1;
@@ -71,7 +71,7 @@ foreach my $file (@files){
     unless(-e "to_combine/{$sample2}.info"){ die "Do not find to_combine/{$sample2}.info. You might need to run vast-tools align again.";}
     open(my $fh_info,"to_combine/{$sample2}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
     my @fs=split("\t",$line);
-    if($fs[@fs-2] eq "-SS"){%mappability=%mappability_ss;}else{%mappability=%mappability_ns;}
+    if($fs[@fs-2] eq "-SS"){$mappability_href=\%mappability_ss;}else{$mappability_href=\%mappability_ns;}
     
     
     open (IN, $file);
@@ -86,12 +86,12 @@ foreach my $file (@files){
         $corrected_reads{$temp[0]}{'EE'}{$sample}=$temp[3];
 
         ### if we have the raw reads, this will be way easier
-        $raw_reads{$temp[0]}{'EI1'}{$sample}=sprintf("%.0f",$temp[1]*$mappability{$temp[0]}{'EI1'}/35) if $mappability{$temp[0]}{'EI1'};
-        $raw_reads{$temp[0]}{'EI1'}{$sample}="ne" if !$mappability{$temp[0]}{'EI1'};
-        $raw_reads{$temp[0]}{'EI2'}{$sample}=sprintf("%.0f",$temp[2]*$mappability{$temp[0]}{'EI2'}/35) if $mappability{$temp[0]}{'EI2'};
-        $raw_reads{$temp[0]}{'EI2'}{$sample}="ne" if !$mappability{$temp[0]}{'EI2'};
-        $raw_reads{$temp[0]}{'EE'}{$sample}=sprintf("%.0f",$temp[3]*$mappability{$temp[0]}{'EE'}/35) if $mappability{$temp[0]}{'EE'};
-        $raw_reads{$temp[0]}{'EE'}{$sample}="ne" if !$mappability{$temp[0]}{'EE'};
+        $raw_reads{$temp[0]}{'EI1'}{$sample}=sprintf("%.0f",$temp[1]*$mappability_href->{$temp[0]}{'EI1'}/35) if $mappability_href->{$temp[0]}{'EI1'};
+        $raw_reads{$temp[0]}{'EI1'}{$sample}="ne" if !$mappability_href->{$temp[0]}{'EI1'};
+        $raw_reads{$temp[0]}{'EI2'}{$sample}=sprintf("%.0f",$temp[2]*$mappability_href->{$temp[0]}{'EI2'}/35) if $mappability_href->{$temp[0]}{'EI2'};
+        $raw_reads{$temp[0]}{'EI2'}{$sample}="ne" if !$mappability_href->{$temp[0]}{'EI2'};
+        $raw_reads{$temp[0]}{'EE'}{$sample}=sprintf("%.0f",$temp[3]*$mappability_href->{$temp[0]}{'EE'}/35) if $mappability_href->{$temp[0]}{'EE'};
+        $raw_reads{$temp[0]}{'EE'}{$sample}="ne" if !$mappability_href->{$temp[0]}{'EE'};
     }
     close IN;
 }
@@ -111,7 +111,7 @@ foreach my $sample (sort keys %samples){
 }
 print OUT "\n";
 
-foreach my $event (sort keys %mappability){
+foreach my $event (sort keys %mappability_ns){
     print OUT "$event";
     foreach my $sample (sort keys %samples){
         my $eEI=$corrected_reads{$event}{EI1}{$sample};
