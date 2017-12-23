@@ -130,7 +130,7 @@ open (COUNTs, ">raw_reads/RAW_READS_COMBI-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
-my (%eff,%D_CO,%A_CO);
+my ($eff_href,$D_CO_href,$A_CO_href);
 verbPrint "Quantifying PSIs\n";
 foreach $event (sort (keys %ALL)){
     print PSIs "$ALL{$event}" if $event;
@@ -161,17 +161,17 @@ foreach $event (sort (keys %ALL)){
 	$exc=$inc1=$inc2=$Rexc=$Rinc1=$Rinc2=0; # empty temporary variables for read counts
 	
 	# set mappability correction accordingly
-	if($is_ss{$sample}){%eff=%eff_ss;%D_CO=%D_CO_ss;%A_CO=%A_CO_ss;}else{%eff=%eff_ns;%D_CO=%D_CO_ns;%A_CO=%A_CO_ns;}
+	if($is_ss{$sample}){$eff_href=\%eff_ss;$D_CO_href=\%D_CO_ss;$A_CO_href=\%A_CO_ss;}else{$eff_href=\%eff_ns;$D_CO_href=\%D_CO_ns;$A_CO_href=\%A_CO_ns;}
 	
 	# data from the reference EEJ (C1A, AC2, C1C2)
 	# corrected read counts
-	$exc=$reads{$sample}{$eej_exc}/$eff{$length}{$eej_exc} if $eff{$length}{$eej_exc};
-	$inc1=$reads{$sample}{$eej_inc1}/$eff{$length}{$eej_inc1} if $eff{$length}{$eej_inc1};
-	$inc2=$reads{$sample}{$eej_inc2}/$eff{$length}{$eej_inc2} if $eff{$length}{$eej_inc2};
+	$exc=$reads{$sample}{$eej_exc}/$eff_href->{$length}{$eej_exc} if $eff_href->{$length}{$eej_exc};
+	$inc1=$reads{$sample}{$eej_inc1}/$eff_href->{$length}{$eej_inc1} if $eff_href->{$length}{$eej_inc1};
+	$inc2=$reads{$sample}{$eej_inc2}/$eff_href->{$length}{$eej_inc2} if $eff_href->{$length}{$eej_inc2};
 	# raw read counts
-	$Rexc=$reads{$sample}{$eej_exc} if $eff{$length}{$eej_exc};
-	$Rinc1=$reads{$sample}{$eej_inc1} if $eff{$length}{$eej_inc1};
-	$Rinc2=$reads{$sample}{$eej_inc2} if $eff{$length}{$eej_inc2};
+	$Rexc=$reads{$sample}{$eej_exc} if $eff_href->{$length}{$eej_exc};
+	$Rinc1=$reads{$sample}{$eej_inc1} if $eff_href->{$length}{$eej_inc1};
+	$Rinc2=$reads{$sample}{$eej_inc2} if $eff_href->{$length}{$eej_inc2};
 	# Simple PSI (only C1A, AC2 and C1C2 EEJs); Not used
 	$PSI_simple=sprintf("%.2f",100*($inc1+$inc2)/(($exc*2)+($inc1+$inc2))) if (($exc*2)+($inc1+$inc2))>0;
 	$PSI_simple="NA" if (($exc*2)+($inc1+$inc2))==0;
@@ -186,19 +186,19 @@ foreach $event (sort (keys %ALL)){
 
 	### Inclusion reads
 	for $i (0..$d2-1){ # loops through all donors in the gene from the first to d2-1
-	    if ((($D_CO{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $i != $d1){
+	    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $i != $d1){
 		$temp_eej="$gene-$i-$a1";
-		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-		    $inc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+		    $inc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 		    $Rinc1C+=$reads{$sample}{$temp_eej};
 		}
 	    }
 	}
 	for $i ($a1+1..$last_acceptor{$gene}){ # loops through all acceptors in the gene from a1+1 to the last
-	    if ((($A_CO{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO{$gene}{$i} < $donor_coord && $strand eq "-")) && $i != $a2){
+	    if ((($A_CO_href->{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $donor_coord && $strand eq "-")) && $i != $a2){
 		$temp_eej="$gene-$d2-$i";
-		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-		    $inc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+		    $inc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 		    $Rinc2C+=$reads{$sample}{$temp_eej};
 		}
 	    }
@@ -207,32 +207,32 @@ foreach $event (sort (keys %ALL)){
 	if (!$ALL_EXC_EEJ){
 	    for $i (0..$d1-1){
 		$temp_eej="$gene-$i-$a2";
-		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-		    $exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+		    $exc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 		    $Rexc1C+=$reads{$sample}{$temp_eej};
 		}
 	    }
 	    for $i ($d1+1..$last_donor{$gene}){
-		if (($D_CO{$gene}{$i} < $A_CO{$gene}{$a1} && $strand eq "+") || ($D_CO{$gene}{$i} > $A_CO{$gene}{$a1} && $strand eq "-")){
+		if (($D_CO_href->{$gene}{$i} < $A_CO_href->{$gene}{$a1} && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $A_CO_href->{$gene}{$a1} && $strand eq "-")){
 		    $temp_eej="$gene-$i-$a2";
-		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			$exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$exc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			$Rexc1C+=$reads{$sample}{$temp_eej};
 		    }
 		}
 	    }
 	    for $i ($a2+1..$last_acceptor{$gene}){
 		$temp_eej="$gene-$d1-$i";
-		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-		    $exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+		    $exc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 		    $Rexc2C+=$reads{$sample}{$temp_eej};
 		}
 	    }
 	    for $i (0..$a2-1){
-		if (($A_CO{$gene}{$i} > $D_CO{$gene}{$d2} && $strand eq "+") || ($A_CO{$gene}{$i} < $D_CO{$gene}{$d2} && $strand eq "-")){
+		if (($A_CO_href->{$gene}{$i} > $D_CO_href->{$gene}{$d2} && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $D_CO_href->{$gene}{$d2} && $strand eq "-")){
 		    $temp_eej="$gene-$d1-$i";
-		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			$exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$exc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			$Rexc2C+=$reads{$sample}{$temp_eej};
 		    }
 		}
@@ -244,10 +244,10 @@ foreach $event (sort (keys %ALL)){
 	elsif ($ALL_EXC_EEJ){ ### NOT USED, NOT TESTED
 	    for $i (0..$d2-1){
 		for $j ($a1+1..$last_acceptor{$gene}){
-		    if (($D_CO{$gene}{$i} < $acceptor_coord && $A_CO{$gene}{$j} > $donor_coord && $str eq "+") || ($D_CO{$gene}{$i} > $acceptor_coord && $A_CO{$gene}{$j} < $donor_coord && $str eq "-")){
+		    if (($D_CO_href{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $str eq "+") || ($D_CO_href{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $str eq "-")){
 			$temp_eej="$gene-$i-$j";
-			if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			    $excC+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			    $excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			    $RexcC+=$reads{$sample}{$temp_eej};
 			}
 		    }
