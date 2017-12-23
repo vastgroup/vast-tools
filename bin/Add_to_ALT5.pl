@@ -79,7 +79,7 @@ foreach $file (@EFF){
     close MAPPABILITY;
 }
 
-my %ss;
+my %is_ss;
 verbPrint "Loading EEJ data for ALT5\n";
 foreach $file (@EEJ){
    # ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./; DEPRECATED --TSW
@@ -120,7 +120,7 @@ open (COUNTs, ">raw_reads/RAW_READS_ALT5-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 print COUNTs "$head_ReadCounts\n";
 
-my %eff;
+my $eff_href;
 verbPrint "Starting PSI quantifications\n";
 foreach $event_root (sort keys %ALL){
     ($gene,$junctions)=$event_root=~/(.+?)\-(.+)/;
@@ -149,13 +149,13 @@ foreach $event_root (sort keys %ALL){
 	@PSI=(); # Percent splice site usage for each donor
 	
 	# set mappability correction accordingly
-	if($is_ss{$sample}){%eff=%eff_ss}else{%eff=%eff_ns}
+	if($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
 	
 	$max_mappability=$length-15;
 	for $i (0..$#junctions){ #does Simple read counts
 	    $eej="$gene-$junctions[$i]";
-	    $corr_inc_reads_S[$i]=$max_mappability*($reads{$sample}{$eej}/$eff{$length}{$eej}) if $eff{$length}{$eej};
-	    $raw_inc_reads_S[$i]=$reads{$sample}{$eej} if $eff{$length}{$eej};
+	    $corr_inc_reads_S[$i]=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
+	    $raw_inc_reads_S[$i]=$reads{$sample}{$eej} if $eff_href->{$length}{$eej};
 	    $total_corr_reads_S+=$corr_inc_reads_S[$i];
 	    $total_raw_reads_S+=$raw_inc_reads_S[$i];
 	}
@@ -164,8 +164,8 @@ foreach $event_root (sort keys %ALL){
 	    ($donor)=$junctions[$i]=~/(\d+?)\-\d+/;
 	    for $j (0..$last_acceptor{$gene}){  # It includes the "reference" acceptor
 		$eej="$gene-$donor-$j"; 
-		$corr_inc_reads_ALL[$i]+=$max_mappability*($reads{$sample}{$eej}/$eff{$length}{$eej}) if $eff{$length}{$eej};
-		$raw_inc_reads_ALL[$i]+=$reads{$sample}{$eej} if $eff{$length}{$eej};
+		$corr_inc_reads_ALL[$i]+=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
+		$raw_inc_reads_ALL[$i]+=$reads{$sample}{$eej} if $eff_href->{$length}{$eej};
 	    }
 	    $total_corr_reads_ALL+=$corr_inc_reads_ALL[$i];
 	    $total_raw_reads_ALL+=$raw_inc_reads_ALL[$i];
