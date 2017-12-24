@@ -474,7 +474,7 @@ unless($resumed){
 				if($i==0){
 					if($percR1n<$minThresh){print $fh_info "\t$fq1";next;}
 					open($fh,"".getPrefixCmd($fq1)." |");
-					$fn="$tmpDir/".pop([split("/",$fq1)]);
+					$fn="$tmpDir/tmp_read_files/".pop([split("/",$fq1)]);
 					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq1; writing into $fn";
 					$fq1=$fn;
