@@ -11,7 +11,7 @@ Table of Contents:
 - [Usage](#usage)
 	- [Help](#help)
 	- [Quick Usage](#quick-usage)
-	- [Strand-specific RNAseq data](#strand-specific-data)
+	- [Strand-specific RNAseq data](#strand-specific-rnaseq-data)
 	- [Alignment](#alignment)
 	- [Merging Outputs](#merging-outputs)
 	- [Combining Results](#combining-results)
