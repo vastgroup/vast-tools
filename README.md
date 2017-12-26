@@ -11,6 +11,7 @@ Table of Contents:
 - [Usage](#usage)
 	- [Help](#help)
 	- [Quick Usage](#quick-usage)
+	- [Strand-specific RNAseq data](#strand-specific-data)
 	- [Alignment](#alignment)
 	- [Merging Outputs](#merging-outputs)
 	- [Combining Results](#combining-results)
@@ -198,6 +199,13 @@ AND
 ~~~~
 > vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2 -c 8 > INCLUSION-FILTERED.tab
 ~~~~
+
+
+### Strand-specific RNAseq data
+
+VAST-TOOLs recognizes automatically if RNAseq data are strand-specific and will align them strand-specifically to the transcriptome.
+Strand-unspecific RNAseq data will be aligned strand-unspecifically. Though samples with strand-specific and strand-unspecific RNAseq data can be merged into a new sample with ``vast-tools merge``, it is not recommended to do so: In this case, the mappability correction will be applied in strand-unspecific mode, potentially biasing estimated PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``vast-tools merge``.
+
 
 ### Alignment
 
