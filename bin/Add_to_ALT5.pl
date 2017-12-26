@@ -48,7 +48,7 @@ close TEMPLATE;
 @EEJ=glob("to_combine/*.ee*");
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "Needs strand-unspecific effective\n" if !@EFF;
-verbPrint "Loading Effective files (strand-unspecific):\n";
+verbPrint "Loading mappability files (strand-unspecific and strand-specific):\n";
 foreach $file (@EFF){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
     verbPrint "Loading: $file\tLength: $length\n";
