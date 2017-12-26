@@ -203,7 +203,7 @@ AND
 
 ### Strand-specific RNAseq data
 
-VAST-TOOLS recognizes automatically if RNAseq data are strand-specific and will align them strand-specifically.
+``vast-tools align`` recognizes automatically if RNAseq data are strand-specific and will align them strand-specifically.
 Strand-unspecific RNAseq data will be aligned strand-unspecifically. Several samples with strand-specific/strand-unspecific RNAseq data can be merged into a new strand-specific/strand-unspecific sample with ``vast-tools merge``. Though it is also possible to merge samples with strand-specific **and** strand-unspecific RNAseq data **into one new sample**, it is not recommended to do so, as in this case the mappability correction will be applied in strand-unspecific mode which may introduce a bias to the final PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``vast-tools merge``.
 
 
