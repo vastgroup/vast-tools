@@ -510,16 +510,16 @@ foreach my $group (sort keys %groups){
     ### EXPR
     if (defined $expr){
 	unless (-e "expr_out/$group.cRPKM"){
-	    my %eff;
+	    my $eff_href;
 	    open (EXPR, ">expr_out/$group.cRPKM") || errPrintDie "Cannot open output file";
-	    if($group_is_ss{$group}){%eff=%eff_ss}else{%eff=%eff_nss}
+	    if($group_is_ss{$group}){$eff_href=\%eff_ss}else{$eff_href=\%eff_nss}
 	    foreach my $g (sort keys %{$READS_EXPR{$group}}){
 		my $cRPKM = "";
-		if ($READS_EXPR{$group}{$g} eq "NA" || $eff{$g}==0){
+		if ($READS_EXPR{$group}{$g} eq "NA" || $eff_href->{$g}==0){
 		    $cRPKM="NA";
 		}
 		else {
-		    $cRPKM=sprintf("%.2f",1000000*(1000*$READS_EXPR{$group}{$g}/$eff{$g})/$TOTAL_READS_EXPR{$group}); 
+		    $cRPKM=sprintf("%.2f",1000000*(1000*$READS_EXPR{$group}{$g}/$eff_href->{$g})/$TOTAL_READS_EXPR{$group}); 
 		}
 		print EXPR "$g\t$cRPKM\t$READS_EXPR{$group}{$g}\n";
 	    }
