@@ -71,8 +71,17 @@ foreach my $file (@files){
     unless(-e "to_combine/{$sample2}.info"){ die "Do not find to_combine/{$sample2}.info. You might need to run vast-tools align again.";}
     open(my $fh_info,"to_combine/{$sample2}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
     my @fs=split("\t",$line);
-    if($fs[@fs-2] eq "-SS"){$mappability_href=\%mappability_ss;}else{$mappability_href=\%mappability_ns;}
     
+    unless(-e "to_combine/${sample}.info"){$mappability_href=\%mappability_ns;
+    }else{
+    	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    	my @fs=split("\t",$line);
+    	if($fs[@fs-2] eq "-SS"){
+    		$mappability_href=\%mappability_ss;
+    	}else{
+    		$mappability_href=\%mappability_ns;
+    	}
+    }
     
     open (IN, $file);
     <IN>;
