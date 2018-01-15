@@ -73,9 +73,9 @@ Usage: $0 sub-commands [options]
 
 [sub-commands]
 	align		:	Align RNA-Seq reads to exon-exon junctions and quantify AS
-        merge           :       Merges vast-tool outputs from multiple sub-samples  
+        merge           :       Merge vast-tool outputs from multiple sub-samples  
 	combine		:	Combine two or more 'aligned' RNA-Seq samples into summary tables
-        compare         :       Compares PSIs between samples and produces lists for GO analysis
+        compare         :       Compare PSIs between samples and produces lists for GO analysis
 	diff		:	Compare posterior distributions over PSI of two or more samples 
 	plot		:	Utility application to plot PSI scatterplots
         tidy            :       Simplifies and filters the PSI table for external analysis (e.g. in R)
