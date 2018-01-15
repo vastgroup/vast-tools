@@ -30,12 +30,12 @@ die "Needs Species key\n" if !defined($sp);
 $COMB="M"; # Only available version
 
 @EEJ=glob("to_combine/*.ee*"); # uses the same input files as COMBI
-@EFF=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*");
-die "[vast combine annot error] Needs effective from database!\n" if !@EFF;
+@EFF_ns=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*"); die "[vast combine combi error] Needs effective (strand-unspecific) from database!\n" if !@EFF_ns;
+@EFF_ss=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA-SS.ef*"); die "[vast combine combi error] Needs effective (strand-specific) from database!\n" if !@EFF_ss;
 
 ###
-verbPrint "Loading Mappability for each EEJ and length:\n";
-foreach $file (@EFF){
+verbPrint "Loading strand-unspecific mappability for each EEJ and length:\n";
+foreach $file (@EFF_ns){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
     verbPrint "Loading: $file\tLength: $length\n";
     open (MAPPABILITY, $file);
@@ -44,11 +44,31 @@ foreach $file (@EFF){
 	@t=split(/\t/);
 	($gene,$donor,$acceptor,$donor_coord,$acceptor_coord)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
 	$eej="$gene-$donor-$acceptor";
-	$eff{$length}{$eej}=$t[1];
+	$eff_ns{$length}{$eej}=$t[1];
 
 	# keeps the coordinate for each donor/acceptor
-	$D_CO{$gene}{$donor}=$donor_coord;
-        $A_CO{$gene}{$acceptor}=$acceptor_coord;
+	$D_CO_ns{$gene}{$donor}=$donor_coord;
+        $A_CO_ns{$gene}{$acceptor}=$acceptor_coord;
+    }
+    close MAPPABILITY;
+}
+
+
+verbPrint "Loading strand-unspecific mappability for each EEJ and length:\n";
+foreach $file (@EFF_ss){
+    ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;
+    verbPrint "Loading: $file\tLength: $length\n";
+    open (MAPPABILITY, $file);
+    while (<MAPPABILITY>){
+	chomp;
+	@t=split(/\t/);
+	($gene,$donor,$acceptor,$donor_coord,$acceptor_coord)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
+	$eej="$gene-$donor-$acceptor";
+	$eff_ss{$length}{$eej}=$t[1];
+
+	# keeps the coordinate for each donor/acceptor
+	$D_CO_ss{$gene}{$donor}=$donor_coord;
+        $A_CO_ss{$gene}{$acceptor}=$acceptor_coord;
     }
     close MAPPABILITY;
 }
@@ -68,6 +88,7 @@ while (<TEMPLATE>){
 close TEMPLATE;
 
 ###
+my %is_ss=();  # get strand-specific samples / groups
 verbPrint "Loading EEJ read counts data\n";
 foreach $file (@EEJ){
     my $fname = $file;
@@ -75,6 +96,18 @@ foreach $file (@EEJ){
     ($sample)=$fname=~/^(.*)\..*$/;
     $head_PSIs.="\t$sample\t$sample-Q";
     
+    unless(-e "to_combine/${sample}.info"){ verbPrint "$sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
+    }else{
+    	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    	my @fs=split("\t",$line);
+    	if($fs[@fs-2] eq "-SS"){
+    		$is_ss{$sample}=1;
+    		verbPrint "$sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
+    	}else{
+    		verbPrint "$sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+    	}
+    }
+
     open (EEJ, $file);
     while (<EEJ>){
 	chomp;
@@ -96,7 +129,7 @@ my $NUM=$#EEJ+1; # number of samples
 open (PSIs, ">raw_incl/INCLUSION_LEVELS_ANNOT-$sp$NUM-n.tab");
 print PSIs "$head_PSIs\n";
 
-
+my ($eff_href,$D_CO_href,$A_CO_href);
 verbPrint "Quantifying PSIs\n";
 foreach $event (sort (keys %ALL)){
     print PSIs "$ALL{$event}" if $event;
@@ -123,16 +156,19 @@ foreach $event (sort (keys %ALL)){
 	($sample)=$fname=~/^(.*)\..*$/;
 	$length = $samLen;
 	$exc=$inc1=$inc2=$Rexc=$Rinc1=$Rinc2=0; # empty temporary variables for read counts
+
+	# set mappability correction accordingly
+	if($is_ss{$sample}){$eff_href=\%eff_ss;$D_CO_href=\%D_CO_ss;$A_CO_href=\%A_CO_ss;}else{$eff_href=\%eff_ns;$D_CO_href=\%D_CO_ns;$A_CO_href=\%A_CO_ns;}
 	
 	# data from the reference EEJ (C1A, AC2, C1C2)
 	# corrected read counts
-	$exc=$reads{$sample}{$eej_exc}/$eff{$length}{$eej_exc} if $eff{$length}{$eej_exc};
-	$inc1=$reads{$sample}{$eej_inc1}/$eff{$length}{$eej_inc1} if $eff{$length}{$eej_inc1};
-	$inc2=$reads{$sample}{$eej_inc2}/$eff{$length}{$eej_inc2} if $eff{$length}{$eej_inc2};
+	$exc=$reads{$sample}{$eej_exc}/$eff_href->{$length}{$eej_exc} if $eff_href->{$length}{$eej_exc};
+	$inc1=$reads{$sample}{$eej_inc1}/$eff_href->{$length}{$eej_inc1} if $eff_href->{$length}{$eej_inc1};
+	$inc2=$reads{$sample}{$eej_inc2}/$eff_href->{$length}{$eej_inc2} if $eff_href->{$length}{$eej_inc2};
 	# raw read counts
-	$Rexc=$reads{$sample}{$eej_exc} if $eff{$length}{$eej_exc};
-	$Rinc1=$reads{$sample}{$eej_inc1} if $eff{$length}{$eej_inc1};
-	$Rinc2=$reads{$sample}{$eej_inc2} if $eff{$length}{$eej_inc2};
+	$Rexc=$reads{$sample}{$eej_exc} if $eff_href->{$length}{$eej_exc};
+	$Rinc1=$reads{$sample}{$eej_inc1} if $eff_href->{$length}{$eej_inc1};
+	$Rinc2=$reads{$sample}{$eej_inc2} if $eff_href->{$length}{$eej_inc2};
 	
 	# Donor1 (d1), Donor2 (d2), Acceptor1 (a1) and Acceptor2 (a2)
 	($d1,$a2)=$eej_exc=~/\-(\d+?)\-(\d+)/;
@@ -145,19 +181,19 @@ foreach $event (sort (keys %ALL)){
 	#### Quantifying COMPLEX READS: doing it "very" locally (+/-5 acc/donors)
 	### Inclusion reads
 	for $i ($d1-5..$d2-1){
-	    if ((($D_CO{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $D_CO{$gene}{$i} && $i != $d1 && $i>=0){
+	    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $i != $d1 && $i>=0){
 		$temp_eej="$gene-$i-$a1";
-		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-		    $inc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+		    $inc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 		    $Rinc1C+=$reads{$sample}{$temp_eej};
 		} 
 	    }
 	}
 	for $i ($a1+1..$a2+5){
-	    if ((($A_CO{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO{$gene}{$i} < $donor_coord && $strand eq "-")) && $A_CO{$gene}{$i} && $i != $a2 && $i<=$last_acceptor{$gene}){
+	    if ((($A_CO_href->{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $donor_coord && $strand eq "-")) && $A_CO_href->{$gene}{$i} && $i != $a2 && $i<=$last_acceptor{$gene}){
 		$temp_eej="$gene-$d2-$i";
-		if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-		    $inc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+		    $inc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 		    $Rinc2C+=$reads{$sample}{$temp_eej};
 		}
 	    }
@@ -169,17 +205,17 @@ foreach $event (sort (keys %ALL)){
 	    for $i ($d1-5..$d1-1){
 		if ($i>=0){
 		    $temp_eej="$gene-$i-$a2";
-		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			$exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$exc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			$Rexc1C+=$reads{$sample}{$temp_eej};
 		    }
 		}
 	    }
 	    for $i ($d1+1..$d1+5){
-		if (($D_CO{$gene}{$i} < $A_CO{$gene}{$a1} && $strand eq "+") || ($D_CO{$gene}{$i} > $A_CO{$gene}{$a1} && $strand eq "-") && $i <= $last_donor{$gene}){
+		if (($D_CO_href->{$gene}{$i} < $A_CO_href->{$gene}{$a1} && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $A_CO_href->{$gene}{$a1} && $strand eq "-") && $i <= $last_donor{$gene}){
 		    $temp_eej="$gene-$i-$a2";
-		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			$exc1C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$exc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			$Rexc1C+=$reads{$sample}{$temp_eej};
 		    }
 		}
@@ -187,17 +223,17 @@ foreach $event (sort (keys %ALL)){
 	    for $i ($a2+1..$a2+5){
 		if ($i <= $last_acceptor{$gene}){
 		    $temp_eej="$gene-$d1-$i";
-		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			$exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$exc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			$Rexc2C+=$reads{$sample}{$temp_eej};
 		    }
 		}
 	    }
 	    for $i ($a2-5..$a2-1){
-		if (($A_CO{$gene}{$i} > $D_CO{$gene}{$d2} && $strand eq "+") || ($A_CO{$gene}{$i} < $D_CO{$gene}{$d2} && $strand eq "-") && $i >= 0){
+		if (($A_CO_href->{$gene}{$i} > $D_CO_href->{$gene}{$d2} && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $D_CO_href->{$gene}{$d2} && $strand eq "-") && $i >= 0){
 		    $temp_eej="$gene-$d1-$i";
-		    if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			$exc2C+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$exc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			$Rexc2C+=$reads{$sample}{$temp_eej};
 		    }
 		}
@@ -209,10 +245,10 @@ foreach $event (sort (keys %ALL)){
 	elsif ($ALL_EXC_EEJ){
 	    for $i ($d1-5..$d2-1){ # The only true ANNOT-specific thing
 		for $j ($a1+1..$a2+5){
-		    if ((($D_CO{$gene}{$i} < $acceptor_coord && $A_CO{$gene}{$j} > $donor_coord && $strand eq "+") || ($D_CO{$gene}{$i} > $acceptor_coord && $A_CO{$gene}{$j} < $donor_coord && $strand eq "-")) && $D_CO{$gene}{$i} && $A_CO{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
+		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
 			$temp_eej="$gene-$i-$j";
-			if ($eff{$length}{$temp_eej} >= $min_eff_complex){
-			    $excC+=$reads{$sample}{$temp_eej}/$eff{$length}{$temp_eej};
+			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			    $excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			    $RexcC+=$reads{$sample}{$temp_eej};
 			}
 		    }
