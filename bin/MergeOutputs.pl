@@ -150,9 +150,19 @@ while (<GROUPS>){
     $groups{$temp[1]}=1;
     $files_2b_merged{$temp[0]}=1;
     my $tmp_file="to_combine/${temp[0]}.info";
-    open(my $fh,$tmp_file) or goto STOPSCRIPT;
-    chomp(my $l=<$fh>);my @fs=split("\t",$l);close($fh);
-    if($fs[@fs-2] eq "-SS"){$file_is_ss{$temp[0]}=1;}
+    unless(-e $tmp_file){
+    
+    unless(-e "to_combine/${temp[0]}.info"){ verbPrint "$temp[0]: do not find to_combine/${temp[0]}.info. Sample will be treated as being not strand-specific.";
+    }else{
+    	open(my $fh_info,"to_combine/${temp[0]}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    	my @fs=split("\t",$line);
+    	if($fs[@fs-2] eq "-SS"){
+    		$file_is_ss{$temp[0]}=1;
+    		verbPrint "$temp[0]: found to_combine/${temp[0]}.info. Sample will be treated as being strand-specific."
+    	}else{
+    		verbPrint "$temp[0]: found to_combine/${temp[0]}.info. Sample will be treated as being not strand-specific."
+    	}
+    }
 
     # check if all necessary files exists; if not the groups file might contain incorrect subsample names
     $tmp_file="expr_out/${temp[0]}.cRPKM";
