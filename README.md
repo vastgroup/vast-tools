@@ -11,9 +11,9 @@ Table of Contents:
 - [Usage](#usage)
 	- [Help](#help)
 	- [Quick Usage](#quick-usage)
-	- [Strand-specific RNAseq data](#strand-specific-rnaseq-data)
 	- [Alignment](#alignment)
 	- [Merging Outputs](#merging-outputs)
+	- [Strand-specific RNAseq data](#strand-specific-rnaseq-data)
 	- [Combining Results](#combining-results)
 	- [Comparing PSIs Between Samples](#comparing-psis-between-samples)
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
@@ -201,12 +201,6 @@ AND
 ~~~~
 
 
-### Strand-specific RNAseq data
-
-``vast-tools align`` recognizes automatically if RNAseq data are strand-specific and will align them strand-specifically.
-Strand-unspecific RNAseq data will be aligned strand-unspecifically. Several samples with strand-specific/strand-unspecific RNAseq data can be merged into a new strand-specific/strand-unspecific sample with ``vast-tools merge``. Though it is also possible to merge samples with strand-specific **and** strand-unspecific RNAseq data **into one new sample**, it is not recommended to do so, as in this case the mappability correction will be applied in strand-unspecific mode which may introduce a bias to the final PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``vast-tools merge``.
-
-
 ### Alignment
 
 In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length (legacy) or specify the reads have been genome substracted; see below).
@@ -216,8 +210,7 @@ unmapped reads, and these are then aligned to predefined splice junction librari
 in the output directory as ``<sample>-50-e.fa.gz``, where ``sample`` is the sample
 name. The input reads can be compressed (via gzip) or uncompressed.
 
-Currently, VAST-TOOLS supports three species, human (Hsa), mouse (Mmu), chicken (Gga), and planarian (Sme). By
-default, the ``-sp`` option is ``Hsa``.
+Currently, VAST-TOOLS supports the following species: human (Hsa), mouse (Mmu), chicken (Gga), zebrafish (Dre), sea urchin (Spu), and planarian (Sme). By default, the ``-sp`` option is ``Hsa``.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs pluscRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
 
@@ -277,6 +270,12 @@ To merge cRPKM files from gene expression analysis, the option ``--expr`` needs 
 Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`) by using the option ``--move_to_PARTS``. 
 
 
+### Strand-specific RNAseq data
+
+From release v2.0.0, ``align`` recognizes automatically if RNAseq data are strand-specific and will align them strand-specifically.
+Strand-unspecific RNAseq data will be aligned strand-unspecifically. Several samples with strand-specific/strand-unspecific RNAseq data can be merged into a new strand-specific/strand-unspecific sample with ``merge``. Although it is also possible to merge samples with strand-specific **and** strand-unspecific RNAseq data **into one new sample**, it is not recommended to do so, as in this case the mappability correction will be applied in strand-unspecific mode which may introduce a bias to the final PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``combine``.
+
+
 ### Combining Results 
 
 ``vast-tools combine`` will join all of the files sent to the same output
@@ -288,6 +287,9 @@ From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 co
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga] --IR_version [1|2]
 ~~~~
+
+From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; IDs starting from 6 onwards). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: These modules has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
+
 
 ### Comparing PSIs Between Samples
 
