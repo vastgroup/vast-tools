@@ -26,6 +26,8 @@ my $noIRflag = 0;    # don't use IR!
 my $onlyIRflag = 0; # only run intron retention
 my $IR_version = 2;  # either 1 or 2
 
+my $noANNOTflag = 0;
+
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 
 my $asmbly;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
@@ -40,6 +42,7 @@ GetOptions("help"  	 => \$helpFlag,
            "z"           => \$compress,
 	   "noIR"        => \$noIRflag,
 	   "onlyIR"      => \$onlyIRflag,
+	   "noANNOT"     => \$noANNOTflag,
 	   "IR_version=i" => \$IR_version,
            "C"           => \$cRPKMCounts);
 
@@ -90,10 +93,11 @@ OPTIONS:
 	--noIR			Don't run intron retention pipeline (default off)
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
+        --noANNOT               Don't use exons quantified directly from annotation (default off)
 	--dbDir DBDIR		Database directory
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
-	-h, --help		Print this help message
+	-h, --help		Print this help messagev
 	-C			Create a cRPKM plus read counts summary table. By default, a
     				table containing ONLY cRPKM is produced. This option is only
            			applicable when expression analysis is enabled.
@@ -169,7 +173,13 @@ if ($N != 0) {
 	sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
     }
 
-    #my($verbRFlag) = ($verboseFlag) ? "T" : "F";
+    #### New in v2.0 (added 15/01/18)
+    unless ($noANNOTflag){
+	### Gets the PSIs for ALL annotated exons directly
+	verbPrint "Building Table for ANNOT (annotated pipeline)\n";
+	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+    }
+
     
     # To define version [02/10/15]; minimize changes for users
     # $v => "" or "_v2" [v1/v2]
@@ -232,6 +242,9 @@ if ($N != 0) {
 		     "raw_incl/INCLUSION_LEVELS_ALT3-$sp$N-n.tab",
 		     "raw_incl/INCLUSION_LEVELS_ALT5-$sp$N-n.tab");
 	
+	unless($noANNOTflag) { # for ANNOT Exons (EXi, i>=6) [v2.0]
+	    push(@input, "raw_incl/INCLUSION_LEVELS_ANNOT-$sp$N-n.tab");
+	}
 	unless($noIRflag) {
 	    push(@input, "raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
 	}
