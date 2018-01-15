@@ -89,7 +89,6 @@ OPTIONS:
 				For -sp Mmu: mm9 or mm10, (default mm9)
 				    - vast-tools will work internally with mm9; 
                                       if you choose mm10, the output gets lifted-over to mm10
-        --s                     Strand-aware mode: I
 	--noIR			Don't run intron retention pipeline (default off)
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
