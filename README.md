@@ -96,36 +96,38 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 
 For manual, install each species or all of them to any location by:
 
-Human (hg19) - 6.2G [vastdb.hsa.22.06.16.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.22.06.16.tar.gz):
+Human (hg19) - 6.2G [vastdb.hsa.15.01.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.15.01.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.hsa.22.06.16.tar.gz
-> tar xzvf vastdb.hsa.22.06.16.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.hsa.15.01.18.tar.gz
+> tar xzvf vastdb.hsa.15.01.18.tar.gz
 ~~~~
-Mouse (mm9) - 5.6G [vastdb.mmu.22.06.16.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.22.06.16.tar.gz):
+Mouse (mm9) - 5.7G [vastdb.mmu.15.01.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.15.01.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.mmu.22.06.16.tar.gz
-> tar xzvf vastdb.mmu.22.06.16.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.mmu.15.01.18.tar.gz
+> tar xzvf vastdb.mmu.15.01.18.tar.gz
 ~~~~
-Chicken (galGal3) - 1.4G [vastdb.gga.13.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz):
+Chicken (galGal3) - 1.6G [vastdb.gga.15.01.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.15.01.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.gga.13.11.15.tar.gz
-> tar xzvf vastdb.gga.13.11.15.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.gga.15.01.18.tar.gz
+> tar xzvf vastdb.gga.15.01.18.tar.gz
 ~~~~
-Zebrafish (danRer10) - 2.1G [vastdb.dre.10.03.17.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.10.03.17.tar.gz):
+Zebrafish (danRer10) - 2.2G [vastdb.dre.15.01.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.15.01.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.dre.10.03.17.tar.gz
-> tar xzvf vastdb.dre.10.03.17.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.dre.15.01.18.tar.gz
+> tar xzvf vastdb.dre.15.01.18.tar.gz
 ~~~~
-Sea urchin (Spur3.1) - 1.2G [vastdb.spu.10.03.17.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.10.03.17.tar.gz):
+Sea urchin (Spur3.1) - 1.2G [vastdb.spu.15.01.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.15.01.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.spu.10.03.17.tar.gz
-> tar xzvf vastdb.spu.10.03.17.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.spu.15.01.18.tar.gz
+> tar xzvf vastdb.spu.15.01.18.tar.gz
 ~~~~
-Planarian (v31) - 942M [vastdb.sme.31.11.15.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz):
+Planarian (v31) - 952M [vastdb.sme.15.01.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.15.01.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.sme.31.11.15.tar.gz
-> tar xzvf vastdb.sme.31.11.15.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.sme.15.01.18.tar.gz
+> tar xzvf vastdb.sme.15.01.18.tar.gz
 ~~~~
+
+** NOTE: from release v2.0.0, new VASTDB libraries are needed for all species.
 
 If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
