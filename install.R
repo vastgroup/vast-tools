@@ -31,12 +31,12 @@ downloadDb <- function(speUrl, speFile) {
    }
 }
 
-humanDbFile <- "vastdb.hsa.22.06.16.tar.gz"
-mouseDbFile <- "vastdb.mmu.22.06.16.tar.gz"
-chickenDbFile <- "vastdb.gga.13.11.15.tar.gz"
-DreDbFile <- "vastdb.dre.10.03.17.tar.gz"
-SpuDbFile <- "vastdb.spu.10.03.17.tar.gz"
-planariaDbFile <- "vastdb.sme.13.11.15.tar.gz"
+humanDbFile <- "vastdb.hsa.15.01.18.tar.gz"
+mouseDbFile <- "vastdb.mmu.15.01.18.tar.gz"
+chickenDbFile <- "vastdb.gga.15.01.18.tar.gz"
+DreDbFile <- "vastdb.dre.15.01.18.tar.gz"
+SpuDbFile <- "vastdb.spu.15.01.18.tar.gz"
+planariaDbFile <- "vastdb.sme.15.01.18.tar.gz"
 
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
