@@ -64,18 +64,24 @@ sub reorderColumns {
 my $NEWID = openFileHandle("$dbDir/FILES/New_ID-$sp.txt.gz");
 my %newIDs;
 while (<$NEWID>) {
-  chomp;
-  my @l = split("\t");
-  if (defined $newIDs{$l[1]}) {
-      die "Non-unique key value pair in $NEWID!\n";
-  }
-  $newIDs{$l[1]} = $l[0];
-  
-  # to correct a small discordance in old human/mouse IDs --MI [23/12/15]
-  if ($l[0] =~ /INT/ && $l[1] =~ /^\-/){
-      my $temp_ID = "NA".$l[1];
-      $newIDs{$temp_ID} = $l[0];
-  }
+    chomp;
+    my @l = split("\t");
+
+# Removed in V2 (18/01/18): if repeated (due to assembly conversion) are re-rewritten
+#  if (defined $newIDs{$l[1]}) {
+#      die "Non-unique key value pair in $NEWID!\n";
+#   }
+#  else {
+#      $newIDs{$l[1]} = $l[0]; # old_ID => new_ID
+#  }
+    
+    $newIDs{$l[1]} = $l[0]; # old_ID => new_ID
+    
+    # to correct a small discordance in old human/mouse IDs --MI [23/12/15]
+    if ($l[0] =~ /INT/ && $l[1] =~ /^\-/){
+	my $temp_ID = "NA".$l[1];
+	$newIDs{$temp_ID} = $l[0];
+    }
 }
 close $NEWID;
 
@@ -90,9 +96,11 @@ my %template;
 while (<$TEMPLATE>){
   chomp;
   my @l = split(/\t/);
-  if (defined $template{$l[1]}) {
-    die "Non-unique key value pair in $TEMPLATE!\n";
-  }
+
+# Requirement removed in V2 (if repeated, overwrites)
+#  if (defined $template{$l[1]}) {
+#    die "Non-unique key value pair in $TEMPLATE!\n";
+#  }
 
   @l = @l[0..5]; # to make sure unexpected extras are not included --MI [30/12/15] (old: \@l)
   $template{$l[1]} = \@l; 
