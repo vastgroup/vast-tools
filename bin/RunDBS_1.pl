@@ -455,12 +455,16 @@ unless($resumed){
        	open($fh, "".getPrefixCmd($fq1)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
        	if($p1+$n1<500){die "Too few first reads (<500) could be mapped to mRNA library for detecting strand-orientation of reads. Maybe wrong species selected?";}
        	($percR1p,$percR1n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)) );
-       	verbPrint "   fraction of first reads mapping to fwd / rev strand : $percR1p / $percR1n";
+		$percR1p = sprintf("%.4f",$percR1p);
+		$percR1n = sprintf("%.4f",$percR1n);
+		verbPrint "   fraction of first reads mapping to fwd / rev strand : $percR1p / $percR1n";
 
        	if($pairedEnd){  # same for second reads of each pair
        		open($fh, "".getPrefixCmd($fq2)." | head -n $N - | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
         	if($p2+$n2<500){die "Too few second reads (<500) could be mapped to mRNA library for detecting strand-orientation of reads. Maybe wrong species selected?";}
        		($percR2p,$percR2n)=( ($p2/($p2+$n2)),($n2/($p2+$n2)) );
+		$percR2p = sprintf("%.4f",$percR2p);
+		$percR2n = sprintf("%.4f",$percR2n);
        		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
         }
 		
