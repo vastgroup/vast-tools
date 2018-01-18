@@ -102,15 +102,15 @@ foreach $file (@EEJ){
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-ReC\t$sample-Ri1C\t$sample-Ri2C\t$sample-Q";
     
-    unless(-e "to_combine/${sample}.info"){ verbPrint "$sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
+    unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
     }else{
     	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
     		$is_ss{$sample}=1;
-    		verbPrint "$sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
+    		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
     	}else{
-    		verbPrint "$sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+    		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
     	}
     }
     
