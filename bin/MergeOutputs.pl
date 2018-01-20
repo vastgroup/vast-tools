@@ -150,7 +150,6 @@ while (<GROUPS>){
     $groups{$temp[1]}=1;
     $files_2b_merged{$temp[0]}=1;
     my $tmp_file="to_combine/${temp[0]}.info";
-    unless(-e $tmp_file){
     
     unless(-e "to_combine/${temp[0]}.info"){ verbPrint "$temp[0]: do not find to_combine/${temp[0]}.info. Sample will be treated as being not strand-specific.";
     }else{
