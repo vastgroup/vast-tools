@@ -142,6 +142,8 @@ for (i in 1:nrow(samples)) {
       bal.i[!row.is.equal.zero] <- apply(matrix(xranges[!row.is.equal.zero,], ncol=2), MAR=1, FUN=function(x) {
           binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value
       })
+    }else{
+      stop("Looks like an error: all IR events of sample ",samples$Sample[i]," have zero inclusion and zero exclusion reads. Did you use the correct species?")
     }
 
     ## make the 'quality' column: cov,bal@alpha,beta
