@@ -136,10 +136,13 @@ for (i in 1:nrow(samples)) {
     xranges <- apply(xranges, MAR=2, round)
     xranges[,2] <- xranges[,1] + xranges[,2]
     bal.i <- numeric(length=nrow(xranges))
-    bal.i[xranges[,2] == 0] <- 1
-    bal.i[xranges[,2] > 0] <- apply(matrix(xranges[xranges[,2] > 0,], ncol=2), MAR=1, FUN=function(x) {
-        binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value
-   })
+    row.is.equal.zero <- xranges[,2] == 0
+    bal.i[row.is.equal.zero] <- 1
+    if(length(which(!row.is.equal.zero))>0){
+      bal.i[!row.is.equal.zero] <- apply(matrix(xranges[!row.is.equal.zero,], ncol=2), MAR=1, FUN=function(x) {
+          binom.test(x=x[1], n=x[2], p=1/3.5, alternative="less")$p.value
+      })
+    }
 
     ## make the 'quality' column: cov,bal@alpha,beta
     qal.i <- paste(round(cov.i, 1), ",", signif(bal.i, 3), "@", alpha.i, ",", beta.i, sep="")
