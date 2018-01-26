@@ -120,12 +120,13 @@ foreach $event (sort (keys %eff)){
 	    foreach $n (sort (keys %{$eff{$event}{$ie}})){
 		($coord,$n2)=$n=~/(.+?)\=(.+)/;
 		$full="$event.$coord.$ie.$n2";
-
+		
 		# Modified in the new version (18/01/16) --MI
 		@exons=split(/\_/,$ie); # array with all (micro)exons in the junctions
+		@exons_inc=@exons[1..$#exons-1]; # to exclude the first and last exons from EEJ for inclusion
 		for $z (1..$total_exones){ # looping through all MICs in the group
 		    $INC_read="";
-		    foreach $exon (@exons){
+		    foreach $exon (@exons_inc){
 			$INC_read=1 if $z eq $exon; # i.e. $z is one of the exons in the junction
 		    }
 		    if ($INC_read){
