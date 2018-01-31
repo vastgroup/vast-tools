@@ -31,6 +31,18 @@ sub verbPrint {
   }
 }
 
+sub errPrint {
+    my $errMsg = shift;
+    print STDERR "[vast combine error]: $errMsg\n";
+    $EXIT_STATUS++; 
+}
+
+sub errPrintDie {
+    my $errMsg = shift;
+    errPrint $errMsg;
+    exit $EXIT_STATUS if ($EXIT_STATUS != 0);
+}
+
 sub simplifyComplex {
   # Ad hoc routine to simplify COMPLEX types
   # (should eventually be simplified in the template source files)
@@ -120,6 +132,7 @@ my @samples;
 my $headerCount = 0;    # count number of columns
 my %headerOrder;        # store order of samples
 my @newOrder;           # used for fixing out-of-order headers
+my %seen_sample;       # keeps the samples that were seen in the first file; if not matched in the rest, die 
 
 while (<STDIN>) {
   chomp;
@@ -131,6 +144,16 @@ while (<STDIN>) {
   # Check headers
   if (/^GENE\tEVENT/) {
     $headerCount++;
+    
+    #### Check that samples are the exact ones, irrespective of the order (31/01/18 --MI)
+    foreach my $temp_sample (@sampleCols){
+	if ($headerCount == 1){ # first table
+	    $seen_sample{$temp_sample}=1;
+	}
+	else {
+	    errPrintDie("Sample $temp_sample is not in all tables\n") if (!defined $seen_sample{$temp_sample});
+	}
+
     if (!$sawHeader) {
       push @header, @sampleCols;
       $sawHeader = @l;  # store number of expected columns
