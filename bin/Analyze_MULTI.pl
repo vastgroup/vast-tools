@@ -61,10 +61,6 @@ while (<STDIN>){
     @t=split(/\t/);
 
     # obtains original read source
-#    ($read)=$t[0]=~/(.+) /;
-#    ($read)=$t[0]=~/(.+)\#/ if !$read;
-#    ($read)=$t[0]=~/(.+)\:/ if !$read;
-#    ($read)=$t[0]=~/(.+)\// if !$read;
     ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
 
@@ -96,7 +92,7 @@ foreach $event_root (sort (keys %eff)){
 	($u, $d, $n)=$eej=~/(.+?)\-(.+?)\.(.+)/; # structure of EEJ: upstream_exon-downstream_exon.variant => $u-$d.$n
 	
 	### C1-C2 are named so only in C1C2 EEJs. Otherwise, C1=0 and C2=$Nex{$event_root_root}+1
-      	if ($eff{$event_root}{$eej}){ # Mappability of the EEJ > 0
+      	if ($eff{$event_root}{$eej}>0){ # Mappability of the EEJ > 0
 	    # Corrected read counts
 	    $I1{$d}+=sprintf("%.2f",$cle*$read_count{$event_root}{$eej}/$eff{$event_root}{$eej});
 	    $I2{$u}+=sprintf("%.2f",$cle*$read_count{$event_root}{$eej}/$eff{$event_root}{$eej});
@@ -167,6 +163,14 @@ foreach $event_root (sort (keys %eff)){
 	$PSI="NA" if (($I1{$i}+$I2{$i})+2*$EXCL{$i})==0;
 	$sum_all_EEJ=$rI1{$i}+$rI2{$i}+$rEXCL{$i};
 
+	### In case some of the EEJ don't have mappability
+	### col 13-16 (0-based): $rEXCL{$i}\t$rI1{$i}\t$rI2{$i}\t$sum_all_EEJ
+	$rEXCL{$i}="NA" if $rEXCL{$i}!~/\d/; $rI1{$i}="NA" if $rI1{$i}!~/\d/;
+	$rI2{$i}="NA" if $rI2{$i}!~/\d/; $sum_all_EEJ="NA" if $sum_all_EEJ!~/\d/;
+	if ($rEXCL{$i} eq "NA" || $rI1{$i} eq "NA" || $rI2{$i} eq "NA"){
+	    $PSI="NA";
+	}
+	
 	print O "$pre_data{$event_F}\t$PSI\t$rEXCL{$i}\t$rI1{$i}\t$rI2{$i}\t$sum_all_EEJ\t$ref_C1{$event_F}\t$ref_C2{$event_F}\t";
 	print O "$EXCL{$i}=$RrefE{$i}=$refE{$i}\t$I1{$i}=$RrefI1{$i}=$refI1{$i}\t$I2{$i}=$RrefI2{$i}=$refI2{$i}\t$Q\t$post_data{$event_F}\n";	    
     }
