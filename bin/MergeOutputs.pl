@@ -614,7 +614,11 @@ foreach my $group (sort keys %groups){
 	    print MULTI "$MULTI_head";
 	    foreach my $ev (sort keys %{$MULTIa{$group}}){
 		my $PSI_MULTI_new = "";
-		if ((($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0])>0){
+		
+		if ($MULTIb{$group}{$ev}[20][0] eq "NA" || $MULTIb{$group}{$ev}[21][0] eq "NA" || $MULTIb{$group}{$ev}[19][0] eq "NA"){
+		    $PSI_MULTI_new="NA";
+		}
+		elsif ((($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0])>0){
 		    $PSI_MULTI_new=sprintf("%.2f",100*($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])/(($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0]));
 		}
 		else {
@@ -626,13 +630,18 @@ foreach my $group (sort keys %groups){
 		$MULTIb{$group}{$ev}[20][2]=0 if (!defined $MULTIb{$group}{$ev}[20][2]);
 		$MULTIb{$group}{$ev}[21][2]=0 if (!defined $MULTIb{$group}{$ev}[21][2]);	    
 		
-		my $from_S=$MULTIb{$group}{$ev}[19][2]+$MULTIb{$group}{$ev}[20][2]+$MULTIb{$group}{$ev}[21][2]; # reads coming only from the reference EEJs (refI1, refI2 and refE)
-		my $from_C=($MULTIb{$group}{$ev}[19][0]+$MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])-$from_S; # all other reads
 		my $Q;
-		if ($from_C > ($from_C+$from_S)/2) {$Q="C3";}
-		elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q="C2";}
-		elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q="C1";}
-		else {$Q="S";}
+		if ($PSI_MULTI_new ne "NA"){
+		    my $from_S=$MULTIb{$group}{$ev}[19][2]+$MULTIb{$group}{$ev}[20][2]+$MULTIb{$group}{$ev}[21][2]; # reads coming only from the reference EEJs (refI1, refI2 and refE)
+		    my $from_C=($MULTIb{$group}{$ev}[19][0]+$MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])-$from_S; # all other reads
+		    if ($from_C > ($from_C+$from_S)/2) {$Q="C3";}
+		    elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q="C2";}
+		    elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q="C1";}
+		    else {$Q="S";}
+		}
+		else {
+		    $Q="NA";
+		}
 		
 		$MULTIa{$group}{$ev}[13]="" if (!defined $MULTIa{$group}{$ev}[13]);
 		$MULTIa{$group}{$ev}[14]="" if (!defined $MULTIa{$group}{$ev}[14]);

@@ -23,6 +23,8 @@ GetOptions("sp=s" => \$sp, "dbDir=s" => \$dbDir, "len=i" => \$samLen,
 
 ###############################################################################
 
+our $EXIT_STATUS = 0;
+
 sub verbPrint {
   my $verbMsg = shift;
   if($verboseFlag) {
@@ -153,7 +155,8 @@ while (<STDIN>) {
 	else {
 	    errPrintDie("Sample $temp_sample is not in all tables\n") if (!defined $seen_sample{$temp_sample});
 	}
-
+    }
+    
     if (!$sawHeader) {
       push @header, @sampleCols;
       $sawHeader = @l;  # store number of expected columns

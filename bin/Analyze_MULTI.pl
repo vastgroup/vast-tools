@@ -151,11 +151,13 @@ foreach $event_root (sort (keys %eff)){
 	next if !$pre_data{$event_F}; # Prefiltered events only
 	
 	# Complexity definition scores are explained in scripts from Step 2
+	# If no mappability for an EEJ, then the counts would be "empty" (~0)
 	$from_S=$refI1{$i}+$refI2{$i}+$refE{$i}; # reads coming only from the reference EEJs (refI1, refI2 and refE)
 	$from_C=($I1{$i}+$I2{$i}+$EXCL{$i})-$from_S; # all other reads
 	if ($from_C > ($from_C+$from_S)/2) {$Q="C3";}
 	elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q="C2";}
 	elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q="C1";}
+	elsif ($from_C+$from_S == 0){$Q="NA";}
         else {$Q="S";}
 
 	# calculates PSIs
@@ -170,6 +172,10 @@ foreach $event_root (sort (keys %eff)){
 	if ($rEXCL{$i} eq "NA" || $rI1{$i} eq "NA" || $rI2{$i} eq "NA"){
 	    $PSI="NA";
 	}
+	# also for individual cases
+	$EXCL{$i}="NA" if $EXCL{$i}!~/\d/; $RrefE{$i}="NA" if $RrefE{$i}!~/\d/; $refE{$i}="NA" if $refE{$i}!~/\d/;
+	$I1{$i}="NA" if $I1{$i}!~/\d/; $RrefI1{$i}="NA" if $RrefI1{$i}!~/\d/; $refI1{$i}="NA" if $refI1{$i}!~/\d/;
+	$I2{$i}="NA" if $I2{$i}!~/\d/; $RrefI2{$i}="NA" if $RrefI2{$i}!~/\d/; $refI2{$i}="NA" if $refI2{$i}!~/\d/;
 	
 	print O "$pre_data{$event_F}\t$PSI\t$rEXCL{$i}\t$rI1{$i}\t$rI2{$i}\t$sum_all_EEJ\t$ref_C1{$event_F}\t$ref_C2{$event_F}\t";
 	print O "$EXCL{$i}=$RrefE{$i}=$refE{$i}\t$I1{$i}=$RrefI1{$i}=$refI1{$i}\t$I2{$i}=$RrefI2{$i}=$refI2{$i}\t$Q\t$post_data{$event_F}\n";	    
