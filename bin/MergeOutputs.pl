@@ -486,18 +486,25 @@ unless (defined $exprONLY){
 	    
 	    foreach my $group (@{$file_2_groups{$root}}){
 	    	for my $i (13..16){ # only sum of raw reads 
-#		    $temp[$i]=0 if $temp[$i] ne "NA" && $temp[$i]!~/\d/; # added to avoid warning
-		    $MULTIa{$group}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA" && (defined $temp[$i]);
-		    $MULTIa{$group}{$event}[$i]="NA" if $temp[$i] eq "NA";
+		    unless (defined($MULTIa{$group}{$event}[$i]) && $MULTIa{$group}{$event}[$i] eq "NA"){
+			$MULTIa{$group}{$event}[$i]+=$temp[$i] if $temp[$i] ne "NA" && (defined $temp[$i]);
+			$MULTIa{$group}{$event}[$i]="NA" if $temp[$i] eq "NA";
+		    }
 	    	}
 	    	for my $i (19..21){ 
 		    my ($a,$b,$c)=$temp[$i]=~/(.*?)\=(.*?)\=(.*)/;
-		    $MULTIb{$group}{$event}[$i][0]+=$a if $a ne "NA" && $a=~/\d/;
-		    $MULTIb{$group}{$event}[$i][0]="NA" if $a eq "NA";
-		    $MULTIb{$group}{$event}[$i][1]+=$b if $b ne "NA" && $b=~/\d/;
-		    $MULTIb{$group}{$event}[$i][1]="NA" if $b eq "NA";
-		    $MULTIb{$group}{$event}[$i][2]+=$c if $c ne "NA" && $c=~/\d/;
-		    $MULTIb{$group}{$event}[$i][2]="NA" if $c eq "NA";
+		    unless (defined($MULTIb{$group}{$event}[$i][0]) && $MULTIb{$group}{$event}[$i][0] eq "NA"){
+			$MULTIb{$group}{$event}[$i][0]+=$a if $a ne "NA" && $a=~/\d/;
+			$MULTIb{$group}{$event}[$i][0]="NA" if $a eq "NA";
+		    }
+		    unless (defined($MULTIb{$group}{$event}[$i][1]) && $MULTIb{$group}{$event}[$i][1] eq "NA"){
+			$MULTIb{$group}{$event}[$i][1]+=$b if $b ne "NA" && $b=~/\d/;
+			$MULTIb{$group}{$event}[$i][1]="NA" if $b eq "NA";
+		    }
+		    unless (defined($MULTIb{$group}{$event}[$i][2]) && $MULTIb{$group}{$event}[$i][2] eq "NA"){
+			$MULTIb{$group}{$event}[$i][2]+=$c if $c ne "NA" && $c=~/\d/;
+			$MULTIb{$group}{$event}[$i][2]="NA" if $c eq "NA";
+		    }
 	    	}
 	    }
 	}
@@ -614,10 +621,15 @@ foreach my $group (sort keys %groups){
 	    print MULTI "$MULTI_head";
 	    foreach my $ev (sort keys %{$MULTIa{$group}}){
 		my $PSI_MULTI_new = "";
-		
-		if ($MULTIb{$group}{$ev}[20][0] eq "NA" || $MULTIb{$group}{$ev}[21][0] eq "NA" || $MULTIb{$group}{$ev}[19][0] eq "NA"){
-		    $PSI_MULTI_new="NA";
+
+		# if any junction has an NA (i.e. mappability == 0), then the PSI is killed
+		for my $loop1 (19..21){ # 19 => excl, 20 => inc1, 21 => inc2
+		    for my $loop2 (0..2){ # 0 => corr_all, 1 => raw_ref, 2 => corr_ref
+			$PSI_MULTI_new = "NA" if $MULTIb{$group}{$ev}[$loop1][$loop2] eq "NA";
+		    }
 		}
+		
+		if ($PSI_MULTI_new eq "NA"){}
 		elsif ((($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0])>0){
 		    $PSI_MULTI_new=sprintf("%.2f",100*($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])/(($MULTIb{$group}{$ev}[20][0]+$MULTIb{$group}{$ev}[21][0])+2*$MULTIb{$group}{$ev}[19][0]));
 		}

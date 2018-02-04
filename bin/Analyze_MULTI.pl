@@ -103,8 +103,8 @@ foreach $event_root (sort (keys %eff)){
 	    # Calculates inclusion from reference only
 	    $u2=$u;
 	    $d2=$d;
-	    $u2="C1" if $u==0;
-	    $d2="C2" if $d==$Nex{$event_root}+1;
+	    $u2="C1" if $u == 0;
+	    $d2="C2" if $d == $Nex{$event_root}+1;
 	    $event1d="$event_root-$d/$Nex{$event_root}";
 	    $event1u="$event_root-$u/$Nex{$event_root}";
 
@@ -169,13 +169,19 @@ foreach $event_root (sort (keys %eff)){
 	### col 13-16 (0-based): $rEXCL{$i}\t$rI1{$i}\t$rI2{$i}\t$sum_all_EEJ
 	$rEXCL{$i}="NA" if $rEXCL{$i}!~/\d/; $rI1{$i}="NA" if $rI1{$i}!~/\d/;
 	$rI2{$i}="NA" if $rI2{$i}!~/\d/; $sum_all_EEJ="NA" if $sum_all_EEJ!~/\d/;
+
 	if ($rEXCL{$i} eq "NA" || $rI1{$i} eq "NA" || $rI2{$i} eq "NA"){
 	    $PSI="NA";
 	}
+
 	# also for individual cases
 	$EXCL{$i}="NA" if $EXCL{$i}!~/\d/; $RrefE{$i}="NA" if $RrefE{$i}!~/\d/; $refE{$i}="NA" if $refE{$i}!~/\d/;
 	$I1{$i}="NA" if $I1{$i}!~/\d/; $RrefI1{$i}="NA" if $RrefI1{$i}!~/\d/; $refI1{$i}="NA" if $refI1{$i}!~/\d/;
 	$I2{$i}="NA" if $I2{$i}!~/\d/; $RrefI2{$i}="NA" if $RrefI2{$i}!~/\d/; $refI2{$i}="NA" if $refI2{$i}!~/\d/;
+
+	if ($EXCL{$i} eq "NA" || $I1{$i} eq "NA" || $I2{$i} eq "NA" || $RrefE{$i} eq "NA" || $RrefI1{$i} eq "NA" || $RrefI2{$i} eq "NA"){
+	    $PSI="NA";
+	}
 	
 	print O "$pre_data{$event_F}\t$PSI\t$rEXCL{$i}\t$rI1{$i}\t$rI2{$i}\t$sum_all_EEJ\t$ref_C1{$event_F}\t$ref_C2{$event_F}\t";
 	print O "$EXCL{$i}=$RrefE{$i}=$refE{$i}\t$I1{$i}=$RrefI1{$i}=$refI1{$i}\t$I2{$i}=$RrefI2{$i}=$refI2{$i}\t$Q\t$post_data{$event_F}\n";	    
