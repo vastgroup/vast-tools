@@ -127,6 +127,13 @@ my %file_grpchk;
 my %file_is_ss;
 my %group_is_ss;
 
+
+if (defined $move_to_PARTS){
+    system "mkdir to_combine/PARTS" unless (-e "to_combine/PARTS");
+    system "mkdir expr_out/PARTS" unless (-e "expr_out/PARTS") || (!defined $expr);    
+}
+
+
 ### Loading group info
 open (GROUPS, $groups_fullpath) || errPrintDie "Cannot open groupings: $groups_fullpath\n";
 while (<GROUPS>){
@@ -205,6 +212,10 @@ foreach my $grp (keys %groups){
 		print $fh "\t\tdone"; # means strand-unspecific
 	}
 	close($fh);
+	
+	if (defined $move_to_PARTS){
+		system "mv to_combine/${grp}.info to_combine/PARTS/";
+	}
 }
 
 
@@ -213,12 +224,6 @@ foreach my $fn (keys %file_grpchk){foreach my $gr (keys %{$file_grpchk{$fn}}){
 	my $num=$file_grpchk{$fn}->{$gr};
 	if($num>1){verbPrint("Attention: sample $fn gets merged $num times into group $gr.\n");}
 }}
-
-if (defined $move_to_PARTS){
-    system "mkdir to_combine/PARTS" unless (-e "to_combine/PARTS");
-    system "mkdir expr_out/PARTS" unless (-e "expr_out/PARTS") || (!defined $expr);    
-}
-
 
 
 ### variables for merging:
