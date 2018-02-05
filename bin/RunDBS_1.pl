@@ -484,6 +484,7 @@ unless($resumed){
 					$fq1=$fn;
 				}
 				if($i==1){
+					if($percR2n eq "NA"){next;}  # single-end data
 					if($percR2n<$minThresh){print $fh_info "\t$fq2";next;}
 					open($fh,"".getPrefixCmd($fq2)." |");
 					$fn="$tmpDir/tmp_read_files/".pop([split("/",$fq2)]);
