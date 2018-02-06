@@ -17,9 +17,10 @@ my $sp;
 my $read_length;
 my $root;
 my $strandaware=0;
+my $print_EEJs=0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-			  "readLen=i" => \$read_length, "root=s" => \$root, "s" => \$strandaware);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,"readLen=i" => \$read_length, 
+	   "root=s" => \$root, "s" => \$strandaware, "ec" => \$print_EEJs);
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
@@ -57,6 +58,7 @@ while (<STDIN>){
 
     if ($event ne $previous_event || $read ne $previous_read){	#avoid multiple counting
     	$reads{$event}{$inc_exc}{$eej}++;
+	$POS{$event}{$inc_exc}{$eej}{$t[3]}++;
     }
     #keeps a 1-line memmory in the loop
     $previous_read=$read;
@@ -75,7 +77,8 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-open (O, ">to_combine/$root.micX"); # summary info (output)
+open (EEJ, ">to_combine/$root.eejMIC") if $print_EEJs;
+open (O, ">to_combine/$root.micX") || die "Cannot open MIC output file\n"; # summary info (output)
 print O "GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX\tPSI\tRaw_reads_exc\tRaw_reads_inc\tCorr_reads_exc\tCorr_reads_inc\n";
 
 ### Calculates the PSIs
@@ -91,6 +94,16 @@ foreach $event (sort (keys %eff)){
 		$inc+=sprintf("%.2f",($read_length-15)*$reads{$event}{INC}{$n}/$eff{$event}{INC}{$n});
 		$r_inc+=$reads{$event}{INC}{$n};
 	    }
+
+	    ### Prints EEJ counts if specified
+	    if ($print_EEJs){
+		$p_p="";
+		foreach $POS (sort {$a<=>$b}(keys %{$POS{$event}{INC}{$n}})){
+		    $p_p.="$POS:$POS{$event}{INC}{$n}{$POS},";
+		}
+		chop($p_p);
+		print EEJ "$full\t$reads{$event}{INC}{$n}\t$eff{$event}{INC}{$n}\t$p_p\n";
+	    }
 	}
 	foreach $n (sort (keys %{$eff{$event}{EXC}})){ # loops through each exclusion EEJ (when alternative C1, C2, splice sites, etc)
 	    ($coord,$n2)=$n=~/(.+?)\=(.+)/;
@@ -99,6 +112,16 @@ foreach $event (sort (keys %eff)){
 		$OKexc=1;
 		$exc+=sprintf("%.2f",($read_length-15)*$reads{$event}{EXC}{$n}/$eff{$event}{EXC}{$n});
 		$r_exc+=$reads{$event}{EXC}{$n};
+	    }
+
+	    ### Prints EEJ counts if specified
+	    if ($print_EEJs){
+		$p_p="";
+		foreach $POS (sort {$a<=>$b}(keys %{$POS{$event}{EXC}{$n}})){
+		    $p_p.="$POS:$POS{$event}{EXC}{$n}{$POS},";
+		}
+		chop($p_p);
+		print EEJ "$full\t$reads{$event}{EXC}{$n}\t$eff{$event}{EXC}{$n}\t$p_p\n";
 	    }
 	}
 	
@@ -146,6 +169,16 @@ foreach $event (sort (keys %eff)){
 			}
 		    }
 		} #### End of update
+
+		### Prints EEJ counts if specified
+		if ($print_EEJs){
+		    $p_p="";
+		    foreach $POS (sort {$a<=>$b}(keys %{$POS{$event}{$ie}{$n}})){
+			$p_p.="$POS:$POS{$event}{$ie}{$n}{$POS},";
+		    }
+		    chop($p_p);
+		    print EEJ "$full\t$reads{$event}{$ie}{$n}\t$eff{$event}{$ie}{$n}\t$p_p\n";
+		}
 	    }
 	}
 	for $z (1..$total_exones){ # Generates the actual event

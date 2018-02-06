@@ -16,9 +16,10 @@ my $sp;
 my $length;
 my $root;
 my $strandaware=0;
+my $print_EEJs=0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$length, "root=s" => \$root, "s" => \$strandaware);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "readLen=i" => \$length, 
+	   "root=s" => \$root, "s" => \$strandaware, "ec" => \$print_EEJs);
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
@@ -58,10 +59,6 @@ while (<STDIN>){
     @t=split(/\t/);
 
     # this is to get the actual read name to avoid doublecounting in a sorted output
-#    ($read)=$t[0]=~/(.+) /;
-#    ($read)=$t[0]=~/(.+)\:/ if !$read;
-#    ($read)=$t[0]=~/(.+)\#/ if !$read;
-#    ($read)=$t[0]=~/(.+)\// if !$read;
     ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
 
@@ -69,6 +66,7 @@ while (<STDIN>){
     
     if ($event ne $previous_event || $read ne $previous_read){	#avoid multiple counting
 	$read_count{$event}{$eej}++;
+	$POS{$event}{$eej}{$t[3]}++;
     }
 
     #keeps a 1-line memmory in the loop
@@ -77,7 +75,8 @@ while (<STDIN>){
 }
 #close $I;
 
-open (O, ">to_combine/$root.exskX"); #file with PSI and read counts per event.
+open (EEJ, ">to_combine/$root.eejEX")
+open (O, ">to_combine/$root.exskX") || die "Cannot open EXSK output"; #file with PSI and read counts per event.
 ### Temporary output format needed for Step 2
 print O "Ensembl_ID\tA_coord\tStrand\tEvent_ID\tFullCoord\tType\tLength\tC1_coord\tC2_coord\tLength_Int1\tLength_Int2\t3n\t";
 print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_of_reads\t.\tComplexity\tCorrected_Exc\tCorrected_Inc1\tCorrected_Inc2\t.\t.\t.\tGene_name\n";
@@ -86,7 +85,7 @@ print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_of_reads\t.\tComplexity\tCo
 $cle=$length-15; #read length for correction.
 foreach $event (sort (keys %eff)){
     $eI1=$eI2=$eE=$I1=$I2=$E=$rI1=$rI2=$rE=""; # empty temporary variables in each loop
-
+    
     if(!defined($pre_data{$event})){next;}	# skip events coming from "Mappability information" (%eff) which are not in Template.1.txt (%pre_data)
 						# This filter was necessary after introducing the strandaware mode, because being strandaware we have available some
 						# events more which were/are not avaibale in strand-unaware mode, but Template.1.txt contains information for events
@@ -95,7 +94,17 @@ foreach $event (sort (keys %eff)){
     foreach $eej (sort (keys %{$eff{$event}})){
 	($exons)=$eej=~/(.+?)\_.+?\_.+?\_\d+/;
 	
-	if ($eff{$event}{$eej}){
+	### prints EEJ counts if specified
+	if ($print_EEJs){
+	    $p_p="";
+	    foreach $POS (sort {$a<=>$b}(keys %{$POS{$event}{$eej}})){
+		$p_p.="$POS:$POS{$event}{$eej}{$POS},";
+	    }
+	    chop($p_p);
+	    print EEJ "$event\t$eej\t$read_count{$event}{$eej}\t$eff{$event}{$eej}\t$p_p\n";
+	}
+	
+	if ($eff{$event}{$eej}>0){
 	    # corrected count for I1 (all EEJs for inclusion 1=upstream), I2 (downstream) and E (exclusion)
 	    $I1+=sprintf("%.2f",$cle*$read_count{$event}{$eej}/$eff{$event}{$eej}) if $exons eq "C1A";
 	    $I2+=sprintf("%.2f",$cle*$read_count{$event}{$eej}/$eff{$event}{$eej}) if $exons eq "AC2";

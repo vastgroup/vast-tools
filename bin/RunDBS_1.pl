@@ -35,6 +35,7 @@ my $onlyIRflag = 0; # only run intron retention
 my $stringentIRflag = 0; # Run extra genome/eej subtraction step
 my $IR_version = 2; # IR version [09/Nov/2015] [new default 01/04/16]
 my $minReadNum;
+my $print_EEJs = 0; # print out a file with EEJ counts for MIC, MULTI and EXSK
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
@@ -80,6 +81,8 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "IR_version=i" => \$IR_version, 
 			  "keep" => \$keepFlag,
 			  "minReadDepth=i" => \$minReadNum, #to do
+			  "EEJ_counts" => \$print_EEJs,
+			  "ec" => \$print_EEJs,
 			  "tmpDir=s" => \$tmpDir,
 			  "stepSize=i" => \$trimStep,
 			  "trimOnce" => \$trimOnceFlag,
@@ -115,51 +118,51 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 	my $total=1;
 	my $perc;
 	if($fn =~ /(\S+)\.(fastq|fq)(\.gz)?/){  # FASTQ files
-		while(<$fh>){if($check){if(substr($_,0,1) ne "@"){errPrintDie("Sequence data must be provided in FASTQ format but file $fn does not look like FASTQ format (first line does not start with @).");}$check=0;}
-			chomp;
-			$c++;
-			if($c % 4==2){
-				unless($readL){
-			    	$readL=length($_);
-			    	$tally_readL{$readL}=1;
-				}
-				else{ 
-			    	$readL=length($_);
-			    	$tally_readL{$readL}++ if defined $tally_readL{$readL};
-			    	$tally_readL{$readL}=1 if !defined $tally_readL{$readL};
-			    	$total++;
-				}
-			}
-			if($c/4 > $maxN){last;}
-		}
+	    while(<$fh>){if($check){if(substr($_,0,1) ne "@"){errPrintDie("Sequence data must be provided in FASTQ format but file $fn does not look like FASTQ format (first line does not start with @).");}$check=0;}
+			 chomp;
+			 $c++;
+			 if($c % 4==2){
+			     unless($readL){
+				 $readL=length($_);
+				 $tally_readL{$readL}=1;
+			     }
+			     else{ 
+				 $readL=length($_);
+				 $tally_readL{$readL}++ if defined $tally_readL{$readL};
+				 $tally_readL{$readL}=1 if !defined $tally_readL{$readL};
+				 $total++;
+			     }
+			 }
+			 if($c/4 > $maxN){last;}
+	    }
 	}elsif($fn =~ /(\S+)\.(fasta|fa)(\.gz)?/){  # FASTA files
-		my $read="";
-		my $str_tmp;
-		while(<$fh>){
-			if($c>$maxN){last;}
-			chomp;
-			$str_tmp=substr($_,0,1);
-			if(length($_)==0){next;}
-			if($str_tmp eq "#"){next;}
-			if($str_tmp eq ">"){
-				if($read ne ""){
-					$c++;
-					unless($readL){
-			    			$readL=length($read);
-			    			$tally_readL{$readL}=1;
-					}else{ 
-			    			$readL=length($read);
-			    			$tally_readL{$readL}++ if defined $tally_readL{$readL};
-			    			$tally_readL{$readL}=1 if !defined $tally_readL{$readL};
-			    			$total++;
-					}
-				}
-				$read="";next;
+	    my $read="";
+	    my $str_tmp;
+	    while(<$fh>){
+		if($c>$maxN){last;}
+		chomp;
+		$str_tmp=substr($_,0,1);
+		if(length($_)==0){next;}
+		if($str_tmp eq "#"){next;}
+		if($str_tmp eq ">"){
+		    if($read ne ""){
+			$c++;
+			unless($readL){
+			    $readL=length($read);
+			    $tally_readL{$readL}=1;
+			}else{ 
+			    $readL=length($read);
+			    $tally_readL{$readL}++ if defined $tally_readL{$readL};
+			    $tally_readL{$readL}=1 if !defined $tally_readL{$readL};
+			    $total++;
 			}
-			$read.=$_;
+		    }
+		    $read="";next;
 		}
+		$read.=$_;
+	    }
 	}else{
-		errPrintDie("Type of sequence file $fn cannot be deduced from file name (must end with fastq|fq|fasta|fa (.gz).");
+	    errPrintDie("Type of sequence file $fn cannot be deduced from file name (must end with fastq|fq|fasta|fa (.gz).");
 	}
 	
 	
@@ -170,7 +173,7 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 	    $perc = sprintf("%.2f",100*$tally_readL{$temp_readL}/$total);
 	    $readL=$temp_readL;
 	}
-
+	
 	return($readL,$perc);
 }
 
@@ -259,6 +262,7 @@ OPTIONS:
         --IR_version 1/2        Version of the Intron Retention analysis (default 2)
 	--keep			Don't remove trimmed and genome-subtracted reads 
 				after use. (default off)
+        -ec, --EEJ_counts      Print out files with EEJ counts for MIC and APR (default off)
 	--findSubtracted	Set this flag to start alignment from genome-subtracted
 				reads (default off). If enabled, must supply *-e.fq as input
 	--trimOnce		Only use first 50bp of reads, if paired, only use 
@@ -607,7 +611,9 @@ if ($EXIT_STATUS) {
 }
 
 #### Map to the EEJ:
-my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; unless($notstrandaware){$runArgs .=" -s"}
+my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; 
+     unless($notstrandaware){$runArgs .=" -s";}
+     unless($print_EEJs){$runArgs.=" -ec";}         
 my $preCmd = getPrefixCmd($subtractedFq);
 unless ($onlyIRflag){
     verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";

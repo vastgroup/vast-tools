@@ -16,9 +16,10 @@ my $sp;
 my $length;
 my $root;
 my $strandaware=0;
+my $print_EEJs=0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$length, "root=s" => \$root,  "s" => \$strandaware);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "readLen=i" => \$length, 
+	   "root=s" => \$root,  "s" => \$strandaware,  "ec" => \$print_EEJs);
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
@@ -68,6 +69,7 @@ while (<STDIN>){
     
     if ($event ne $previous_event || $read ne $previous_read){	
 	$read_count{$event}{$eej}++;
+	$POS{$event}{$eej}{$t[3]}++;
     }
 
     #keeps a 1-line memmory in the loop                                                                             
@@ -76,8 +78,9 @@ while (<STDIN>){
 }
 #close $INPUT;
 
-#($root)=$file=~/(.+\-$length\-.+?)\-e/;
-open (O, ">to_combine/$root.MULTI3X");
+
+open (EEJ, ">to_combine/$root.eejMX") if $print_EEJs;
+open (O, ">to_combine/$root.MULTI3X") || die "Cannot open MULTI3X output\n";
 print O "Ensembl_ID\tA_coord\tStrand\tEvent_ID\tFullCoord\tType\tLength\tC1_coord\tC2_coord\tLength_Int1\tLength_Int2\t3n\t";
 print O "PSI\tReads_exc\tReads_inc1\tReads_inc2\tSum_all_Reads\tRef_C1\tRef_C2\tExcl_reads(corr_all=raw_ref=corr_ref)\tInc1_reads(corr_all=raw_ref=corr_ref)\tInc2_reads(corr_all=raw_ref=corr_ref)\tComplexity\tPre_C1\tPre_C2\tGene_name\n";
 
@@ -90,6 +93,16 @@ foreach $event_root (sort (keys %eff)){
 
     foreach $eej (sort (keys %{$eff{$event_root}})){
 	($u, $d, $n)=$eej=~/(.+?)\-(.+?)\.(.+)/; # structure of EEJ: upstream_exon-downstream_exon.variant => $u-$d.$n
+
+	### prints EEJ counts if specified
+	if ($print_EEJs){
+	    $p_p="";
+	    foreach $POS (sort {$a<=>$b}(keys %{$POS{$event_root}{$eej}})){
+		$p_p.="$POS:$POS{$event_root}{$eej}{$POS},";
+	    }
+	    chop($p_p);
+	    print EEJ "$event_root\t$eej\t$read_count{$event_root}{$eej}\t$eff{$event_root}{$eej}\t$p_p\n";
+	}
 	
 	### C1-C2 are named so only in C1C2 EEJs. Otherwise, C1=0 and C2=$Nex{$event_root_root}+1
       	if ($eff{$event_root}{$eej}>0){ # Mappability of the EEJ > 0
