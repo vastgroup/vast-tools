@@ -263,7 +263,7 @@ OPTIONS:
         --IR_version 1/2        Version of the Intron Retention analysis (default 2)
 	--keep			Don't remove trimmed and genome-subtracted reads 
 				after use. (default off)
-        -ec, --EEJ_counts      Print out files with EEJ counts for MIC and APR (default off)
+        -ec, --EEJ_counts       Print out files with EEJ counts for MIC and APR (default off)
 	--findSubtracted	Set this flag to start alignment from genome-subtracted
 				reads (default off). If enabled, must supply *-e.fq as input
 	--trimOnce		Only use first 50bp of reads, if paired, only use 

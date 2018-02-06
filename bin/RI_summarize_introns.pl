@@ -13,8 +13,9 @@ my $sp;
 my $rle;
 my $root;
 my $strandaware=0;
+my $silent=0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "ec" => \$silent,
            "readLen=i" => \$rle, "root=s" => \$root, "s" => \$strandaware);
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
