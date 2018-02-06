@@ -12,6 +12,7 @@ use warnings;
 use strict;
 use Cwd qw(abs_path cwd);
 use Getopt::Long;
+use File::Path qw(make_path);
 
 # INITIALIZE PATH AND FLAGS--TSW
 my $binPath = abs_path($0);
@@ -367,7 +368,7 @@ else{verbPrint("Most common read lengths detected for fq1 & fq2: $length ($percF
 
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
-mkdir($outdir) unless (-e $outdir);
+make_path($outdir) unless (-e $outdir);
 chdir($outdir) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $outdir";
 mkdir("to_combine") unless (-e "to_combine");
