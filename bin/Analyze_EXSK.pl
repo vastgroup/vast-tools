@@ -75,7 +75,7 @@ while (<STDIN>){
 }
 #close $I;
 
-open (EEJ, ">to_combine/$root.eejEX")
+open (EEJ, ">to_combine/$root.eejEX");
 open (O, ">to_combine/$root.exskX") || die "Cannot open EXSK output"; #file with PSI and read counts per event.
 ### Temporary output format needed for Step 2
 print O "Ensembl_ID\tA_coord\tStrand\tEvent_ID\tFullCoord\tType\tLength\tC1_coord\tC2_coord\tLength_Int1\tLength_Int2\t3n\t";
