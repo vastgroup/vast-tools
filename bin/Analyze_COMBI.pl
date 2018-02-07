@@ -16,9 +16,10 @@ my $sp;
 my $length;
 my $root;
 my $strandaware=0;  # dummy; to prevent GetOptions getting confused between -sp and -s 
+my $silent=0; # non used option
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,
-           "readLen=i" => \$length, "root=s" => \$root, , "s" => \$strandaware);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "readLen=i" => \$length, 
+	   "root=s" => \$root, , "s" => \$strandaware, "ec" => \$silent);
 
 
 # ARGV[0] is now a dummy variable.
