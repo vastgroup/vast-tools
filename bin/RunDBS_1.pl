@@ -613,8 +613,8 @@ if ($EXIT_STATUS) {
 
 #### Map to the EEJ:
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; 
-     unless($notstrandaware){$runArgs .=" -s";}
-     unless($print_EEJs){$runArgs.=" -ec";}         
+     unless ($notstrandaware){$runArgs .=" -s";}
+     if ($print_EEJs){$runArgs.=" -ec";}         
 my $preCmd = getPrefixCmd($subtractedFq);
 unless ($onlyIRflag){
     verbPrint "Mapping reads to the \"splice site-based\" (aka \"a posteriori\") EEJ library and Analyzing...\n";
