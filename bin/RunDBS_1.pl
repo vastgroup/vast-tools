@@ -423,7 +423,7 @@ my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc
 my $mapcorr_fileswitch="";  # change of file names with mappability correction (needs to change in strand-aware mode)
 my $resumed=0;
 # resume?
-if($resume & -e "to_combine/$root".".info" && open($fh_info,"to_combine/$root".".info")){
+if($resume && -e "to_combine/$root".".info" && open($fh_info,"to_combine/$root".".info")){
 	my $line=<$fh_info>; chomp($line); close($fh_info); my @fs=split("\t",$line);
 	if(@fs[@fs-1] eq "done"){ # done in the end means read check and potential creation of reverse-complement has finished already successfully
 		$bt_norc=$fs[@fs-3];
