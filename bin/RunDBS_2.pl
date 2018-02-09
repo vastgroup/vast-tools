@@ -256,7 +256,7 @@ if ($N != 0) {
     # lift-over if necessary (hg19->hg38 or mm9->mm10)
     if( $asmbly=~/(hg38|mm10)/ ){
     	# select liftOvr dictionary
-    	my $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; if($asmbly=~/mm10/){$dictionary="lftOvr_dict_from_mm09_to_mm10.pdat";}
+    	my $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; if($asmbly=~/mm10/){$dictionary="lftOvr_dict_from_mm9_to_mm10.pdat";}
     	# do liftOvr
     	sysErrMsg "$binPath/LftOvr_INCLUSION_LEVELS_FULL.pl translate $finalOutput $dbDir/FILES/$dictionary ${finalOutput}.lifted";
     	# move files
