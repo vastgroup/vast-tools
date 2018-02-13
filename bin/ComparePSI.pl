@@ -277,10 +277,12 @@ while (<PSI>){
     my $kill_coverage = 0;
     foreach my $s (@samplesA){
 	$kill_coverage = 1 if ($t[$s+1]!~/$Q/); # kill if ANY of the samples does not meet the coverage criteria
+	$kill_coverage = 1 if ($t[$s] eq "NA"); # for some MULTI cases without mappability (more strict in V2)
 	push(@PSI_A,$t[$s]);
     }
     foreach my $s (@samplesB){
 	$kill_coverage = 1 if ($t[$s+1]!~/$Q/); # kill if ANY of the samples does not meet the coverage criteria
+	$kill_coverage = 1 if ($t[$s] eq "NA"); # for some MULTI cases without mappability (more strict in V2)
 	push(@PSI_B,$t[$s]);
     }
     next if ($kill_coverage == 1);
