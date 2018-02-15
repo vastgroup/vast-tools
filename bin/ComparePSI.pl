@@ -198,7 +198,7 @@ $name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
 
 ####### Output file
 # defining default output file name
-my ($root)=$ARGV[0]=~/.+?\-(.+?)\./;
+my ($root)=$ARGV[0]=~/.+?\-([^\/]+?)\./;
 my $tail = ""; # to be added to the output name
 $tail.="-range$min_range" if (defined $min_range); 
 $tail.="-noVLOW" if (defined $noVLOW);
