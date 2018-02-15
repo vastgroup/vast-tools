@@ -422,6 +422,7 @@ my $fh_info;
 my $bt_norc="";  # Bowtie option:will map only to fwd strand if set to --norc 
 my $mapcorr_fileswitch="";  # change of file names with mappability correction (needs to change in strand-aware mode)
 my $resumed=0;
+my @files_to_be_deleted=();
 # resume?
 if($resume && -e "to_combine/$root".".info" && open($fh_info,"to_combine/$root".".info")){
 	my $line=<$fh_info>; chomp($line); close($fh_info); my @fs=split("\t",$line);
@@ -472,7 +473,7 @@ unless($resumed){
 		$percR2n = sprintf("%.4f",$percR2n);
        		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
         }
-		
+
 		if(($percR2n eq "NA" && $percR1n<$minThresh) || ($percR1n<$minThresh && $percR2n<$minThresh)){
 			print $fh_info "\tdata assumed to be not strand-specific $percR1p $percR1n $percR2p $percR2n";
 			$notstrandaware=1;
@@ -487,6 +488,7 @@ unless($resumed){
 					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq1; writing into $fn";
 					$fq1=$fn;
+					push(@files_to_be_deleted,$fn);
 				}
 				if($i==1){
 					if($percR2n eq "NA"){next;}  # single-end data
@@ -496,6 +498,7 @@ unless($resumed){
 					if(isZipped($fq2)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq2; writing into $fn";
 					$fq2=$fn;
+					push(@files_to_be_deleted,$fn);
 				}
 				print $fh_info "\t$fn";
 				my $c=0; while(<$fh>){chomp;my $l=$_;$c++;
@@ -705,7 +708,9 @@ open(my $fh,">$tmpDir/".pop([split("/",$fq1)]).".resume");print $fh "finished su
 
 # remove files with reverse-complemented reads
 verbPrint "Deleting temporary files with reverse-complemented reads.";
-sysErrMsg "rm -rf $tmpDir/tmp_read_files";
+foreach my $file (@files_to_be_deleted){
+	sysErrMsg "rm $file";
+}
 
 verbPrint "Completed " . localtime;
 exit $EXIT_STATUS;
