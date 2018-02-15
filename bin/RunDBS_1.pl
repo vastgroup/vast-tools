@@ -452,8 +452,8 @@ unless($resumed){
 		my ($fh,$fh2);
 		sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
 
-       	my $N=40000; # check 10K fastq reads 
-       	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=20000;}
+       	my $N=400000; # check 100K fastq reads 
+       	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=200000;}
        	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
        	my ($percR1p,$percR1n,$percR2p,$percR2n)=("NA","NA","NA","NA");
 
