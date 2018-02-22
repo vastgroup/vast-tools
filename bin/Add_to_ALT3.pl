@@ -45,7 +45,7 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("to_combine/*.ee*");
+@EEJ=glob("to_combine/*.eej2");
 
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
 die "[vast combine alt3]: Needs strand-unspecific effective from database!\n" if !@EFF;
