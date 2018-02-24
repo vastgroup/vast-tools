@@ -96,7 +96,7 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 
 For manual, install each species or all of them to any location by:
 
-Human (hg19) - 6.2G [vastdb.hsa.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz):
+Human (hg19) - 6.3G [vastdb.hsa.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
 > tar xzvf vastdb.hsa.16.02.18.tar.gz
