@@ -21,6 +21,7 @@ Table of Contents:
 	- [Simplifying Combine Table](#simplifying-combine-table)
 - [Combine output format](#combine-output-format)
 - [Interconnection with VastDB web](#interconnection-with-vastdb-web)
+- [Interconnection with Matt](#interconnection-with-matt)
 - [Issues](#issues)
 - [Contributions](#contributions)
 - [Citation](#citation)
