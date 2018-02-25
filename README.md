@@ -29,7 +29,7 @@ Table of Contents:
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server.
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://agohr.crg.eu/matt), a toolkit for downstream analyses of alternative splicing.
 
 Requirements
 ------------
