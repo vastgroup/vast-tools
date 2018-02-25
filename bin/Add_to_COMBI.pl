@@ -5,11 +5,6 @@
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
-
-#use Cwd;
-#$cwd = getcwd;
-#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
-
 use Getopt::Long;
 
 my $dbDir;
@@ -30,7 +25,6 @@ sub verbPrint {
   }
 }
 
-#$sp=$ARGV[0];
 die "Needs Species key\n" if !defined($sp);
 
 $COMB="M"; # Only available version
@@ -107,11 +101,12 @@ foreach $file (@EEJ){
     	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
-    		$is_ss{$sample}=1;
-    		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
-    	}else{
-    		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+	    $is_ss{$sample}=1;
+	    verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
     	}
+	else{
+	    verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+	}
     }
     
     open (EEJ, $file);
@@ -160,7 +155,6 @@ foreach $event (sort (keys %ALL)){
     ($donor_coord,$acceptor_coord)=$DATA[2]=~/\:(\d+?)\-(\d+)/ if $strand eq "-";
 
     foreach $file (@EEJ){
-#	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;
 	my $fname = $file;
 	$fname =~ s/^.*\///;
 	($sample)=$fname=~/^(.*)\..*$/;
@@ -379,32 +373,30 @@ foreach $event (sort (keys %ALL)){
         elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q.=",C1";}
         else {$Q.=",S";}
 ###
-
+	
 ### Final PSI value  
-   $PSI_complex=sprintf ("%.2f", (100*($inc1F+$inc2F))/($inc1F+$inc2F+(2*$excF))) if ($inc1F+$inc2F+(2*$excF))>0;
-   $PSI_complex="NA" if ($inc1F+$inc2F+(2*$excF))==0;
-
-   ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
-   ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
-   ### These values are added to the qual score and used to infer the posterior distribution
-   unless($legacyFlag) {
-     my $totalN = $total_reads; # no point in re-assigning really.
-     my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-     unless($PSI_complex eq "NA" or $totalN == 0) {
-       $pPSI = $PSI_complex / 100;
-       #$exValOfInc = $pPSI * $totalN;
-       #$exValOfExc = (1-$pPSI) * $totalN;
-       $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
-       $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
-     }
-     # ALTER QUAL OUTPUT HERE>>
-     $Q .= "\@$exValOfInc,$exValOfExc";
-   } 
-
+	$PSI_complex=sprintf ("%.2f", (100*($inc1F+$inc2F))/($inc1F+$inc2F+(2*$excF))) if ($inc1F+$inc2F+(2*$excF))>0;
+	$PSI_complex="NA" if ($inc1F+$inc2F+(2*$excF))==0;
+	
+	### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
+	### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+	### These values are added to the qual score and used to infer the posterior distribution
+	unless($legacyFlag) {
+	    my $totalN = $total_reads; # no point in re-assigning really.
+	    my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+	    unless($PSI_complex eq "NA" or $totalN == 0) {
+		$pPSI = $PSI_complex / 100;
+		$exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+		$exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
+	    }
+	    # ALTER QUAL OUTPUT HERE>>
+	    $Q .= "\@$exValOfInc,$exValOfExc";
+	} 
+	
 	print PSIs "\t$PSI_complex\t$Q" if $event;
 	print COUNTs "\t$Rexc\t$Rinc1\t$Rinc2\t$RexcC\t$Rinc1C\t$Rinc2C\t$PSI_complex=$Q" if $event;
     }
-
+    
     print PSIs "\n" if $event;
     print COUNTs "\n" if $event;
 }
