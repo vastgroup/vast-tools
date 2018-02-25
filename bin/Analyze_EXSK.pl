@@ -23,12 +23,6 @@ GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "readLen=i" => \$length,
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
-
-#($sp,$length)=$ARGV[0]=~/(.{3})EXSK\-(\d+?)\-/; # input file format
-
-#($file)=$ARGV[0]=~/(.+?\.out)/;
-#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
-
 ### parses the general information for the events
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.EXSK.Template.1.txt") || die "No SIMPLE EXSK Template for $sp\n";
 while (<TEMPLATE>){
@@ -52,8 +46,6 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 #### parses the bowtie output file for the EEJ sequences
-#($root)=$file=~/(.+\-$length\-.+?)\-e/;
-#$I = openFileHandle ($file); # DEPRECATED --TSW
 while (<STDIN>){
     chomp;
     @t=split(/\t/);
