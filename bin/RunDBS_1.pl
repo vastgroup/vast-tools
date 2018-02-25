@@ -301,7 +301,6 @@ if($ribofoot) {
     $runExprFlag = 0; # no need for expression calculations.
     $readLength = 32;
     $trimLen = 32;   
-#  $noIRflag = 1;  # temporary;
 }
 
 ## Getting sample name and length:
@@ -377,13 +376,13 @@ mkdir("expr_out") if (($runExprFlag || $onlyExprFlag) && (! -e "expr_out"));
 # set default tmpDir for sort;
 verbPrint "Setting tmp directory..";
 unless(defined($tmpDir)) {
-  mkdir("tmp");
-  $tmpDir = abs_path("tmp");  
+    mkdir("tmp");
+    $tmpDir = abs_path("tmp");  
 } else {
-  $tmpDir = abs_path($tmpDir);  # or try to find it
-  unless(-e $tmpDir) {
-    errPrint "$tmpDir does not exist!";
-  }
+    $tmpDir = abs_path($tmpDir);  # or try to find it
+    unless(-e $tmpDir) {
+	errPrint "$tmpDir does not exist!";
+    }
 }
 unless($EXIT_STATUS > 0) {
   verbPrint "Set tmp directory to $tmpDir!";
@@ -425,34 +424,35 @@ my $resumed=0;
 my @files_to_be_deleted=();
 # resume?
 if($resume && -e "to_combine/$root".".info" && open($fh_info,"to_combine/$root".".info")){
-	my $line=<$fh_info>; chomp($line); close($fh_info); my @fs=split("\t",$line);
-	if(@fs[@fs-1] eq "done"){ # done in the end means read check and potential creation of reverse-complement has finished already successfully
-		$bt_norc=$fs[@fs-3];
-		$mapcorr_fileswitch=$fs[@fs-2];
-		$fq1=$fs[@fs-4]; if($fs[0] eq "paired"){ ($fq1,$fq2)=($fs[@fs-5],$fs[@fs-4]); }
-		$resumed=1;
-	}
+    my $line=<$fh_info>; chomp($line); close($fh_info); my @fs=split("\t",$line);
+    if(@fs[@fs-1] eq "done"){ # done in the end means read check and potential creation of reverse-complement has finished already successfully
+	$bt_norc=$fs[@fs-3];
+	$mapcorr_fileswitch=$fs[@fs-2];
+	$fq1=$fs[@fs-4]; if($fs[0] eq "paired"){ ($fq1,$fq2)=($fs[@fs-5],$fs[@fs-4]); }
+	$resumed=1;
+    }
 }
 unless($resumed){
-
-	# create info file for this RNAseq data set
-	open($fh_info,">to_combine/$root".".info") or die "$!";
-	if($fq2){print $fh_info "paired\t$fq1\t$fq2";}else{print $fh_info "single\t$fq1";}
-	if($notstrandaware){
-		print $fh_info "\t$species\t--ns (should be treated as strand-unspecific data)";
-	}else{
-		print $fh_info "\t$species\t--s (check if data is strand-specific)";
-	}
-
-	#### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
-	if($notstrandaware){
-		print $fh_info "\tdue to given argument -ns, data are treated as being not strand-specific NA NA NA NA\t\t$bt_norc\t$mapcorr_fileswitch\tdone";
-	}else{
-		my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
-		my $minThresh=0.2;          # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
-		my ($fh,$fh2);
-		sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
-
+    # create info file for this RNAseq data set
+    open($fh_info,">to_combine/$root".".info") or die "$!";
+    if($fq2){print $fh_info "paired\t$fq1\t$fq2";}else{print $fh_info "single\t$fq1";}
+    if($notstrandaware){
+	print $fh_info "\t$species\t--ns (should be treated as strand-unspecific data)";
+    }
+    else{
+	print $fh_info "\t$species\t--s (check if data is strand-specific)";
+    }
+    
+    #### Check if paired-end reads are strand specific. If paired-end reads are strand-specific, all first/second reads get reverse-complemented if the majority of them maps to strand - of mRNA reference sequences.
+    if($notstrandaware){
+	print $fh_info "\tdue to given argument -ns, data are treated as being not strand-specific NA NA NA NA\t\t$bt_norc\t$mapcorr_fileswitch\tdone";
+    }
+    else{
+	my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
+	my $minThresh=0.2;          # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+	my ($fh,$fh2);
+	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
+	
        	my $N=400000; # check 100K fastq reads 
        	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=200000;}
        	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
@@ -529,8 +529,7 @@ if (!$genome_sub and !$useGenSub){
      my $bowtie_fa_fq_flag="-q";
      if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";}
 
-#    24/12/16 --MI
-#    $cmd .= " | - -p $cores -m 1 -v $bowtieV -3 $difLE $dbDir/EXPRESSION/mRNA -";
+#    Different $cmd (24/12/16 --MI)
      if (defined($trimLen)){
 	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bt_norc $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
@@ -549,22 +548,10 @@ if (!$genome_sub and !$useGenSub){
 }
 ###
 
-#### Merge PE
-# if ($pairedEnd){
-#   verbPrint "Concatenating paired end reads";
-     #sysErrMsg "cat $fq1 $fq2 > $fq";  # away with this as well? 
-                                       # $fq is used in trimming below. but we
-                                       # can pipe into it. KH
-#   $fq = "$fq1 $fq2";
-  #} else {
-   $fq = $fq1; # Above is deprecated --TSW 7/14/14
-#}
+#### Merge PE => happens in Trim
+$fq = $fq1; # just assigning name
 
- 
 #### Trimming
-#
-#
-
 $keep_trimmed=1 if $trimmed; #keeps the original file provided as pre-trimmed input
 
 my $cmd = getPrefixCmd($fq);
