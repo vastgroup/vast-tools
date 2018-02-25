@@ -3,11 +3,7 @@
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
-
 use Cwd;
-#$cwd = getcwd;
-#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
-
 use Getopt::Long;
 
 my $dbDir;
@@ -83,13 +79,11 @@ foreach $file (@EFF){
 my %is_ss;
 verbPrint "Loading EEJ data for ALT3\n";
 foreach $file (@EEJ){
-#    ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./;
-#     ($sample)=$file=~/^(.*)\..*$/;   
-     my $fname = $file;
+    my $fname = $file;
     $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
-     $length = $samLen; # replacement --TSW
-
+    $length = $samLen; # replacement --TSW
+    
     # generates headings
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Ri\t$sample-Rtot\t$sample-Q";
@@ -105,7 +99,7 @@ foreach $file (@EEJ){
     		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
     	}
     }
-    # Loads EEJ files
+    ### Loads EEJ files
     open (EEJ, $file);
     while (<EEJ>){
         chomp;
@@ -143,22 +137,21 @@ foreach $event_root (sort (keys %ALL)){
     }
     
     foreach $file (@EEJ){
-#	($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;   
-     my $fname = $file;
-    $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
-     $length = $samLen;  #replacement --TSW
-
+	my $fname = $file;
+	$fname =~ s/^.*\///;
+	($sample)=$fname=~/^(.*)\..*$/;
+	$length = $samLen;  #replacement --TSW
+	
 	# Emptying variables and arrays with read counts per sample
 	$total_raw_reads_S=$total_corr_reads_S=0; # total simple reads
 	$total_raw_reads_ALL=$total_corr_reads_ALL=0; # total complex and simple reads
 	@corr_inc_reads_S=@raw_inc_reads_S=(); # Simple reads for each acceptor
 	@corr_inc_reads_ALL=@raw_inc_reads_ALL=(); # Complex reads for each acceptor
 	@PSI=(); # Percent splice site usage for each acceptor
-
+	
 	# set mappability correction accordingly
 	if($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
-
+	
 	$max_mappability=$length-15;
 	for $i (0..$#junctions){ #does Simple read counts
 	    $eej="$gene-$junctions[$i]";
@@ -222,11 +215,9 @@ foreach $event_root (sort (keys %ALL)){
              my $totalN = $total_raw_reads_ALL;
              my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
              unless($PSI[$i] eq "NA" or $totalN == 0) {
-               $pPSI = $PSI[$i] / 100;
-               #$exValOfInc = $pPSI * $totalN;
-               #$exValOfExc = (1-$pPSI) * $totalN;
-           	  $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
-           	  $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
+		 $pPSI = $PSI[$i] / 100;
+		 $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+		 $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
              }
              # ALTER QUAL OUTPUT HERE>>
              $Q[$i] .= "\@$exValOfInc,$exValOfExc";
