@@ -2,14 +2,6 @@
 
 use strict;
 
-#($r)=$ARGV[0]=~/(.+?)\.out/;# if $ARGV[0]!~/\//;
-#$sam=$&;
-
-#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
-
-#open (I, $sam);
-#open (O, ">$r.outsum");
-
 my $previous_read;
 my $hitB;
 my %tally;
@@ -20,11 +12,6 @@ while (<STDIN>){
     my $read="";
     my @t=split(/\t/);
     
-#    ($read)=$t[0]=~/(.+) /;
-#    ($read)=$t[0]=~/(.+)\#/ if !$read;
-#    ($read)=$t[0]=~/(.+)\:/ if !$read;
-#    ($read)=$t[0]=~/(.+)\// if !$read;
-
     ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
     
@@ -48,6 +35,3 @@ foreach my $hit (sort (keys %tally)){
 
     print STDOUT "$hit\t$tally{$hit}\t$p_p\n";
 }
-
-#system "rm $sam";
-#system "gzip $r.outsum";
