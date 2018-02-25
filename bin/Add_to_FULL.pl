@@ -46,16 +46,17 @@ sub errPrintDie {
 }
 
 sub simplifyComplex {
-  # Ad hoc routine to simplify COMPLEX types
-  # (should eventually be simplified in the template source files)
-  my $type = shift;
-  $type =~ s/\*//;
-  if ($type =~ /^ME\(.*\)$/) {
-      $type = "C3";
-  } elsif ($type =~ /MIC/) {
-      $type = "MIC";
-  }
-  return $type;
+    # Ad hoc routine to simplify COMPLEX types
+    # (should eventually be simplified in the template source files)
+    my $type = shift;
+    $type =~ s/\*//;
+    if ($type =~ /^ME\(.*\)$/) {
+	$type = "C3";
+    } 
+    elsif ($type =~ /MIC/) {
+	$type = "MIC";
+    }
+    return $type;
 }
 
 sub reorderColumns {
@@ -80,7 +81,7 @@ my %newIDs;
 while (<$NEWID>) {
     chomp;
     my @l = split("\t");
-
+    
 # Removed in V2 (18/01/18): if repeated (due to assembly conversion) are re-rewritten
 #  if (defined $newIDs{$l[1]}) {
 #      die "Non-unique key value pair in $NEWID!\n";
@@ -199,4 +200,3 @@ while (<STDIN>) {
     }
   }
 }
-
