@@ -39,17 +39,6 @@ sub verbPrint {
   }
 }
 
-# Deprecated --TSW
-#sub randString {
-#  my $len = shift;
-#  my @chars=('a'..'z','A'..'Z','0'..'9');
-#  my $ret = "";
-#  for(my $c=0; $c < $len; $c++) {
-#    $ret .= $chars[int rand @chars];
-#  }
-#  return($ret);
-#}
-
 ### Initialize variables
 my $total_reads = 0;
 my $total_fwd_accepted = 0;
