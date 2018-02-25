@@ -55,7 +55,6 @@ while (<MAPPABILITY>){
 close MAPPABILITY;
 
 
-
 ### For each file with counts
 my %samples;
 my %corrected_reads;
@@ -172,7 +171,6 @@ foreach my $event (sort keys %mappability_ns){
                 $Q.=",N,NA,$reads";
             }
         }
-
         print OUT "\t$Q";
     }
     print OUT "\n";
