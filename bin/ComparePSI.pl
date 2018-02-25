@@ -12,7 +12,6 @@ my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
-
 ### Setting global variables:
 my $helpFlag = 0;
 my $verboseFlag = 1; 
