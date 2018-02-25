@@ -68,13 +68,12 @@ while(<$ANOT>){
     
     if(defined $rcount{$event} && defined $ucount{$event} && $ucount{$event} > 0){
 	$I = sprintf("%.2f",$rcount{$event} / $ucount{$event} * $maxcount);
-    }
-    
+    }    
     # added on 02/10/15
     $C1A = 0 if !$C1A;
     $AC2 = 0 if !$AC2;
     $C1C2 = 0 if !$C1C2;
-
+    
     print OUT "$event\t$C1A\t$AC2\t$C1C2\t$I\n" if $C1A ne "ne" && $AC2 ne "ne" && $C1C2 ne "ne"; # to avoid ne's in subsequent R processing
 }
 close $ANOT;
