@@ -22,25 +22,11 @@ GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "readLen=i" => \$length,
 	   "root=s" => \$root, , "s" => \$strandaware, "ec" => \$silent);
 
 
-# ARGV[0] is now a dummy variable.
-#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
-
-### it accepts both bowtie outputs and summarySAMs
-#($input)=$ARGV[0]=~/(.+\.out)/;
-
-#$INPUT = openFileHandle ($input) || die "Needs a bowtie COMBI output\n";
-#($root)=$ARGV[0]=~/(.+?COMBI\-.+?\-\d+?\-.+?)\-e/; # analysis of a combination of boundaries (COMBI)   DEPRECATED --TSW
-
 ### Parsesread counts
 while (<STDIN>) {
     $read="";
     @t=split(/\t/);
     
-    # General ranked search pattern for gene name. It may vary in specific cases.
-#    ($read)=$t[0]=~/(.+) /;
-#    ($read)=$t[0]=~/(.+)\#/ if !$read;
-#    ($read)=$t[0]=~/(.+)\:/ if !$read;
-#    ($read)=$t[0]=~/(.+)\// if !$read;
     ($read)=$t[0]=~/(.+)\-/;
     $read=$t[0] if !$read;
     
@@ -54,7 +40,6 @@ while (<STDIN>) {
     }
     $previous_read=$read;
 }
-#close $INPUT;
 
 ### Prints the read counts
 open (OUTPUT, ">to_combine/$root.eej2"); # read counts for all EEJ
