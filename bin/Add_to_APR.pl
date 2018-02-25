@@ -4,15 +4,8 @@
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
-
 use Getopt::Long;
-
 use Cwd;
-#$cwd = getcwd;
-#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
-
-#$sp=$ARGV[0]; # DEPRECATED --TSW
-#$type=$ARGV[1];
 
 my $sp;
 my $type;
@@ -20,7 +13,6 @@ my $dbDir;
 my $samLen;
 my $verboseFlag = 1;
 my $legacyFlag = 0;
-
 
 GetOptions("sp=s" => \$sp, "type=s" => \$type,
 			  "dbDir=s" => \$dbDir, "len=i" => \$samLen, "verbose=i" => \$verboseFlag);
@@ -33,15 +25,10 @@ sub verbPrint {
   }
 }
 
-#die "Needs Species (Hsa/Mmu) and type (exskX/MULTI3X)\n" if ($#ARGV<1);
-
 $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
-#@EXSK=glob("to_combine/$sp*$type");
 my(@EXSK) = glob("to_combine/*$type");  # not sure what to do with this.  TEST PLZ --TSW
-
-#die "@EXSK";
 
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
 $head=<TEMPLATE>;
@@ -120,17 +107,16 @@ foreach $event (sort keys %ALL){
     print COUNTs "$ALL{$event}";
     
     foreach $file (@EXSK){
-	#($sample)=$file=~/$sp.+?\-\d+?\-(.+?)\./;
-    my $fname = $file;
-    $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
-
-    $PSI=sprintf("%.2f",$PSI{$event}{$sample})  if $PSI{$event}{$sample}=~/\d/;
-    $PSI="NA"  if $PSI{$event}{$sample} eq "NA";
-    $total_raw_reads=$Rexc{$event}{$sample}+$Rinc1{$event}{$sample}+$Rinc2{$event}{$sample};
-    $total_corr_reads=$exc{$event}{$sample}+$inc1{$event}{$sample}+$inc2{$event}{$sample};
-    $total_ref_reads=$RexcS{$event}{$sample}+$Rinc1S{$event}{$sample}+$Rinc2S{$event}{$sample};
-
+	my $fname = $file;
+	$fname =~ s/^.*\///;
+	($sample)=$fname=~/^(.*)\..*$/;
+	
+	$PSI=sprintf("%.2f",$PSI{$event}{$sample})  if $PSI{$event}{$sample}=~/\d/;
+	$PSI="NA"  if $PSI{$event}{$sample} eq "NA";
+	$total_raw_reads=$Rexc{$event}{$sample}+$Rinc1{$event}{$sample}+$Rinc2{$event}{$sample};
+	$total_corr_reads=$exc{$event}{$sample}+$inc1{$event}{$sample}+$inc2{$event}{$sample};
+	$total_ref_reads=$RexcS{$event}{$sample}+$Rinc1S{$event}{$sample}+$Rinc2S{$event}{$sample};
+	
 	if ($type eq "MULTI3X"){
 #### Coverage scores. Score 1: Using all raw reads	
 	    if (($Rexc{$event}{$sample}>=20 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=20) || ($Rinc1{$event}{$sample} >=20 && $Rinc2{$event}{$sample}>=15)) && $total_raw_reads >= 100){
@@ -274,19 +260,17 @@ foreach $event (sort keys %ALL){
    ### DIFF OUTPUT ADDITION TO QUAL SCORE!   --TSW
    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
    ### These values are added to the qual score and used to infer the posterior distribution
-   unless($legacyFlag) {
-     my $totalN = $Rexc{$event}{$sample} + $Rinc1{$event}{$sample} + $Rinc2{$event}{$sample};
-     my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-     unless($PSI eq "NA" or $totalN == 0) {
-       $pPSI = $PSI / 100;
-       #$exValOfInc = $pPSI * $totalN;
-   	 #$exValOfExc = (1-$pPSI) * $totalN;
-       $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
-       $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
-     }
-     # ALTER QUAL OUTPUT HERE>>
-	  $Q .= "\@$exValOfInc,$exValOfExc";
-   }
+	unless($legacyFlag) {
+	    my $totalN = $Rexc{$event}{$sample} + $Rinc1{$event}{$sample} + $Rinc2{$event}{$sample};
+	    my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+	    unless($PSI eq "NA" or $totalN == 0) {
+		$pPSI = $PSI / 100;
+		$exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+		$exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
+	    }
+	    # ALTER QUAL OUTPUT HERE>>
+	    $Q .= "\@$exValOfInc,$exValOfExc";
+	}
 	
 	# Print out data
 	print PSIs "\t$PSI\t$Q";
