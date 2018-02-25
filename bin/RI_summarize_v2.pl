@@ -56,7 +56,6 @@ while(<$UC>){
 	$ucount{$junction} = $count; 
     }
     else {
-#	my($gene,$en,$co) = split(/\-/,$junction0);
 	my($gene,$en,$co)=$junction0=~/(.+)\-(.+?)\-(.+)/; #CHANGED 11/11/15 (genes with "-", e.g. D17H6S56E-3)
 	my $junction = $gene."-".$en;
 
@@ -88,7 +87,6 @@ while(<$RC>){
 	$corrected_count{$junction} = ($count / $ucount{$junction}) * $maxcount if $ucount{$junction};
     }
     else {
-#	my($gene,$en,$co) = split(/\-/,$junction0);
 	my($gene,$en,$co)=$junction0=~/(.+)\-(.+?)\-(.+)/; #CHANGED 11/11/15 (genes with "-", e.g. D17H6S56E-3)
 	my $junction = $gene."-".$en;
 	my($e1,$e2)=$en=~/(\d+)\_(\d+)/;
