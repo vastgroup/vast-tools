@@ -281,11 +281,11 @@ if (@rpkmFiles > 0) {
     sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts";
 
     if ($compress) {
-      verbPrint "Compressing files\n";
-      sysErrMsg "gzip -v expr_out/*.cRPKM $cRPKMOutput";
-      $cRPKMOutput .= ".gz";
+	verbPrint "Compressing files\n";
+	sysErrMsg "gzip -v expr_out/*.cRPKM $cRPKMOutput";
+	$cRPKMOutput .= ".gz";
     }
-
+    
     verbPrint "Final cRPKM table saved as: " . abs_path($cRPKMOutput) . "\n";
 }
 
