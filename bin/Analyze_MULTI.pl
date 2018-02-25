@@ -23,10 +23,6 @@ GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "readLen=i" => \$length,
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
-#($sp,$length)=$ARGV[0]=~/(\S{3})MULTI\-(\d+?)\-/; # uniform format
-#($file)=$ARGV[0]=~/(.+?\.out)/; # input file: bowtie output    # DEPRECATED --TSW
-#system "gunzip $ARGV[0]" if $ARGV[0]=~/\.gz/;
-
 ### Loads template information
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.MULTI.Template.1.txt") || die "Can't find MULTI template 1\n";
 while (<TEMPLATE>){
