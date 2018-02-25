@@ -98,9 +98,8 @@ samples <- data.frame(Sample = basename(sub(fileExt, "", sampleFiles)),
                       File   = sampleFiles,
                       stringsAsFactors=FALSE)
 samples <- samples[order(samples$Sample),]  #  temporary fix --UB
-###########################################################
-### Needs to be replaced with a locale-independent sort ###
-###########################################################
+                                            # Needs to be replaced with a locale-independent sort
+
 
 template <- read.delim(templFile)
 
@@ -200,7 +199,6 @@ if (rmHigh) {
     minpir <- suppressWarnings(apply(as.data.frame(pir[,seq(from=1, by=2, length.out=nrow(samples))]), MAR=1, FUN=min, na.rm=T))
     pir[minpir > opt$PIRthresh, seq(from=1, by=2, length.out=nrow(samples))] <- NA
 }
-
 
 ## Save table
 outnames <- c(names(template)[1:6], names(pir))
