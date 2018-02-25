@@ -133,7 +133,6 @@ foreach my $event (sort keys %corrected_reads){
                 $Q.=",N,NA,$reads";
             }
         }
-
         print OUT "\t$Q";
     }
     print OUT "\n";
