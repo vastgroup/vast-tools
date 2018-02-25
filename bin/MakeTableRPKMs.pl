@@ -71,6 +71,5 @@ foreach my $gene (sort (keys %data)){
     print $OUTPUT "$gene\t$names{$gene}$data{$gene}\n" if $cRPKMCounts;
     print RPKM "$gene\t$names{$gene}$RPKM{$gene}\n";
 }
-
 close $OUTPUT if $cRPKMCounts;
 close RPKM;
