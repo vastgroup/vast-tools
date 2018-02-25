@@ -3,11 +3,7 @@
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
-
 use Cwd;
-#$cwd = getcwd;
-#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
-
 use Getopt::Long;
 
 my $dbDir;
@@ -26,7 +22,6 @@ sub verbPrint {
   }
 }
 
-#$sp=$ARGV[0];
 die "[vast combine alt5]: Needs 3-letter species key\n" if !defined($sp);
 $COMB="M"; # only version implemented.
 
@@ -83,12 +78,10 @@ foreach $file (@EFF){
 my %is_ss;
 verbPrint "Loading EEJ data for ALT5\n";
 foreach $file (@EEJ){
-   # ($sample)=$file=~/COMBI\-$COMB\-\d+?\-(.+)\./; DEPRECATED --TSW
-   #($sample)=$file=~/^(.*)\..*$/;
     my $fname = $file;
     $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
-     $length = $samLen;
+    $length = $samLen;
     # generates headings
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Ri\t$sample-Rtot\t$sample-Q";
@@ -98,11 +91,12 @@ foreach $file (@EEJ){
     	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
-    		$is_ss{$sample}=1;
-    		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
-    	}else{
-    		verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+	    $is_ss{$sample}=1;
+	    verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
     	}
+	else{
+	    verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+	}
     }   
 
     # Loads EEJ files
@@ -110,8 +104,8 @@ foreach $file (@EEJ){
     while (<EEJ>){
         chomp;
         @t=split(/\t/);
-	     $gene=$t[0];
-	     $eej=$t[1];
+	$gene=$t[0];
+	$eej=$t[1];
         $gene_eej="$gene-$t[1]";
         $reads{$sample}{$gene_eej}=$t[2];
         ($donor,$acceptor)=$eej=~/(\d+?)\-(\d+)/;
@@ -143,11 +137,10 @@ foreach $event_root (sort keys %ALL){
     }
     
     foreach $file (@EEJ){
-	#($length,$sample)=$file=~/COMBI\-[A-Z]\-(\d+?)\-(.+)\./;   
-	 my $fname = $file;
-    $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
-     $length = $samLen;  #replacement --TSW
+	my $fname = $file;
+	$fname =~ s/^.*\///;
+	($sample)=$fname=~/^(.*)\..*$/;
+	$length = $samLen;  #replacement --TSW
 	# Emptying variables and arrays with read counts per sample
 	$total_raw_reads_S=$total_corr_reads_S=0; # total simple reads
 	$total_raw_reads_ALL=$total_corr_reads_ALL=0; # total complex and simple reads
@@ -166,7 +159,7 @@ foreach $event_root (sort keys %ALL){
 	    $total_corr_reads_S+=$corr_inc_reads_S[$i];
 	    $total_raw_reads_S+=$raw_inc_reads_S[$i];
 	}
-
+	
 	for $i (0..$#junctions){ # does Simple and Complex read counts
 	    ($donor)=$junctions[$i]=~/(\d+?)\-\d+/;
 	    for $j (0..$last_acceptor{$gene}){  # It includes the "reference" acceptor
@@ -179,58 +172,56 @@ foreach $event_root (sort keys %ALL){
 	}
 	 
 #### QUALITY SCORES
-	 $Q="";
-	 ### Score 1
-	 $Q="SOK" if $total_raw_reads_ALL >= 100;
-	 $Q="OK" if $total_raw_reads_ALL >= 40 && $total_raw_reads_ALL < 100;
-	 $Q="LOW" if $total_raw_reads_ALL >= 25 && $total_raw_reads_ALL < 40;
-	 $Q="VLOW" if $total_raw_reads_ALL >= 15 && $total_raw_reads_ALL < 25;
-	 $Q="N" if $total_raw_reads_ALL < 15;
-	 ### Score 2
+	$Q="";
+	### Score 1
+	$Q="SOK" if $total_raw_reads_ALL >= 100;
+	$Q="OK" if $total_raw_reads_ALL >= 40 && $total_raw_reads_ALL < 100;
+	$Q="LOW" if $total_raw_reads_ALL >= 25 && $total_raw_reads_ALL < 40;
+	$Q="VLOW" if $total_raw_reads_ALL >= 15 && $total_raw_reads_ALL < 25;
+	$Q="N" if $total_raw_reads_ALL < 15;
+	### Score 2
         $Q.=",SOK" if $total_corr_reads_ALL >= 100;
         $Q.=",OK" if $total_corr_reads_ALL >= 40 && $total_corr_reads_ALL < 100;
-	 $Q.=",LOW" if $total_corr_reads_ALL >= 25 && $total_corr_reads_ALL < 40;
+	$Q.=",LOW" if $total_corr_reads_ALL >= 25 && $total_corr_reads_ALL < 40;
         $Q.=",VLOW" if $total_corr_reads_ALL >= 15 && $total_corr_reads_ALL < 25;
         $Q.=",N" if $total_corr_reads_ALL < 15;
         ### Score 3 (instead of Score 4, read count)
-	 $Q.=",SOK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 100;
-	 $Q.=",OK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 40 && $total_raw_reads_S < 100;
-	 $Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 25 && $total_raw_reads_S < 40;
-	 $Q.=",VLOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 15 && $total_raw_reads_S < 25;
-	 $Q.=",N,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S < 15;
-
+	$Q.=",SOK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 100;
+	$Q.=",OK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 40 && $total_raw_reads_S < 100;
+	$Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 25 && $total_raw_reads_S < 40;
+	$Q.=",VLOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 15 && $total_raw_reads_S < 25;
+	$Q.=",N,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S < 15;
+	
         #### Score 5: COMPLEXITY
         $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
         $from_S=$total_corr_reads_S;
-
-		  if ($from_C > ($from_C+$from_S)/2) {$Q.=",C3"; $Qs.=",C3";}
+	
+	if ($from_C > ($from_C+$from_S)/2) {$Q.=",C3"; $Qs.=",C3";}
         elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q.=",C2";$Qs.=",C2";}
         elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q.=",C1";$Qs.=",C1";}
-		  else {$Q.=",S"; $Qs.=",S";}
+	else {$Q.=",S"; $Qs.=",S";}
         ####### 
-
+	
 	for $i (0..$#junctions){
 	    $PSI[$i]=sprintf("%.2f",100*$corr_inc_reads_ALL[$i]/$total_corr_reads_ALL) if $total_corr_reads_ALL>0;
 	    $PSI[$i]="NA" if $total_corr_reads_ALL==0;
-
+	    
 	    $Q[$i] = $Q;
-             ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
-             ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
-             ### These values are added to the qual score and used to infer the posterior distribution
-             unless($legacyFlag) {
-               my $totalN = $total_raw_reads_ALL;
-               my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
-               unless($PSI[$i] eq "NA" or $totalN == 0) {
-                 $pPSI = $PSI[$i] / 100;
-                 #$exValOfInc = $pPSI * $totalN;
-                 #$exValOfExc = (1-$pPSI) * $totalN;
-                 $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
-                 $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
+	    ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
+	    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+	    ### These values are added to the qual score and used to infer the posterior distribution
+	    unless($legacyFlag) {
+		my $totalN = $total_raw_reads_ALL;
+		my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
+		unless($PSI[$i] eq "NA" or $totalN == 0) {
+		    $pPSI = $PSI[$i] / 100;
+		    $exValOfInc = sprintf("%.2f", $pPSI * $totalN);
+		    $exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
                 }
                 # ALTER QUAL OUTPUT HERE>>
 	        $Q[$i] .= "\@$exValOfInc,$exValOfExc";
 	    }
-
+	    
 	    $ind=$i+1;
 	    $event="$event_root-$ind/$ALL{$event_root}";
 	    $TPC1[$i].="$PSI[$i]\t$Q[$i]\t";
@@ -239,12 +230,12 @@ foreach $event_root (sort keys %ALL){
     }
     
     for $i (0..$#junctions){
-		$ind=$i+1;
-      $event="$event_root-$ind/$ALL{$event_root}";
-		if ($pre_data{$event}){
+	$ind=$i+1;
+	$event="$event_root-$ind/$ALL{$event_root}";
+	if ($pre_data{$event}){
 	    print PSIs "$TPC1[$i]\n";
 	    print COUNTs "$TPC2[$i]\n";
-		}
+	}
     }
 }
 close PSIs;
