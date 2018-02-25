@@ -257,7 +257,6 @@ foreach $event (sort (keys %ALL)){
 	}
 	############# END ANNOT QUANT
 
-
 #### Sum of corrected reads
 	$inc1F=$inc1C+$inc1;
 	$inc2F=$inc2C+$inc2;
