@@ -288,7 +288,6 @@ if (@rpkmFiles > 0) {
     
     verbPrint "Final cRPKM table saved as: " . abs_path($cRPKMOutput) . "\n";
 }
-
 if ($N + @rpkmFiles == 0) {
     verbPrint "Could not find any files to combine. If they are compressed, please decompress them first.\n";
 }
