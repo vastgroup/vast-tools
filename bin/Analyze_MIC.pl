@@ -24,16 +24,6 @@ GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp,"readLen=i" => \$read_length,
 
 my $mapcorr_fileswitch=""; if($strandaware){$mapcorr_fileswitch="-SS"}
 
-### DEPRECATED --TSW
-#$file=$ARGV[0];
-
-#system "gunzip $file" if $file=~/\.gz/;
-#$file=~s/\.gz//;
-
-#($sp,$read_length)=$file=~/.+\/(.+?)MIC\-(\d+)\-[^\-]+/;
-#$root=$&;
-
-
 ### Loads mappability/effective lengths
 open (EFF, "$dbDir/FILES/$sp"."_MIC-$read_length-gDNA${mapcorr_fileswitch}.eff2") || die "Needs file with effective length for each EEEJ\n";
 while (<EFF>){ #loads the effective length in the hash \%eff
@@ -46,7 +36,6 @@ while (<EFF>){ #loads the effective length in the hash \%eff
 close EFF;
 
 ### Loads bowtie output file and does the read count
-#$INPUT = openFileHandle ($file) || die "Needs the bowtie output for MIC file\n";
 while (<STDIN>){
     chomp;
     @t=split(/\t/);
