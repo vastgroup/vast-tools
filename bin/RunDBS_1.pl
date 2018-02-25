@@ -180,57 +180,57 @@ sub extractReadLen {  # extracts automatically read length from fastq or fastq.g
 
 
 sub sysErrMsg {
-  my @sysCommand = @_;
-  if($resume){print STDERR "... --resumed!\n";return(1);}
+    my @sysCommand = @_;
+    if($resume){print STDERR "... --resumed!\n";return(1);}
 #  print "\n".join(" ",@sysCommand)."\n";
-  not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
+    not system(@sysCommand) or die "[vast align error]: @sysCommand Failed in $0!";
 }
 
 sub errPrint {
-  my $errMsg = shift;
-  print STDERR "[vast align error]: $errMsg\n";
-  $EXIT_STATUS++; 
+    my $errMsg = shift;
+    print STDERR "[vast align error]: $errMsg\n";
+    $EXIT_STATUS++; 
 }
 
 sub errPrintDie {
-  my $errMsg = shift;
-  errPrint $errMsg;
-  exit $EXIT_STATUS if ($EXIT_STATUS != 0);
+    my $errMsg = shift;
+    errPrint $errMsg;
+    exit $EXIT_STATUS if ($EXIT_STATUS != 0);
 }
 
 sub verbPrint {
-  my $verbMsg = shift;
-  if($verboseFlag) {
-    chomp($verbMsg);
-    print STDERR "[vast align]: $verbMsg\n";
-  }
+    my $verbMsg = shift;
+    if($verboseFlag) {
+	chomp($verbMsg);
+	print STDERR "[vast align]: $verbMsg\n";
+    }
 }
 
 sub isZipped {
-  my $file = shift;
-  return $file =~ /\.(gz)$/;
+    my $file = shift;
+    return $file =~ /\.(gz)$/;
 }
 
 sub getPrefixCmd {
-  my $file = shift;
-  my $prefix = isZipped($file) ? "gzip -dc $file" : "cat $file";
-  return $prefix;
+    my $file = shift;
+    my $prefix = isZipped($file) ? "gzip -dc $file" : "cat $file";
+    return $prefix;
 }
 
 sub checkResumeOption{
-  my @files_to_be_checked=@_;   # if any of these files exist, we can skip the next computation 
-  if($resume == 0){return(1);}
-  $resume=0;   # assume we need to execute the next command
-  foreach my $file_to_be_checked (@files_to_be_checked){
+    my @files_to_be_checked=@_;   # if any of these files exist, we can skip the next computation 
+    if($resume == 0){return(1);}
+    $resume=0;   # assume we need to execute the next command
+    foreach my $file_to_be_checked (@files_to_be_checked){
   	if(-e $file_to_be_checked){$resume=1;last;}  # except if one of these files exist
-  }
+    }
 }
 
 my $inpType = !$fastaOnly ? "-f" : "-q"; 
 
 # Check database directory
 unless(defined($dbDir)) {
-  $dbDir = "$binPath/../VASTDB";
+    $dbDir = "$binPath/../VASTDB";
 }
 $dbDir = abs_path($dbDir);
 $dbDir .= "/$species";
@@ -297,10 +297,10 @@ errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_vers
 
 # FOR RIBOFOOT
 if($ribofoot) {
-  $trimOnceFlag = 1; # only trim once. no slide.
-  $runExprFlag = 0; # no need for expression calculations.
-  $readLength = 32;
-  $trimLen = 32;   
+    $trimOnceFlag = 1; # only trim once. no slide.
+    $runExprFlag = 0; # no need for expression calculations.
+    $readLength = 32;
+    $trimLen = 32;   
 #  $noIRflag = 1;  # temporary;
 }
 
