@@ -53,6 +53,7 @@ my $juncAnnotationFile = "$dbDir/FILES/$sp.IntronJunctions.new.annotation.txt";
 my $ANOT = openFileHandle($juncAnnotationFile);
 my $outfile = "./to_combine/$root.IR.summary.txt";
 open(OUT,">$outfile") or die "Failed to open $outfile: $!\n";
+
 my $head = <$ANOT>;
 print OUT "Event\tEIJ1\tEIJ2\tEEJ\n";
 while(<$ANOT>){
