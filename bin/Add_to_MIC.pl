@@ -1,13 +1,10 @@
 #!/usr/bin/env perl
+# This script is to calculate PSIs for MIC and produce a table with them for all samples.
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use FuncBasics qw(:all);
-
-# This script is to calculate PSIs for MIC and produce a table with them for all samples.
 use Cwd;
-#$cwd = getcwd;
-#($dir)=$cwd=~/(.+?\/AS_PIPE_S)/;
 use Getopt::Long;
 
 my $dbDir;
@@ -26,19 +23,18 @@ sub verbPrint {
   }
 }
 
-#$sp=$ARGV[0];
 die "[vast combine micro]: Needs the 3-letter species key\n" if !defined($sp);
 
 @files=glob("to_combine/*micX");
 
 $head_counts=$head_PSI="GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX";
 foreach $file (@files){
- #   ($sample)=$file=~/MIC\-\d+?\-(.+)\./;
     my $fname = $file;
     $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
     $head_PSI.="\t$sample\t$sample-Q";
     $head_counts.="\t$sample-Rexc\t$sample-Rinc\t$sample-exc\t$sample-inc\tPSI=Q";
+
     open (INPUT, $file);
     while (<INPUT>){
 	chomp;
@@ -81,8 +77,6 @@ foreach $file (@files){
 	    my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
 	    unless($t[6] eq "NA" or $totalN == 0) {
 		$pPSI = $t[6] / 100;
-		#$exValOfInc = $pPSI * $totalN;
-		#$exValOfExc = (1-$pPSI) * $totalN;
 		$exValOfInc = sprintf("%.2f", $pPSI * $totalN);
 		$exValOfExc = sprintf("%.2f", (1-$pPSI) * $totalN);
 	    }
