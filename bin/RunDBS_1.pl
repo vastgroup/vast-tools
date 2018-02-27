@@ -449,7 +449,8 @@ unless($resumed){
     }
     else{
 	my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
-	my $minThresh=0.2;          # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+	my $minThresh=0.35;         # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
+	my $maxThresh=0.65; 
 	my ($fh,$fh2);
 	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
 	
@@ -474,7 +475,7 @@ unless($resumed){
        		verbPrint "   fraction of second reads mapping to fwd / rev strand : $percR2p / $percR2n";
         }
 
-		if(($percR2n eq "NA" && $percR1n<$minThresh) || ($percR1n<$minThresh && $percR2n<$minThresh)){
+		if(($percR2n eq "NA" && $percR1n>=$minThresh && $percR1n<=$maxThresh) || ($percR1n>=$minThresh && $percR1n<=$maxThresh && $percR2n>=$minThresh && $percR2n<=$maxThresh)){
 			print $fh_info "\tdata assumed to be not strand-specific $percR1p $percR1n $percR2p $percR2n";
 			$notstrandaware=1;
 		}else{
@@ -482,7 +483,7 @@ unless($resumed){
 			print $fh_info "\tdata assumed to be strand-specific $percR1p $percR1n $percR2p $percR2n";
 			for(my $i=0;$i<2;$i++){
 				if($i==0){
-					if($percR1n<$minThresh){print $fh_info "\t$fq1";next;}
+					unless($percR1n>=$maxThresh){print $fh_info "\t$fq1";next;}
 					open($fh,"".getPrefixCmd($fq1)." |");
 					$fn="$tmpDir/tmp_read_files/".pop([split("/",$fq1)]);
 					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
@@ -492,7 +493,7 @@ unless($resumed){
 				}
 				if($i==1){
 					if($percR2n eq "NA"){next;}  # single-end data
-					if($percR2n<$minThresh){print $fh_info "\t$fq2";next;}
+					unless($percR2n>=$maxThresh){print $fh_info "\t$fq2";next;}
 					open($fh,"".getPrefixCmd($fq2)." |");
 					$fn="$tmpDir/tmp_read_files/".pop([split("/",$fq2)]);
 					if(isZipped($fq2)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
