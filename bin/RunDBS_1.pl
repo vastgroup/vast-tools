@@ -485,7 +485,7 @@ unless($resumed){
 				if($i==0){
 					unless($percR1n>=$maxThresh){print $fh_info "\t$fq1";next;}
 					open($fh,"".getPrefixCmd($fq1)." |");
-					$fn="$tmpDir/tmp_read_files/".pop([split("/",$fq1)]);
+					$fn="$tmpDir/tmp_read_files/".pop(@{[split("/",$fq1)]});
 					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq1; writing into $fn";
 					$fq1=$fn;
@@ -495,7 +495,7 @@ unless($resumed){
 					if($percR2n eq "NA"){next;}  # single-end data
 					unless($percR2n>=$maxThresh){print $fh_info "\t$fq2";next;}
 					open($fh,"".getPrefixCmd($fq2)." |");
-					$fn="$tmpDir/tmp_read_files/".pop([split("/",$fq2)]);
+					$fn="$tmpDir/tmp_read_files/".pop(@{[split("/",$fq2)]});
 					if(isZipped($fq2)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq2; writing into $fn";
 					$fq2=$fn;
@@ -631,7 +631,7 @@ unless ($onlyIRflag){
 	"$binPath/Analyze_MULTI.pl $runArgs";                                # produces to_combine/$root.MULTI3X
 
     verbPrint "Mapping reads to microexon EEJ library and Analyzing...\n";
-    checkResumeOption("to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt","$tmpDir/".pop([split("/",$fq1)]).".resume");
+    checkResumeOption("to_combine/$root.IR.summary.txt","to_combine/$root.IR.summary_v2.txt","$tmpDir/".pop(@{[split("/",$fq1)]}).".resume");
     sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
 	"$dbDir/FILES/$species"."_MIC-$le - | ".
 	" cut -f 1-4,8 - | sort -T $tmpDir -k 1,1 | " .
@@ -663,7 +663,7 @@ unless (($genome_sub and $useGenSub)  or $noIRflag) {
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
               "$binPath/MakeSummarySAM.pl | " .
               "$binPath/RI_summarize$v.pl - $runArgs";                       # produces to_combine/$root.IR.summary.txt or to_combine/$root.IR.summary_v2.txt
-  checkResumeOption("$tmpDir/".pop([split("/",$fq1)]).".resume");
+  checkResumeOption("$tmpDir/".pop(@{[split("/",$fq1)]}).".resume");
   sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
                   "$dbDir/FILES/$species.Introns.sample.200 - | " .
               "cut -f 1-4,8 | sort -T $tmpDir -k 1,1 | " .
@@ -692,7 +692,7 @@ unless($noIRflag || $IR_version == 2) {  # --UB
 }
 
 # Generate a control file for resume option. Allows us a complete resume if previous run did complete successfully.
-open(my $fh,">$tmpDir/".pop([split("/",$fq1)]).".resume");print $fh "finished successfully";close($fh);
+open(my $fh,">$tmpDir/".pop(@{[split("/",$fq1)]}).".resume");print $fh "finished successfully";close($fh);
 
 # remove files with reverse-complemented reads
 verbPrint "Deleting temporary files with reverse-complemented reads.";
