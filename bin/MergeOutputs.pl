@@ -135,6 +135,7 @@ if (defined $move_to_PARTS){
 
 
 ### Loading group info
+my %info_files_of_subsamples=();
 open (GROUPS, $groups_fullpath) || errPrintDie "Cannot open groupings: $groups_fullpath\n";
 while (<GROUPS>){
     # cleaning in case they were made in Mac's excel
@@ -161,6 +162,7 @@ while (<GROUPS>){
     unless(-e "to_combine/${temp[0]}.info"){ verbPrint "$temp[0]: do not find to_combine/${temp[0]}.info. Sample will be treated as being not strand-specific.";
     }else{
     	open(my $fh_info,"to_combine/${temp[0]}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    	$info_files_of_subsamples{"${temp[0]}.info"}=1;
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
     		$file_is_ss{$temp[0]}=1;
@@ -212,12 +214,7 @@ foreach my $grp (keys %groups){
 		print $fh "\t\tdone"; # means strand-unspecific
 	}
 	close($fh);
-	
-	if (defined $move_to_PARTS){
-		system "mv to_combine/${grp}.info to_combine/PARTS/";
-	}
 }
-
 
 # output warning if one file will be merged into the same group several times; maybe this is a mistake!
 foreach my $fn (keys %file_grpchk){foreach my $gr (keys %{$file_grpchk{$fn}}){
@@ -691,4 +688,12 @@ foreach my $group (sort keys %groups){
 	    }
 	}
     }
+}
+
+
+# move info files of subsamples which have been merged into at least one group into subfolder PARTS
+if (defined $move_to_PARTS){
+	foreach my $infof (keys %info_files_of_subsamples){
+    		system "mv to_combine/$infof to_combine/PARTS/";
+	}
 }
