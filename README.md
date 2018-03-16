@@ -488,26 +488,26 @@ Then, for each combined sample, a pair of columns:
  * **Column 7**: Estimated percent of sequence inclusion (PSI/PSU/PIR). PSI: percent spliced in (for EX). PSU: percent splice site usage (for ALTD and ALTA). PIR: percent intron retention (for INT).
  * **Column 8**: Quality scores, and number of corrected inclusion and exclusion reads (qual@inc,exc).
  	* *Score 1*: Read coverage, based on actual reads (as used in Irimia *et al*, Cell 2014):
-    - For EX: OK/LOW/VLOW: (i) ≥20/15/10 actual reads (i.e. before mappability correction) mapping to all exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two groups of inclusion splice junctions (upstream or downstream the alternative exon), and ≥15/10/5 to the other group of inclusion splice junctions.
-    - For EX (microexon module): OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to the sum of inclusion splice junctions.
-    - For INT: OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of skipping splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two inclusion exon-intron junctions (the 5' or 3' of the intron), and ≥15/10/5 to the other inclusion splice junctions.
-    - For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/25/15 actual reads mapping to the sum of all splice junctions involved in the specific event.
-    - For any type of event: SOK: same thresholds as OK, but a total number of reads ≥100.
-    - For any type of event: N: does not meet the minimum threshold (VLOW).
+  		- For EX: OK/LOW/VLOW: (i) ≥20/15/10 actual reads (i.e. before mappability correction) mapping to all exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two groups of inclusion splice junctions (upstream or downstream the alternative exon), and ≥15/10/5 to the other group of inclusion splice junctions.
+    		- For EX (microexon module): OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to the sum of inclusion splice junctions.
+    		- For INT: OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of skipping splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two inclusion exon-intron junctions (the 5' or 3' of the intron), and ≥15/10/5 to the other inclusion splice junctions.
+    		- For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/25/15 actual reads mapping to the sum of all splice junctions involved in the specific event.
+    		- For any type of event: SOK: same thresholds as OK, but a total number of reads ≥100.
+  		- For any type of event: N: does not meet the minimum threshold (VLOW).
 
  	* *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
  	* *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). Always NA for intron retention events.
  	* *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the *splice site-based* or *transcript-based* modules; For intron retention events, numbers of reads mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format A=B=C)
-    - OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
-    - B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
-    - B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
-    - Bl/Bn: low/no read coverage for splice junctions supporting inclusion.
+		- OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
+		- B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
+		- B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
+		- Bl/Bn: low/no read coverage for splice junctions supporting inclusion.
  	* *Score 5*: Complexity of the event (only for exon skipping events quantified by the *splice site-based* or *transcript-based* modules); For intron retention events, p-value of a binomial test of balance between reads mapping to the upstream and downstream exon-intron junctions, modified by reads mapping to a 200-bp window in the centre of the intron (see Braunschweig et al., 2014).
-    - S: percent of complex reads (i.e. those inclusion- and exclusion-supporting reads that do not map to the reference C1A, AC2 or C1C2 splice junctions) is < 5%.
-    - C1: percent of complex reads is > 5% but < 20%.
-    - C2: percent of complex reads is > 20% but < 50%.
-    - C3: percent of complex reads is > 50%.
-    - NA: low coverage event.
+		- S: percent of complex reads (i.e. those inclusion- and exclusion-supporting reads that do not map to the reference C1A, AC2 or C1C2 splice junctions) is < 5%.
+		- C1: percent of complex reads is > 5% but < 20%.
+		- C2: percent of complex reads is > 20% but < 50%.
+		- C3: percent of complex reads is > 50%.
+		- NA: low coverage event.
  	* inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
 
 ### Simplifying Combine Table
