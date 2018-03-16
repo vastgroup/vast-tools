@@ -477,7 +477,8 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
   * For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
   * For INT: *chromosome:C1exon=C2exon:strand*.
  * **Column 6**: Type of event.
-  * S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information). Scores from the ANNOTATION module ("A_*") do NOT follow the same logic.
+  * S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information). 
+  * ANN: exon skipping (EX) events quantified by the ANNOTATION module. Their IDs also start by ≥ 6 (e.g. HsaEX6000001).
   * MIC: exon skipping (EX) events quantified by the microexon pipeline.
   * IR-S: intron retention event with no other annotated overlapping alternative splicing event and/or alternative first/last exons.
   * IR-C: intron retention event with other annotated overlapping alternative splicing event(s) and/or alternative first/last exons (similar to Type C introns in Braunschweig *et al*, 2014).  
