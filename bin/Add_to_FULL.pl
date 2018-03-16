@@ -56,6 +56,9 @@ sub simplifyComplex {
     elsif ($type =~ /MIC/) {
 	$type = "MIC";
     }
+    elsif ($type =~ /A\_/){
+	$type = "ANN";
+    }
     return $type;
 }
 
