@@ -466,9 +466,9 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
 
  * **Column 1**: Official gene symbol.
  * **Column 2**: VAST-DB event ID. Formed by: 
-  * Species identifier: Hsa (Human), Mmu (Mouse), or Gga (Chicken);
-  * Type of alternative splicing event: alternative exon skipping (EX), retained intron (INT), alternative splice site donor choice (ALTD), or alternative splice site acceptor choice (ALTA). In the case of ALTD/ALTA, each splice site within the event is indicated (from exonic internal to external) over the total number of alternative splice sites in the event (e.g. HsaALTA0000011-1/2).
-  * Numerical identifier.
+  	* Species identifier: Hsa (Human), Mmu (Mouse), or Gga (Chicken);
+  	* Type of alternative splicing event: alternative exon skipping (EX), retained intron (INT), alternative splice site donor choice (ALTD), or alternative splice site acceptor choice (ALTA). In the case of ALTD/ALTA, each splice site within the event is indicated (from exonic internal to external) over the total number of alternative splice sites in the event (e.g. HsaALTA0000011-1/2).
+  	* Numerical identifier.
  * **Column 3**: Genomic coordinate of the alternative sequence.
  * **Column 4**: Length of the alternative sequence. In ALTD/ALTA events, the first splice site within each event has a length of 0 nt, by definition.
  * **Column 5**: Full set of genomic coordinates of the alternative splicing event. 
