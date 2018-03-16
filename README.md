@@ -489,11 +489,11 @@ Then, for each combined sample, a pair of columns:
  * **Column 8**: Quality scores, and number of corrected inclusion and exclusion reads (qual@inc,exc).
  	* *Score 1*: Read coverage, based on actual reads (as used in Irimia *et al*, Cell 2014):
   		- For EX: OK/LOW/VLOW: (i) ≥20/15/10 actual reads (i.e. before mappability correction) mapping to all exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two groups of inclusion splice junctions (upstream or downstream the alternative exon), and ≥15/10/5 to the other group of inclusion splice junctions.
-    		- For EX (microexon module): OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to the sum of inclusion splice junctions.
-    		- For INT: OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of skipping splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two inclusion exon-intron junctions (the 5' or 3' of the intron), and ≥15/10/5 to the other inclusion splice junctions.
-    		- For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/25/15 actual reads mapping to the sum of all splice junctions involved in the specific event.
-    		- For any type of event: SOK: same thresholds as OK, but a total number of reads ≥100.
-  		- For any type of event: N: does not meet the minimum threshold (VLOW).
+		- For EX (microexon module): OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of exclusion splice junctions, OR (ii) ≥20/15/10 actual reads mapping to the sum of inclusion splice junctions.
+		- For INT: OK/LOW/VLOW: (i) ≥20/15/10 actual reads mapping to the sum of skipping splice junctions, OR (ii) ≥20/15/10 actual reads mapping to one of the two inclusion exon-intron junctions (the 5' or 3' of the intron), and ≥15/10/5 to the other inclusion splice junctions.
+		- For ALTD and ALTA: OK/LOW/VLOW: (i) ≥40/25/15 actual reads mapping to the sum of all splice junctions involved in the specific event.
+		- For any type of event: SOK: same thresholds as OK, but a total number of reads ≥100.
+		- For any type of event: N: does not meet the minimum threshold (VLOW).
 
  	* *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
  	* *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). Always NA for intron retention events.
