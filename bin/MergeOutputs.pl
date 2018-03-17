@@ -627,6 +627,7 @@ foreach my $group (sort keys %groups){
 		# if any junction has an NA (i.e. mappability == 0), then the PSI is killed
 		for my $loop1 (19..21){ # 19 => excl, 20 => inc1, 21 => inc2
 		    for my $loop2 (0..2){ # 0 => corr_all, 1 => raw_ref, 2 => corr_ref
+			$MULTIb{$group}{$ev}[$loop1][$loop2] = 0 if (!defined $MULTIb{$group}{$ev}[$loop1][$loop2]);
 			$PSI_MULTI_new = "NA" if $MULTIb{$group}{$ev}[$loop1][$loop2] eq "NA";
 		    }
 		}
