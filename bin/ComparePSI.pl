@@ -616,3 +616,17 @@ print "\tIntron_ret\t$tally{IR}{DOWN}\t$tally{IR}{UP}\t$tally_total{IR}\t$tally_
 print "\tAlt_3ss\t$tally{Alt3}{DOWN}\t$tally{Alt3}{UP}\t$tally_total{Alt3}\t$tally_total_AS{Alt3}\n";
 print "\tAlt_5ss\t$tally{Alt5}{DOWN}\t$tally{Alt5}{UP}\t$tally_total{Alt5}\t$tally_total_AS{Alt5}\n";
 print "\n";
+
+if (defined $print_sets){
+    print 
+"*** Summary statistics for extra event sets:
+
+\tAS_TYPE\tConstitutive\tCryptic\tAS non-changing
+\tMicroexons\t$tally_extra{MIC}{CS}\t$tally_extra{MIC}{CR}\t$tally_extra{MIC}{AS_NC}
+\tLong_AltEx\t$tally_extra{AltEx}{CS}\t$tally_extra{AltEx}{CR}\t$tally_extra{AltEx}{AS_NC}
+\tIntron_ret\t$tally_extra{IR}{CS}\t$tally_extra{IR}{CR}\t$tally_extra{IR}{AS_NC}
+\tAlt_3ss\t$tally_extra{Alt3}{CS}\t$tally_extra{Alt3}{CR}\t$tally_extra{Alt3}{AS_NC}
+\tAlt_5ss\t$tally_extra{Alt5}{CS}\t$tally_extra{Alt5}{CR}\t$tally_extra{Alt5}{AS_NC}
+
+"
+}
