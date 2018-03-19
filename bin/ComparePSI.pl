@@ -333,6 +333,30 @@ while (<PSI>){
     $tally_total_AS{$type}++ if ($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10;
     $tally_total{$type}++;
     
+    ### Prints cryptic and constitutive
+    if (defined $print_sets){
+	if ($type eq "IR"){
+	    unless (defined $print_dPSI){
+		print SET_CS "$_\n" if $max_A < 5 && $max_B < 5;
+		print SET_CR "$_\n" if $min_A > 95 && $min_B > 95;
+	    }
+	    else {
+		print SET_CS "$_\t$dPSI\n" if $max_A < 5 && $max_B < 5;
+		print SET_CR "$_\t$dPSI\n" if $min_A > 95 && $min_B > 95;
+	    }
+	}
+	else {
+	    unless (defined $print_dPSI){
+		print SET_CR "$_\n" if $max_A < 5 && $max_B < 5;
+		print SET_CS "$_\n" if $min_A > 95 && $min_B > 95;
+	    }
+	    else {
+		print SET_CR "$_\t$dPSI\n" if $max_A < 5 && $max_B < 5;
+		print SET_CS "$_\t$dPSI\n" if $min_A > 95 && $min_B > 95;
+	    }
+	}
+    }
+    
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
 	# get dPSI
