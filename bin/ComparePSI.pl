@@ -261,12 +261,20 @@ my %doneBG;
 my %tally;
 my %tally_total; # to count the total number of AS events with good coverage
 my %tally_total_AS; # to count the total number of AS events within the compared samples
+my %tally_extra; # to count the number of other types
 
+### Setting all to 0
 $tally{MIC}{DOWN}=0; $tally{MIC}{UP}=0; $tally_total_AS{MIC}=0; $tally_total{MIC}=0;
 $tally{AltEx}{DOWN}=0; $tally{AltEx}{UP}=0; $tally_total_AS{AltEx}=0; $tally_total{AltEx}=0;
 $tally{IR}{DOWN}=0; $tally{IR}{UP}=0; $tally_total_AS{IR}=0; $tally_total{IR}=0;
 $tally{Alt3}{DOWN}=0; $tally{Alt3}{UP}=0; $tally_total_AS{Alt3}=0; $tally_total{Alt3}=0;
 $tally{Alt5}{DOWN}=0; $tally{Alt5}{UP}=0; $tally_total_AS{Alt5}=0; $tally_total{Alt5}=0;
+
+$tally_extra{MIC}{CS}=0; $tally_extra{MIC}{CR}=0; $tally_extra{MIC}{AS_NC}=0;
+$tally_extra{AltEx}{CS}=0; $tally_extra{AltEx}{CR}=0; $tally_extra{AltEx}{AS_NC}=0;
+$tally_extra{IR}{CS}=0; $tally_extra{IR}{CR}=0; $tally_extra{IR}{AS_NC}=0;
+$tally_extra{Alt3}{CS}=0; $tally_extra{Alt3}{CR}=0; $tally_extra{Alt3}{AS_NC}=0;
+$tally_extra{Alt5}{CS}=0; $tally_extra{Alt5}{CR}=0; $tally_extra{Alt5}{AS_NC}=0;
 
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
 unless (defined $print_dPSI){
