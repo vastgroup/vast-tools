@@ -39,6 +39,7 @@ my $no_plot;
 my $plot_only_samples;
 my $print_dPSI;
 my $print_sets;
+my $max_dPSI;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -61,6 +62,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "paired" => \$paired,
 			  "print_dPSI" => \$print_dPSI,
 			  "print_sets" => \$print_sets,
+			  "max_dPSI"   => \$max_dPSI,
 			  "no_plot" => \$no_plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
@@ -125,8 +127,9 @@ Compare two sample sets to find differentially regulated AS events
         --print_sets             Prints files with different sets for comparisons:
                                    - CS: all events with coverage and constitutively spliced (PSI>95 for AltEx, PSI<5 for IR)
                                    - CR: all events with coverage and cryptically spliced (PSI<5 for AltEx, PSI>95 for IR)
-                                   - AS_NC: all events with coverage, alternative (10<PSI<90 in a group or range > min_dPSI)
-                                            and that do not change between the two conditions.
+                                   - AS_NC: all events with coverage, alternative (10 < av_PSI < 90 in a group)
+                                            and that do not change between the two conditions (abs(dPSI)< max_dPSI)
+        --max_dPSI i             Maximum dPSI to consider an AS non-changing (default min_dPSI/5)
         --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
@@ -221,9 +224,10 @@ open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do
 
 ####### Other sets file
 if (defined $print_sets){
+    $max_dPSI = $min_dPSI/5 if (!defined $max_dPSI);
     my $CS_file="CS-$out_root.tab";
     my $CR_file="CR-$out_root.tab";
-    my $AS_file="AS_NC-$out_root.tab";
+    my $AS_file="AS_NC-$out_root-Max_dPSI$max_dPSI.tab";
     
     open (SET_CS, ">$folder/$CS_file") or errPrintDie "Can't open the CS file\n"; # output file 
     open (SET_CR, ">$folder/$CR_file") or errPrintDie "Can't open the CR file\n"; # output file 
@@ -233,7 +237,6 @@ if (defined $print_sets){
 #### prepare to obtain gene IDs for GO analyses
 my %ID_gene;
 if (defined $get_GO){
-    
     if (defined $ID_file){
 	open (KEY, $ID_file) || errPrintDie "Can't open ID keys file ($ID_file)\n";
 	while (<KEY>){
@@ -419,7 +422,7 @@ while (<PSI>){
 	    }
 	}
 	### Set of AS with no change
-	if (abs($dPSI) < $min_dPSI/5 && (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10)){
+	if (abs($dPSI) < $max_dPSI && (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10)){
 	    unless (defined $print_dPSI){
 		print SET_AS "$_\n"; # dPSI is not printed so it can the be run with plot
 	    }
@@ -496,7 +499,7 @@ while (<PSI>){
 	    }
 	}
 	### Set of AS with no change
-	if (abs($av_paired_dPSI) < $min_dPSI/5 && (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10)){
+	if (abs($av_paired_dPSI) < $max_dPSI && (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10)){
 	    unless (defined $print_dPSI){
 		print SET_AS "$_\n"; # dPSI is not printed so it can the be run with plot
 	    }
