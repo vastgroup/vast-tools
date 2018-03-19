@@ -221,9 +221,9 @@ open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do
 
 ####### Other sets file
 if (defined $print_sets){
-    $CS_file="CS-$out_root.tab";
-    $CR_file="CR-$out_root.tab";
-    $AS_file="AS_NC-$out_root.tab";
+    my $CS_file="CS-$out_root.tab";
+    my $CR_file="CR-$out_root.tab";
+    my $AS_file="AS_NC-$out_root.tab";
     
     open (SET_CS, ">$folder/$CS_file") or errPrintDie "Can't open the CS file\n"; # output file 
     open (SET_CR, ">$folder/$CR_file") or errPrintDie "Can't open the CR file\n"; # output file 
