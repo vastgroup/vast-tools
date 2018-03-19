@@ -219,6 +219,17 @@ my $out_root="$root-dPSI$min_dPSI$tail" unless (defined $output_file);
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
 
+####### Other sets file
+if (defined $print_sets){
+    $CS_file="CS-$out_root.tab";
+    $CR_file="CR-$out_root.tab";
+    $AS_file="AS_NC-$out_root.tab";
+    
+    open (CS, ">$folder/$CS_file") or errPrintDie "Can't open the CS file\n"; # output file 
+    open (CR, ">$folder/$CR_file") or errPrintDie "Can't open the CR file\n"; # output file 
+    open (AS, ">$folder/$AS_file") or errPrintDie "Can't open the AS_NC file\n"; # output file 
+}
+
 #### prepare to obtain gene IDs for GO analyses
 my %ID_gene;
 if (defined $get_GO){
