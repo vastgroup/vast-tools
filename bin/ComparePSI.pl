@@ -418,6 +418,15 @@ while (<PSI>){
 		}
 	    }
 	}
+	### Set of AS with no change
+	if (abs($dPSI) < $min_dPSI/5 && (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10)){
+	    unless (defined $print_dPSI){
+		print SET_AS "$_\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+		print SET_AS "$_\t$dPSI\n";
+	    }
+	}
     }
     else { # if paired: calculates each pair's dPSI & the lower/higher of these
 	# get each dPSI and the average
@@ -486,7 +495,17 @@ while (<PSI>){
 		}
 	    }
 	}
+	### Set of AS with no change
+	if (abs($av_paired_dPSI) < $min_dPSI/5 && (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10)){
+	    unless (defined $print_dPSI){
+		print SET_AS "$_\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+	    print SET_AS "$_\t$dPSI\n";
+	    }
+	}
     }
+
     # prints out the genes for BG
     if (defined $get_GO){
 	unless ($use_names){
