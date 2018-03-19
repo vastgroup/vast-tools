@@ -117,7 +117,7 @@ Zebrafish (danRer10) - 2.2G [vastdb.dre.16.02.18.tar.gz](http://vastdb.crg.eu/li
 > wget http://vastdb.crg.eu/libs/vastdb.dre.16.02.18.tar.gz
 > tar xzvf vastdb.dre.15.01.18.tar.gz
 ~~~~
-Sea urchin (Spur3.1) - 1.2G [vastdb.spu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.16.01.18.tar.gz):
+Sea urchin (Spur3.1) - 1.2G [vastdb.spu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.16.02.18.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.spu.16.02.18.tar.gz
 > tar xzvf vastdb.spu.16.02.18.tar.gz
