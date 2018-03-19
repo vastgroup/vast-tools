@@ -225,9 +225,9 @@ if (defined $print_sets){
     $CR_file="CR-$out_root.tab";
     $AS_file="AS_NC-$out_root.tab";
     
-    open (CS, ">$folder/$CS_file") or errPrintDie "Can't open the CS file\n"; # output file 
-    open (CR, ">$folder/$CR_file") or errPrintDie "Can't open the CR file\n"; # output file 
-    open (AS, ">$folder/$AS_file") or errPrintDie "Can't open the AS_NC file\n"; # output file 
+    open (SET_CS, ">$folder/$CS_file") or errPrintDie "Can't open the CS file\n"; # output file 
+    open (SET_CR, ">$folder/$CR_file") or errPrintDie "Can't open the CR file\n"; # output file 
+    open (SET_AS, ">$folder/$AS_file") or errPrintDie "Can't open the AS_NC file\n"; # output file 
 }
 
 #### prepare to obtain gene IDs for GO analyses
