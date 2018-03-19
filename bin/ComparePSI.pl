@@ -415,6 +415,7 @@ while (<PSI>){
 		else {
 		    print SET_AS "$_\t$dPSI\n";
 		}
+		$tally_extra{$type}{AS_NC}++;
 	    }
 	    ### Prints cryptic and constitutive
 	    if ($type eq "IR"){
@@ -426,6 +427,8 @@ while (<PSI>){
 		    print SET_CS "$_\t$dPSI\n" if $max_A < 5 && $max_B < 5;
 		    print SET_CR "$_\t$dPSI\n" if $min_A > 95 && $min_B > 95;
 		}
+		$tally_extra{$type}{CS}++ if $max_A < 5 && $max_B < 5;
+		$tally_extra{$type}{CR}++ if $min_A > 95 && $min_B > 95;
 	    }
 	    else {
 		unless (defined $print_dPSI){
@@ -436,6 +439,8 @@ while (<PSI>){
 		    print SET_CR "$_\t$dPSI\n" if $max_A < 5 && $max_B < 5;
 		    print SET_CS "$_\t$dPSI\n" if $min_A > 95 && $min_B > 95;
 		}
+		$tally_extra{$type}{CR}++ if $max_A < 5 && $max_B < 5;
+		$tally_extra{$type}{CS}++ if $min_A > 95 && $min_B > 95;
 	    }
 	}
     }
@@ -516,6 +521,7 @@ while (<PSI>){
 		else {
 		    print SET_AS "$_\t$av_paired_dPSI\n";
 		}
+		$tally_extra{$type}{AS_NC}++;
 	    }
 	    ### Prints cryptic and constitutive
 	    if ($type eq "IR"){
@@ -527,6 +533,8 @@ while (<PSI>){
 		    print SET_CS "$_\t$av_paired_dPSI\n" if $max_A < 5 && $max_B < 5;
 		    print SET_CR "$_\t$av_paired_dPSI\n" if $min_A > 95 && $min_B > 95;
 		}
+		$tally_extra{$type}{CS}++ if $max_A < 5 && $max_B < 5;
+		$tally_extra{$type}{CR}++ if $min_A > 95 && $min_B > 95;
 	    }
 	    else {
 		unless (defined $print_dPSI){
@@ -537,6 +545,8 @@ while (<PSI>){
 		    print SET_CR "$_\t$av_paired_dPSI\n" if $max_A < 5 && $max_B < 5;
 		    print SET_CS "$_\t$av_paired_dPSI\n" if $min_A > 95 && $min_B > 95;
 		}
+		$tally_extra{$type}{CR}++ if $max_A < 5 && $max_B < 5;
+		$tally_extra{$type}{CS}++ if $min_A > 95 && $min_B > 95;
 	    }
 	}
     }
