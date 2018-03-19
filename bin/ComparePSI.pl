@@ -38,6 +38,7 @@ my $folder;
 my $no_plot;
 my $plot_only_samples;
 my $print_dPSI;
+my $print_sets;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -59,6 +60,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "use_names" => \$use_names,
 			  "paired" => \$paired,
 			  "print_dPSI" => \$print_dPSI,
+			  "print_sets" => \$print_sets,
 			  "no_plot" => \$no_plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
@@ -120,6 +122,11 @@ Compare two sample sets to find differentially regulated AS events
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
         --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
                                    - It does not allow ploting.
+        --print_sets             Prints files with different sets for comparisons:
+                                   - CS: all events with coverage and constitutively spliced (PSI>95 for AltEx, PSI<5 for IR)
+                                   - CR: all events with coverage and cryptically spliced (PSI<5 for AltEx, PSI>95 for IR)
+                                   - AS_NC: all events with coverage, alternative (10<PSI<90 in a group or range > min_dPSI)
+                                            and that do not change between the two conditions.
         --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
