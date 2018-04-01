@@ -35,7 +35,7 @@ my $get_GO;
 my $paired;
 my $use_names;
 my $folder;
-my $no_plot;
+my $plot; # changed from no_plot to plot (01/04/18)
 my $plot_only_samples;
 my $print_dPSI;
 my $print_sets;
@@ -62,8 +62,8 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "paired" => \$paired,
 			  "print_dPSI" => \$print_dPSI,
 			  "print_sets" => \$print_sets,
-			  "max_dPSI"   => \$max_dPSI,
-			  "no_plot" => \$no_plot,
+			  "max_dPSI=i"   => \$max_dPSI,
+			  "plot" => \$plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
     );
@@ -130,7 +130,7 @@ Compare two sample sets to find differentially regulated AS events
                                    - AS_NC: all events with coverage, alternative (10 < av_PSI < 90 in a group)
                                             and that do not change between the two conditions (abs(dPSI)< max_dPSI)
         --max_dPSI i             Maximum dPSI to consider an AS non-changing (default min_dPSI/5)
-        --no_plot                Does NOT plot the DS events using \'plot\' (default OFF)
+        --plot_PSI               Plots the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
                                    - min_dPSI: minimum value for the average of each paired dPSI
@@ -164,7 +164,7 @@ errPrintDie "If paired comparison, the number of replicates must be the same\n" 
 $folder = "." unless (defined $folder);
 
 #### Check if plot and print_dPSI are active together
-errPrintDie "print_dPSI cannot be used with plot (please use --no_plot)\n" if (defined $print_dPSI) && (!defined $no_plot);
+errPrintDie "print_dPSI cannot be used with plot\n" if (defined $print_dPSI) && (defined $plot);
 
 #### opens INCLUSION TABLE
 open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
@@ -577,7 +577,7 @@ if (defined $get_GO){
     close EXSK;
 }
 
-unless (defined $no_plot){
+if (defined $plot){
     verbPrint "Plotting differentially spliced AS events\n";
     my $config_file = $output_file;
     $config_file =~ s/\..+$//; # ~ getting a root
@@ -637,9 +637,8 @@ print "\n";
 
 if (defined $print_sets){
     print 
-"*** Summary statistics for extra event sets:
-
-\tAS_TYPE\tConstitutive\tCryptic\tAS non-changing
+"*** Summary statistics for extra event sets (Max_dPSI=$max_dPSI):
+\tAS_TYPE\tConstitutive\tCryptic\tAS_non_change
 \tMicroexons\t$tally_extra{MIC}{CS}\t$tally_extra{MIC}{CR}\t$tally_extra{MIC}{AS_NC}
 \tLong_AltEx\t$tally_extra{AltEx}{CS}\t$tally_extra{AltEx}{CR}\t$tally_extra{AltEx}{AS_NC}
 \tIntron_ret\t$tally_extra{IR}{CS}\t$tally_extra{IR}{CR}\t$tally_extra{IR}{AS_NC}
