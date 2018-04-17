@@ -20,6 +20,7 @@ Table of Contents:
 	- [Plotting](#plotting)
 	- [Simplifying Combine Table](#simplifying-combine-table)
 - [Combine output format](#combine-output-format)
+- [Investigating event-level conservation](#investigating-event-level-conservation)
 - [Interconnection with VastDB web](#interconnection-with-vastdb-web)
 - [Interconnection with Matt](#interconnection-with-matt)
 - [Issues](#issues)
@@ -29,7 +30,7 @@ Table of Contents:
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://agohr.crg.eu/matt), a toolkit for downstream analyses of alternative splicing.
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://agohr.crg.eu/matt), a toolkit for downstream analyses of alternative splicing.
 
 Requirements
 ------------
@@ -516,6 +517,9 @@ Then, for each combined sample, a pair of columns:
 
 As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
 
+Investigating event-level conservation
+--------------------------------------
+A major feature of VAST-TOOLS event IDs is that they are fixed for each species (similar to Ensembl gene IDs, for example). This facilitates PSI comparisons across multiple samples and conditions (see next section) and evolutionary comparisons at the event level. Files with the correspondence for a given event ID between species are available for download in [VastDB](http://vastdb.crg.eu/wiki/Downloads). For instance, for each event ID in Hsa, the corresponding orthologous event ID in Mmu (if available) can be found in this [file](http://vastdb.crg.eu/downloads/Human/VASTDB_CONSERVATION_Hsa108_hg19_to_Mmu139_mm9.tab.gz). This unique feature allows to readily interconnect VAST-TOOLS results for different species.
 
 Interconnection with VastDB Web
 -------------------------------
