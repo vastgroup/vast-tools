@@ -110,9 +110,10 @@ if (defined $get_GO){
 }
 
 if (!defined($ARGV[0]) || $helpFlag){
-    die "\nUsage: vast-tools compare INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+    die "\nUsage: vast-tools compare /path/to/INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
-Compare two sample sets to find differentially regulated AS events
+Compare two sample sets to find differentially regulated AS events. 
+INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command combine.
 
 [General options] 
         --min_dPSI i             Minimum delta PSI of the averages (default 15)
