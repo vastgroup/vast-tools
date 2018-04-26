@@ -87,6 +87,7 @@ Merges vast-tools outputs from multiple subsamples into grouped samples
 OPTIONS: 
         -g, --groups file        File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
+                                 Must contain sub-folders to_combine or expr_out from align steps.
         --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
         --dbDir db               Database directory (default VASTDB)
         --IR_version 1/2         Version of the Intron Retention pipeline (1 or 2) (default 2)
@@ -116,7 +117,7 @@ my $groups_fullpath=abs_path($groups);
 
 verbPrint "Using VASTDB -> $dbDir" if (defined $expr);
 # change directories
-errPrintDie "The output directory \"$folder/to_combine\" does not exist" unless (-e "$folder/to_combine");
+errPrintDie "The output directory \"$folder/to_combine\" does not exist. Check path specified with argument -o." unless (-e "$folder/to_combine");
 chdir($folder) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $folder";
 

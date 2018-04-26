@@ -81,6 +81,7 @@ Combine multiple samples analyzed using \"vast-tools align\" into a single summa
 
 OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
+				Must contain sub-folders to_combine or expr_out from align steps.
 	-sp Hsa/Mmu/etc		Species selection (mandatory)
 	-a			Genome assembly of the output coordinates (only for -sp Hsa or Mmu) 
 				For -sp Hsa: hg19 or hg38, (default hg19)
@@ -290,6 +291,8 @@ if (@rpkmFiles > 0) {
 }
 if ($N + @rpkmFiles == 0) {
     verbPrint "Could not find any files to combine. If they are compressed, please decompress them first.\n";
+    verbPrint "The path specified by -o needs to contain the sub-folder to_combine or expr_out.\n";
+    verbPrint "By default this is -o vast_out, which contains vast_out/to_combine.\n";
 }
 
 verbPrint "Completed " . localtime;
