@@ -12,6 +12,8 @@ $min_SD=5; # min standard deviation of the event (def=5)
 #$min_N=10; # min number of samples with good coverage (def=10)
 $noVLOW=0;
 $p_IR=0;
+$print_all = "";
+$samples = "";
 $command_line=join(" ", @ARGV);
 
 Getopt::Long::Configure("no_auto_abbrev");
@@ -22,6 +24,7 @@ GetOptions(               "min_SD=i" => \$min_SD,
                           "help" => \$helpFlag,
                           "p_IR" => \$p_IR,
                           "noVLOW" => \$noVLOW,
+			  "samples=s" => \$samples,
 			  "log" => \$log,
 			  "onlyEXSK" => \$onlyEXSK,
 			  "add_names" => \$AddName
@@ -47,24 +50,32 @@ sub verbPrint {
     }
 }
 
+# gets the array of samples
+if ($samples){
+    @samples=split(/\,/,$samples);
+    $N_samples=$#samples+1;
+}
 
+# sanity checks for min_Fraction
+errPrintDie "min_Fr has to be between 0 and 1\n" if $min_Fraction > 1;
+errPrintDie "min_N cannot be higher than N of samples\n" if $min_N > $N_samples;
 
 # defining default output file name
 ($root)=$input_file=~/(.+)\./;
-#$root=~s/.+\///;
 $root_out=$root;
 $root_out.="-minN_$min_N" if $min_N;
-$root_out.="-minFr_$min_Fr" if $min_Fraction;
+$root_out.="-minFr_$min_Fraction" if $min_Fraction;
 $root_out.="-minSD_$min_SD";
 $root_out.="-noVLOW" if $noVLOW;
 $root_out.="-p_IR" if $p_IR;
 $root_out.="-onlyEXSK" if $onlyEXSK;
+$root_out.="-samples$N_samples" if $samples;
 
 $output_file="$root_out-Tidy.tab" unless $output_file;
 $log_file="$root_out-Tidy.log" if $log;
 
 if (!$ARGV[0] || $helpFlag){
-    die "\nUsage: vast-tools tidy INCLUSION_LEVELS_FULL-SpN.tab (--min_N min_N_samples OR --min_Fr min_fraction) --min_SD min_SD [options]
+    die "\nUsage: vast-tools tidy INCLUSION_LEVELS_FULL-SpN.tab \(--min_N min_N_samples OR --min_Fr min_fraction\) --min_SD min_SD [options]
 
 Prepares and filters a vast-tools output for general analyses.
 
@@ -72,15 +83,16 @@ Prepares and filters a vast-tools output for general analyses.
         -min_N i                Minimum number of samples with good coverage. Alternatively, you can define it by fraction
         -min_Fr f               Minimum fraction of samples with good coverage. 
         -min_SD i               Minimum standard deviation of the event (def=5)
+        -samples S1,S2,...      Samples to be considered (default all)
         -outFile                Output file name (default based on option parameters)
         --noVLOW                Do not use samples with VLOW coverage (default OFF)
         --p_IR                  Filter IR by the p-value of the binomial test (default OFF)
         --onlyEXSK              Outputs only EXSK events (default OFF)
-        --add_names             Adds gene name to the event_ID. E.g. Mta1=MmuEX0029874 (default OFF)
+        --add_names             Adds gene name to the event_ID. E.g. Mta1\=MmuEX0029874 (default OFF)
         --log                   Print the summary stats into a file (default OFF)
 
 
-*** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
+*** Questions \& Bug Reports: Manuel Irimia \(mirimia\@gmail.com\)
 
 ";
 }
@@ -94,7 +106,6 @@ open (O, ">$output_file") || die "Can't open output file ($output_file)\n";
 ### saying hi:
 verbPrint "Cleaning and filtering $ARGV[0]\n";
 
-
 ### Printing a new clean heading (only Event_ID and PSI)
 print O "EVENT";
 $head=<I>;
@@ -102,9 +113,23 @@ chomp($head);
 @H=split(/\t/,$head);
 for $i (6..$#H){
     if ($i%2==0){
-	print O "\t$H[$i]";
-        $TISSUES{$H[$i]}=1;
-	$max_N++;
+	if ($samples){
+	    foreach $j (0..$#samples){
+		if ($samples[$j] eq $H[$i]){
+#		    $samples[$j] = $i;
+		    $valid_sample[$i] = 1;
+		    print O "\t$H[$i]";
+		    $TISSUES{$H[$i]}=1;
+		    $max_N++;
+		}
+	    }
+	}
+	else {
+	    $valid_sample[$i] = 1;
+	    print O "\t$H[$i]";
+	    $TISSUES{$H[$i]}=1;
+	    $max_N++;
+	}
     }
 }
 print O "\n";
@@ -119,7 +144,7 @@ while (<I>){
     $event=$t[1];
     $length=$t[3];
     $type=$t[5];
-
+    
     next if $length==0; # to remove the internal ss in Alt3 and Alt5
     next if $onlyEXSK && ($type=~/Alt/ || $type=~/IR/);
     
@@ -132,6 +157,7 @@ while (<I>){
     
     foreach $i (6..$#t){
 	if ($i%2==0){
+	    next if !$valid_sample[$i];
 	    if ($t[$i+1]=~/$Q/){
 		if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 		    ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
