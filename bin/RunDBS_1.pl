@@ -19,6 +19,7 @@ my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
+my ($rc1,$rc2,$nrc1,$nrc2)=(undef,undef,undef,undef);  # if non of these specified by user, VTS tried to infer strandness of reads
 my $helpFlag = 0;
 my $bowtie = "bowtie"; # by default;
 my $species = "Hsa"; # by default;
@@ -93,11 +94,23 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
                           "preTrimmed" => \$trimmed,
                           "useFastq" => \$fastaOnly,
 			  "riboFoot" => \$ribofoot,
-			  "resume" =>\$resume
+			  "resume" =>\$resume,
+			  "rc1" => \$rc1,
+			  "rc2" => \$rc2,
+			  "nrc1" => \$nrc1,
+			  "nrc2" => \$nrc2,
 			  );
 
 our $EXIT_STATUS = 0;
 
+if(defined($rc1) && defined($nrc1)){errPrintDie("Only one of these two arguments --rc1 and --nrc1 can be given at a time.")}
+if(defined($rc2) && defined($nrc2)){errPrintDie("Only one of these two arguments --rc2 and --nrc2 can be given at a time.")}
+if(defined($rc1)){$rc1=1;}
+if(defined($nrc1)){$rc1=0;}
+if(defined($rc2)){$rc2=1;}
+if(defined($nrc2)){$rc2=0;}
+if(defined($rc1) && !defined($rc2)){$rc2=0;}
+if(defined($rc2) && !defined($rc1)){$rc1=0;}
 
 sub extractReadLen {  # extracts automatically read length from fastq or fastq.gz file
 	my $fn=$_[0]; # extracts the first 5000 reads and if all have the same length, returns this length
@@ -267,13 +280,18 @@ OPTIONS:
 	--findSubtracted	Set this flag to start alignment from genome-subtracted
 				reads (default off). If enabled, must supply *-e.fq as input
 	--trimOnce		Only use first 50bp of reads, if paired, only use 
-					50 from fwd and 50 from rev (default off)
+				50 from fwd and 50 from rev (default off)
 	--stepSize i		Trim 50bp every --stepSize (default is 25)
 	--preTrimmed		If you are trying to use pre-trimmed fasta/q files 
-					(only output from Trim.pl, default off)
+				(only output from Trim.pl, default off)
 	--useFastq		This option is only necessary if you have pre-trimmed reads 
-					in fastq not fasta format (default off)
+				in fastq not fasta format (default off)
 	--resume		Resume a previous run using previous intermediate results
+	--rc1,  --rc2		Reverse-complement reads1 / reads2
+	--nrc1, --nrc2		Do not reverse-complement reads1 / reads2  
+	                	If any of these four arguments is given, VAST-TOOLs will not try to
+				automatically infer the strandness of the reads, and reverse-complement
+				or not reverse-complement the reads as specified through these arguments.
 	-h, --help		Print this help message
 
 
@@ -459,7 +477,11 @@ unless($resumed){
        	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
        	my ($percR1p,$percR1n,$percR2p,$percR2n)=("NA","NA","NA","NA");
 
-       	open($fh, "".getPrefixCmd($fq1)." | head -n $N | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
+       	if(!defined($rc1)){
+       		open($fh, "".getPrefixCmd($fq1)." | head -n $N | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
+       	}else{ # user has defined if reads1 should be reversed or not
+       		if($rc1==1){($p1,$n1)=(0,5000)}else{($p1,$n1)=(5000,0)}
+       	}
        	if($p1+$n1<500){die "Too few first reads (<500) could be mapped to mRNA library for detecting strand-orientation of reads. Maybe wrong species selected?";}
        	($percR1p,$percR1n)=( ($p1/($p1+$n1)),($n1/($p1+$n1)) );
 		$percR1p = sprintf("%.4f",$percR1p);
@@ -467,7 +489,11 @@ unless($resumed){
 		verbPrint "   fraction of first reads mapping to fwd / rev strand : $percR1p / $percR1n";
 
        	if($pairedEnd){  # same for second reads of each pair
-       		open($fh, "".getPrefixCmd($fq2)." | head -n $N | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
+       		if(!defined($rc2)){	
+       			open($fh, "".getPrefixCmd($fq2)." | head -n $N | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
+       		}else{ # user has defined if reads1 should be reversed or not
+       			if($rc2==1){($p2,$n2)=(0,5000)}else{($p2,$n2)=(5000,0)}
+       		}
         	if($p2+$n2<500){die "Too few second reads (<500) could be mapped to mRNA library for detecting strand-orientation of reads. Maybe wrong species selected?";}
        		($percR2p,$percR2n)=( ($p2/($p2+$n2)),($n2/($p2+$n2)) );
 		$percR2p = sprintf("%.4f",$percR2p);
