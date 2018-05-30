@@ -58,7 +58,7 @@ if ($samples){
 
 # sanity checks for min_Fraction
 errPrintDie "min_Fr has to be between 0 and 1\n" if $min_Fraction > 1;
-errPrintDie "min_N cannot be higher than N of samples\n" if $min_N > $N_samples;
+errPrintDie "min_N ($min_N) cannot be higher than N of samples ($N_samples)\n" if $min_N > $N_samples && $samples;
 
 # defining default output file name
 ($root)=$input_file=~/(.+)\./;
