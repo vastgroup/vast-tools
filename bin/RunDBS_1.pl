@@ -261,7 +261,6 @@ OPTIONS:
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
-	--ns                    RNA-seq reads are treated as if they were strand-unspecific
 	--expr			For expression analyses: -expr 
 				(PSIs plus cRPKM calculations) (default off)
 	--exprONLY		For expression analyses: -exprONLY (only cRPKMs) 
@@ -287,11 +286,15 @@ OPTIONS:
 	--useFastq		This option is only necessary if you have pre-trimmed reads 
 				in fastq not fasta format (default off)
 	--resume		Resume a previous run using previous intermediate results
+
+	By default, VAST-TOOLs will try to detect the strandness of the RNA-seq data automatically,
+	and reverse-complement reads if necessary such that all map to the forward strand. If you
+	specify any of the following arguments, the strandness will not be tested and reads will
+	be treated as defined. This may be useful, if the strandness test fails. 	
 	--rc1,  --rc2		Reverse-complement reads1 / reads2
-	--nrc1, --nrc2		Do not reverse-complement reads1 / reads2  
-	                	If any of these four arguments is given, VAST-TOOLs will not try to
-				automatically infer the strandness of the reads, and reverse-complement
-				or not reverse-complement the reads as specified through these arguments.
+	--nrc1, --nrc2		Do not reverse-complement reads1 / reads2
+	--ns			RNA-seq reads will be treated as if they were strand-unspecific  
+
 	-h, --help		Print this help message
 
 
