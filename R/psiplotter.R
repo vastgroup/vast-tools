@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-# Author: Kevin Ha, 2014
-# k.ha@mail.utoronto.ca
+# Authors: Kevin Ha (2014) - k.ha@mail.utoronto.ca,
+#          Javier Tapial (2018) - javier.tapial@crg.eu
 
 # Copyright (C) 2014-2017 Kevin Ha
 #
@@ -83,7 +83,6 @@ Customizing plots [optional]:
   file will be ignored. This may be useful if you want to customize the
   type of samples in your plots.
 "
-
 option.list <- list(
   make_option(c("-v", "--verbose"), type = "logical", default = TRUE,
               meta="TRUE|FALSE",
@@ -106,7 +105,24 @@ option.list <- list(
   make_option(c("-u", "--groupMeans"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "plotGroupMeans",
               help = "Plot mean PSIs for groups defined in config file. Requires
-              --config option. [%default]"),
+              --config option [%default]"),
+  make_option(c("-s", "--subgroups"), type = "logical", default = FALSE,
+              meta="TRUE|FALSE", dest = "subgroups",
+              help="Pool samples in subgroups according to the information in the
+              config file. PSI/cRPKMs of a subgroup is the arithmetic mean of the
+              PSI/cRPKMs of the samples in it. Requires --config option and a 
+              'SubgroupName' column in the config file. Using this option with 
+              -E = TRUE is an experimental feature and can be slow. [%default]"),
+  make_option(c("-q","--qual"), type = "character",
+              default="VLOW",
+              dest="qual",
+              help="Minimum quality for a PSI value to be plotted. Not used for
+              cRPKM plots. Must be a valid vast-tools quality score: 'N', 'VLOW',
+              'LOW', 'OK' or 'SOK'. [%default]"),
+  make_option(c("-t","--trimColnames"), type = "character", default = NULL,
+              meta = NULL, dest = "trimColnames",
+              help = "String that will be searched for and trimmed at the end of
+              every sample column in the input table."),
   make_option(c("-W", "--width"), type = "numeric", default = NULL, dest = "width",
               help = "Width of graphics region in inches (similar to width in
               pdf()) [default: automatic]"),
@@ -120,6 +136,10 @@ option.list <- list(
   make_option(c("--expr"), type = "logical", default = FALSE, dest = "crpkm",
               meta = "TRUE|FALSE",
               help = "Plot cRPKM instead of PSI. [%default]"),
+  make_option(c("--counts"), type = "logical", default = FALSE, dest = "counts",
+              meta = "TRUE|FALSE",
+              help = "Set to TRUE to plot cRPKMs from tables that have two columns
+              per sample, one for cRPKMs and one for raw read counts. [%default]"),
   make_option(c("--debug"), type = "logical", default = FALSE,
               meta="TRUE|FALSE", dest = "debug",
               help = "Print out options list for debugging. [%default]")
@@ -128,6 +148,11 @@ parser <- OptionParser(option_list = option.list,
                        desc = desc,
                        usage = "usage: %prog [options] INCLUSION_LEVELS.tab")
 opt <- parse_args(parser, args = args, positional_arguments = TRUE)
+
+if(!opt$options$qual %in% c("N","VLOW","LOW","OK","SOK")){
+  stop("'--qual' must be a valid quality score value.
+       Valid values are: N, VLOW, LOW, OK, or SOK")
+}
 
 # Load remaining packages
 loadPackages(c("psiplot", "methods", "labeling"),
@@ -151,6 +176,14 @@ if (opt$options$crpkm && compareVersion(v, suggested) == -1) {
                 "have been squashed in these updates!"))
 }
 
+suggested_subg <- '2.2.0'
+if(opt$options$subg && compareVersion(v,suggested_subg) == -1) {
+  stop(paste("Plotting subgroups is not supported in your version of the",
+             "psiplot package.\n The minimum psiplot version required to plot",
+             "subgroups is", suggested_subg, ".\n Please update psiplot before",
+             "running this script.\n",
+             "See https://github.com/kcha/psiplot for additional details."))
+}
 # Check options ###############################################################
 if (length(opt$args) == 0) {
   print_help(parser)
@@ -232,6 +265,8 @@ verbPrint("// Plotting...")
 if (!is.null(opt$options$config)) {
     verbPrint(paste("// Plot group means as horizontal lines:",
                 opt$options$plotGroupMeans))
+    verbPrint(paste("// Pool samples in subgroups:",
+                opt$options$subgroups))
 }
 
 # Set output file
@@ -267,18 +302,24 @@ pb <- txtProgressBar(style = 3, file = stderr())
 for (i in 1:nplot) {
   if (opt$options$crpkm) {
     result <- suppressWarnings(plot_expr(all_events[i,], config = config,
+                                         subg = opt$options$subgroups,
                                          groupmean = opt$options$plotGroupMeans,
                                          gridlines = opt$options$gridLines,
                                          cex.xaxis = 9, cex.yaxis = 10, cex.main = 8,
-                                         plot = FALSE))
+                                         plot = FALSE, show_group_legend = F,
+                                         counts = opt$options$counts,
+                                         trim_colnames = opt$options$trimColnames))
   } else {
     result <- suppressWarnings(plot_event(all_events[i,], config = config,
+                                          subg = opt$options$subgroups,
+                                          qual = opt$options$qual,
                                           ylim = c(0,100),
                                           errorbar = !opt$options$noErrorBar,
                                           groupmean = opt$options$plotGroupMeans,
                                           gridlines = opt$options$gridLines,
                                           cex.xaxis = 9, cex.yaxis = 10, cex.main = 8,
-                                          plot = FALSE))
+                                          plot = FALSE, show_group_legend = F,
+                                          trim_colnames = opt$options$trimColnames))
   }
   print(result)
   setTxtProgressBar(pb, i/nplot)

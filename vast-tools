@@ -91,7 +91,7 @@ Usage: $0 sub-commands [options]
 *** Questions \& Bug Reports: 
     - align, merge, combine, compare, tidy: Manuel Irimia (mirimia\@gmail.com)
     - diff: Tim Sterne-Weiler (tim.sterne.weiler\@utoronto.ca)
-    - plot: Kevin Ha (k.ha\@mail.utoronto.ca)
+    - plot: Kevin Ha (k.ha\@mail.utoronto.ca), Javier Tapial (javier.tapial\@crg.eu)
 
 "
 }
