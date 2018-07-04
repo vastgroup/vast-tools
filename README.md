@@ -30,7 +30,7 @@ Table of Contents:
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://agohr.crg.eu/matt), a toolkit for downstream analyses of alternative splicing.
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://matt.crg.eu), a toolkit for downstream analyses of alternative splicing.
 
 Requirements
 ------------
@@ -527,7 +527,7 @@ Interconnection with VastDB Web
 
 Interconnection with Matt
 -------------------------------
-[Matt](http://agohr.crg.eu/matt) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
+[Matt](http://matt.crg.eu) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
 
 
 Issues
