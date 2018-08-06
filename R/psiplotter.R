@@ -238,7 +238,7 @@ if (!is.null(opt$options$config)) {
 suffix <- ifelse(opt$options$crpkm, "cRPKM_plots.pdf", "PSI_plots.pdf")
 outfile <- suffix
 if (!using_stdin) {
-  outfile <- sub("\\.[^.]*(\\.gz)?$", paste0(".", suffix), basename(file))
+  outfile <- sub("(\\.[^.]*(\\.gz)?)?$", paste0(".", suffix), basename(file))
 }
 
 # Check if output directory was specified

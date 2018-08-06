@@ -30,7 +30,7 @@ Table of Contents:
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://agohr.crg.eu/matt), a toolkit for downstream analyses of alternative splicing.
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://matt.crg.eu), a toolkit for downstream analyses of alternative splicing.
 
 Requirements
 ------------
@@ -240,11 +240,11 @@ from the raw reads).
 
 Although you can specify two fastq files to vast-tools in a 'paired-end' format,
 the program treats both mates independently because of trimming, but will not double
-count the any trim or mate pair more than once  (see above). Reads must be given to the program
+count any trim or mate pair more than once  (see above). Reads must be given to the program
 such that `vast-tools align fwd_mate_1.fq.gz rev_mate_2.fq.gz` refers to two fastq
 files of identical line number where Read1 from file_1 is mated to Read1 from file_2. NOTE: if reads are downloaded from SRA as sra files, use ``fastq-dump --split-file ./sample.sra`` to generate separate fastq files for each paired-end (plus a third file with unmatched mates).
 
-Finally, from `vast-tools v1.0.0` it is possible to calculate intron retention using two slightly different approaches with the ``--IR_version 1/2`` option. `Version 1` is the one used in Braunschweig *et al* 2014. `Version 2` incorporates alternative exon-exon junction for skipping reads to obtain a more representative Percent Intron Retention at the transcript level.
+Finally, from `vast-tools v1.0.0` onwards it is possible to calculate intron retention using two slightly different approaches with the ``--IR_version 1/2`` option. `Version 1` is the one used in Braunschweig *et al* 2014. `Version 2` incorporates alternative exon-exon junction for skipping reads to obtain a more representative Percent Intron Retention at the transcript level.
 
 ### Merging Outputs
 
@@ -277,7 +277,7 @@ Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`)
 ### Strand-specific RNAseq data
 
 From release v2.0.0, ``align`` recognizes automatically if RNAseq data are strand-specific and will align them strand-specifically.
-Strand-unspecific RNAseq data will be aligned strand-unspecifically (equivalent to previous versions of VAST-TOOLS). This information will be gathered in a new file, SAMPLE.info, which will be generated together with the rest of outputs from ``align``. This file will be subsequently used by other VAST-TOOLS modules. If the file is absent, VAST-TOOLS will assume an old version of VAST-TOOLS ``align`` was used and that the sample was thus mapped strand-unspecifically. Several samples with strand-specific/strand-unspecific RNAseq data can be merged into a new strand-specific/strand-unspecific sample with ``merge``. Although it is also possible to merge samples with strand-specific **and** strand-unspecific RNAseq data **into one new sample**, it is not recommended to do so, as in this case the mappability correction will be applied in strand-unspecific mode which may introduce a bias to the final PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``combine``.
+Strand-unspecific RNAseq data will be aligned strand-unspecifically (equivalent to previous versions of VAST-TOOLS). This information will be gathered in a new file, SAMPLE.info, which will be generated together with the rest of outputs from ``align``. This file will subsequently be used by other VAST-TOOLS modules. If the file is absent, VAST-TOOLS will assume an old version of VAST-TOOLS ``align`` was used and that the sample was thus mapped strand-unspecifically. Several samples with strand-specific/strand-unspecific RNAseq data can be merged into a new strand-specific/strand-unspecific sample with ``merge``. Although it is also possible to merge samples with strand-specific **and** strand-unspecific RNAseq data **into one new sample**, it is not recommended to do so, as in this case the mappability correction will be applied in strand-unspecific mode which may introduce a bias to the final PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``combine``.
 
 
 ### Combining Results 
@@ -286,13 +286,13 @@ Strand-unspecific RNAseq data will be aligned strand-unspecifically (equivalent 
 directory found in <output_dir>/to_combine/, to form one final table in the main
 <output_dir> folder.  This is the file you give to ``compare`` or ``diff`` in the case that you
 intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined. In addition, the version of intron retention used in ``align`` can be specified using ``--IR_version``. 
-From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This need to be provided using the ``-a`` option. (Output in mm10 and hg38 need an extra file in VASTDB. If you have downloaded a VASTDB version older than vastdb.*.22.06.16, you will need to download the following patch: [PATCH_mm10-hg38.tar.gz](http://vastdb.crg.eu/libs/PATCH_mm10-hg38.tar.gz)
+From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This needs to be provided using the ``-a`` option. (Output in mm10 and hg38 need an extra file in VASTDB. If you have downloaded a VASTDB version older than vastdb.*.22.06.16, you will need to download the following patch: [PATCH_mm10-hg38.tar.gz](http://vastdb.crg.eu/libs/PATCH_mm10-hg38.tar.gz)
 
 ~~~~
 > vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga] --IR_version [1|2]
 ~~~~
 
-From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; IDs starting from 6 onwards). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: These modules has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
+From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; IDs starting with 6). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: This module has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
 
 
 ### Comparing PSIs Between Samples
@@ -321,11 +321,13 @@ Finally, ``vast-tools compare`` can also produce list of gene IDs for the select
 
 ### Differential Splicing Analysis
 
-*IMPORTANT NOTE*: `diff` is still an experimental part of this package and is currently under development and testing. Please use at your own knowledge and risk.
+``vast-tools diff`` provides functionality to test for differential AS based on
+replicates and read depth for each event, but will also give reasonable estimates 
+if replicates are not available (Han, Braunschweig et al., 2017).
 
 Bayesian inference followed by differential analysis of posterior distributions with respect to
 PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample are estimated from 
-emperical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
+empirical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
 
 ~~~~
 > vast-tools diff -a sampA_r1,sampA_r2,sampA_r3 -b sampB_r1,sampB_r2 -o outputdir > outputdir/diff_output.tab
@@ -348,7 +350,7 @@ be 'believable'.  By default this is 0.95, but it can be altered depending on
 stringency requirements.  
 
 The ``-m`` flag represents the minimum value of difference (`MV`, see example below) 
-between psi1 and psi2 that you will accept, such that we are are sure with at least 
+between PSI in group A and PSI in group B that you will accept, such that we are are sure with at least 
 probability ``-r`` that there is a difference of at least ``-m``.  `-m` does not 
 currently alter the output sent to STDOUT, but does filter what is plotted to PDF
 and printed to file.
@@ -386,10 +388,10 @@ The ``-s`` flag can be used to specify the ``-s SIZE`` of the emperical
 posterior distribution to sample, lower numbers decrease accuracy but increase
 performance.
 
-The ``diff`` command is also able to run in parallel.., specify the number of
+The ``diff`` command is also able to run in parallel. Specify the number of
 cores to use with ``-c INT``
-Obviously more cores will increase the speed of ``diff``, though it may increase
-the RAM usage as well..
+Obviously more cores will increase the speed of ``diff``, at the cost of increased
+RAM usage.
 
 Using the ``-n`` flag to specify the number of lines to read/process at a time,
 will set a max threshold to the RAM used by parallel processing with the ``-c``
@@ -527,7 +529,7 @@ Interconnection with VastDB Web
 
 Interconnection with Matt
 -------------------------------
-[Matt](http://agohr.crg.eu/matt) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
+[Matt](http://matt.crg.eu) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
 
 
 Issues
@@ -558,6 +560,10 @@ Irimia, M., Weatheritt, R.J., Ellis, J., Parikshak, N.N., Gonatopoulos-Pournatzi
 * Intron retention analysis:
 
 Braunschweig, U., Barbosa-Morais, N.L., Pan, Q., Nachman, E., Alipahani, B., Gonatopoulos-Pournatzis, T., Frey, B., Irimia, M., Blencowe, B.J. (2014). Widespread intron retention in mammals functionally tunes transcriptomes. *Genome Research*, 24:1774-86
+
+* `diff` module:
+
+Han H, Braunschweig U.,  Gonatopoulos-Pournatzis T., Weatheritt R.J., Hirsch C.L., Ha K.C., Radovani E., Nabeel-Shah S., Sterne-Weiler T., Wang J., O'Hanlon D., Pan Q., Ray D., Vizeacoumar F., Datti A., Magomedova L., Cummins C.L., Hughes T.R., Greenblatt J.F., Wrana J.L., Moffat J., Blencowe B.J. (2017). Multilayered control of alternative splicing regulatory networks by transcription factors. *Mol Cell*, 65(3):539-553
 
 * Chicken database:
 
