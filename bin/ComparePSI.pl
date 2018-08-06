@@ -219,6 +219,7 @@ $tail.="-with_dPSI" if (defined $print_dPSI);
 my $out_root="$root-dPSI$min_dPSI$tail" unless (defined $output_file);
 ($out_root)=$output_file=~/([^\/]+)\./ if (defined $output_file && $output_file=~/[^\/]+\./);
 ($out_root)=$output_file=~/([^\/]+)/ if (defined $output_file && $output_file!~/[^\/]+\./);
+$out_root=~s/DiffAS\-// if (defined $output_file);
 
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
