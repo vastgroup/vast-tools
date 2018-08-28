@@ -38,6 +38,7 @@ my $stringentIRflag = 0; # Run extra genome/eej subtraction step
 my $IR_version = 2; # IR version [09/Nov/2015] [new default 01/04/16]
 my $minReadNum;
 my $print_EEJs = 0; # print out a file with EEJ counts for MIC, MULTI and EXSK
+my $trim5 = 0; # number of nt skipped at the 5 prime on R1 for strand specificity and expr
 
 my $legacyFlag = 0;
 my $verboseFlag = 1;  # on for debugging 
@@ -94,6 +95,7 @@ GetOptions(		  "bowtieProg=s" => \$bowtie,
                           "preTrimmed" => \$trimmed,
                           "useFastq" => \$fastaOnly,
 			  "riboFoot" => \$ribofoot,
+			  "trim5" => \$trim5,
 			  "resume" =>\$resume,
 			  "rc1" => \$rc1,
 			  "rc2" => \$rc2,
@@ -283,6 +285,7 @@ OPTIONS:
 	--stepSize i		Trim 50bp every --stepSize (default is 25)
 	--preTrimmed		If you are trying to use pre-trimmed fasta/q files 
 				(only output from Trim.pl, default off)
+        --trim5 i               Skips i nt of read R1 for expression and strand detection (default 0)
 	--useFastq		This option is only necessary if you have pre-trimmed reads 
 				in fastq not fasta format (default off)
 	--resume		Resume a previous run using previous intermediate results
@@ -412,6 +415,10 @@ unless(-e "$tmpDir/tmp_read_files"){
 	mkdir("$tmpDir/tmp_read_files") or die "$!";
 }
 
+# Quality control for trim5
+if ($length-$trim5 < 50){
+    errPrint "Trim5 ($trim5) cannot be applied for reads of length $length\n";
+}
 
 #length options:
 my ($le, $half_length);
@@ -481,7 +488,7 @@ unless($resumed){
        	my ($percR1p,$percR1n,$percR2p,$percR2n)=("NA","NA","NA","NA");
 
        	if(!defined($rc1)){
-       		open($fh, "".getPrefixCmd($fq1)." | head -n $N | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
+       		open($fh, "".getPrefixCmd($fq1)." | head -n $N | $bowtie $bowtie_fa_fq_flag -5 $trim5 -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n1++}else{$p1++}}; close($fh);
        	}else{ # user has defined if reads1 should be reversed or not
        		if($rc1==1){($p1,$n1)=(0,5000)}else{($p1,$n1)=(5000,0)}
        	}
@@ -493,7 +500,7 @@ unless($resumed){
 
        	if($pairedEnd){  # same for second reads of each pair
        		if(!defined($rc2)){	
-       			open($fh, "".getPrefixCmd($fq2)." | head -n $N | $bowtie $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
+       			open($fh, "".getPrefixCmd($fq2)." | head -n $N | $bowtie $bowtie_fa_fq_flag -5 $trim5 -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA - | cut -f 2 |") or errPrintDie "$!";  while(<$fh>){chomp;if($_ eq "-"){$n2++}else{$p2++}}; close($fh);
        		}else{ # user has defined if reads1 should be reversed or not
        			if($rc2==1){($p2,$n2)=(0,5000)}else{($p2,$n2)=(5000,0)}
        		}
@@ -561,10 +568,10 @@ if (!$genome_sub and !$useGenSub){
 
 #    Different $cmd (24/12/16 --MI)
      if (defined($trimLen)){
-	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bt_norc $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen $trimLen -v | $bowtie $bt_norc $bowtie_fa_fq_flag -5 $trim5 -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
      else {     	
-	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie $bt_norc $bowtie_fa_fq_flag -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
+	 $cmd .= " | $binPath/Trim.pl --once --targetLen 50 -v | $bowtie $bt_norc $bowtie_fa_fq_flag -5 $trim5 -p $cores -m 1 -v $bowtieV $dbDir/EXPRESSION/mRNA -"; 
      }
      
      verbPrint "Calculating cRPKMs\n";
