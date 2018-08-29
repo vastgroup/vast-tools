@@ -230,11 +230,13 @@ $out_root=~s/DiffAS\-// if (defined $output_file);
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
 
+my $all_ev_file;
 if (defined $print_all_ev){
     $all_ev_file="AllEvents-$output_file";
     $all_ev_file=~s/DiffAS\-//g;
     open (O_ALL, ">$folder/$all_ev_file") or errPrintDie "Can't open the output file for all events (do not provide a path)\n"; # output file  
 }
+my $all_AS_file;
 if (defined $print_AS_ev){
     $all_AS_file="ASEvents-$output_file";
     $all_AS_file=~s/DiffAS\-//g;
@@ -363,34 +365,34 @@ while (<PSI>){
     my $min_B = (sort{$b<=>$a}@PSI_B)[-1];
     my $max_B = (sort{$a<=>$b}@PSI_B)[-1];
 
-    ### To count the total number of AS events considered and print sets if required
-    if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
-	$tally_total_AS{$type}++;
-	if (defined $print_AS_ev){
-	    unless (defined $print_dPSI){
-		print O_AS "$_\tAS_EV\n"; # dPSI is not printed so it can the be run with plot
-	    }
-	    else {
-		print O_AS "$_\t$dPSI\tAS_EV\n";
-	    }
-	}
-    }
-    $tally_total{$type}++;
-    if (defined $print_all_ev){
-	unless (defined $print_dPSI){
-	    print O_ALL "$_\tBG\n"; # dPSI is not printed so it can the be run with plot
-	}
-	else {
-	    print O_ALL "$_\t$dPSI\tBG\n";
-	}
-    }
-    
-
     
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
 	# get dPSI
 	my $dPSI = $av_PSI_B-$av_PSI_A;
+
+	### To count the total number of AS events considered and print sets if required
+	if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
+	    $tally_total_AS{$type}++;
+	    if (defined $print_AS_ev){
+		unless (defined $print_dPSI){
+		    print O_AS "$_\tAS_EV\n"; # dPSI is not printed so it can the be run with plot
+		}
+		else {
+		    print O_AS "$_\t$dPSI\tAS_EV\n";
+		}
+	    }
+	}
+	$tally_total{$type}++;
+	if (defined $print_all_ev){
+	    unless (defined $print_dPSI){
+		print O_ALL "$_\tBG\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+		print O_ALL "$_\t$dPSI\tBG\n";
+	    }
+	}
+	
 	
 	# does the diff AS test:
 	if ($dPSI > $min_dPSI && $min_B > $max_A+$min_range){ # if rep1 it will always meet the criteria
@@ -499,7 +501,30 @@ while (<PSI>){
 	# get min and max (for min dPSI, pos and neg values)
 	my $min_indiv_dPSI = (sort{$b<=>$a}@dPSI_pairs)[-1];
 	my $max_indiv_dPSI = (sort{$a<=>$b}@dPSI_pairs)[-1];
+
+	### To count the total number of AS events considered and print sets if required
+	if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
+	    $tally_total_AS{$type}++;
+	    if (defined $print_AS_ev){
+		unless (defined $print_dPSI){
+		    print O_AS "$_\tAS_EV\n"; # dPSI is not printed so it can the be run with plot
+		}
+		else {
+		    print O_AS "$_\t$av_paired_dPSI\tAS_EV\n";
+		}
+	    }
+	}
+	$tally_total{$type}++;
+	if (defined $print_all_ev){
+	    unless (defined $print_dPSI){
+		print O_ALL "$_\tBG\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+		print O_ALL "$_\t$av_paired_dPSI\tBG\n";
+	    }
+	}
 	
+	### Does the diff tests
 	if ($av_paired_dPSI > $min_dPSI && $min_indiv_dPSI > $min_range){ 
 	    $tally{$type}{UP}++;
 	    unless (defined $print_dPSI){
