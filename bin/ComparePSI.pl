@@ -40,6 +40,8 @@ my $plot_only_samples;
 my $print_dPSI;
 my $print_sets;
 my $max_dPSI;
+my $print_all_ev;
+my $print_AS_ev;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -62,6 +64,8 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "paired" => \$paired,
 			  "print_dPSI" => \$print_dPSI,
 			  "print_sets" => \$print_sets,
+			  "print_all_ev" => \$print_all_ev,
+			  "print_AS_ev" => \$print_AS_ev,
 			  "max_dPSI=i"   => \$max_dPSI,
 			  "plot" => \$plot,
 			  "only_samples" => \$plot_only_samples,
@@ -130,6 +134,8 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
                                    - CR: all events with coverage and cryptically spliced (PSI<5 for AltEx, PSI>95 for IR)
                                    - AS_NC: all events with coverage, alternative (10 < av_PSI < 90 in a group)
                                             and that do not change between the two conditions (abs(dPSI)< max_dPSI)
+        --print_all_ev           Prints a table with all events that pass the coverage filters (default OFF)
+        --print_AS_ev            Prints a table with all AS events that pass the coverage filters (default OFF)  
         --max_dPSI i             Maximum dPSI to consider an AS non-changing (default min_dPSI/5)
         --plot_PSI               Plots the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
@@ -224,6 +230,17 @@ $out_root=~s/DiffAS\-// if (defined $output_file);
 $output_file="DiffAS-$out_root.tab" unless (defined $output_file);
 open (O, ">$folder/$output_file") or errPrintDie "Can't open the output file (do not provide a path)\n"; # output file
 
+if (defined $print_all_ev){
+    $all_ev_file="AllEvents-$output_file";
+    $all_ev_file=~s/DiffAS\-//g;
+    open (O_ALL, ">$folder/$all_ev_file") or errPrintDie "Can't open the output file for all events (do not provide a path)\n"; # output file  
+}
+if (defined $print_AS_ev){
+    $all_AS_file="ASEvents-$output_file";
+    $all_AS_file=~s/DiffAS\-//g;
+    open (O_AS, ">$folder/$all_AS_file") or errPrintDie "Can't open the output file for all AS events (do not provide a path)\n"; # output file  
+}
+
 ####### Other sets file
 if (defined $print_sets){
     $max_dPSI = $min_dPSI/5 if (!defined $max_dPSI);
@@ -281,9 +298,13 @@ $tally_extra{Alt5}{CS}=0; $tally_extra{Alt5}{CR}=0; $tally_extra{Alt5}{AS_NC}=0;
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
 unless (defined $print_dPSI){
     print O "$head_row\n"; # it will print the original data (for plot later)
+    print O_ALL "$head_row\tCATEGORY\n" if (defined $print_all_ev);
+    print O_AS "$head_row\tCATEGORY\n" if (defined $print_AS_ev);
 }
 else {
     print O "$head_row\tdPSI\n"; # it will print the original data + dPSI
+    print O_ALL "$head_row\tdPSI\tCATEGORY\n" if (defined $print_all_ev);
+    print O_AS "$head_row\tdPSI\tCATEGORY\n" if (defined $print_AS_ev);
 }
 ### starts the actual analysis
 while (<PSI>){
@@ -342,9 +363,29 @@ while (<PSI>){
     my $min_B = (sort{$b<=>$a}@PSI_B)[-1];
     my $max_B = (sort{$a<=>$b}@PSI_B)[-1];
 
-    ### To count the total number of AS events considered 
-    $tally_total_AS{$type}++ if ($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10;
+    ### To count the total number of AS events considered and print sets if required
+    if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
+	$tally_total_AS{$type}++;
+	if (defined $print_AS_ev){
+	    unless (defined $print_dPSI){
+		print O_AS "$_\tAS_EV\n"; # dPSI is not printed so it can the be run with plot
+	    }
+	    else {
+		print O_AS "$_\t$dPSI\tAS_EV\n";
+	    }
+	}
+    }
     $tally_total{$type}++;
+    if (defined $print_all_ev){
+	unless (defined $print_dPSI){
+	    print O_ALL "$_\tBG\n"; # dPSI is not printed so it can the be run with plot
+	}
+	else {
+	    print O_ALL "$_\t$dPSI\tBG\n";
+	}
+    }
+    
+
     
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
