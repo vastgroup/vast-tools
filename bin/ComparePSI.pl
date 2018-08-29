@@ -129,13 +129,13 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
         --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
                                    - It does not allow ploting.
-        --print_sets             Prints files with different sets for comparisons:
+        --print_sets             Prints files with different sets for comparisons in Matt (http://matt.crg.eu):
                                    - CS: all events with coverage and constitutively spliced (PSI>95 for AltEx, PSI<5 for IR)
                                    - CR: all events with coverage and cryptically spliced (PSI<5 for AltEx, PSI>95 for IR)
                                    - AS_NC: all events with coverage, alternative (10 < av_PSI < 90 in a group)
                                             and that do not change between the two conditions (abs(dPSI)< max_dPSI)
-        --print_all_ev           Prints a table with all events that pass the coverage filters (default OFF)
-        --print_AS_ev            Prints a table with all AS events that pass the coverage filters (default OFF)  
+        --print_all_ev           Prints a table with all event IDs that pass the coverage filters and dPSI (default OFF)
+        --print_AS_ev            Prints a table with all AS events that pass the coverage filters and dPSI (default OFF)  
         --max_dPSI i             Maximum dPSI to consider an AS non-changing (default min_dPSI/5)
         --plot_PSI               Plots the DS events using \'plot\' (default OFF)
         --only_samples           Plots only the compared samples, otherwise the whole table (default OFF)
@@ -300,14 +300,13 @@ $tally_extra{Alt5}{CS}=0; $tally_extra{Alt5}{CR}=0; $tally_extra{Alt5}{AS_NC}=0;
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
 unless (defined $print_dPSI){
     print O "$head_row\n"; # it will print the original data (for plot later)
-    print O_ALL "$head_row\tCATEGORY\n" if (defined $print_all_ev);
-    print O_AS "$head_row\tCATEGORY\n" if (defined $print_AS_ev);
 }
 else {
     print O "$head_row\tdPSI\n"; # it will print the original data + dPSI
-    print O_ALL "$head_row\tdPSI\tCATEGORY\n" if (defined $print_all_ev);
-    print O_AS "$head_row\tdPSI\tCATEGORY\n" if (defined $print_AS_ev);
 }
+print O_ALL "EventID\tPSI_A\tPSI_B\tdPSI\tCATEGORY\n" if (defined $print_all_ev);
+print O_AS "EventID\tPSI_A\tPSI_B\tdPSI\tCATEGORY\n" if (defined $print_AS_ev);
+
 ### starts the actual analysis
 while (<PSI>){
     $_ =~ s/VLOW/N/g if (defined $noVLOW);
@@ -315,6 +314,7 @@ while (<PSI>){
     my @t=split(/\t/,$_);
     my @PSI_A = ();
     my @PSI_B = ();
+    my $event = $t[1];
 
     next if $t[3] == 0; # removes the internal Alt3 and Alt5 splice sites to avoid double counting
     
@@ -375,22 +375,12 @@ while (<PSI>){
 	if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
 	    $tally_total_AS{$type}++;
 	    if (defined $print_AS_ev){
-		unless (defined $print_dPSI){
-		    print O_AS "$_\tAS_EV\n"; # dPSI is not printed so it can the be run with plot
-		}
-		else {
-		    print O_AS "$_\t$dPSI\tAS_EV\n";
-		}
+		print O_AS "$event\t$av_PSI_A\t$av_PSI_B\t$dPSI\tAS_EV\n";
 	    }
 	}
 	$tally_total{$type}++;
 	if (defined $print_all_ev){
-	    unless (defined $print_dPSI){
-		print O_ALL "$_\tBG\n"; # dPSI is not printed so it can the be run with plot
-	    }
-	    else {
-		print O_ALL "$_\t$dPSI\tBG\n";
-	    }
+	    print O_ALL "$event\t$av_PSI_A\t$av_PSI_B\t$dPSI\tBG\n";
 	}
 	
 	
@@ -506,22 +496,12 @@ while (<PSI>){
 	if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
 	    $tally_total_AS{$type}++;
 	    if (defined $print_AS_ev){
-		unless (defined $print_dPSI){
-		    print O_AS "$_\tAS_EV\n"; # dPSI is not printed so it can the be run with plot
-		}
-		else {
-		    print O_AS "$_\t$av_paired_dPSI\tAS_EV\n";
-		}
+		print O_AS "$event\t$av_PSI_A\t$av_PSI_B\t$av_paired_dPSI\tAS_EV\n";
 	    }
 	}
 	$tally_total{$type}++;
 	if (defined $print_all_ev){
-	    unless (defined $print_dPSI){
-		print O_ALL "$_\tBG\n"; # dPSI is not printed so it can the be run with plot
-	    }
-	    else {
-		print O_ALL "$_\t$av_paired_dPSI\tBG\n";
-	    }
+	    print O_ALL "$event\t$av_PSI_A\t$av_PSI_B\t$av_paired_dPSI\tBG\n";
 	}
 	
 	### Does the diff tests
