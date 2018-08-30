@@ -98,7 +98,7 @@ sub verbPrint {
 if (!defined($ARGV[0]) || $helpFlag){
     die "\nUsage: CompareEXPR.pl cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
-Compare two sample sets to find differentially regulated AS events
+Compare two sample sets to find differentially expressed genes based on fold changes of cRPKM values
 
 [General options] 
         --min_fold_av f          Minimum fold change of the averages (default 2)
