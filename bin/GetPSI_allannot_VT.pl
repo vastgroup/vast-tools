@@ -11,7 +11,7 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
-my $ALL_EXC_EEJ; # non-active variable
+my $ALL_EXC_EEJ=1; # non-active variable
 my $min_eff_complex = 2;  # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
