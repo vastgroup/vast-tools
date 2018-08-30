@@ -180,7 +180,7 @@ foreach $event (sort (keys %ALL)){
 	
 	#### Quantifying COMPLEX READS: doing it "very" locally (+/-$extra acc/donors)
 	### Inclusion reads
-	$extra=10; # originally 5 (30/08/19)
+	$extra=11; # originally 5 (30/08/19)
 	for $i ($d1-$extra..$d2-1){
 	    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $i != $d1 && $i>=0){
 		$temp_eej="$gene-$i-$a1";
