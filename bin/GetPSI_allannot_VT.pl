@@ -13,6 +13,8 @@ my $samLen;
 my $verboseFlag;
 my $ALL_EXC_EEJ=1; # non-active variable
 my $min_eff_complex = 2;  # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
+my $extra_inc = 5; # original 5
+my $extra_exc = 5; # original 5
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
 	   "verbose=i" => \$verboseFlag);
@@ -180,8 +182,7 @@ foreach $event (sort (keys %ALL)){
 	
 	#### Quantifying COMPLEX READS: doing it "very" locally (+/-$extra acc/donors)
 	### Inclusion reads
-	$extra=5; # originally 5 (30/08/19)
-	for $i ($d1-$extra..$d2-1){
+	for $i ($d1-$extra_inc..$d2-1){
 	    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $i != $d1 && $i>=0){
 		$temp_eej="$gene-$i-$a1";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -190,7 +191,7 @@ foreach $event (sort (keys %ALL)){
 		} 
 	    }
 	}
-	for $i ($a1+1..$a2+$extra){
+	for $i ($a1+1..$a2+$extra_inc){
 	    if ((($A_CO_href->{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $donor_coord && $strand eq "-")) && $A_CO_href->{$gene}{$i} && $i != $a2 && $i<=$last_acceptor{$gene}){
 		$temp_eej="$gene-$d2-$i";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -203,7 +204,7 @@ foreach $event (sort (keys %ALL)){
 	### COMBI-like:
 	### Exclusion reads (It does NOT take all EEJs around the alternative exon, but only those including C1 or C2.)
 	if (!$ALL_EXC_EEJ){
-	    for $i ($d1-$extra..$d1-1){
+	    for $i ($d1-$extra_exc..$d1-1){
 		if ($i>=0){
 		    $temp_eej="$gene-$i-$a2";
 		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -212,7 +213,7 @@ foreach $event (sort (keys %ALL)){
 		    }
 		}
 	    }
-	    for $i ($d1+1..$d1+$extra){
+	    for $i ($d1+1..$d1+$extra_exc){
 		if (($D_CO_href->{$gene}{$i} < $A_CO_href->{$gene}{$a1} && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $A_CO_href->{$gene}{$a1} && $strand eq "-") && $i <= $last_donor{$gene}){
 		    $temp_eej="$gene-$i-$a2";
 		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -221,7 +222,7 @@ foreach $event (sort (keys %ALL)){
 		    }
 		}
 	    }
-	    for $i ($a2+1..$a2+$extra){
+	    for $i ($a2+1..$a2+$extra_exc){
 		if ($i <= $last_acceptor{$gene}){
 		    $temp_eej="$gene-$d1-$i";
 		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -230,7 +231,7 @@ foreach $event (sort (keys %ALL)){
 		    }
 		}
 	    }
-	    for $i ($a2-$extra..$a2-1){
+	    for $i ($a2-$extra_exc..$a2-1){
 		if (($A_CO_href->{$gene}{$i} > $D_CO_href->{$gene}{$d2} && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $D_CO_href->{$gene}{$d2} && $strand eq "-") && $i >= 0){
 		    $temp_eej="$gene-$d1-$i";
 		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -244,8 +245,8 @@ foreach $event (sort (keys %ALL)){
 	}
 	### ALL exclusion (prone to more false positives)
 	elsif ($ALL_EXC_EEJ){
-	    for $i ($d1-$extra..$d2-1){ # The only true ANNOT-specific thing
-		for $j ($a1+1..$a2+$extra){
+	    for $i ($d1-$extra_exc..$d2-1){ # The only true ANNOT-specific thing
+		for $j ($a1+1..$a2+$extra_exc){
 		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
 			$temp_eej="$gene-$i-$j";
 			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
