@@ -65,6 +65,7 @@ if($helpFlag and
 	  $subCommand eq "combine" or
 	  $subCommand eq "merge" or
 	  $subCommand eq "compare" or
+	  $subCommand eq "compare_expr" or
 	  $subCommand eq "tidy" or
 	  $subCommand eq "diff" or
       	  $subCommand eq "plot") ? 0 : 1)) {
@@ -76,6 +77,7 @@ Usage: $0 sub-commands [options]
         merge           :       Merge vast-tool outputs from multiple sub-samples  
 	combine		:	Combine two or more 'aligned' RNA-Seq samples into summary tables
         compare         :       Compare PSIs between samples and produces lists for GO analysis
+        compare_expr    :       Compare Gene Expression (cRPKMs) between samples 
 	diff		:	Compare posterior distributions over PSI of two or more samples 
 	plot		:	Utility application to plot PSI scatterplots
         tidy            :       Simplifies and filters the PSI table for external analysis (e.g. in R)
@@ -101,7 +103,7 @@ Usage: $0 sub-commands [options]
 if (! defined $outdir) {
     $outdir = DEFAULT_OUTDIR;
     $outdir = abs_path($outdir);
-    push @args, "-o $outdir" unless ($subCommand eq "plot" || $subCommand eq "tidy" || $subCommand eq "compare");
+    push @args, "-o $outdir" unless ($subCommand eq "plot" || $subCommand eq "tidy" || $subCommand eq "compare" || $subCommand eq "compare_expr");
 } else {
     $outdir = abs_path($outdir);
 }
@@ -119,6 +121,9 @@ elsif($subCommand eq "merge") {
 } 
 elsif($subCommand eq "compare") {
   $EXIT_STATUS = system("$path/bin/ComparePSI.pl @args");
+} 
+elsif($subCommand eq "compare_expr") {
+  $EXIT_STATUS = system("$path/bin/CompareEXPR.pl @args");
 } 
 elsif($subCommand eq "diff") {
   $EXIT_STATUS = system("$path/R/vastdiff.R @args");

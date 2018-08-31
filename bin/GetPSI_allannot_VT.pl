@@ -181,8 +181,17 @@ foreach $event (sort (keys %ALL)){
 	$Rexc1C=$Rexc2C=$exc1C=$exc2C=$inc1C=$inc2C=$excC=$Rinc1C=$Rinc2C=$RexcC=0; # empty temporary variables for read counts for each sample
 	
 	#### Quantifying COMPLEX READS: doing it "very" locally (+/-$extra acc/donors)
+	my $min_d;
+	my $max_a;
+	if ($d1 < $d2-$extra_exc){$min_d = $d1;}
+	else {$min_d = $d2-$extra_exc;}
+	if ($a2 > $a1+$extra_exc){$max_a = $a2;}
+	else {$max_a = $a1+$extra_exc;} 
+	
+
 	### Inclusion reads
-	for $i ($d1-$extra_inc..$d2-1){
+	for $i ($d1-$extra_inc..$d2-1){ # stays in v2.1.1
+#	for $i ($min_d..$d2-1){
 	    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $i != $d1 && $i>=0){
 		$temp_eej="$gene-$i-$a1";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -191,7 +200,8 @@ foreach $event (sort (keys %ALL)){
 		} 
 	    }
 	}
-	for $i ($a1+1..$a2+$extra_inc){
+	for $i ($a1+1..$a2+$extra_inc){ # stays in v2.1.1
+#	for $i ($a1+1..$max_a){
 	    if ((($A_CO_href->{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $donor_coord && $strand eq "-")) && $A_CO_href->{$gene}{$i} && $i != $a2 && $i<=$last_acceptor{$gene}){
 		$temp_eej="$gene-$d2-$i";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -245,16 +255,9 @@ foreach $event (sort (keys %ALL)){
 	}
 	### ALL exclusion (prone to more false positives)
 	elsif ($ALL_EXC_EEJ){
-	    my $min_d;
-	    my $max_a;
-	    if ($d1 < $d2-$extra_exc){$min_d = $d1;}
-	    else {$min_d = $d2-$extra_exc;}
-	    if ($a2 > $a1+$extra_exc){$max_a = $a2;}
-	    else {$max_a = $a1+$extra_exc;} 
-
-#	    for $i ($d1-$extra_ex..$d2-1){ # The only true ANNOT-specific thing
-#		for $j ($a1+1..$a2+$extra_exc){
-	    for $i ($min_d..$d2-1){ # The only true ANNOT-specific thing
+#	    for $i ($d1-$extra_ex..$d2-1){ # changed in v2.1.1
+#		for $j ($a1+1..$a2+$extra_exc){ # changed in v2.1.1
+	    for $i ($min_d..$d2-1){ 
 		for $j ($a1+1..$max_a){
 		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
 			$temp_eej="$gene-$i-$j";
