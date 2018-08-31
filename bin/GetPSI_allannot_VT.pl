@@ -245,8 +245,17 @@ foreach $event (sort (keys %ALL)){
 	}
 	### ALL exclusion (prone to more false positives)
 	elsif ($ALL_EXC_EEJ){
-	    for $i ($d1-$extra_exc..$d2-1){ # The only true ANNOT-specific thing
-		for $j ($a1+1..$a2+$extra_exc){
+	    my $min_d;
+	    my $max_a;
+	    if ($d1 < $d2-$extra_exc){$min_d = $d1;}
+	    else {$min_d = $d2-$extra_exc;}
+	    if ($a2 > $a1+$extra_exc){$max_a = $a2;}
+	    else {$max_a = $a1+$extra_exc;} 
+
+#	    for $i ($d1-$extra_ex..$d2-1){ # The only true ANNOT-specific thing
+#		for $j ($a1+1..$a2+$extra_exc){
+	    for $i ($min_d..$d2-1){ # The only true ANNOT-specific thing
+		for $j ($a1+1..$max_a){
 		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
 			$temp_eej="$gene-$i-$j";
 			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
