@@ -96,7 +96,7 @@ sub verbPrint {
 }
 
 if (!defined($ARGV[0]) || $helpFlag){
-    die "\nUsage: CompareEXPR.pl cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+    die "\nUsage: vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
 Compare two sample sets to find differentially expressed genes based on fold changes of cRPKM values
 
@@ -108,7 +108,7 @@ Compare two sample sets to find differentially expressed genes based on fold cha
         --min_reads i            Minimum number of raw reads in at least one sample (default 50) 
         --max_CV i               Maximum Coefficient of Variation (CV) (default 1000 -- NOT USED)
         --outRoot root           Output file root (default based on option parameters)
-        --norm                   Normalize cRPKMs using \'normalizebetweenarray\' from limma (default OFF)
+        --norm                   Normalize cRPKMs using \'normalizebetweenarray\' from limma (default OFF, recommended)
         --install_limma          Installs limma package if needed (default OFF)
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
