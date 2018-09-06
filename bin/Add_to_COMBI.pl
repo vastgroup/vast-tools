@@ -13,8 +13,10 @@ my $samLen;
 my $verboseFlag;
 my $legacyFlag;
 my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
+my $ALL_EXC_EEJ;
+my $extra_eej = 5; # only used if $ALL_EXC_EEJ is active
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen, "extra_eej=i" => \$extra_eej, "use_all_excl_eej" => \$ALL_EXC_EEJ,
 			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
 
 sub verbPrint {
@@ -242,9 +244,11 @@ foreach $event (sort (keys %ALL)){
 	    $RexcC=$Rexc1C+$Rexc2C;
 	}
 	### Taking all EEJs around the alternative exon 
-	elsif ($ALL_EXC_EEJ){ ### NOT USED, NOT TESTED
-	    for $i (0..$d2-1){
-		for $j ($a1+1..$last_acceptor{$gene}){
+	elsif ($ALL_EXC_EEJ){ ### NOT USED, NOT TESTED, added as user's option
+#	    for $i (0..$d2-1){
+#		for $j ($a1+1..$last_acceptor{$gene}){
+	    for $i ($d2-$extra_eej..$d2-1){
+		for $j ($a1+1..$a1+$extra_eej){
 		    if (($D_CO_href{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $str eq "+") || ($D_CO_href{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $str eq "-")){
 			$temp_eej="$gene-$i-$j";
 			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
