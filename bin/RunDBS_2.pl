@@ -100,9 +100,9 @@ OPTIONS:
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
         --noANNOT               Don't use exons quantified directly from annotation (default off)
-        --use_all_excl_eej      Use all exclusion EEJs within +/- extra_eej in splice-site based module (default off)
+        --use_all_excl_eej      Use all exclusion EEJs (within extra_eej limit) in ss-based module (default off)
         --extra_eej i           Use +/- extra_eej neighboring junctions to calculate skipping in 
-                                     ANNOT and splice-site based modules (default 5)
+                                     ANNOT (from A) and splice-site-based (from C1/C2) modules (default 5)
 	--dbDir DBDIR	        Database directory
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
@@ -167,6 +167,7 @@ if ($N != 0) {
     unless ($onlyIRflag){
 	### Gets the PSIs for the events in the a posteriori pipeline
 	verbPrint "Building Table for COMBI (splice-site based pipeline)\n";
+	verbPrint "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
 	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
 	
 	### Gets the PSIs for the a priori, SIMPLE
@@ -186,6 +187,7 @@ if ($N != 0) {
     unless ($noANNOTflag){
 	### Gets the PSIs for ALL annotated exons directly
 	verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
+	verbPrint "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
 	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
     }
 
