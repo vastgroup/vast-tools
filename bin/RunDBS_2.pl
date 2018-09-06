@@ -167,7 +167,6 @@ if ($N != 0) {
     unless ($onlyIRflag){
 	### Gets the PSIs for the events in the a posteriori pipeline
 	verbPrint "Building Table for COMBI (splice-site based pipeline)\n";
-	verbPrint "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
 	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
 	
 	### Gets the PSIs for the a priori, SIMPLE
@@ -187,7 +186,6 @@ if ($N != 0) {
     unless ($noANNOTflag){
 	### Gets the PSIs for ALL annotated exons directly
 	verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
-	verbPrint "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
 	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
     }
 
