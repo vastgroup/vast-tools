@@ -13,10 +13,10 @@ my $samLen;
 my $verboseFlag;
 my $legacyFlag;
 my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
-my $ALL_EXC_EEJ;
+my $use_all_excl_eej;
 my $extra_eej = 5; # only used if $ALL_EXC_EEJ is active
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen, "extra_eej=i" => \$extra_eej, "use_all_excl_eej" => \$ALL_EXC_EEJ,
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen, "extra_eej=i" => \$extra_eej, "use_all_excl_eej" => \$use_all_excl_eej,
 			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
 
 sub verbPrint {
@@ -207,7 +207,7 @@ foreach $event (sort (keys %ALL)){
 	    }
 	}
 	### Exclusion reads (It does NOT take all EEJs around the alternative exon, but only those including C1 or C2.)
-	if (!$ALL_EXC_EEJ){
+	if (!$use_all_excl_eej){
 	    for $i (0..$d1-1){
 		$temp_eej="$gene-$i-$a2";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -244,7 +244,7 @@ foreach $event (sort (keys %ALL)){
 	    $RexcC=$Rexc1C+$Rexc2C;
 	}
 	### Taking all EEJs around the alternative exon 
-	elsif ($ALL_EXC_EEJ){ ### NOT USED, NOT TESTED, added as user's option
+	elsif ($use_all_excl_eej){ ### NOT USED, NOT TESTED, added as user's option
 #	    for $i (0..$d2-1){
 #		for $j ($a1+1..$last_acceptor{$gene}){
 	    for $i ($d2-$extra_eej..$d2-1){
