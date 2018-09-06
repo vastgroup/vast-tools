@@ -27,24 +27,28 @@ my $onlyIRflag = 0; # only run intron retention
 my $IR_version = 2;  # either 1 or 2
 
 my $noANNOTflag = 0;
+my $extra_eej = 5; # default extra eej to use in ANNOT and in COMBI if use_all_excl_eej is provided
+my $use_all_excl_eej = 0; # for COMBI flag
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 
 my $asmbly;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
  
-GetOptions("help"  	 => \$helpFlag,
-	   "dbDir=s"     => \$dbDir,
-	   "sp=s"        => \$sp,
-	   "a=s"         => \$asmbly,
-	   "verbose"     => \$verboseFlag,
-	   "output=s"    => \$outDir,
-	   "o=s"         => \$outDir,
-           "z"           => \$compress,
-	   "noIR"        => \$noIRflag,
-	   "onlyIR"      => \$onlyIRflag,
-	   "noANNOT"     => \$noANNOTflag,
-	   "IR_version=i" => \$IR_version,
-           "C"           => \$cRPKMCounts);
+GetOptions("help"  	       => \$helpFlag,
+	   "dbDir=s"           => \$dbDir,
+	   "sp=s"              => \$sp,
+	   "a=s"               => \$asmbly,
+	   "verbose"           => \$verboseFlag,
+	   "output=s"          => \$outDir,
+	   "o=s"               => \$outDir,
+           "z"                 => \$compress,
+	   "noIR"              => \$noIRflag,
+	   "onlyIR"            => \$onlyIRflag,
+	   "noANNOT"           => \$noANNOTflag,
+	   "IR_version=i"      => \$IR_version,
+	   "extra_eej=i"       => \$extra_eej,
+	   "use_all_excl_eej"  => \$use_all_excl_eej,
+           "C"                 => \$cRPKMCounts);
 
 our $EXIT_STATUS = 0;
 
@@ -94,7 +98,10 @@ OPTIONS:
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
         --noANNOT               Don't use exons quantified directly from annotation (default off)
-	--dbDir DBDIR		Database directory
+        --use_all_excl_eej      Use all exclusion EEJs within +/- extra_eej in splice-site based module (default off)
+        --extra_eej i           Use +/- extra_eej neighboring junctions to calculate skipping in 
+                                     ANNOT and splice-site based modules (default 5)
+	--dbDir DBDIR	        Database directory
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help messagev
@@ -158,7 +165,7 @@ if ($N != 0) {
     unless ($onlyIRflag){
 	### Gets the PSIs for the events in the a posteriori pipeline
 	verbPrint "Building Table for COMBI (a posteriori pipeline)\n";
-	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
 	
 	### Gets the PSIs for the a priori, SIMPLE
 	verbPrint "Building Table for EXSK (a priori pipeline, single)\n";
@@ -177,7 +184,7 @@ if ($N != 0) {
     unless ($noANNOTflag){
 	### Gets the PSIs for ALL annotated exons directly
 	verbPrint "Building Table for ANNOT (annotated pipeline)\n";
-	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
     }
 
     
