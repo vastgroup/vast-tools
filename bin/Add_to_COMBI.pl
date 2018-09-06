@@ -207,6 +207,7 @@ foreach $event (sort (keys %ALL)){
 		}
 	    }
 	}
+
 	### Exclusion reads (It does NOT take all EEJs around the alternative exon, but only those including C1 or C2.)
 	if (!$use_all_excl_eej){
 	    for $i (0..$d1-1){
@@ -250,11 +251,11 @@ foreach $event (sort (keys %ALL)){
 #		for $j ($a1+1..$last_acceptor{$gene}){
 	    for $i ($d1-$extra_eej..$d2-1){
 		for $j ($a1+1..$a2+$extra_eej){
-		    if ((($D_CO_href{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $str eq "+") || 
-			 ($D_CO_href{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $str eq "-")) &&
-			($i >= 0 && $j <= $last_acceptor{$gene})){
+		    $temp_eej="$gene-$i-$j";
+		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || 
+			 ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) &&
+			($i >= 0 && $j <= $last_acceptor{$gene} && $eej_exc ne $temp_eej)){ # the "simple" excl junction is omited
 
-			$temp_eej="$gene-$i-$j";
 			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
 			    $excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
 			    $RexcC+=$reads{$sample}{$temp_eej};
