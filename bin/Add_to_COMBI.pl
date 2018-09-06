@@ -16,8 +16,9 @@ my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "
 my $use_all_excl_eej;
 my $extra_eej; # only used if $ALL_EXC_EEJ is active
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen, "extra_eej=i" => \$extra_eej, "use_all_excl_eej" => \$use_all_excl_eej,
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen, "extra_eej=i" => \$extra_eej, "use_all_excl_eej=i" => \$use_all_excl_eej,
 			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);
+
 
 sub verbPrint {
   my $verbMsg = shift;
