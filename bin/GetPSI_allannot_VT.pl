@@ -258,7 +258,9 @@ foreach $event (sort (keys %ALL)){
 #		for $j ($a1+1..$a2+$extra_eej){ # changed in v2.1.1
 	    for $i ($min_d..$d2-1){ 
 		for $j ($a1+1..$max_a){
-		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
+		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || 
+			 ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) 
+			&& $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
 			$temp_eej="$gene-$i-$j";
 			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
 			    $excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
