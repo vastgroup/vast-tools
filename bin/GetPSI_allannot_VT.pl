@@ -16,7 +16,7 @@ my $min_eff_complex = 2;  # cut-off for the minimum number of mappable position 
 my $extra_eej = 5; # original 5
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
-	   "verbose=i" => \$verboseFlag);
+	   "extra_eej=i" => \$extra_eej, "verbose=i" => \$verboseFlag);
 
 sub verbPrint {
     my $verbMsg = shift;
