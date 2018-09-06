@@ -14,7 +14,7 @@ my $verboseFlag;
 my $legacyFlag;
 my $min_eff_complex=2; # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
 my $use_all_excl_eej;
-my $extra_eej = 5; # only used if $ALL_EXC_EEJ is active
+my $extra_eej; # only used if $ALL_EXC_EEJ is active
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen, "extra_eej=i" => \$extra_eej, "use_all_excl_eej" => \$use_all_excl_eej,
 			  "verbose=i" => \$verboseFlag, "legacy" => \$legacyFlag);

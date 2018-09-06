@@ -13,7 +13,7 @@ my $samLen;
 my $verboseFlag;
 my $ALL_EXC_EEJ=1; # non-active variable
 my $min_eff_complex = 2;  # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
-my $extra_eej = 5; # original 5
+my $extra_eej; # original 5
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
 	   "extra_eej=i" => \$extra_eej, "verbose=i" => \$verboseFlag);
