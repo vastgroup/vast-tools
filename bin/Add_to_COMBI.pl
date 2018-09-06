@@ -248,9 +248,12 @@ foreach $event (sort (keys %ALL)){
 	elsif ($use_all_excl_eej){ ### NOT USED, NOT TESTED, added as user's option
 #	    for $i (0..$d2-1){
 #		for $j ($a1+1..$last_acceptor{$gene}){
-	    for $i ($d2-$extra_eej..$d2-1){
-		for $j ($a1+1..$a1+$extra_eej){
-		    if (($D_CO_href{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $str eq "+") || ($D_CO_href{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $str eq "-")){
+	    for $i ($d1-$extra_eej..$d2-1){
+		for $j ($a1+1..$a2+$extra_eej){
+		    if ((($D_CO_href{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $str eq "+") || 
+			 ($D_CO_href{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $str eq "-")) &&
+			($i >= 0 && $j <= $last_acceptor{$gene})){
+
 			$temp_eej="$gene-$i-$j";
 			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
 			    $excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
