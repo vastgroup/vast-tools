@@ -25,7 +25,7 @@ my $compress = 0;
 my $noIRflag = 0;    # don't use IR!
 my $onlyIRflag = 0; # only run intron retention
 my $IR_version = 2;  # either 1 or 2
-
+my $onlyEXflag = 0; # only run exon skipping
 my $noANNOTflag = 0;
 my $extra_eej = 5; # default extra eej to use in ANNOT and in COMBI if use_all_excl_eej is provided
 my $use_all_excl_eej = 0; # for COMBI flag
@@ -44,6 +44,7 @@ GetOptions("help"  	       => \$helpFlag,
            "z"                 => \$compress,
 	   "noIR"              => \$noIRflag,
 	   "onlyIR"            => \$onlyIRflag,
+	   "onlyEX"            => \$onlyEXflag,
 	   "noANNOT"           => \$noANNOTflag,
 	   "IR_version=i"      => \$IR_version,
 	   "extra_eej=i"       => \$extra_eej,
@@ -94,6 +95,7 @@ OPTIONS:
 				For -sp Mmu: mm9 or mm10, (default mm9)
 				    - vast-tools will work internally with mm9; 
                                       if you choose mm10, the output gets lifted-over to mm10
+        --onlyEX                Only run the exon skpping pipelines (default off)
 	--noIR			Don't run intron retention pipeline (default off)
         --onlyIR                Only run intron retention pipeline (default off) 
         --IR_version 1/2        Version of the IR analysis (default 2)
@@ -203,7 +205,7 @@ if ($N != 0) {
     
     $noIRflag = 1 if @irFiles == 0;
 
-    unless($noIRflag) {
+    unless($noIRflag || $onlyEXflag) {
 	### Gets the PIRs for the Intron Retention pipeline
 	verbPrint "Building quality score table for intron retention (version $IR_version)\n";
 	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
@@ -214,17 +216,7 @@ if ($N != 0) {
 	    " -o " . abs_path("raw_incl");
     }
 
-    ### Adds those PSIs to the full database of PSIs (MERGE3m).
-    # to be deprecated and replaced by Add_to_FULL (see below) --KH
-    #verbPrint "Building non-redundant PSI table (MERGE3m)\n";
-    #sysErrMsg "$binPath/Add_to_MERGE3m.pl " .
-    #"raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab " .
-    #"raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab " .
-    #"raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab " .
-    #"raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab " .
-    #"-sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-
-    unless ($onlyIRflag){
+    unless ($onlyIRflag || $onlyEXflag){
 	### Gets PSIs for ALT5ss and adds them to the general database
 	verbPrint "Building Table for Alternative 5'ss choice events\n";
 	sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
@@ -240,6 +232,16 @@ if ($N != 0) {
     
     if ($onlyIRflag){
 	@input = ("raw_incl/INCLUSION_LEVELS_IR-$sp$N.tab");
+    }
+    elsif ($onlyEXflag){
+	@input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_MULTI-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_COMBI-$sp$N-n.tab",
+		     "raw_incl/INCLUSION_LEVELS_MIC-$sp$N-n.tab");
+	
+	unless($noANNOTflag) { # for ANNOT Exons (EXi, i>=6) [v2.0]
+	    push(@input, "raw_incl/INCLUSION_LEVELS_ANNOT-$sp$N-n.tab");
+	}
     }
     else {
 	@input =    ("raw_incl/INCLUSION_LEVELS_EXSK-$sp$N-n.tab",
