@@ -16,6 +16,7 @@ Table of Contents:
 	- [Strand-specific RNAseq data](#strand-specific-rnaseq-data)
 	- [Combining Results](#combining-results)
 	- [Comparing PSIs Between Samples](#comparing-psis-between-samples)
+	- [Comparing Expression Between Samples](#comparing-expression-between-samples)
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 	- [Plotting](#plotting)
 	- [Simplifying Combine Table](#simplifying-combine-table)
@@ -318,6 +319,21 @@ Differentially spliced AS events are printed out to an output file. The name of 
 It is also possible to output other sets of AS events of special interest for feature comparisons (e.g. using [Matt](#interconnection-with-matt)). This can be done using the option ``--print_sets``. It will produce three sets of AS events: (i) constitutive events (CS), which correspond to those with PSI < 5 (for IR) or PSI > 95 (for all other types) in all samples being compared; (ii) cryptic events (CR), which correspond to those with PSI > 95 (for IR) or PSI < 5 (for all other types) in all samples being compared; (iii) non-changing AS events (AS_NC), which correspond to those with 10 < av_PSI < 90 in at least one of the groups (or a range of PSIs > 10) and that do not change between the two conditions. The latter is specified with the option ``--max_dPSI``. By default, it takes 1/5 of the provided ``--min_dPSI``.
 
 Finally, ``vast-tools compare`` can also produce list of gene IDs for the selected events to run Gene Ontology (GO) analyses using ``--GO``. In particular, it generates four list: (i) differentially spliced cassette exons and microexons, (ii) introns with higher retention in B (IR_UP), (iii) introns with higher retention in A (IR_DOWN), and (iv) backgroup set, for all multiexonic genes that meet similar read coverage criteria. (The latter is crucial to avoid GO enrichment of highly expressed genes in the specific cell or tissue type of study). To generate the list of gene IDs, VAST-TOOLS needs to access VASTDB and thus needs the species key provided with ``-sp``. Alternatively, a custom list of gene IDs for each AS event (`event1\tgene_id1`) can be provided using ``--GO_file``, or gene symbols from the first colum of the INCLUSION table can be used instead activating the ``--use_names`` flag.
+
+### Comparing Expression Between Samples
+
+Using a similar logic to ``compare``, ``vast-tools compare_expr`` identifies differentially expression genes between two groups (A and B) based on the difference in their average expression levels using the internal cRPKM metric. For this, it calculates the fold change in cRPKMs between the group averages (fold_B/A) as well as between each individual replicate. The default is set to a difference in fold change of the averages of at least 2 (``--min_fold_av``) and a difference between each of the individual replicates of 1.5 (``--min_fold_r``, equivalent to ``--min_range`` in ``compare``). Paired comparisons are allowed using the option ``--paired``. Basic usage:
+
+~~~~
+> vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+~~~~
+
+It requires an expression table with cRPKMs and read counts, which can be obtained in ``combine`` providing the option ``--C``. ``vast-tools compare_expr`` performs several filters before doing the comparisons to discard lowly expressed genes across all samples or supported by too few reads overall. In particular, the default requires that all samples in at least one of the compared groups have a minimum cRPKM of 2. This can be modified using ``--min_cRPKM``. Additionally, using ``--min_cRPKM_loose`` it is possible to allow only one sample across the comparison to have a minimum level of expression. With regards to the minimum number of reads to ensure an statistically sound cRPKM calculation, this is set to 50 by default, and can be modified using ``--min_reads``. 
+
+By default, raw cRPKM values are compared. However, it is recommended the values are normalized. For this, the option ``--norm`` is provided, which using `normalizeBetweenArrays` from the `limma` R package. If this package is not installed in your computer, this can be done the first time you run ``vast-tools compare_expr`` by using the option ``--install_limma``. 
+
+Finally, ``vast-tools compare_expr`` also provides an option to output files to perform Gene Ontology analyses (``--GO``). By defult, Ensembl GeneIDs are provided, but gene symbols can be retrieved instead using the option ``--use_names``. The files provided are: (i) upregulated genes in B compared to A; (ii) downregulated genes in B compared to A; (iii) background set, after the expression and read count filters; (iv) the log2 (B/A fold change) values for all genes in the background set, which can be used for GSEA analyses.
+
 
 ### Differential Splicing Analysis
 
