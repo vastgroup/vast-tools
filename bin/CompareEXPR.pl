@@ -106,7 +106,6 @@ Compare two sample sets to find differentially expressed genes based on fold cha
         --min_cRPKM f            Minimum expression value (cRPKM) in all samples for at least one group (default 2)
         --min_cRPKM_loose        min_cRPKM applies to only one sample, not the whole group (default OFF [strict])
         --min_reads i            Minimum number of raw reads in at least one sample (default 50) 
-        --max_CV i               Maximum Coefficient of Variation (CV) (default 1000 -- NOT USED)
         --outRoot root           Output file root (default based on option parameters)
         --norm                   Normalize cRPKMs using \'normalizebetweenarray\' from limma (default OFF, recommended)
         --install_limma          Installs limma package if needed (default OFF)
