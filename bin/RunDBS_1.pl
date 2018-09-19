@@ -416,7 +416,7 @@ unless(-e "$tmpDir/tmp_read_files"){
 }
 
 # Quality control for trim5
-if ($length-$trim5 < $trimLen){
+if ($length-$trim5 < $trimLen && defined($trimLen)){
     errPrint "Trim5 ($trim5) cannot be applied for reads of length $length\n";
 }
 
