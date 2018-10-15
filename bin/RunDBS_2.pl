@@ -183,7 +183,7 @@ if ($N != 0) {
     }
 
     #### New in v2.0 (added 15/01/18)
-    unless ($noANNOTflag){
+    unless ($noANNOTflag || $onlyIRflag){
 	### Gets the PSIs for ALL annotated exons directly
 	verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
 	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
