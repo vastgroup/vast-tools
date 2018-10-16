@@ -64,15 +64,15 @@ while(<$ANOT>){
             defined $rcount{$C1C2j})){
 	my $C1A = 0;
 	if(defined $rcount{$C1Aj} && defined $ucount{$C1Aj} && $ucount{$C1Aj} > 0){
-	    $C1A = $rcount{$C1Aj} / $ucount{$C1Aj} * $maxcount;
+	    $C1A = ($rcount{$C1Aj} / $ucount{$C1Aj}) * $maxcount;
 	}
 	my $AC2 = 0;
 	if(defined $rcount{$AC2j} && defined $ucount{$AC2j} && $ucount{$AC2j} > 0){
-	    $AC2 = $rcount{$AC2j} / $ucount{$AC2j} * $maxcount;
+	    $AC2 = ($rcount{$AC2j} / $ucount{$AC2j}) * $maxcount;
 	}
 	my $C1C2 = 0;
 	if(defined $rcount{$C1C2j} && defined $ucount{$C1C2j} && $ucount{$C1C2j} > 0){
-	    $C1C2 = $rcount{$C1C2j} / $ucount{$C1C2j} * $maxcount;
+	    $C1C2 = ($rcount{$C1C2j} / $ucount{$C1C2j}) * $maxcount;
 	}
 	print OUT "$event\t$C1A\t$AC2\t$C1C2\n";
 	$eventseen{$event} = "Y";

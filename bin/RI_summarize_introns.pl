@@ -61,7 +61,7 @@ while(<$ANOT>){
     my $I = 0;
 
     if(defined $rcount{$event} && defined $ucount{$event} && $ucount{$event} > 0){
-	    $I = $rcount{$event} / $ucount{$event} * $maxcount;
+	    $I = ($rcount{$event} / $ucount{$event}) * $maxcount;
     }
     print OUT "$event\t$C1A\t$AC2\t$C1C2\t$I\n";
 }

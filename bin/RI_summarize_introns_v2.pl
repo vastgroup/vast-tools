@@ -67,7 +67,7 @@ while(<$ANOT>){
     my $I = 0;
     
     if(defined $rcount{$event} && defined $ucount{$event} && $ucount{$event} > 0){
-	$I = sprintf("%.2f",$rcount{$event} / $ucount{$event} * $maxcount);
+	$I = sprintf("%.2f",($rcount{$event} / $ucount{$event}) * $maxcount);
     }    
     # added on 02/10/15
     $C1A = 0 if !$C1A;
