@@ -94,6 +94,9 @@ foreach my $file (@files_IR2){
         chomp;
         my @temp=split(/\t/,$_);
 	$temp[4]=sprintf("%.1f",$temp[4]);
+	$intron_sample_mappability_noSS{$temp[0]}=0 if (!defined $intron_sample_mappability_noSS{$temp[0]});
+	$intron_sample_mappability_SS{$temp[0]}=0 if (!defined $intron_sample_mappability_SS{$temp[0]});
+	
 	unless ($is_ss{$sample}){
 	    if ($intron_sample_mappability_noSS{$temp[0]}>0){
 		$intron_sample_cor_counts{$temp[0]}{$sample}=$temp[4]."=".$intron_sample_mappability_noSS{$temp[0]};
