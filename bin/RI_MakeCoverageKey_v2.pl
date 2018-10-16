@@ -11,6 +11,7 @@ use Getopt::Long;
 my $helpFlag = 0;
 my $dbDir=".";
 my $species = $ARGV[0]; 
+my $verboseFlag=1;
 
 GetOptions("help"     => \$helpFlag,
             "dbDir=s" => \$dbDir,
@@ -30,6 +31,15 @@ OPTIONS:
 
 my $combineFolder = $ARGV[0];
 
+
+sub verbPrint {
+    my $verbMsg = shift;
+    if($verboseFlag) {
+	chomp($verbMsg);
+	print STDERR "[vast combine IR]: $verbMsg\n";
+    }
+}
+
 # One intermediary file that contains the raw and the corrected read counts
 my @files_counts=glob($combineFolder . "/*.summary_v2.txt"); # This contains raw and corrected counts
 my $N=$#files_counts+1;
@@ -37,6 +47,73 @@ my $N=$#files_counts+1;
 die "Error in $0: No samples found in folder $combineFolder\n" if ($N == 0);
 
 ### Mappability is no longer needed in v2 (02/10/15)
+### Addition on 15/10/18: to incorportate the intron body read number as third score.
+my %intron_sample_mappability_noSS;
+my %intron_sample_mappability_SS;
+my %intron_sample_cor_counts;
+
+open (MAP_I_NOSS, "$dbDir/FILES/$species.Introns.sample.200.50.uniquecount.txt") || die "    Error: Needs the intron body sample mappability for non-SS\n"; 
+while (<MAP_I_NOSS>){
+    chomp;
+    my @temp=split(/\t/,$_);
+    $intron_sample_mappability_noSS{$temp[0]}=$temp[1]; # intron => eff positions (max = 151)
+}
+close MAP_I_NOSS;
+
+open (MAP_I_SS, "$dbDir/FILES/$species.Introns.sample-SS.200.50.uniquecount.txt") || die "    Error: Needs the intron body sample mappability for SS\n"; 
+while (<MAP_I_SS>){
+    chomp;
+    my @temp=split(/\t/,$_);
+    $intron_sample_mappability_SS{$temp[0]}=$temp[1]; # intron => eff positions (max = 151)
+}
+close MAP_I_SS;
+
+my %is_ss;
+my @files_IR2=glob($combineFolder . "/*.IR2"); # This contains the corrected counts, including the I (colum 5)
+my $M = $#files_IR2+1;
+die "Error in $0: Different number of IR2 and IR.summary_v2.txt files\n" if ($M != $N);
+foreach my $file (@files_IR2){
+    my ($sample)=$file=~/([^\/]+)\.IR2$/;
+    
+    unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
+    }else{
+	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+	my @fs=split("\t",$line);
+	if($fs[@fs-2] eq "-SS"){
+	    $is_ss{$sample}=1;
+	    verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being strand-specific."
+	}
+	else{
+	    verbPrint "   $sample: found to_combine/${sample}.info. Sample will be treated as being not strand-specific."
+	}
+    }
+    
+    open (IN, $file) || die "Can't open input file";
+    <IN>;
+    while (<IN>){ #Format:  Event_ID EIJ1 EIJ2 EEJ I (all corrected)
+        chomp;
+        my @temp=split(/\t/,$_);
+	$temp[4]=sprintf("%.1f",$temp[4]);
+	unless ($is_ss{$sample}){
+	    if ($intron_sample_mappability_noSS{$temp[0]}>0){
+		$intron_sample_cor_counts{$temp[0]}{$sample}=$temp[4]."=".$intron_sample_mappability_noSS{$temp[0]};
+	    }
+	    else {
+		$intron_sample_cor_counts{$temp[0]}{$sample}="NA=0";
+	    }
+	}
+	else {
+	    if ($intron_sample_mappability_SS{$temp[0]}>0){
+		$intron_sample_cor_counts{$temp[0]}{$sample}=$temp[4]."=".$intron_sample_mappability_SS{$temp[0]};
+	    }
+	    else {
+		$intron_sample_cor_counts{$temp[0]}{$sample}="NA=0";
+	    }
+	}
+    }
+    close IN;
+}
+#### Update finished
 
 ### For each file with counts
 my %samples_counts;
@@ -101,7 +178,7 @@ foreach my $event (sort keys %corrected_reads){
 
         ### If any of the three junctions is "ne" (=no mappability) the whole KEY is turned into N's
         if ($eIE eq "ne" || $eEI eq "ne" || $eEE eq "ne" || $ne_events{$event}) { # added last bit (02/10/15)
-            $Q="N,N,NA,ne";  # score 3 set to NA for consistency --UB
+            $Q="N,N,NA=0,ne";  # score 3 set to NA for consistency --UB
         } 
 	else {
             ### Corresponds to Q1 in other events
@@ -115,22 +192,22 @@ foreach my $event (sort keys %corrected_reads){
             ### "NA" and "Reads" is just all the reads.
             ### The 5th key would be Ulrich's imbalanced test p-value and will be added later
             if (! (defined $eEI && defined $eIE && defined $eEE)) {
-                $Q.=",N,NA,$reads";
+                $Q.=",N,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
             elsif ((($eEI>=15 && $eIE>=20) || ($eEI>=20 && $eIE>=15) || $eEE>=20) && ($eEI+$eIE+$eEE)>=100){
-                $Q.=",SOK,NA,$reads";
+                $Q.=",SOK,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
             elsif (($eEI>=15 && $eIE>=20) || ($eEI>=20 && $eIE>=15) || $eEE>=20){
-                $Q.=",OK,NA,$reads";
+                $Q.=",OK,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
             elsif (($eEI>=10 && $eIE>=15) || ($eEI>=15 && $eIE>=10) || $eEE>=15){
-                $Q.=",LOW,NA,$reads";
+                $Q.=",LOW,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
             elsif (($eEI>=5 && $eIE>=10) || ($eEI>=10 && $eIE>=5) || $eEE>=10){
-                $Q.=",VLOW,NA,$reads";
+                $Q.=",VLOW,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
             else {
-                $Q.=",N,NA,$reads";
+                $Q.=",N,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
         }
         print OUT "\t$Q";
