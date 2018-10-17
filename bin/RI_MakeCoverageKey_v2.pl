@@ -159,9 +159,9 @@ print OUT "\n";
 foreach my $event (sort keys %corrected_reads){
     print OUT "$event";
     foreach my $sample (sort keys %samples_counts){
-        my $eEI=$corrected_reads{$event}{EI1}{$sample};
-        my $eIE=$corrected_reads{$event}{EI2}{$sample};
-        my $eEE=$corrected_reads{$event}{EE}{$sample};
+        my $eEI=sprintf("%.1f",$corrected_reads{$event}{EI1}{$sample});
+        my $eIE=sprintf("%.1f",$corrected_reads{$event}{EI2}{$sample});
+        my $eEE=sprintf("%.1f",$corrected_reads{$event}{EE}{$sample});
 
         my $rEI=$raw_reads{$event}{EI1}{$sample};
         my $rIE=$raw_reads{$event}{EI2}{$sample};
