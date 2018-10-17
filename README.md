@@ -517,8 +517,9 @@ Then, for each combined sample, a pair of columns:
 		- For any type of event: N: does not meet the minimum threshold (VLOW).
 
  	* *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
- 	* *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). Always NA for intron retention events.
- 	* *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the *splice site-based* or *transcript-based* modules; For intron retention events, numbers of reads mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format A=B=C)
+ 	* *Score 3*: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). For all AS events except for IR. 
+		- For IR, from v2.1.3, the score has the corrected number of intron body reads (in a sample of 200bp in the middle of the intron, or the whole intron if shorter), and the number of mappable position in the same (maximum 151 positions). Format A=B.
+ 	* *Score 4*: Imbalance of reads mapping to inclusion splice junctions (only for exon skipping events quantified by the *splice site-based* or *transcript-based* modules; For intron retention events, corrected numbers of reads mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format A=B=C)
 		- OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
 		- B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
 		- B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
