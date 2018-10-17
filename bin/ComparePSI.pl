@@ -370,40 +370,38 @@ while (<PSI>){
 	foreach my $s (@samplesA){
             my ($temp_r_ib,$le_body,$temp_r_EI,$temp_r_IE)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\=(.+?)\,(.+?)\=(.+?)\=.+?\,.+?\@/;
 	    if (defined $temp_r_ib && $temp_r_ib =~ /\d/ && $le_body >= 5){
-		$int_body_reads{$s} = $temp_r_ib;
 		$int_body_reads{A}+= $temp_r_ib;
+		$int_junct_reads{A}+= sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
 	    }
 	    else {
-		$int_body_reads{$s} = "NA";
 		$int_body_reads{A} = "NA";
+		$int_junct_reads{A} = "NA";
 	    }
-	    $int_junct_reads{$s} = sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
-	    $int_junct_reads{A}+= sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
         }
         foreach my $s (@samplesB){
             my ($temp_r_ib,$le_body,$temp_r_EI,$temp_r_IE)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\=(.+?)\,(.+?)\=(.+?)\=.+?\,.+?\@/;
 	    if (defined $temp_r_ib && $temp_r_ib =~ /\d/ && $le_body >= 5){
-		$int_body_reads{$s} = $temp_r_ib;
 		$int_body_reads{B}+= $temp_r_ib;
+		$int_junct_reads{B}+= sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
 	    }
 	    else {
-		$int_body_reads{$s} = "NA";
 		$int_body_reads{B} = "NA";
+		$int_junct_reads{B} = "NA";
 	    }
-	    $int_junct_reads{$s} = sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
-	    $int_junct_reads{B}+= sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
         }
 	### Does the averages
 	if ($int_body_reads{A} ne "NA" && $int_body_reads{B} ne "NA"){
 	    $av_int_reads{A}=sprintf("%.2f",$int_body_reads{A}/($#samplesA+1));
 	    $av_int_reads{B}=sprintf("%.2f",$int_body_reads{B}/($#samplesB+1));
+	    $av_junct_reads{A}=sprintf("%.2f",$int_junct_reads{A}/($#samplesA+1));
+	    $av_junct_reads{B}=sprintf("%.2f",$int_junct_reads{B}/($#samplesB+1));
 	}
 	else {
 	    $av_int_reads{A} = "NA";
 	    $av_int_reads{B} = "NA";
+	    $av_junct_reads{A} = "NA";
+	    $av_junct_reads{B} = "NA";
 	}
-	$av_junct_reads{A}=sprintf("%.2f",$int_junct_reads{A}/($#samplesA+1));
-	$av_junct_reads{B}=sprintf("%.2f",$int_junct_reads{B}/($#samplesB+1));
     }
 
     # get PSIs
@@ -437,7 +435,7 @@ while (<PSI>){
 	
 	# does the diff AS test:
 	if ($dPSI > $min_dPSI && $min_B > $max_A+$min_range){ # if rep1 it will always meet the criteria
-	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{B}/$av_junct_reads{B} >= $fr_int_reads || $av_int_reads{B} eq "NA"))){
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && $av_int_reads{B} eq "NA")  || ($type eq "IR" && $av_int_reads{B}/$av_junct_reads{B} >= $fr_int_reads)){
 		$tally{$type}{UP}++;
 		unless (defined $print_dPSI){
 		    print O "$_\n"; # dPSI is not printed so it can the be run with plot
@@ -466,7 +464,7 @@ while (<PSI>){
 	    }
 	}
 	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range){
-	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads || $av_int_reads{A} eq "NA"))){
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && $av_int_reads{A} eq "NA")  || ($type eq "IR" && $av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads)){
 		$tally{$type}{DOWN}++;
 		unless (defined $print_dPSI){
 		    print O "$_\n"; # dPSI is not printed so it can the be run with plot
@@ -560,7 +558,7 @@ while (<PSI>){
 	
 	### Does the diff tests
 	if ($av_paired_dPSI > $min_dPSI && $min_indiv_dPSI > $min_range){ 
-	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{B}/$av_junct_reads{B} >= $fr_int_reads || $av_int_reads{B} eq "NA"))){
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && $av_int_reads{B} eq "NA") || ($type eq "IR" && $av_int_reads{B}/$av_junct_reads{B} >= $fr_int_reads)){
 		$tally{$type}{UP}++;
 		unless (defined $print_dPSI){
 		    print O "$_\n";
@@ -589,7 +587,7 @@ while (<PSI>){
 	    }
 	}
 	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range){ 
-	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads || $av_int_reads{A} eq "NA"))){
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && $av_int_reads{A} eq "NA") || ($type eq "IR" && $av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads)){
 		$tally{$type}{DOWN}++;
 		unless (defined $print_dPSI){
 		    print O "$_\n";
