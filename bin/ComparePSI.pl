@@ -42,6 +42,8 @@ my $print_sets;
 my $max_dPSI;
 my $print_all_ev;
 my $print_AS_ev;
+my $use_int_reads;
+my $fr_int_reads = 0.4;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -55,6 +57,8 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "o=s" => \$folder,
 			  "help" => \$helpFlag,
 			  "p_IR" => \$p_IR,
+			  "use_int_reads" => \$use_int_reads,
+			  "fr_int_reads=f" => \$fr_int_reads,
 			  "GO" => \$get_GO,
 			  "sp=s" => \$species,
 			  "species=s" => \$species,
@@ -127,6 +131,9 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
+        --use_int_reads          Requires a minimum number (--fr_int_reads) of intron body reads for IR (default OFF)(from combine v2.1.3)
+        --fr_int_reads           Minimum fraction of reads in the intron bodies respect to the 
+                                   average of the EI/IE junctions (default 0.4). Only useful with --use_int_reads
         --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
                                    - It does not allow ploting.
         --print_sets             Prints files with different sets for comparisons in Matt (http://matt.crg.eu):
@@ -219,6 +226,7 @@ my $tail = ""; # to be added to the output name
 $tail.="-range$min_range" if (defined $min_range); 
 $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
+$tail.="-ir_reads" if (defined $use_int_reads);
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
 $tail.="-with_dPSI" if (defined $print_dPSI);
@@ -314,6 +322,10 @@ while (<PSI>){
     my @t=split(/\t/,$_);
     my @PSI_A = ();
     my @PSI_B = ();
+    my %int_body_reads = ();
+    my %int_junct_reads = ();
+    my %av_int_reads = ();
+    my %av_junct_reads = ();
     my $event = $t[1];
 
     next if $t[3] == 0; # removes the internal Alt3 and Alt5 splice sites to avoid double counting
@@ -353,6 +365,46 @@ while (<PSI>){
 	}
 	next if ($kill_pIR == 1);
     }
+    # Gets the number of intron body reads (from v2.1.3)
+    if (($type eq "IR") && (defined $use_int_reads)){
+	foreach my $s (@samplesA){
+            my ($temp_r_ib,$le_body,$temp_r_EI,$temp_r_IE)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\=(.+?)\,(.+?)\=(.+?)\=.+?\,.+?\@/;
+	    if (defined $temp_r_ib && $temp_r_ib =~ /\d/ && $le_body >= 5){
+		$int_body_reads{$s} = $temp_r_ib;
+		$int_body_reads{A}+= $temp_r_ib;
+	    }
+	    else {
+		$int_body_reads{$s} = "NA";
+		$int_body_reads{A} = "NA";
+	    }
+	    $int_junct_reads{$s} = sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
+	    $int_junct_reads{A}+= sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
+        }
+        foreach my $s (@samplesB){
+            my ($temp_r_ib,$le_body,$temp_r_EI,$temp_r_IE)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\=(.+?)\,(.+?)\=(.+?)\=.+?\,.+?\@/;
+	    if (defined $temp_r_ib && $temp_r_ib =~ /\d/ && $le_body >= 5){
+		$int_body_reads{$s} = $temp_r_ib;
+		$int_body_reads{B}+= $temp_r_ib;
+	    }
+	    else {
+		$int_body_reads{$s} = "NA";
+		$int_body_reads{B} = "NA";
+	    }
+	    $int_junct_reads{$s} = sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
+	    $int_junct_reads{B}+= sprintf("%.2f",($temp_r_EI+$temp_r_IE)/2);
+        }
+	### Does the averages
+	if ($int_body_reads{A} ne "NA" && $int_body_reads{B} ne "NA"){
+	    $av_int_reads{A}=sprintf("%.2f",$int_body_reads{A}/($#samplesA+1));
+	    $av_int_reads{B}=sprintf("%.2f",$int_body_reads{B}/($#samplesB+1));
+	}
+	else {
+	    $av_int_reads{A} = "NA";
+	    $av_int_reads{B} = "NA";
+	}
+	$av_junct_reads{A}=sprintf("%.2f",$int_junct_reads{A}/($#samplesA+1));
+	$av_junct_reads{B}=sprintf("%.2f",$int_junct_reads{B}/($#samplesB+1));
+    }
 
     # get PSIs
     my $sum_A = sum(@PSI_A);
@@ -365,7 +417,6 @@ while (<PSI>){
     my $min_B = (sort{$b<=>$a}@PSI_B)[-1];
     my $max_B = (sort{$a<=>$b}@PSI_B)[-1];
 
-    
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
 	# get dPSI
@@ -386,57 +437,60 @@ while (<PSI>){
 	
 	# does the diff AS test:
 	if ($dPSI > $min_dPSI && $min_B > $max_A+$min_range){ # if rep1 it will always meet the criteria
-	    $tally{$type}{UP}++;
-	    unless (defined $print_dPSI){
-		print O "$_\n"; # dPSI is not printed so it can the be run with plot
-	    }
-	    else {
-		print O "$_\t$dPSI\n";
-	    }
-	    
-	    # print for GO
-	    if (defined$get_GO){
-		unless ($use_names){
-		    if (defined $ID_gene{$t[1]}){
-			print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
-			$doneIR_UP{$ID_gene{$t[1]}}=1;
-			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			$doneEXSK{$ID_gene{$t[1]}}=1;
-		    }
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{B}/$av_junct_reads{B} >= $fr_int_reads || $av_int_reads{B} eq "NA"))){
+		$tally{$type}{UP}++;
+		unless (defined $print_dPSI){
+		    print O "$_\n"; # dPSI is not printed so it can the be run with plot
 		}
 		else {
-		    print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
-		    $doneIR_UP{$t[0]}=1 if (defined $t[0]);
-		    print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-		    $doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    print O "$_\t$dPSI\n";
+		}
+		
+		# print for GO
+		if (defined $get_GO){
+		    unless ($use_names){
+			if (defined $ID_gene{$t[1]}){
+			    print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
+			    $doneIR_UP{$ID_gene{$t[1]}}=1;
+			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			}
+		    }
+		    else {
+			print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
+			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
+			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    }
 		}
 	    }
 	}
 	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range){
-	    $tally{$type}{DOWN}++;
-
-	    unless (defined $print_dPSI){
-		print O "$_\n"; # dPSI is not printed so it can the be run with plot
-	    }
-	    else {
-		print O "$_\t$dPSI\n";
-	    }
-
-	    #print for GO
-	    if (defined$get_GO){
-		unless ($use_names){
-		    if (defined $ID_gene{$t[1]}){
-			print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
-			$doneIR_DOWN{$ID_gene{$t[1]}}=1;
-			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			$doneEXSK{$ID_gene{$t[1]}}=1;	
-		    }
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads || $av_int_reads{A} eq "NA"))){
+		$tally{$type}{DOWN}++;
+		unless (defined $print_dPSI){
+		    print O "$_\n"; # dPSI is not printed so it can the be run with plot
 		}
 		else {
-		    print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
-		    $doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
-		    print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-		    $doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    print O "$_\t$dPSI\n";
+		}
+		
+		#print for GO
+		if (defined$get_GO){
+		    unless ($use_names){
+			if (defined $ID_gene{$t[1]}){
+			    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
+			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
+			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			}
+		    }
+		    else {
+			print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
+			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
+			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    }
 		}
 	    }
 	}
@@ -506,56 +560,60 @@ while (<PSI>){
 	
 	### Does the diff tests
 	if ($av_paired_dPSI > $min_dPSI && $min_indiv_dPSI > $min_range){ 
-	    $tally{$type}{UP}++;
-	    unless (defined $print_dPSI){
-		print O "$_\n";
-	    }
-	    else {
-		print O "$_\t$av_paired_dPSI\n";
-	    }
-	    
-	    # print for GO
-	    if (defined $get_GO){
-		unless ($use_names){
-		    if (defined $ID_gene{$t[1]}){
-			print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
-			$doneIR_UP{$ID_gene{$t[1]}}=1;
-			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			$doneEXSK{$ID_gene{$t[1]}}=1;
-		    }
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{B}/$av_junct_reads{B} >= $fr_int_reads || $av_int_reads{B} eq "NA"))){
+		$tally{$type}{UP}++;
+		unless (defined $print_dPSI){
+		    print O "$_\n";
 		}
 		else {
-		    print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
-		    $doneIR_UP{$t[0]}=1 if (defined $t[0]);
-		    print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-		    $doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    print O "$_\t$av_paired_dPSI\n";
+		}
+		
+		# print for GO
+		if (defined $get_GO){
+		    unless ($use_names){
+			if (defined $ID_gene{$t[1]}){
+			    print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
+			    $doneIR_UP{$ID_gene{$t[1]}}=1;
+			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			}
+		    }
+		    else {
+			print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
+			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
+			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    }
 		}
 	    }
 	}
 	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range){ 
-	    $tally{$type}{DOWN}++;
-	    unless (defined $print_dPSI){
-		print O "$_\n";
-	    }
-	    else {
-		print O "$_\t$av_paired_dPSI\n";
-	    }
-
-	    #print for GO
-	    if (defined $get_GO){
-		unless ($use_names){
-		    if (defined $ID_gene{$t[1]}){
-			print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
-			$doneIR_DOWN{$ID_gene{$t[1]}}=1;
-			print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			$doneEXSK{$ID_gene{$t[1]}}=1;	
-		    }	
+	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && ($av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads || $av_int_reads{A} eq "NA"))){
+		$tally{$type}{DOWN}++;
+		unless (defined $print_dPSI){
+		    print O "$_\n";
 		}
 		else {
-		    print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
-		    $doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
-		    print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-		    $doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    print O "$_\t$av_paired_dPSI\n";
+		}
+		
+		#print for GO
+		if (defined $get_GO){
+		    unless ($use_names){
+			if (defined $ID_gene{$t[1]}){
+			    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
+			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
+			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
+			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			}	
+		    }
+		    else {
+			print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
+			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
+			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+		    }
 		}
 	    }
 	}
