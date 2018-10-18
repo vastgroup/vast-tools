@@ -159,9 +159,13 @@ print OUT "\n";
 foreach my $event (sort keys %corrected_reads){
     print OUT "$event";
     foreach my $sample (sort keys %samples_counts){
-        my $eEI=sprintf("%.1f",$corrected_reads{$event}{EI1}{$sample});
-        my $eIE=sprintf("%.1f",$corrected_reads{$event}{EI2}{$sample});
-        my $eEE=sprintf("%.1f",$corrected_reads{$event}{EE}{$sample});
+	my $eEI=$corrected_reads{$event}{EI1}{$sample};
+	my $eIE=$corrected_reads{$event}{EI2}{$sample};
+	my $eEE=$corrected_reads{$event}{EE}{$sample};
+	
+        $eEI=sprintf("%.1f",$eEI) if $eEI=~/\d/;
+        $eIE=sprintf("%.1f",$eIE) if $eIE=~/\d/;
+        $eEE=sprintf("%.1f",$eEE) if $eEE=~/\d/;
 
         my $rEI=$raw_reads{$event}{EI1}{$sample};
         my $rIE=$raw_reads{$event}{EI2}{$sample};
@@ -170,7 +174,7 @@ foreach my $event (sort keys %corrected_reads){
         $eEI=0 if !$corrected_reads{$event}{EI1}{$sample};
         $eIE=0 if !$corrected_reads{$event}{EI2}{$sample};
         $eEE=0 if !$corrected_reads{$event}{EE}{$sample};
-
+	
         $rEI=0 if !$raw_reads{$event}{EI1}{$sample};
         $rIE=0 if !$raw_reads{$event}{EI2}{$sample};
         $rEE=0 if !$raw_reads{$event}{EE}{$sample};
