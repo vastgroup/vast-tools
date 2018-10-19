@@ -8,15 +8,17 @@ before_install:
 
 install:  
   # Install library
+  - pwd
   - mkdir ${TRAVIS_BUILD_DIR}/db
   - cd ${TRAVIS_BUILD_DIR}/db
   - wget -c -t0 http://vastdb.crg.eu/libs/vastdb.gga.16.02.18.tar.gz
   - tar zxf vastdb.gga.16.02.18.tar.gz
   - rm vastdb.gga.16.02.18.tar.gz
-  # Out directory
+  # In & out directory
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
   - cd
-  - cp toniher/vast-tools/tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
+  - ls -l
+  - cp ./tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/out
 
 script:
