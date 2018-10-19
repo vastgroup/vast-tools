@@ -16,7 +16,7 @@ install:
   # Out directory
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
   - cd
-  - cp ./tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
+  - cp toniher/vast-tools/tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/out
 
 script:
