@@ -10,7 +10,7 @@ install:
   # Install library
   - mkdir ${TRAVIS_BUILD_DIR}/db
   - cd ${TRAVIS_BUILD_DIR}/db
-  - wget -c -t0 http://vastdb.crg.eu/libs/vastdb.gga.16.02.18.tar.gz
+  - wget -c -t0 http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
   - tar zxf vastdb.gga.16.02.18.tar.gz
   - rm vastdb.gga.16.02.18.tar.gz
   # In & out directory
@@ -21,5 +21,5 @@ install:
 script:
   # Run docker
   - docker run -d -v ${TRAVIS_BUILD_DIR}/db:/VASTDB -v ${TRAVIS_BUILD_DIR}/share:/share --name myvast biocorecrg/vast-tools tail -f /dev/null
-  - docker exec myvast vast-tools align /share/reads/Test-100.fq.gz -sp Gga --expr -o /share/out/test
+  - docker exec myvast vast-tools align /share/reads/Test-100.fq.gz -sp Hsa --expr -o /share/out/test
 
