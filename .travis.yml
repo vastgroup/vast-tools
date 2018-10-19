@@ -1,0 +1,25 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker pull biocorecrg/vast-tools
+  - docker tag biocorecrg/vast-tools biocorecrg/vast-tools:2.1.3
+
+install:  
+  # Install library
+  - mkdir ${TRAVIS_BUILD_DIR}/db
+  - cd ${TRAVIS_BUILD_DIR}/db
+  - wget -c -t0 http://vastdb.crg.eu/libs/vastdb.gga.16.02.18.tar.gz
+  - tar zxf vastdb.gga.16.02.18.tar.gz
+  - rm vastdb.gga.16.02.18.tar.gz
+  # Out directory
+  - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
+  - cp ./Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
+  - mkdir -p ${TRAVIS_BUILD_DIR}/share/out
+
+script:
+  # Run docker
+  - docker run -d -v ${TRAVIS_BUILD_DIR}/db:/VASTDB -v ${TRAVIS_BUILD_DIR}/share:/share --name myvast biocorecrg/vast-tools tail -f /dev/null
+  - docker exec myvast vast-tools align /share/reads/Test-100.fq.gz -sp Gga --expr -o /share/out/test
+
