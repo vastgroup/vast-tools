@@ -15,7 +15,7 @@ install:
   - rm vastdb.gga.16.02.18.tar.gz
   # In & out directory
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
-  - cp ${TRAVIS_BUILD_DIR}/toniher/vast-tools/tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
+  - cp ${TRAVIS_BUILD_DIR}/tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/out
 
 script:
