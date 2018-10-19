@@ -15,6 +15,7 @@ install:
   - rm vastdb.gga.16.02.18.tar.gz
   # Out directory
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
+  - cd
   - cp ./tests/data/Test-100.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/out
 
