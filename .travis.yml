@@ -3,7 +3,8 @@ services:
   - docker
 
 before_install:
-  - docker pull biocorecrg/vast-tools
+  # - docker pull biocorecrg/vast-tools
+  docker build -t vast-tools .
 
 install:  
   # Install library
@@ -19,6 +20,6 @@ install:
 
 script:
   # Run docker
-  - docker run -d -v ${TRAVIS_BUILD_DIR}/db:/VASTDB -v ${TRAVIS_BUILD_DIR}/share:/share --name myvast biocorecrg/vast-tools tail -f /dev/null
+  - docker run -d -v ${TRAVIS_BUILD_DIR}/db:/VASTDB -v ${TRAVIS_BUILD_DIR}/share:/share --name myvast vast-tools tail -f /dev/null
   - docker exec myvast vast-tools align /share/reads/Test-100.fq.gz -sp Hsa --expr -o /share/out/test
 
