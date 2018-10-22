@@ -5,3 +5,5 @@ install.packages('reshape2',dependencies=TRUE, repos='cran.rstudio.com/');
 install.packages('ggplot2',dependencies=TRUE, repos='cran.rstudio.com/');
 install.packages('MASS',dependencies=TRUE, repos='cran.rstudio.com/');
 install.packages('getopt',dependencies=TRUE, repos='cran.rstudio.com/');
+install.packages('tidyr',dependencies=TRUE, repos='cran.rstudio.com/');
+install.packages('readr',dependencies=TRUE, repos='cran.rstudio.com/');
