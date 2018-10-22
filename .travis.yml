@@ -22,4 +22,4 @@ script:
   # Run docker
   - docker run -d -v ${TRAVIS_BUILD_DIR}/db:/VASTDB -v ${TRAVIS_BUILD_DIR}/share:/share --name myvast vast-tools tail -f /dev/null
   - docker exec myvast vast-tools align /share/reads/Test-100.fq.gz -sp Hsa --expr -o /share/out/test
-
+  - bash ${TRAVIS_BUILD_DIR}/tests/tests.sh ${TRAVIS_BUILD_DIR}/tests/data ${TRAVIS_BUILD_DIR}/share/out/test
