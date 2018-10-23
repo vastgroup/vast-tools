@@ -10,8 +10,8 @@ install:
   # Install library
   - mkdir ${TRAVIS_BUILD_DIR}/db
   - cd ${TRAVIS_BUILD_DIR}/db
-  - wget -c -t0 -o /dev/null http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
-  - tar zxf vastdb.hsa.16.02.18.tar.gz
+  - travis_wait wget -c -t0 -o /dev/null http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
+  - travis_wait tar zxf vastdb.hsa.16.02.18.tar.gz
   - rm vastdb.hsa.16.02.18.tar.gz
   # In & out directory
   - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
