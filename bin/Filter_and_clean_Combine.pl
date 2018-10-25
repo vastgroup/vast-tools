@@ -26,7 +26,7 @@ GetOptions(               "min_SD=i" => \$min_SD,
                           "noVLOW" => \$noVLOW,
 			  "samples=s" => \$samples,
 			  "log" => \$log,
-			  "onlyEXSK" => \$onlyEXSK,
+			  "onlyEX" => \$onlyEXSK,
 			  "add_names" => \$AddName
     );
 
@@ -68,7 +68,7 @@ $root_out.="-minFr_$min_Fraction" if $min_Fraction;
 $root_out.="-minSD_$min_SD";
 $root_out.="-noVLOW" if $noVLOW;
 $root_out.="-p_IR" if $p_IR;
-$root_out.="-onlyEXSK" if $onlyEXSK;
+$root_out.="-onlyEX" if $onlyEXSK;
 $root_out.="-samples$N_samples" if $samples;
 
 $output_file="$root_out-Tidy.tab" unless $output_file;
@@ -87,7 +87,7 @@ Prepares and filters a vast-tools output for general analyses.
         -outFile                Output file name (default based on option parameters)
         --noVLOW                Do not use samples with VLOW coverage (default OFF)
         --p_IR                  Filter IR by the p-value of the binomial test (default OFF)
-        --onlyEXSK              Outputs only EXSK events (default OFF)
+        --onlyEX                Outputs only EXSK events (default OFF)
         --add_names             Adds gene name to the event_ID. E.g. Mta1\=MmuEX0029874 (default OFF)
         --log                   Print the summary stats into a file (default OFF)
 
