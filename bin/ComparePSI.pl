@@ -727,6 +727,7 @@ verbPrint "Printing summary statistics\n";
 my $extras = "";
 $extras.=", noVLOW" if (defined $noVLOW);
 $extras.=", p_IR" if (defined $p_IR);
+$extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);
 
 print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras\n";
