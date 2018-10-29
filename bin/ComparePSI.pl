@@ -71,7 +71,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "print_all_ev" => \$print_all_ev,
 			  "print_AS_ev" => \$print_AS_ev,
 			  "max_dPSI=i"   => \$max_dPSI,
-			  "plot" => \$plot,
+			  "plot_PSI" => \$plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
     );
