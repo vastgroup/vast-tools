@@ -1,0 +1,25 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  # - docker pull biocorecrg/vast-tools
+  docker build -t vast-tools .
+
+install:  
+  # Install library
+  - mkdir ${TRAVIS_BUILD_DIR}/db
+  - cd ${TRAVIS_BUILD_DIR}/db
+  - travis_wait wget -c -t0 -o /dev/null http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
+  - travis_wait tar zxf vastdb.hsa.16.02.18.tar.gz
+  - rm vastdb.hsa.16.02.18.tar.gz
+  # In & out directory
+  - mkdir -p ${TRAVIS_BUILD_DIR}/share/reads
+  - cp ${TRAVIS_BUILD_DIR}/tests/data/NewFQ_Test_Hsa-51/NewFQ_Test_Hsa-51.fq.gz ${TRAVIS_BUILD_DIR}/share/reads
+  - mkdir -p ${TRAVIS_BUILD_DIR}/share/out
+
+script:
+  # Run docker
+  - docker run -d -v ${TRAVIS_BUILD_DIR}/db:/VASTDB -v ${TRAVIS_BUILD_DIR}/share:/share --name myvast vast-tools tail -f /dev/null
+  - docker exec myvast vast-tools align /share/reads/NewFQ_Test_Hsa-51.fq.gz -sp Hsa --expr -o /share/out/test
+  - bash ${TRAVIS_BUILD_DIR}/tests/tests.sh ${TRAVIS_BUILD_DIR}/tests/data ${TRAVIS_BUILD_DIR}/share/out/test
