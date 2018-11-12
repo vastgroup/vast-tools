@@ -280,12 +280,14 @@ if (defined $get_GO){
     open (IR_UP, ">$folder/IR_UP-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (IR_DOWN, ">$folder/IR_DOWN-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (EXSK, ">$folder/AltEx-$out_root.txt") or errPrintDie "Can't open GO output files";
+    open (ALL_EV, ">$folder/All_Ev-$out_root.txt") or errPrintDie "Can't open GO output files";
 }
 
 #### Global variables for PSI analysis & GO
 my %doneIR_UP;
 my %doneIR_DOWN;
 my %doneEXSK;
+my %doneALL;
 my %doneBG;
 my %tally;
 my %tally_total; # to count the total number of AS events with good coverage
@@ -452,6 +454,8 @@ while (<PSI>){
 			    $doneIR_UP{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			    print ALL_EV "$ID_gene{$t[1]}\n" if !defined $doneALL{$ID_gene{$t[1]}};
+			    $doneALL{$ID_gene{$t[1]}}=1;
 			}
 		    }
 		    else {
@@ -459,6 +463,8 @@ while (<PSI>){
 			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -481,6 +487,8 @@ while (<PSI>){
 			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
+			    $doneALL{$ID_gene{$t[1]}}=1;	
 			}
 		    }
 		    else {
@@ -488,6 +496,8 @@ while (<PSI>){
 			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -575,6 +585,8 @@ while (<PSI>){
 			    $doneIR_UP{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
+			    $doneALL{$ID_gene{$t[1]}}=1;
 			}
 		    }
 		    else {
@@ -582,6 +594,8 @@ while (<PSI>){
 			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -604,6 +618,8 @@ while (<PSI>){
 			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
+			    $doneALL{$ID_gene{$t[1]}}=1;	
 			}	
 		    }
 		    else {
@@ -611,6 +627,8 @@ while (<PSI>){
 			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -679,6 +697,7 @@ if (defined $get_GO){
     close IR_DOWN;
     close IR_UP;
     close EXSK;
+    close ALL_EV;
 }
 
 if (defined $plot){
