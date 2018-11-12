@@ -1,7 +1,7 @@
 VAST-TOOLS
 ==========
 
-[![Build Status](https://travis-ci.org/toniher/vast-tools.svg?branch=master)](https://travis-ci.org/toniher/vast-tools)
+[![Build Status](https://travis-ci.org/vastgroup/vast-tools.svg?branch=master)](https://travis-ci.org/vastgroup/vast-tools)
 
 Table of Contents:
 
