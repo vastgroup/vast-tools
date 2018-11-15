@@ -188,7 +188,7 @@ VAST-TOOLS can be run as simply as:
 
 > vast-tools compare -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2
 OR
-> vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2
 > vast-tools plot INCLUSION-FILTERED.tab
 ~~~~
 
@@ -201,7 +201,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 ~~~~ 
 AND
 ~~~~
-> vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2 -c 8 > INCLUSION-FILTERED.tab
+> vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2
 ~~~~
 
 
@@ -330,7 +330,7 @@ PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample ar
 empirical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
 
 ~~~~
-> vast-tools diff -a sampA_r1,sampA_r2,sampA_r3 -b sampB_r1,sampB_r2 -o outputdir > outputdir/diff_output.tab
+> vast-tools diff -a sampA_r1,sampA_r2,sampA_r3 -b sampB_r1,sampB_r2 -o outputdir -d outbase
 ~~~~
 Note: Sample names do not have to follow any specific convention as long as they remain valid ASCII words and any number of replicate sample names may be given 1:N.
 
@@ -380,7 +380,7 @@ is compared to PerturbationB.  No MLE fitting is used in this case.
 
 In all multireplicate cases where `--paired=FALSE`, the posterior distributions
 of the individual replicates are used to estimate a 'best fit joint posterior' distribution
-over psi for each sample.
+over PSI for each sample.
  
 *Performance Options*
 
@@ -417,8 +417,8 @@ The text output of diff looks like:
 
 Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
 for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
-Psi (deltaPsi) between SampleA and SampleB of -0.57, the minimum value (`MV`) for |dPsi| at 0.95 is
-0.3, meaning that there is a 0.95 probability that |deltaPsi| is greater than 0.3. Use this value 
+PSI (dPsi/ΔPSI) between SampleA and SampleB of -0.57, the minimum value (`MV`) for |ΔPSI| at 0.95 is
+0.3, meaning that there is a 0.95 probability that |ΔPSI| is greater than 0.3. Use this value 
 to filter for events that are statistically likely to have at least a minimal difference of some 
 magnitude that you deem to be biologically relevant.  The `-m` argument (default 0.1) provides a
 lower bound for events that will be plotted to PDF and printed to file based on `MV`.  As a cutoff,
@@ -428,10 +428,10 @@ would rather view more events that may have significant but modest changes.
 
 ![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
 
-The output plot above shows in the left panel the two joint posterior distributions over psi, and the
-point estimates for each replicate plotted as points below the histograms.  In the right panel:
-the y-axis represents the probability of delta psi being greater than some magnitude value of x (shown on the x-axis).
-The red line indicates the maximal value of x where P(deltaPsi > x) > `-r`, or the 0.95 default.  
+The output plot above shows in the left panel the two joint posterior distributions over PSI, and the
+point estimates for each replicate plotted as points below the histograms.  In the right panel,
+the y-axis represents the probability of deltaPsi being greater than some magnitude value of x (shown on the x-axis).
+The red line indicates the maximal value of x where P(ΔPSI > x) > `-r`, or the 0.95 default.  
 
 ### Plotting
 
