@@ -2,6 +2,7 @@
 
 # Author: Tim Sterne-Weiler, 2014
 # tim.sterne.weiler@utoronto.ca
+# Modifications Ulrich Braunschweig 2018
 
 # Copyright (C) 2014 Tim Sterne-Weiler
 #
@@ -41,7 +42,7 @@ option.list <- list(
         help = "Required, 1:n sample names separated by , [mandatory!]"),
     make_option(c("-b", "--replicateB"), type = "character", default = NULL, metavar = "SampleA,SampleB,SampleC",
         help = "Required, 1:n sample names separated by , [mandatory!]\n
-
+	
 [input options]"),
     make_option(c("--sampleNameA"), type = "character", default = NULL, metavar = "string",
         help = "Name of the replicate set A, [default is first element of --replicateA]"),
@@ -49,18 +50,18 @@ option.list <- list(
         help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
         help = "Exact or Partial match to PSI table in output directory [default %default]"),
-    make_option(c("-n", "--nLines"), type = "integer", default = "10000",
+    make_option(c("-n", "--nLines"), type = "integer", default = "5000",
         help = "Number of lines to read/process in parallel at a time... lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), type = "logical", default = FALSE,
         help = "Samples are paired, -a pairOneA,pairTwoA,.. -b pairOneB,pairTwoB,.. [default %default]\n
 
 [output options]"),
-    make_option(c("-f", "--filter"), type = "logical", default = TRUE,
-        help = "Filter output for differential events only [default %default]"),
-    make_option(c("-d", "--pdf"), type = "character", default = "input.DIFF_plots", metavar="FILE",
-        help = "Plot visual output (pdf) for differential events into FILE [default %default]"),
+    make_option(c("-d", "--baseName"), type = "character", default = "input.DIFF", metavar="FILE",
+        help = "Base name for output files [default %default]"),
+    make_option("--noPDF", action="store_true", default = FALSE,
+        help = "Do not save PDF output [default %default]"),
     make_option(c("-o", "--output"), type = "character", default = NULL,
-        help = "Output directory, [default vast_out]\n
+        help = "Vast-tools output directory, [default vast_out]\n
 
 [statistical options]"),
     make_option(c("-r", "--prob"), type = "numeric", default = 0.95,
@@ -88,9 +89,17 @@ option.list <- list(
 )
 
 parser <- OptionParser(option_list = option.list,
-            usage = "vast-tools diff -a SampleA,..,SampleD -b SampleF,..,SampleG [options]\n\nAuthor: Tim Sterne-Weiler\n")
+            usage       = "vast-tools diff -a SampleA,..,SampleD -b SampleF,..,SampleG [options]",
+	    description = "Score differential alternative splicing between two groups of samples (set A - set B)"
+)
+
 optpar <- parse_args(parser, argv, positional_arguments = TRUE)
 opt <- optpar$options
+
+if (length(commandArgs(TRUE)) == 2 & commandArgs(TRUE)[1] == "-o") {
+    print_help(parser)
+    stop("No input")
+}
 
 loadPackages(c("MASS", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
@@ -104,7 +113,7 @@ set.seed(opt$seed)
 if(!file.exists(opt$input)) {
   potentialFiles <- Sys.glob( paste(c("*",opt$input,"*"), collapse="") )
   if( length( potentialFiles ) >= 1) { 
-	 # now sort and take the one with the 'biggest' number of samples
+    # now sort and take the one with the 'biggest' number of samples
     potentialFiles_sort <- rev( sort( potentialFiles ) )
     opt$input <- potentialFiles_sort[1]
   } else {
@@ -117,19 +126,13 @@ if(!file.exists(opt$input)) {
 ## Setting input files.
 inputFile <- file( opt$input, 'r' )
 
-## Make plot directory
-#if(opt$pdf) {
-  #dir.create(paste(c(opt$output, "/diff_out"), collapse=""))
-#}
-
-#-replicatesA=name1@name2@name3 -replicatesB=name4@name5
 firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "," ))
 secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "," ))
 
 if( length(firstRepSet) <= 0 || 
-    length(secondRepSet) <= 0) { 
+  length(secondRepSet) <= 0) { 
   print_help(parser) 
-  stop("[vast diff error]: No replicate sample names given!!! -a sampA,sampB -b sampC,sampD")
+  stop("[vast diff error]: No replicate sample names given! -a sampA,sampB -b sampC,sampD")
 }
 
 # Set number of replicates
@@ -148,23 +151,8 @@ sampOneName <- substr(opt$sampleNameA, 1, 9)
 sampTwoName <- substr(opt$sampleNameB, 1, 9)
 
 
-## INITIALIZE LISTS ##
-shapeFirst <- vector("list", firstRepN)
-shapeSecond <- vector("list", secondRepN)
-
-psiFirst <- vector("list", firstRepN)
-psiSecond <- vector("list", secondRepN)
-
 # Get header
-head <- readLines( inputFile, n=1 )
-head_n <- unlist( strsplit( head, "\t" ) )
-
-#DEPRECATED -TSW 03/26/2015
-# if we are to filter to stdout, then print header
-if( opt$filter ) {
-#  writeLines(head, stdout())
-  writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[dPsi]\tMV[dPsi]_at_%s", sampOneName, sampTwoName, opt$prob), stdout())
-}
+head_n <- unlist(strsplit(readLines( inputFile, n=1 ), "\t"))
 
 # check if header is correct..  TODO
 
@@ -175,195 +163,91 @@ repBind <- which( head_n %in% secondRepSet )
 if(length(repAind) == 0 ||
    length(repBind) == 0) { 
    print_help(parser)
-   stop("[vast diff error]: Incorrect sampleNames given, One or more do not exist!!!\n") 
+   stop("[vast diff error]: Incorrect sampleNames given, one or more do not exist!\n") 
 }
 
 # Indexes of Quals
 repA.qualInd <- repAind + 1
 repB.qualInd <- repBind + 1
 
-# make sure this succeeded  TODO
+# make sure this succeeded TODO
 
 # CONST
 alphaList <- seq(0,1,0.01)
 
 ### TMP OUT
-if(opt$pdf == "input.DIFF_plots") {
+if(opt$baseName == "input.DIFF") {
   pdfname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_plots.pdf", basename(opt$input))
-  signame <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_sig.txt", basename(opt$input))
+  outname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF.txt", basename(opt$input))
 } else {
-  pdfname <- paste(c(opt$pdf, ".pdf"), collapse="")
-  signame <- paste(c(opt$pdf, ".txt"), collapse="")
+  pdfname <- paste0(opt$baseName, ".pdf")
+  outname <- paste0(opt$baseName, ".tab")
 }
 
-sighandle <- file(signame, "w")
+outhandle <- file(outname, "w")
 
-pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
-write(head, sighandle)
+if (!opt$noPDF) {
+  pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
+}
+writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[dPsi]\tMV[dPsi]_at_%s", opt$sampleNameA, opt$sampleNameB, opt$prob), 
+  outhandle)
+
 
 ### BEGIN READ INPUT ###
 # Iterate through input, 'nLines' at a time to reduce overhead/memory
 while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) { 
-
-  # use parallel computing to store plots in plotListed
-  # then print them to the pdf afterwards before next chunk of nLines from file.
-  plotListed <- vector("list", length(lines))
-  eventTitleListed <- vector("list", length(lines))
-
-  plotListed <- mclapply(1:length(lines), function(i) {
- 
-      tabLine <- unlist( strsplit( lines[i], "\t" ) )
-	 #writeLines(paste(tabLine[repA.qualInd], collapse="\t"), stderr());
-	
-      # Posterior parameters... Prior given from command line --alpha, --beta
-      shapeFirst <- lapply( tabLine[repA.qualInd], function(x) { 
-								parseQual(x, opt$alpha, opt$beta) 
-							   } )
-      shapeSecond <- lapply( tabLine[repB.qualInd], function(x) {
-								parseQual(x, opt$alpha, opt$beta)
-							   } )
-
-      totalFirst <- unlist(lapply( shapeFirst, function(x) { x[1] + x[2] }))
-      totalSecond <- unlist(lapply( shapeSecond, function(x) { x[1] + x[2] }))
-
-      # if no data, next; # adapted from @lpantano's fork  7/22/2015
-      if( (sum(totalFirst > (opt$minReads + opt$alpha + opt$beta)) < opt$minSamples) ||
-  	  (sum(totalSecond > (opt$minReads + opt$alpha + opt$beta)) < opt$minSamples) ) {
-		return(NULL)
-      }
-
-      firstShapeMat <- do.call(rbind, shapeFirst)
-      secondShapeMat <- do.call(rbind, shapeSecond)
-
-      firstShapeAve <- c( mean(firstShapeMat[,1]), mean(firstShapeMat[,2]) )
-      secondShapeAve <- c( mean(secondShapeMat[,1]), mean(secondShapeMat[,2]) )
-
-      # Sample Posterior Distributions
-      psiFirst <- lapply( shapeFirst, function(x) {
-        #sample here from rbeta(N, alpha, beta) if > -e
-        if(x[1]+x[2] < opt$minReads) { return(NULL) }
-        rbeta(opt$size, shape1=x[1], shape2=x[2])
-      })
-
-      psiSecond <- lapply( shapeSecond, function(x) {
-        #sample here from rbeta(N, alpha, beta)
-        if(x[1]+x[2] < opt$minReads) { return(NULL) }
-        rbeta(opt$size, shape1=x[1], shape2=x[2])
-      })
-
-      # calculate expected value of psi for each replicate
-      expFirst <- unlist(lapply(shapeFirst, function(x) { 
-         if(x[1]+x[2] < opt$minReads) { return(NULL) }
-         x[1] / (x[1] + x[2]) 
-      }))
-      expSecond <- unlist(lapply(shapeSecond, function(x) {
-         if(x[1]+x[2] < opt$minReads) { return(NULL) } 
-         x[1] / (x[1] + x[2]) 
-      }))
- 
-      if(opt$paired) { #make sure both samples have a non-NULL replicate
-        for(lstInd in 1:length(psiFirst)) {
-          if(is.null(psiFirst[[lstInd]]) || is.null(psiSecond[[lstInd]])) {
-            psiFirst[[lstInd]] <- NULL
-            psiSecond[[lstInd]] <- NULL
-          }
-        }
-      }
- 
-      # Create non-parametric Joint Distributions
-      psiFirstComb <- do.call(c, psiFirst)
-      psiSecondComb <- do.call(c, psiSecond)
-
-      if( length(psiFirstComb) <= 0 || length(psiSecondComb) <= 0 ) { return(NULL) }
-
-      #    print(length(psiFirstComb))
-
-      # if they aren't paired, then shuffle the joint distributions...
-      if( !opt$paired ) {
-        paramFirst <- try (suppressWarnings(
-				fitdistr(psiFirstComb, 
-					"beta", 
-					list( shape1=firstShapeAve[1], shape2=firstShapeAve[2])
-				)$estimate ), TRUE )
-        paramSecond <- try (suppressWarnings(
-				fitdistr(psiSecondComb,
-					"beta", 
-					list( shape1=secondShapeAve[1], shape2=secondShapeAve[2])
-				)$estimate ), TRUE )
-        # if optimization fails its because the distribution is too narrow
-        # in which case our starting shapes should already be good enough
-	if(class(paramFirst) != "try-error") {
-          psiFirstComb <- rbeta(opt$size, shape1=paramFirst[1], shape2=paramFirst[2])
-        }
-        if(class(paramSecond) != "try-error") {
-          psiSecondComb <- rbeta(opt$size, shape1=paramSecond[1], shape2=paramSecond[2])
-        }
-      }
-
-      # get emperical posterior median of psi
-      medOne <- median(psiFirstComb)
-      medTwo <- median(psiSecondComb)
-
-      # look for a max difference given prob cutoff...
-      if(medOne > medTwo) {
-        max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob)
-      } else {
-        max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob)
-      }
-      #    writeLines(lines[i], stderr()) ### DEBUGGING
-
-      # SIGNIFICANT from here on out:
+    lines <- strsplit(lines, split="\t")
+    ## use parallel computing to store plots in plotListed
+    ## then print them to the pdf afterwards before next chunk of nLines from file.
     
-      if( opt$filter ) {
-        filtOut <- sprintf("%s\t%s\t%f\t%f\t%f\t%s", tabLine[1], tabLine[2], medOne, medTwo, medOne - medTwo, round(max,2))
-      } else {
-        filtOut <- NULL
-      }
-
-      # check for significant difference
-      if(max < opt$minDiff) {
-        # non-sig, return null plots and text output
-        return(list(NULL, NULL, NULL, NULL, filtOut))
-      } else {
-        sigInd <- i
-
-        eventTitle <- paste(c("Gene: ", tabLine[1], "  Event: ", tabLine[2]), collapse="")
-        eventCoord <- paste(c("Coordinates: ", tabLine[3]), collapse="")
-        #    eventTitleListed[[i]] <- paste(c("Gene: ", tabLine[1], "     ", "Event: ", tabLine[2]), collapse="")
-
-        # Print visual output to pdf;
-        if( medOne > medTwo ) {
-          retPlot <- plotDiff(psiFirstComb, psiSecondComb, expFirst, expSecond, max, medOne, medTwo, sampOneName, sampTwoName , FALSE)
-        } else {
-          retPlot <- plotDiff(psiSecondComb, psiFirstComb, expFirst, expSecond, max, medTwo, medOne, sampTwoName, sampOneName , TRUE)
-        }
-        # sig event return
-        return(list(retPlot, eventTitle, eventCoord, sigInd, filtOut))  #return of mclapply function
-      }
-  }, mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE) #End For
-
-  for(it in 1:length(lines)) {
-    if(is.null(plotListed[[it]])) { next; }
-    # PRINT MAIN OUTPUT
-    if(!is.null(plotListed[[it]][[5]])) {
-      write( plotListed[[it]][[5]], stdout() )
+    ## Get inclusion/exclusion read numbers (i.e., beta shape parameters) from quality columns
+    shapeFirst  <- array(dim=c(length(lines), length(repAind), 2))
+    shapeSecond <- array(dim=c(length(lines), length(repBind), 2))
+    for (i in 1:length(repA.qualInd)) {
+        shapeFirst[,i,] <- parseQual(sapply(lines, "[[", repA.qualInd[i]),
+                                     prior_alpha=opt$alpha, prior_beta=opt$beta)
     }
-  
-    # PRINT SIG OUTPUT
-    if(!is.null(plotListed[[it]][[4]])) {
-      writeLines( lines[ plotListed[[it]][[4]] ], sighandle )
-    } 
+    for (i in 1:length(repB.qualInd)) {
+        shapeSecond[,i,] <- parseQual(sapply(lines, "[[", repB.qualInd[i]),
+                                      prior_alpha=opt$alpha, prior_beta=opt$beta)
+    }
 
-    # PRINT LIST OF PLOTS.
-    if(is.null(plotListed[[it]][[1]])) { next; }
-    plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
-  }
+    totalFirst  <- apply(shapeFirst,  MAR=2, rowSums)
+    totalSecond <- apply(shapeSecond, MAR=2, rowSums)
+
+    shapeFirstAve  <- apply(shapeFirst,  MAR=3, rowMeans)
+    shapeSecondAve <- apply(shapeSecond, MAR=3, rowMeans)
+
+    ## Expected PSI for each replicate
+    expFirst  <- sapply(1:(dim(shapeFirst)[2]), FUN=function(x)  {shapeFirst[,x,1] / totalFirst[,x]})
+    expSecond <- sapply(1:(dim(shapeSecond)[2]), FUN=function(x) {shapeSecond[,x,1] / totalSecond[,x]})
+
+    ## Simulate distributions and score overlap, create plot data
+    plotListed <- mclapply(1:length(lines), diffBeta, lines=lines, opt=opt,
+                           shapeFirst, shapeSecond,
+                           totalFirst, totalSecond,
+                           firstShapeAve, secondShapeAve,
+                           expFirst, expSecond,
+                           repA.qualInd=repA.qualInd, repB.qualInd=repB.qualInd,
+                           mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE) #End For
+
+    for(it in 1:length(lines)) {
+        if(is.null(plotListed[[it]])) { next }
+        ## PRINT MAIN OUTPUT
+        if(!is.null(plotListed[[it]][[5]])) {
+            write( plotListed[[it]][[5]], outhandle )
+        }
+        
+        ## PRINT LIST OF PLOTS
+        if(opt$noPDF || is.null(plotListed[[it]][[1]])) { next }
+        plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
+    }
 
 } #End While
 
-garbage <- dev.off()
+if (!opt$noPDF) {garbage <- dev.off()}
 
-flush(sighandle)
-close(sighandle)
+flush(outhandle)
+close(outhandle)
 
 q(status=0)
