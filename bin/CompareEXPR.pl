@@ -274,7 +274,7 @@ print O "$head_row\tLog2_Fold_Ch\n" if (defined $print_all);
 my %ID_gene;
 if (defined $get_GO){
     open (BG, ">$folder/GE_BG-$out_root.txt") or errPrintDie "Can't open GO output files";
-    open (BG_FOLD, ">$folder/GE_BG_FOLD-$out_root.txt") or errPrintDie "Can't open GO output files";
+    open (BG_FOLD, ">$folder/GE_BG_FOLD-$out_root.rnk.txt") or errPrintDie "Can't open GO output files";
     open (UP, ">$folder/GE_UP-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (DOWN, ">$folder/GE_DOWN-$out_root.txt") or errPrintDie "Can't open GO output files";
     print BG_FOLD "Feature Name\tScore\n";
