@@ -49,6 +49,7 @@ my $print_all;
 my $normalize; # does quantile normalization (using limma)
 my $install_limma;
 my $out_root;
+my @data_fold;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_fold_av=f" => \$min_fold_av,
@@ -276,6 +277,7 @@ if (defined $get_GO){
     open (BG_FOLD, ">$folder/GE_BG_FOLD-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (UP, ">$folder/GE_UP-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (DOWN, ">$folder/GE_DOWN-$out_root.txt") or errPrintDie "Can't open GO output files";
+    print BG_FOLD "Feature Name\tScore\n";
 }
 
 # Global variables for PSI analysis & GO
@@ -471,11 +473,13 @@ while (<GE>){
     if (defined $get_GO){
 	unless ($use_names){
 	    print BG "$t[0]\n";
-	    print BG_FOLD "$t[0]\t$fold_BG\n" if (defined $fold_BG);
+#	    print BG_FOLD "$t[0]\t$fold_BG\n" if (defined $fold_BG);
+	    push(@data_fold, "$fold_BG=$t[0]") if (defined $fold_BG);
 	}
 	else {
 	    print BG "$t[1]\n";
-	    print BG_FOLD "$t[1]\t$fold_BG\n" if (defined $fold_BG);
+#	    print BG_FOLD "$t[1]\t$fold_BG\n" if (defined $fold_BG);
+	    push(@data_fold, "$fold_BG=$t[1]") if (defined $fold_BG);
 	}
     }
 }
@@ -484,6 +488,14 @@ close O;
 
 if (defined $get_GO){
     verbPrint "Preparing files for GO analysis\n";
+
+    no warnings;
+    @data_fold=sort{$b<=>$a}(@data_fold);
+    foreach my $temp (@data_fold){
+	my ($fold,$g)=split(/\=/,$temp);
+	print BG_FOLD "$g\t$fold\n";
+    }
+    use warnings;
     sleep(1);
     close BG;
     close BG_FOLD;
