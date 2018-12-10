@@ -308,7 +308,7 @@ From release v2.0.0, VAST-TOOLS includes a new module to identify and profile an
 
 - ``compare``: pre-filters the events based on read coverage, imbalance and other features, and simply compares average and individual dPSIs. That is, it looks for non-overlapping PSI distributions based on fixed dPSI cut-offs. For more than 3 replicates, it is likely to be too stringent.
 - ``diff``: performs a statistical test to assess whether the PSI distributions of the two compared groups are signficantly different. It is possible to pre-filter the events based on the minimum number of reads per sample, but subsequent filtering is highly recommended (e.g. overlapping the results with the output of ``tidy``). For more than 5 samples per group it may also be over stringent.
-- When comparing multiple samples per group, an alternative approach is recommended. First, events should be pre-filtered using ``tidy``. This module allows to select events for which a minimum number of samples per group pass the quality controls. Then, a Mann-Whitney U-test or similar can be used to identify differentially spliced events. Finally, average dPSI per group should be calculated and a minimum difference (usually |dPSI| > 15) should be requested.
+- When comparing multiple samples per group, an alternative approach is recommended. First, events should be pre-filtered using ``tidy`` (see [Simplifying Combine Table](#simplifying-combine-table)). This module allows to select events for which a minimum number of samples per group pass the quality controls. Then, a Mann-Whitney U-test or similar can be used to identify differentially spliced events. Finally, average dPSI per group should be calculated and a minimum difference (usually |dPSI| > 15) should be requested.
 
 #### *compare*: Comparing PSIs Between Samples
 
@@ -554,6 +554,15 @@ Then, for each combined sample, a pair of columns:
 ### Simplifying Combine Table
 
 As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
+
+``tidy`` can also be run using a config file (``--groups FILE``), in which TWO groups of samples are provided using the following format:
+
+	Sample1\tGroupA
+	Sample2\tGroupA
+	Sample3\tGroupB
+	...
+
+In this case, ``tidy`` will apply the defined filters to each group independently (and only to the samples listed in the config file). Both groups have to pass those filters. This option is useful if, for instance, the user needs to compare two groups with multiple samples using standard statistical tests. E.g. when comparing 50 patients vs 60 controls, the use may decide to run ``tidy`` with ``--min_N 10`` and run a Mann-Whitney U-test on the filtered output in which at least 10 samples will have sufficient read coverage in each of the groups.
 
 Investigating event-level conservation
 --------------------------------------
