@@ -20,7 +20,7 @@ Table of Contents:
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
 		- [Introduction](#introduction)
 		- [``compare``: Comparing PSIs Between Samples](#compare-comparing-psis-between-samples)
-		- [``diff``: Bayesian inference followed by differential analysis](#diff-bayesian-inference-followed-by-differential-analysis)
+		- [``diff``: Bayesian Inference Followed by Differential Analysis](#diff-bayesian-inference-followed-by-differential-analysis)
 	- [Comparing Expression Between Samples](#comparing-expression-between-samples)
 	- [Plotting](#plotting)
 	- [Simplifying Combine Table](#simplifying-combine-table)
@@ -335,7 +335,7 @@ It is also possible to output other sets of AS events of special interest for fe
 Finally, ``vast-tools compare`` can also produce list of gene IDs for the selected events to run Gene Ontology (GO) analyses using ``--GO``. In particular, it generates four list: (i) differentially spliced cassette exons and microexons, (ii) introns with higher retention in B (IR_UP), (iii) introns with higher retention in A (IR_DOWN), and (iv) backgroup set, for all multiexonic genes that meet similar read coverage criteria. (The latter is crucial to avoid GO enrichment of highly expressed genes in the specific cell or tissue type of study). To generate the list of gene IDs, VAST-TOOLS needs to access VASTDB and thus needs the species key provided with ``-sp``. Alternatively, a custom list of gene IDs for each AS event (`event1\tgene_id1`) can be provided using ``--GO_file``, or gene symbols from the first colum of the INCLUSION table can be used instead activating the ``--use_names`` flag.
 
 
-#### *diff*: Bayesian inference followed by differential analysis
+#### *diff*: Bayesian Inference Followed by Differential Analysis
 
 ``vast-tools diff`` provides functionality to test for differential AS based on
 replicates and read depth for each event, but will also give reasonable estimates 
