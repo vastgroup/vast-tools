@@ -500,6 +500,19 @@ configuration file template can be found under ``R/sample_data``:
 
 ``plot`` can also plot cRPKMs for gene expression by using the option `--expr=TRUE`. The options are similar as per AS plots, but you need to provide a cRPKM-only file (as generated in `combine`).
 
+### Simplifying Combine Table
+
+As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
+
+``tidy`` can also be run using a config file (``--groups FILE``), in which TWO groups of samples are provided using the following format:
+
+	Sample1\tGroupA
+	Sample2\tGroupA
+	Sample3\tGroupB
+	...
+
+In this case, ``tidy`` will apply the defined filters to each group independently (and only to the samples listed in the config file). Both groups have to pass those filters. This option is useful if, for instance, the user needs to compare two groups with multiple samples using standard statistical tests. E.g. when comparing 50 patients vs 60 controls, the use may decide to run ``tidy`` with ``--min_N 10`` and run a Mann-Whitney U-test on the filtered output in which at least 10 samples will have sufficient read coverage in each of the groups.
+
 Combine output format
 ---------------------
 The output of ``combine`` is a tab-separated table with an entry (row) for each predefined alternative splicing event. For each event, there are six columns with basic information about it, and then a pair of columns for each sample from ``align`` that is combined. 
@@ -550,19 +563,6 @@ Then, for each combined sample, a pair of columns:
 		- C3: percent of complex reads is > 50%.
 		- NA: low coverage event.
  	* inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
-
-### Simplifying Combine Table
-
-As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
-
-``tidy`` can also be run using a config file (``--groups FILE``), in which TWO groups of samples are provided using the following format:
-
-	Sample1\tGroupA
-	Sample2\tGroupA
-	Sample3\tGroupB
-	...
-
-In this case, ``tidy`` will apply the defined filters to each group independently (and only to the samples listed in the config file). Both groups have to pass those filters. This option is useful if, for instance, the user needs to compare two groups with multiple samples using standard statistical tests. E.g. when comparing 50 patients vs 60 controls, the use may decide to run ``tidy`` with ``--min_N 10`` and run a Mann-Whitney U-test on the filtered output in which at least 10 samples will have sufficient read coverage in each of the groups.
 
 Investigating event-level conservation
 --------------------------------------
