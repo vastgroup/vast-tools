@@ -38,16 +38,20 @@ my %data;
 my %RPKM;
 my $head="ID\tNAME";
 my $headRPKM=$head;
+my $first_sample_count=0;
 foreach my $f (@files){
     my ($root)=$f=~/([^\/]+).cRPKM/;
     $head.="\t$root-cRPKM\t$root-Counts";
     $headRPKM.="\t$root";
+    my $sample_count=0;
+    
     open (INPUT, $f);
     while (<INPUT>){
         chomp;
         my @t=split(/\t/);
         my $cRPKM = sprintf("%.2f", 0);
         my $raw_count = 0;
+	$sample_count++;
 
         if ($t[1] eq 'NA') {
             $cRPKM = 'NA';
@@ -61,6 +65,13 @@ foreach my $f (@files){
         $RPKM{$t[0]}.="\t$cRPKM";
     }
     close INPUT;
+
+    if ($sample_count >0 && $first_sample_count==0){
+	$first_sample_count=$sample_count;
+    }
+    elsif ($sample_count > 0 && $sample_count != $first_sample_count){
+	die "[vast combine cRPKM error] Count files do not have the same number of genes (incorrect versions?)\n";
+    }
 }
 
 print $OUTPUT "$head\n" if $cRPKMCounts;
