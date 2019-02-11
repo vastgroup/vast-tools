@@ -17,9 +17,11 @@ Table of Contents:
 	- [Merging Outputs](#merging-outputs)
 	- [Strand-specific RNAseq data](#strand-specific-rnaseq-data)
 	- [Combining Results](#combining-results)
-	- [Comparing PSIs Between Samples](#comparing-psis-between-samples)
-	- [Comparing Expression Between Samples](#comparing-expression-between-samples)
 	- [Differential Splicing Analysis](#differential-splicing-analysis)
+		- [Introduction](#introduction)
+		- [``compare``: Comparing PSIs Between Samples](#compare-comparing-psis-between-samples)
+		- [``diff``: Bayesian Inference Followed by Differential Analysis](#diff-bayesian-inference-followed-by-differential-analysis)
+	- [Comparing Expression Between Samples](#comparing-expression-between-samples)
 	- [Plotting](#plotting)
 	- [Simplifying Combine Table](#simplifying-combine-table)
 - [Combine output format](#combine-output-format)
@@ -298,7 +300,17 @@ From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 co
 From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; IDs starting with 6). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: This module has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
 
 
-### Comparing PSIs Between Samples
+### Differential Splicing Analysis
+
+#### Introduction
+
+``vast-tools`` provides two alternative modules (``compare`` and ``diff``) to perform differential splicing analyses on a reduced number of samples per group. Each module gives different functionalities. 
+
+- ``compare``: pre-filters the events based on read coverage, imbalance and other features, and simply compares average and individual dPSIs. That is, it looks for non-overlapping PSI distributions based on fixed dPSI cut-offs. For more than 3 replicates, it is likely to be too stringent.
+- ``diff``: performs a statistical test to assess whether the PSI distributions of the two compared groups are signficantly different. It is possible to pre-filter the events based on the minimum number of reads per sample, but subsequent filtering is highly recommended (e.g. overlapping the results with the output of ``tidy``). For more than 5 samples per group it may also be over stringent.
+- When comparing multiple samples per group, an alternative approach is recommended. First, events should be pre-filtered using ``tidy`` (see [Simplifying Combine Table](#simplifying-combine-table)). This module allows to select events for which a minimum number of samples per group pass the quality controls. Then, a Mann-Whitney U-test or similar can be used to identify differentially spliced events. Finally, average dPSI per group should be calculated and a minimum difference (usually |dPSI| > 15) should be requested.
+
+#### *compare*: Comparing PSIs Between Samples
 
 ``vast-tools compare`` identifies differentially spliced AS events between two groups (A and B) based mainly on the difference in their average inclusion levels (i.e. ΔPSI = average_PSI_B - average_PSI_A). 
 
@@ -322,22 +334,8 @@ It is also possible to output other sets of AS events of special interest for fe
 
 Finally, ``vast-tools compare`` can also produce list of gene IDs for the selected events to run Gene Ontology (GO) analyses using ``--GO``. In particular, it generates four list: (i) differentially spliced cassette exons and microexons, (ii) introns with higher retention in B (IR_UP), (iii) introns with higher retention in A (IR_DOWN), and (iv) backgroup set, for all multiexonic genes that meet similar read coverage criteria. (The latter is crucial to avoid GO enrichment of highly expressed genes in the specific cell or tissue type of study). To generate the list of gene IDs, VAST-TOOLS needs to access VASTDB and thus needs the species key provided with ``-sp``. Alternatively, a custom list of gene IDs for each AS event (`event1\tgene_id1`) can be provided using ``--GO_file``, or gene symbols from the first colum of the INCLUSION table can be used instead activating the ``--use_names`` flag.
 
-### Comparing Expression Between Samples
 
-Using a similar logic to ``compare``, ``vast-tools compare_expr`` identifies differentially expression genes between two groups (A and B) based on the difference in their average expression levels using the internal cRPKM metric. For this, it calculates the fold change in cRPKMs between the group averages (fold_B/A) as well as between each individual replicate. The default is set to a difference in fold change of the averages of at least 2 (``--min_fold_av``) and a difference between each of the individual replicates of 1.5 (``--min_fold_r``, equivalent to ``--min_range`` in ``compare``). Paired comparisons are allowed using the option ``--paired``. Basic usage:
-
-~~~~
-> vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
-~~~~
-
-It requires an expression table with cRPKMs and read counts, which can be obtained in ``combine`` providing the option ``--C``. ``vast-tools compare_expr`` performs several filters before doing the comparisons to discard lowly expressed genes across all samples or supported by too few reads overall. In particular, the default requires that all samples in at least one of the compared groups have a minimum cRPKM of 2. This can be modified using ``--min_cRPKM``. Additionally, using ``--min_cRPKM_loose`` it is possible to allow only one sample across the comparison to have a minimum level of expression. With regards to the minimum number of reads to ensure an statistically sound cRPKM calculation, this is set to 50 by default, and can be modified using ``--min_reads``. 
-
-By default, raw cRPKM values are compared. However, it is recommended the values are normalized. For this, the option ``--norm`` is provided, which using `normalizeBetweenArrays` from the `limma` R package. If this package is not installed in your computer, this can be done the first time you run ``vast-tools compare_expr`` by using the option ``--install_limma``. 
-
-Finally, ``vast-tools compare_expr`` also provides an option to output files to perform Gene Ontology analyses (``--GO``). By defult, Ensembl GeneIDs are provided, but gene symbols can be retrieved instead using the option ``--use_names``. The files provided are: (i) upregulated genes in B compared to A; (ii) downregulated genes in B compared to A; (iii) background set, after the expression and read count filters; (iv) the log2 (B/A fold change) values for all genes in the background set, which can be used for GSEA analyses.
-
-
-### Differential Splicing Analysis
+#### *diff*: Bayesian Inference Followed by Differential Analysis
 
 ``vast-tools diff`` provides functionality to test for differential AS based on
 replicates and read depth for each event, but will also give reasonable estimates 
@@ -451,6 +449,23 @@ point estimates for each replicate plotted as points below the histograms.  In t
 the y-axis represents the probability of deltaPsi being greater than some magnitude value of x (shown on the x-axis).
 The red line indicates the maximal value of x where P(ΔPSI > x) > `-r`, or the 0.95 default.  
 
+* NOTE:  It is highly recommended that the output if further filtered (e.g. using ``diff``).
+
+### Comparing Expression Between Samples
+
+Using a similar logic to ``compare``, ``vast-tools compare_expr`` identifies differentially expression genes between two groups (A and B) based on the difference in their average expression levels using the internal cRPKM metric. For this, it calculates the fold change in cRPKMs between the group averages (fold_B/A) as well as between each individual replicate. The default is set to a difference in fold change of the averages of at least 2 (``--min_fold_av``) and a difference between each of the individual replicates of 1.5 (``--min_fold_r``, equivalent to ``--min_range`` in ``compare``). Paired comparisons are allowed using the option ``--paired``. Basic usage:
+
+~~~~
+> vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+~~~~
+
+It requires an expression table with cRPKMs and read counts, which can be obtained in ``combine`` providing the option ``--C``. ``vast-tools compare_expr`` performs several filters before doing the comparisons to discard lowly expressed genes across all samples or supported by too few reads overall. In particular, the default requires that all samples in at least one of the compared groups have a minimum cRPKM of 2. This can be modified using ``--min_cRPKM``. Additionally, using ``--min_cRPKM_loose`` it is possible to allow only one sample across the comparison to have a minimum level of expression. With regards to the minimum number of reads to ensure an statistically sound cRPKM calculation, this is set to 50 by default, and can be modified using ``--min_reads``. 
+
+By default, raw cRPKM values are compared. However, it is recommended the values are normalized. For this, the option ``--norm`` is provided, which using `normalizeBetweenArrays` from the `limma` R package. If this package is not installed in your computer, this can be done the first time you run ``vast-tools compare_expr`` by using the option ``--install_limma``. 
+
+Finally, ``vast-tools compare_expr`` also provides an option to output files to perform Gene Ontology analyses (``--GO``). By defult, Ensembl GeneIDs are provided, but gene symbols can be retrieved instead using the option ``--use_names``. The files provided are: (i) upregulated genes in B compared to A; (ii) downregulated genes in B compared to A; (iii) background set, after the expression and read count filters; (iv) the log2 (B/A fold change) values for all genes in the background set, which can be used for GSEA analyses.
+
+
 ### Plotting
 
 VAST-TOOLS comes with a plotting script written in R. As of version 0.2.0, the
@@ -482,6 +497,21 @@ configuration file template can be found under ``R/sample_data``:
 ~~~~
 
 ![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/PsiExample.png "Example") 
+
+``plot`` can also plot cRPKMs for gene expression by using the option `--expr=TRUE`. The options are similar as per AS plots, but you need to provide a cRPKM-only file (as generated in `combine`).
+
+### Simplifying Combine Table
+
+As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
+
+``tidy`` can also be run using a config file (``--groups FILE``), in which TWO groups of samples are provided using the following format:
+
+	Sample1\tGroupA
+	Sample2\tGroupA
+	Sample3\tGroupB
+	...
+
+In this case, ``tidy`` will apply the defined filters to each group independently (and only to the samples listed in the config file). Both groups have to pass those filters. This option is useful if, for instance, the user needs to compare two groups with multiple samples using standard statistical tests. E.g. when comparing 50 patients vs 60 controls, the use may decide to run ``tidy`` with ``--min_N 10`` and run a Mann-Whitney U-test on the filtered output in which at least 10 samples will have sufficient read coverage in each of the groups.
 
 Combine output format
 ---------------------
@@ -533,10 +563,6 @@ Then, for each combined sample, a pair of columns:
 		- C3: percent of complex reads is > 50%.
 		- NA: low coverage event.
  	* inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
-
-### Simplifying Combine Table
-
-As per release v1.3.0, VAST-TOOLS comes with a script to simplify and filter the table obtained in ``combine``, to make it more compatible with most R standard analyses. This module is called ``tidy``, and it parses INCLUSION tables (from ``combine``) event by event, printing out only the PSIs (i.e. no quality score) for those events that pass certain filters. Therefore, two main parameters need to be specified: (i) the minimum number of samples in which the event has sufficient read coverage (either as ``--min_N``, absolute number of samples, or as ``--min_Fr``, fraction of the total samples), and (ii) the minimum standard deviation of the PSIs of the events among the samples with good coverage (``--min_SD``). Several other parameters can be specified: ``--noVLOW``, excludes samples with VLOW coverage; ``--p_IR``, excludes samples that do not pass the binomial test for IR; ``--onlyEXSK``, only AltEx events are considered. For any given event, samples that do not meet the mininum coverage cut-off will be assigned a PSI = NA.
 
 Investigating event-level conservation
 --------------------------------------
