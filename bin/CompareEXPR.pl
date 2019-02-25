@@ -174,6 +174,8 @@ if (defined $normalize){
 	$input_path=".";
 	($root_input) = $input_file =~/(.+)\./;
     }
+    $root_input=~s/cRPKM_AND_COUNTS/cRPKM/;
+    
     open (TEMP, ">$input_path/temp_cRPKMs.tab");
     while (<GE_2>){
 	chomp($_);
