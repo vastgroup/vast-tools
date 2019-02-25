@@ -13,8 +13,10 @@ use Getopt::Long;
 my $dbDir;
 my $sp;
 my $cRPKMCounts = 0;
+my $normalize = 0;
+my $install_limma = 0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "install_limma" => \$install_limma);
 
 die "[vast combine cRPKM error] Needs Species\n" if !$sp;
 my @files=glob("expr_out/*.cRPKM");
@@ -84,3 +86,48 @@ foreach my $gene (sort (keys %data)){
 }
 close $OUTPUT if $cRPKMCounts;
 close RPKM;
+
+
+### Makes normalized table:
+my %norm_cRPKMs;
+if ($normalize){
+    my $input_file = "cRPKM-$sp$index.tab";
+    open (GE_2, $input_file) || die "[vast combine cRPKM error] Needs a cRPKM table\n";
+    my ($input_path,$root_input);
+    if ($input_file=~/\//){
+	($input_path,$root_input) = $input_file =~/(.+)\/(.+)\./;
+    }
+    else {
+	$input_path=".";
+	($root_input) = $input_file =~/(.+)\./;
+    }
+    open (TEMP, ">$input_path/temp_cRPKMs.tab");
+    while (<GE_2>){
+	chomp($_);
+	my @t=split(/\t/,$_);
+	print TEMP "$t[0]";
+	foreach my $i (2..$#t){ # not count table
+	    print TEMP "\t$t[$i]";
+	}
+	print TEMP "\n";
+    }
+    close TEMP;
+    close GE_2;
+    
+    open (Temp_R, ">$input_path/temp.R");
+    print Temp_R "source(\"https://bioconductor.org/biocLite.R\")
+biocLite(\"limma\")\n" if ($install_limma);
+    
+    print Temp_R "
+library(limma)
+setwd(\"$input_path/\")
+matrix=as.matrix(read.table(\"temp_cRPKMs.tab\", row.names=1, header=TRUE,sep=\"\\t\"))
+Nmatrix=normalizeBetweenArrays(as.matrix(matrix))
+NmatrixF=cbind(Names=row.names(matrix),Nmatrix)
+write.table(NmatrixF,\"$root_input-NORM.tab\",
+            sep=\"\\t\",col.names=T,row.names=F,quote=F)";
+    close Temp_R;
+    
+    system "Rscript $input_path/temp.R";
+    system "rm $input_path/temp*";
+}
