@@ -310,9 +310,19 @@ $tally_extra{Alt5}{CS}=0; $tally_extra{Alt5}{CR}=0; $tally_extra{Alt5}{AS_NC}=0;
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
 unless (defined $print_dPSI){
     print O "$head_row\n"; # it will print the original data (for plot later)
+    if (defined $print_sets){
+	print SET_AS "$head_row\n";
+	print SET_CR "$head_row\n";
+	print SET_CS "$head_row\n";
+    }
 }
 else {
     print O "$head_row\tdPSI\n"; # it will print the original data + dPSI
+    if (defined $print_sets){
+	print SET_AS "$head_row\tdPSI\n";
+	print SET_CR "$head_row\tdPSI\n";
+	print SET_CS "$head_row\tdPSI\n";
+    }
 }
 print O_ALL "EventID\tPSI_A\tPSI_B\tdPSI\tCATEGORY\n" if (defined $print_all_ev);
 print O_AS "EventID\tPSI_A\tPSI_B\tdPSI\tCATEGORY\n" if (defined $print_AS_ev);
