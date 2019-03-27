@@ -215,8 +215,8 @@ diffBeta <- function(i, lines, opt,
             retPlot <- plotDiff(psiSecondComb, psiFirstComb,
                                 expFirst[i,], expSecond[i,], max, medTwo, medOne, sampTwoName, sampOneName, TRUE)
         }
-        ## sig event return
-        return(list(retPlot, eventTitle, eventCoord, sigInd, filtOut))  #return of mclapply function
       }
+      ## sig event return
+      return(list(retPlot, eventTitle, eventCoord, sigInd, filtOut))  #return of mclapply function
     }
 }
