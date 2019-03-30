@@ -248,8 +248,8 @@ $short_head.= "\tCV_A\tCV_B\tAv_A\tAv_B\tLog2_Fold_Ch";
 # representative names
 my $name_A=$head[$samplesA[0]];
 my $name_B=$head[$samplesB[0]];
-$name_A=~s/(.+)\_.+/$1/; # usually the rep number/id is encoded as "_a"
-$name_B=~s/(.+)\_.+/$1/;
+$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a"
+$name_B=~s/(.+)\_.+/$1/ unless $repA == 1;
 
 # defining default output file name
 my ($root)=$ARGV[0]=~/.+\-(.+?)\./;
