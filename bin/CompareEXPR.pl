@@ -215,7 +215,9 @@ write.table(NmatrixF,\"$root_input-NORM.tab\",
 	my @t = split(/\t/,$_);
 	
 	for my $i (1..$#t){
-	    $norm_cRPKMs{$t[0]}[$i*2]=$t[$i]; # keeps the normalized value as if there were raw counts too
+	    # keeps the normalized value as if there were raw counts too
+	    $norm_cRPKMs{$t[0]}[$i*2]=sprintf("%.2f",$t[$i]) if $t[$i] ne "NA"; 
+	    $norm_cRPKMs{$t[0]}[$i*2]=$t[$i] if $t[$i] eq "NA"; 
 	}
     }
     close GE_NORM;
