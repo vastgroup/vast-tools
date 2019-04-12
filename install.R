@@ -34,17 +34,28 @@ downloadDb <- function(speUrl, speFile) {
 humanDbFile <- "vastdb.hsa.16.02.18.tar.gz"
 mouseDbFile <- "vastdb.mmu.16.02.18.tar.gz"
 chickenDbFile <- "vastdb.gga.16.02.18.tar.gz"
-DreDbFile <- "vastdb.dre.16.02.18.tar.gz"
-SpuDbFile <- "vastdb.spu.16.02.18.tar.gz"
+DreDbFile <- "vastdb.dre.01.12.18.tar.gz"
+BlaDbFile <- "vastdb.bla.01.12.18.tar.gz"
+SpuDbFile <- "vastdb.spu.01.12.18.tar.gz"
+DmeDbFile <- "vastdb.dme.01.12.18.tar.gz"
+SmaDbFile <- "vastdb.sma.01.12.18.tar.gz"
+CelDbFile <- "vastdb.cel.01.12.18.tar.gz"
 planariaDbFile <- "vastdb.sme.16.02.18.tar.gz"
+NveDbFile <- "vastdb.nve.01.12.18.tar.gz"
 
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
 mouseUrl <- joinStr("http://vastdb.crg.eu/libs/", mouseDbFile)
 chickenUrl <- joinStr("http://vastdb.crg.eu/libs/", chickenDbFile)
 DreUrl <- joinStr("http://vastdb.crg.eu/libs/", DreDbFile)
+BlaUrl <- joinStr("http://vastdb.crg.eu/libs/", BlaDbFile)
 SpuUrl <- joinStr("http://vastdb.crg.eu/libs/", SpuDbFile)
+DmeUrl <- joinStr("http://vastdb.crg.eu/libs/", DmeDbFile)
+SmaUrl <- joinStr("http://vastdb.crg.eu/libs/", SmaDbFile)
+CelUrl <- joinStr("http://vastdb.crg.eu/libs/", CelDbFile)
 planariaUrl <- joinStr("http://vastdb.crg.eu/libs/", planariaDbFile)
+NveUrl <- joinStr("http://vastdb.crg.eu/libs/", NveDbFile)
+
 #
 
 writeLines("Looking for VAST Database [VASTDB]")
@@ -53,27 +64,42 @@ if(!file.exists("VASTDB")) {
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
   if(as.character(auto) == 'y') {
-    cat("Please choose database [hg19 -> h / mm9 -> m / galGal3 -> g / danRer10 -> z / Spur31 -> s smed31 -> p / all -> a]: ")
+    cat("Please choose database [all, Hsa, Mmu, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve]: ")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
-    if(db == 'h' || db == 'a') {
+    if(db == 'Hsa' || db == 'all') {
       downloadDb(humanUrl, humanDbFile)
     }
-    if(db == 'm' || db == 'a') {
+    if(db == 'Mmu' || db == 'all') {
       downloadDb(mouseUrl, mouseDbFile)
     }
-    if(db == 'g' || db == 'a') {
+    if(db == 'Gga' || db == 'all') {
       downloadDb(chickenUrl, chickenDbFile)
     }
-    if(db == 'z' || db == 'a') {
+    if(db == 'Dre' || db == 'all') {
       downloadDb(DreUrl, DreDbFile)
     }
-    if(db == 's' || db == 'a') {
+    if(db == 'Bla' || db == 'all') {
+      downloadDb(BlaUrl, BlaDbFile)
+    }
+    if(db == 'Spu' || db == 'all') {
       downloadDb(SpuUrl, SpuDbFile)
     }
-    if(db == 'p' || db == 'a') {
+    if(db == 'Dme' || db == 'all') {
+      downloadDb(DmeUrl, DmeDbFile)
+    }
+    if(db == 'Sma' || db == 'all') {
+      downloadDb(SmaUrl, SmaDbFile)
+    }
+    if(db == 'Cel' || db == 'all') {
+      downloadDb(CelUrl, CelDbFile)
+    }
+    if(db == 'Sme' || db == 'all') {
       downloadDb(planariaUrl, planariaDbFile)
+    }
+    if(db == 'Nve' || db == 'all') {
+      downloadDb(NveUrl, NveDbFile)
     }
   }
 } else {
