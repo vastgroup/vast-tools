@@ -28,6 +28,7 @@ Table of Contents:
 - [Investigating event-level conservation](#investigating-event-level-conservation)
 - [Interconnection with VastDB web](#interconnection-with-vastdb-web)
 - [Interconnection with Matt](#interconnection-with-matt)
+- [Running as a container](#running-as-a-container)
 - [Issues](#issues)
 - [Contributions](#contributions)
 - [Citation](#citation)
@@ -602,6 +603,33 @@ Interconnection with Matt
 -------------------------------
 [Matt](http://matt.crg.eu) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
 
+Running as a container
+----------------------
+It is possible to run VAST-TOOLS using software container technologies, simplifying so software installation and portability among different systems.
+
+Example container setup with Docker:
+
+    docker run -d -v ~/myVASTDB:/VASTDB -v ~/myshared:/share --name myvast vastgroup/vast-tools tail -f /dev/null
+
+
+```vastgroup/vast-tools``` is the [latest Docker image available](https://cloud.docker.com/u/vastgroup/repository/docker/vastgroup/vast-tools). However, for production or publication purposes, we recommend to use always a specific version e. g.: ```vastgroup/vast-tools:v2.2.0```
+
+~/myVASTDB is the directory where VASTDB files are stored
+
+~/myshared is a shared volume used for convenience for placing input and output files
+
+The command highlighted above keeps the container running under the name myvast, so different VAST-TOOLS commands can be run from it.
+
+Example command:
+
+    cd ~/myshared
+    fastq-dump SRR7802623
+    docker exec myvast vast-tools align /share/reads/SRR7802623.fastq -sp Hsa --expr -o /share/out/test
+
+In HPC environments we strongly encourage to use [Singularity](https://www.sylabs.io/singularity/). It is very easy to generate a Singularity image from Docker:
+
+    sudo /usr/bin/singularity build vast-tools.sif docker://vastgroup/vast-tools
+    /usr/bin/singularity exec ./vast-tools.sif vast-tools
 
 Issues
 ------
