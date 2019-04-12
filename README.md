@@ -31,6 +31,7 @@ Table of Contents:
 - [Issues](#issues)
 - [Contributions](#contributions)
 - [Citation](#citation)
+- [Species databases](#species-databases)
 - [References](#references)
 	
 Summary
@@ -634,6 +635,10 @@ Braunschweig, U., Barbosa-Morais, N.L., Pan, Q., Nachman, E., Alipahani, B., Gon
 * `diff` module:
 
 Han H, Braunschweig U.,  Gonatopoulos-Pournatzis T., Weatheritt R.J., Hirsch C.L., Ha K.C., Radovani E., Nabeel-Shah S., Sterne-Weiler T., Wang J., O'Hanlon D., Pan Q., Ray D., Vizeacoumar F., Datti A., Magomedova L., Cummins C.L., Hughes T.R., Greenblatt J.F., Wrana J.L., Moffat J., Blencowe B.J. (2017). Multilayered control of alternative splicing regulatory networks by transcription factors. *Mol Cell*, 65(3):539-553
+
+
+Species databases
+-----------------
 
 * Chicken database:
 
