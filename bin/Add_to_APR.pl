@@ -257,6 +257,7 @@ foreach $event (sort keys %ALL){
     $Q.=",S" if $type eq "exskX";
     $Q.=",$complexity{$event}{$sample}" if $type eq "MULTI3X";
 
+
    ### DIFF OUTPUT ADDITION TO QUAL SCORE!   --TSW
    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
    ### These values are added to the qual score and used to infer the posterior distribution
@@ -272,6 +273,9 @@ foreach $event (sort keys %ALL){
 	    $Q .= "\@$exValOfInc,$exValOfExc";
 	}
 	
+#### To kill $Q info for MULTI with PSI eq "NA" (i.e. missing mappability for some EEJs)
+	$Q="N,N,N,Bn,S" if $PSI eq "NA";
+
 	# Print out data
 	print PSIs "\t$PSI\t$Q";
 	print COUNTs "\t$Rexc{$event}{$sample}\t$Rinc1{$event}{$sample}\t$Rinc2{$event}{$sample}\t\t\t\t$PSI=$Q";

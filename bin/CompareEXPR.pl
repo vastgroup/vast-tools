@@ -49,6 +49,7 @@ my $print_all;
 my $normalize; # does quantile normalization (using limma)
 my $install_limma;
 my $out_root;
+my @data_fold;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_fold_av=f" => \$min_fold_av,
@@ -173,6 +174,8 @@ if (defined $normalize){
 	$input_path=".";
 	($root_input) = $input_file =~/(.+)\./;
     }
+    $root_input=~s/cRPKM_AND_COUNTS/cRPKM/;
+    
     open (TEMP, ">$input_path/temp_cRPKMs.tab");
     while (<GE_2>){
 	chomp($_);
@@ -212,7 +215,9 @@ write.table(NmatrixF,\"$root_input-NORM.tab\",
 	my @t = split(/\t/,$_);
 	
 	for my $i (1..$#t){
-	    $norm_cRPKMs{$t[0]}[$i*2]=$t[$i]; # keeps the normalized value as if there were raw counts too
+	    # keeps the normalized value as if there were raw counts too
+	    $norm_cRPKMs{$t[0]}[$i*2]=sprintf("%.2f",$t[$i]) if $t[$i] ne "NA"; 
+	    $norm_cRPKMs{$t[0]}[$i*2]=$t[$i] if $t[$i] eq "NA"; 
 	}
     }
     close GE_NORM;
@@ -245,8 +250,8 @@ $short_head.= "\tCV_A\tCV_B\tAv_A\tAv_B\tLog2_Fold_Ch";
 # representative names
 my $name_A=$head[$samplesA[0]];
 my $name_B=$head[$samplesB[0]];
-$name_A=~s/(.+)\_.+/$1/; # usually the rep number/id is encoded as "_a"
-$name_B=~s/(.+)\_.+/$1/;
+$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a"
+$name_B=~s/(.+)\_.+/$1/ unless $repA == 1;
 
 # defining default output file name
 my ($root)=$ARGV[0]=~/.+\-(.+?)\./;
@@ -273,9 +278,10 @@ print O "$head_row\tLog2_Fold_Ch\n" if (defined $print_all);
 my %ID_gene;
 if (defined $get_GO){
     open (BG, ">$folder/GE_BG-$out_root.txt") or errPrintDie "Can't open GO output files";
-    open (BG_FOLD, ">$folder/GE_BG_FOLD-$out_root.txt") or errPrintDie "Can't open GO output files";
+    open (BG_FOLD, ">$folder/GE_BG_FOLD-$out_root.rnk.txt") or errPrintDie "Can't open GO output files";
     open (UP, ">$folder/GE_UP-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (DOWN, ">$folder/GE_DOWN-$out_root.txt") or errPrintDie "Can't open GO output files";
+    print BG_FOLD "Feature Name\tScore\n";
 }
 
 # Global variables for PSI analysis & GO
@@ -471,11 +477,13 @@ while (<GE>){
     if (defined $get_GO){
 	unless ($use_names){
 	    print BG "$t[0]\n";
-	    print BG_FOLD "$t[0]\t$fold_BG\n" if (defined $fold_BG);
+#	    print BG_FOLD "$t[0]\t$fold_BG\n" if (defined $fold_BG);
+	    push(@data_fold, "$fold_BG=$t[0]") if (defined $fold_BG);
 	}
 	else {
 	    print BG "$t[1]\n";
-	    print BG_FOLD "$t[1]\t$fold_BG\n" if (defined $fold_BG);
+#	    print BG_FOLD "$t[1]\t$fold_BG\n" if (defined $fold_BG);
+	    push(@data_fold, "$fold_BG=$t[1]") if (defined $fold_BG);
 	}
     }
 }
@@ -484,6 +492,14 @@ close O;
 
 if (defined $get_GO){
     verbPrint "Preparing files for GO analysis\n";
+
+    no warnings;
+    @data_fold=sort{$b<=>$a}(@data_fold);
+    foreach my $temp (@data_fold){
+	my ($fold,$g)=split(/\=/,$temp);
+	print BG_FOLD "$g\t$fold\n";
+    }
+    use warnings;
     sleep(1);
     close BG;
     close BG_FOLD;

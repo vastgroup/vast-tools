@@ -523,6 +523,14 @@ unless (defined $exprONLY){
     verbPrint "Warning: Number of EXPR samples ($N_expr) doesn't match those of other events ($N_EXSK)\n" if $N_expr != $N_EXSK && (defined $expr);
 } 
 
+
+# move info files of subsamples which have been merged into at least one group into subfolder PARTS
+if (defined $move_to_PARTS){
+	foreach my $infof (keys %info_files_of_subsamples){
+    		system "mv to_combine/$infof to_combine/PARTS/";
+	}
+}
+
 ### Print output files
 verbPrint "Printing group files\n";
 foreach my $group (sort keys %groups){
@@ -692,10 +700,4 @@ foreach my $group (sort keys %groups){
     }
 }
 
-
-# move info files of subsamples which have been merged into at least one group into subfolder PARTS
-if (defined $move_to_PARTS){
-	foreach my $infof (keys %info_files_of_subsamples){
-    		system "mv to_combine/$infof to_combine/PARTS/";
-	}
-}
+verbPrint "Merge finished successfully\n";

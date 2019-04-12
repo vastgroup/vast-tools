@@ -31,6 +31,10 @@ my $extra_eej = 5; # default extra eej to use in ANNOT and in COMBI if use_all_e
 my $use_all_excl_eej = 0; # for COMBI flag
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
+my $normalize = 0; # gets an expression table with normalized values
+my $install_limma = 0; # installs limma
+my $noGEflag = 0;
+my $onlyGEflag = 0;
 
 my $asmbly;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
  
@@ -49,7 +53,11 @@ GetOptions("help"  	       => \$helpFlag,
 	   "IR_version=i"      => \$IR_version,
 	   "extra_eej=i"       => \$extra_eej,
 	   "use_all_excl_eej"  => \$use_all_excl_eej,
-           "C"                 => \$cRPKMCounts);
+	   "exprONLY"          => \$onlyGEflag,
+	   "no_expr"           => \$noGEflag,
+           "C"                 => \$cRPKMCounts,
+	   "norm"              => \$normalize,
+	   "install_limma"     => \$install_limma);
 
 our $EXIT_STATUS = 0;
 
@@ -84,7 +92,7 @@ Usage: vast-tools combine -o OUTPUTDIR -sp [Hsa|Mmu|etc] [options]
 
 Combine multiple samples analyzed using \"vast-tools align\" into a single summary table. 
 
-OPTIONS:
+GENERAL OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 				Must contain sub-folders to_combine or expr_out from align steps.
 	-sp Hsa/Mmu/etc		Species selection (mandatory)
@@ -95,6 +103,12 @@ OPTIONS:
 				For -sp Mmu: mm9 or mm10, (default mm9)
 				    - vast-tools will work internally with mm9; 
                                       if you choose mm10, the output gets lifted-over to mm10
+	--dbDir DBDIR	        Database directory
+	-z			Compress all output files using gzip
+	-v, --verbose		Verbose messages
+	-h, --help		Print this help messagev
+
+AS OPTIONS:
         --onlyEX                Only run the exon skpping pipelines (default off)
 	--noIR			Don't run intron retention pipeline (default off)
         --onlyIR                Only run intron retention pipeline (default off) 
@@ -103,13 +117,16 @@ OPTIONS:
         --use_all_excl_eej      Use all exclusion EEJs (within extra_eej limit) in ss-based module (default off)
         --extra_eej i           Use +/- extra_eej neighboring junctions to calculate skipping in 
                                      ANNOT (from A) and splice-site-based (from C1/C2) modules (default 5)
-	--dbDir DBDIR	        Database directory
-	-z			Compress all output files using gzip
-	-v, --verbose		Verbose messages
-	-h, --help		Print this help messagev
+
+GE OPTIONS:
+        -no_expr                Does not create gene expression tables (default OFF)
+        -exprONLY               Only creates gene expression tables (default OFF)
 	-C			Create a cRPKM plus read counts summary table. By default, a
     				table containing ONLY cRPKM is produced. This option is only
            			applicable when expression analysis is enabled.
+        --norm                  Create a cRPKM table normalized using 'normalizeBetweenArrays' from limma (default OFF)
+        --install_limma         Installs limma package if needed for normalization (default OFF)
+
 
 *** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
 					\n";
@@ -163,8 +180,8 @@ else {
    $N=$#files+1;
 }
 
-if ($N != 0) {
-    unless ($onlyIRflag){
+if ($N != 0 && !$onlyGEflag) {
+    unless ($onlyIRflag || $onlyGEflag){
 	### Gets the PSIs for the events in the a posteriori pipeline
 	verbPrint "Building Table for COMBI (splice-site based pipeline)\n";
 	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
@@ -183,7 +200,7 @@ if ($N != 0) {
     }
 
     #### New in v2.0 (added 15/01/18)
-    unless ($noANNOTflag || $onlyIRflag){
+    unless ($noANNOTflag || $onlyIRflag || $onlyGEflag){
 	### Gets the PSIs for ALL annotated exons directly
 	verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
 	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
@@ -205,7 +222,7 @@ if ($N != 0) {
     
     $noIRflag = 1 if @irFiles == 0;
 
-    unless($noIRflag || $onlyEXflag) {
+    unless($noIRflag || $onlyEXflag || $onlyGEflag) {
 	### Gets the PIRs for the Intron Retention pipeline
 	verbPrint "Building quality score table for intron retention (version $IR_version)\n";
 	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
@@ -216,7 +233,7 @@ if ($N != 0) {
 	    " -o " . abs_path("raw_incl");
     }
 
-    unless ($onlyIRflag || $onlyEXflag){
+    unless ($onlyIRflag || $onlyEXflag || $onlyGEflag){
 	### Gets PSIs for ALT5ss and adds them to the general database
 	verbPrint "Building Table for Alternative 5'ss choice events\n";
 	sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
@@ -284,24 +301,34 @@ if ($N != 0) {
 
 ### Combine cRPKM files, if present
 my @rpkmFiles=glob("expr_out/*.cRPKM"); 
-if (@rpkmFiles > 0) {
-    verbPrint "Combining cRPKMs into a single table\n";
-    my $cRPKMOutput = "cRPKM-$sp" . @rpkmFiles . ".tab";
-    $cRPKMCounts = $cRPKMCounts ? "-C" : "";
-    sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts";
-
-    if ($compress) {
-	verbPrint "Compressing files\n";
-	sysErrMsg "gzip -v expr_out/*.cRPKM $cRPKMOutput";
-	$cRPKMOutput .= ".gz";
+unless ($noGEflag){
+    if (@rpkmFiles > 0) {
+	verbPrint "Combining cRPKMs into a single table\n";
+	my $cRPKMOutput = "cRPKM-$sp" . @rpkmFiles . ".tab";
+	my $cRPKMOutput_b = "cRPKM_AND_COUNTS-$sp" . @rpkmFiles . ".tab";
+	my $cRPKMOutput_c = "cRPKM-$sp" . @rpkmFiles . "-NORM.tab";
+	$cRPKMCounts = $cRPKMCounts ? "-C" : "";
+	$normalize = $normalize ? "-norm" : "";
+	$install_limma = $install_limma ? "-install_limma" : "";
+	sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts $normalize $install_limma";
+	
+	if ($compress) {
+	    verbPrint "Compressing files\n";
+	    sysErrMsg "gzip -v expr_out/*.cRPKM $cRPKMOutput";
+	    $cRPKMOutput .= ".gz";
+	}
+	
+	verbPrint "Final cRPKM table saved as: " . abs_path($cRPKMOutput) . "\n";
+	verbPrint "Final cRPKM and COUNTS table saved as: " . abs_path($cRPKMOutput_b) . "\n" if $cRPKMCounts;
+	verbPrint "Final normalized cRPKM table saved as: " . abs_path($cRPKMOutput_c) . "\n" if $normalize;
     }
-    
-    verbPrint "Final cRPKM table saved as: " . abs_path($cRPKMOutput) . "\n";
 }
+
 if ($N + @rpkmFiles == 0) {
     verbPrint "Could not find any files to combine. If they are compressed, please decompress them first.\n";
     verbPrint "The path specified by -o needs to contain the sub-folder to_combine or expr_out.\n";
     verbPrint "By default this is -o vast_out, which contains vast_out/to_combine.\n";
 }
+
 
 verbPrint "Completed " . localtime;

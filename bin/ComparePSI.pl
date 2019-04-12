@@ -71,7 +71,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "print_all_ev" => \$print_all_ev,
 			  "print_AS_ev" => \$print_AS_ev,
 			  "max_dPSI=i"   => \$max_dPSI,
-			  "plot" => \$plot,
+			  "plot_PSI" => \$plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW
     );
@@ -226,7 +226,7 @@ my $tail = ""; # to be added to the output name
 $tail.="-range$min_range" if (defined $min_range); 
 $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
-$tail.="-ir_reads" if (defined $use_int_reads);
+$tail.="-IR_reads" if (defined $use_int_reads);
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
 $tail.="-with_dPSI" if (defined $print_dPSI);
@@ -280,12 +280,14 @@ if (defined $get_GO){
     open (IR_UP, ">$folder/IR_UP-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (IR_DOWN, ">$folder/IR_DOWN-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (EXSK, ">$folder/AltEx-$out_root.txt") or errPrintDie "Can't open GO output files";
+    open (ALL_EV, ">$folder/All_Ev-$out_root.txt") or errPrintDie "Can't open GO output files";
 }
 
 #### Global variables for PSI analysis & GO
 my %doneIR_UP;
 my %doneIR_DOWN;
 my %doneEXSK;
+my %doneALL;
 my %doneBG;
 my %tally;
 my %tally_total; # to count the total number of AS events with good coverage
@@ -308,9 +310,19 @@ $tally_extra{Alt5}{CS}=0; $tally_extra{Alt5}{CR}=0; $tally_extra{Alt5}{AS_NC}=0;
 verbPrint "Doing comparisons of AS profiles ($name_A vs $name_B)\n";
 unless (defined $print_dPSI){
     print O "$head_row\n"; # it will print the original data (for plot later)
+    if (defined $print_sets){
+	print SET_AS "$head_row\n";
+	print SET_CR "$head_row\n";
+	print SET_CS "$head_row\n";
+    }
 }
 else {
     print O "$head_row\tdPSI\n"; # it will print the original data + dPSI
+    if (defined $print_sets){
+	print SET_AS "$head_row\tdPSI\n";
+	print SET_CR "$head_row\tdPSI\n";
+	print SET_CS "$head_row\tdPSI\n";
+    }
 }
 print O_ALL "EventID\tPSI_A\tPSI_B\tdPSI\tCATEGORY\n" if (defined $print_all_ev);
 print O_AS "EventID\tPSI_A\tPSI_B\tdPSI\tCATEGORY\n" if (defined $print_AS_ev);
@@ -452,6 +464,8 @@ while (<PSI>){
 			    $doneIR_UP{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			    print ALL_EV "$ID_gene{$t[1]}\n" if !defined $doneALL{$ID_gene{$t[1]}};
+			    $doneALL{$ID_gene{$t[1]}}=1;
 			}
 		    }
 		    else {
@@ -459,6 +473,8 @@ while (<PSI>){
 			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -481,6 +497,8 @@ while (<PSI>){
 			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
+			    $doneALL{$ID_gene{$t[1]}}=1;	
 			}
 		    }
 		    else {
@@ -488,6 +506,8 @@ while (<PSI>){
 			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -575,6 +595,8 @@ while (<PSI>){
 			    $doneIR_UP{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
+			    $doneALL{$ID_gene{$t[1]}}=1;
 			}
 		    }
 		    else {
@@ -582,6 +604,8 @@ while (<PSI>){
 			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -604,6 +628,8 @@ while (<PSI>){
 			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
+			    $doneALL{$ID_gene{$t[1]}}=1;	
 			}	
 		    }
 		    else {
@@ -611,6 +637,8 @@ while (<PSI>){
 			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
+			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
 		}
 	    }
@@ -679,6 +707,7 @@ if (defined $get_GO){
     close IR_DOWN;
     close IR_UP;
     close EXSK;
+    close ALL_EV;
 }
 
 if (defined $plot){
@@ -727,6 +756,7 @@ verbPrint "Printing summary statistics\n";
 my $extras = "";
 $extras.=", noVLOW" if (defined $noVLOW);
 $extras.=", p_IR" if (defined $p_IR);
+$extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);
 
 print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras\n";
