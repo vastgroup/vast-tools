@@ -118,20 +118,45 @@ Chicken (galGal3) - 1.6G [vastdb.gga.16.02.18.tar.gz](http://vastdb.crg.eu/libs/
 > wget http://vastdb.crg.eu/libs/vastdb.gga.16.02.18.tar.gz
 > tar xzvf vastdb.gga.16.02.18.tar.gz
 ~~~~
-Zebrafish (danRer10) - 2.2G [vastdb.dre.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.16.02.18.tar.gz):
+Zebrafish (danRer10) - 2.2G [vastdb.dre.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.dre.16.02.18.tar.gz
-> tar xzvf vastdb.dre.15.01.18.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz
+> tar xzvf vastdb.dre.01.12.18.tar.gz
 ~~~~
-Sea urchin (Spur3.1) - 1.2G [vastdb.spu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.16.02.18.tar.gz):
+Amphioxus (Bl71nemr) - 1.5G [vastdb.bla.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.bla.01.12.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.spu.16.02.18.tar.gz
-> tar xzvf vastdb.spu.16.02.18.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.bla.01.12.18.tar.gz
+> tar xzvf vastdb.bla.01.12.18.tar.gz
+~~~~
+Sea urchin (Spur3.1) - 1.2G [vastdb.spu.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz
+> tar xzvf vastdb.spu.01.12.18.tar.gz
+~~~~
+Fruitfly (BDGP6) - 317M [vastdb.dme.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz
+> tar xzvf vastdb.dme.01.12.18.tar.gz
+~~~~
+Centipede (Smar1) - 585M [vastdb.sma.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz
+> tar xzvf vastdb.sma.01.12.18.tar.gz
+~~~~
+C. elegans (WBcel235) - 395M [vastdb.cel.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz
+> tar xzvf vastdb.cel.01.12.18.tar.gz
 ~~~~
 Planarian (v31) - 952M [vastdb.sme.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz):
 ~~~~
 > wget http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz
 > tar xzvf vastdb.sme.16.02.18.tar.gz
+~~~~
+Sea anemone (GCA_000209225) - 679M [vastdb.nve.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz):
+~~~~
+> wget http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz
+> tar xzvf vastdb.nve.01.12.18.tar.gz
 ~~~~
 
 ** NOTE: from release v2.0.0, new VASTDB libraries are needed for all species.
@@ -591,8 +616,8 @@ Contributions
 * Kevin Ha (UofT)
 * Tim Sterne-Weiler (UofT)
 
-Citation
---------
+Citations
+---------
 
 * `vast-tools` main paper, including benchmarking and [VastDB](http://vastdb.crg.eu/):
 
@@ -614,17 +639,25 @@ Han H, Braunschweig U.,  Gonatopoulos-Pournatzis T., Weatheritt R.J., Hirsch C.L
 
 Gueroussov, S., Gonatopoulos-Pournatzis, T., Irimia, M., Raj, B., Lin, Z.Y., Gingras, A.C., Blencowe, B.J. (2015). An alternative splicing event amplifies evolutionary differences between vertebrates. *Science*, 349:868-73
 
+* Zebrafish and sea urchin databases:
+
+Burguera, D., Marquez, Y., Racioppi, C., Permanyer, J., Torres-Mendez, T., Esposito, R., Albuixech, B., Fanlo, L., D'Agostino, Y., Gohr, A., Navas-Perez, E., Riesgo, A., Cuomo, C., Benvenuto, G., Christiaen, L.A., Martí, E., D'Aniello, S., Spagnuolo, A., Ristoratore, F., Arnone, M.I., Garcia-Fernàndez, J., Irimia, M. (2017). Evolutionary recruitment of flexible Esrp-dependent splicing programs into diverse embryonic morphogenetic processes. *Nat Commun*, 8:1799.
+
+* Amphioxus, fruitfly, centipede, C. elegans and sea anemone databases:
+
+Torres-Méndez, A., Bonnal, S., Marquez, Y., Roth, J., Iglesias, M., Permanyer, J., Almudí, I., O’Hanlon, D., Guitart, T., Soller, M., Gingras, A.-C., Gebauer, F., Rentzsch, F., Blencowe, B.J.B., Valcárcel, J., Irimia, M. (2019). A novel protein domain in an ancestral splicing factor drove the evolution of neural microexons. *Nature Ecol Evol*, 3:691-701.
+
 * Planarian database: 
 
 Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians. *Elife*, 5:e16797. 
 
-* Zebrafish and sea urchin databases:
-
-Burguera, D., Marquez, Y., Racioppi, C., Permanyer, J., Torres-Mendez, T., Esposito, R., Albuixech, B., Fanlo, L., D'Agostino, Y., Gohr, A., Navas-Perez, E., Riesgo, A., Cuomo, C., Benvenuto, G., Christiaen, L.A., Martí, E., D'Aniello, S., Spagnuolo, A., Ristoratore, F., Arnone, M.I., Garcia-Fernàndez, J., Irimia, M. (2017). Evolutionary recruitment of flexible Esrp-dependent splicing programs into diverse embryonic morphogenetic processes. *Nat Commun*, 8(1):1799.
-
 
 References
 ----------
+
+* *Matt*:
+
+Gohr, A., Irimia, M. (2018). Matt: Unix tools for alternative splicing analysis. *Bioinformatics*, 35:130-132.
 
 * cRPKMs:
 
