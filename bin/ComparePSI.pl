@@ -124,8 +124,8 @@ Compare two sample sets to find differentially regulated AS events.
 INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command combine.
 
 [General options] 
-        --min_dPSI i             Minimum delta PSI of the averages (default 15)
-        --min_range i            Minimum distance between the ranges of both groups (default 5)
+        --min_dPSI i             Minimum delta PSI of the averages (default >15)
+        --min_range i            Minimum distance between the ranges of both groups (default >5)
         --outFile file           Output file name (default based on option parameters)
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
