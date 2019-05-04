@@ -44,6 +44,7 @@ my $print_all_ev;
 my $print_AS_ev;
 my $use_int_reads;
 my $fr_int_reads = 0.4;
+my $min_ALT_use = 25;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -73,7 +74,8 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "max_dPSI=i"   => \$max_dPSI,
 			  "plot_PSI" => \$plot,
 			  "only_samples" => \$plot_only_samples,
-			  "noVLOW" => \$noVLOW
+			  "noVLOW" => \$noVLOW,
+			  "min_ALT_use=i" => \$min_ALT_use
     );
 
 our $EXIT_STATUS = 0;
@@ -227,6 +229,7 @@ $tail.="-range$min_range" if (defined $min_range);
 $tail.="-noVLOW" if (defined $noVLOW);
 $tail.="-p_IR" if (defined $p_IR);
 $tail.="-IR_reads" if (defined $use_int_reads);
+$tail.="-min_ALT_use$min_ALT_use";
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
 $tail.="-with_dPSI" if (defined $print_dPSI);
@@ -363,6 +366,20 @@ while (<PSI>){
 	push(@PSI_B,$t[$s]);
     }
     next if ($kill_coverage == 1);
+
+    # min PSI-like usage for ALT3/5 (min_ALT_use) 04/05/19
+    if ($type eq "Alt3" || $type eq "Alt5"){
+	my $kill_ALT = 0;
+        foreach my $s (@samplesA){
+            my ($temp_ALT)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+            $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+        }
+        foreach my $s (@samplesB){
+            my ($temp_ALT)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+            $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+        }
+        next if ($kill_ALT == 1);
+    }
 
     # IR check (only checks the p if the p_IR is active)
     if (($type eq "IR") && (defined $p_IR)){ # only checks the p if the p_IR is active
@@ -759,7 +776,7 @@ $extras.=", p_IR" if (defined $p_IR);
 $extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);
 
-print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras\n";
+print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras, min_ALT_use=$min_ALT_use\n";
 print "*** Summary statistics:\n";
 print "\tAS_TYPE\tHigher_in_$name_A\tHigher_in_$name_B\tTOTAL_EV\tTOTAL_AS(10<PSI<90)\n";
 print "\tMicroexons\t$tally{MIC}{DOWN}\t$tally{MIC}{UP}\t$tally_total{MIC}\t$tally_total_AS{MIC}\n";
