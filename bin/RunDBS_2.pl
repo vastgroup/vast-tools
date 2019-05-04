@@ -86,8 +86,17 @@ sub verbPrint {
   }
 }
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="Not version found" if !$version;
+
 if ($helpFlag or (!defined $sp)){
     print STDERR "
+VAST-TOOLS v$version
+
 Usage: vast-tools combine -o OUTPUTDIR -sp [Hsa|Mmu|etc] [options]
 
 Combine multiple samples analyzed using \"vast-tools align\" into a single summary table. 
