@@ -59,6 +59,13 @@ if($checkVers) {
   $helpFlag = 1;
 }
 
+### Gets the version
+my $version;
+open (VERSION, "$path/VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="Not version found" if !$version;
+
 if($helpFlag and 
 	!defined($subCommand) or
    	(($subCommand eq "align" or
@@ -70,6 +77,8 @@ if($helpFlag and
 	  $subCommand eq "diff" or
       	  $subCommand eq "plot") ? 0 : 1)) {
   die "
+VAST-TOOLS v$version
+
 Usage: $0 sub-commands [options]
 
 [sub-commands]
@@ -107,7 +116,6 @@ if (! defined $outdir) {
 } else {
     $outdir = abs_path($outdir);
 }
-
 
 ## Nuts and Bolts...
 if($subCommand eq "align") {
