@@ -96,8 +96,18 @@ sub verbPrint {
     }
 }
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!defined($ARGV[0]) || $helpFlag){
-    die "\nUsage: vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+    die "
+VAST-TOOLS v$version
+
+Usage: vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
 Compare two sample sets to find differentially expressed genes based on fold changes of cRPKM values
 
