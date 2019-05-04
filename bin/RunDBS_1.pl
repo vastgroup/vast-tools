@@ -251,8 +251,19 @@ $dbDir = abs_path($dbDir);
 $dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="Not version found" if !$version;
+
+
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
-    print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]
+    print "
+VAST-TOOLS v$version
+
+Usage: vast-tools align fastq_file_1 [fastq_file_2] [options]
 
 Align a single RNA-Seq sample to VASTDB genome and junction libraries.
 Length of reads must be at least 50 nt; for expression analysis, all reads
