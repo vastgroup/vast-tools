@@ -375,11 +375,21 @@ while (<PSI>){
 	my $kill_ALT = 0;
         foreach my $s (@samplesA){
             my ($temp_ALT)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
-            $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+	    if ($temp_ALT=~/\d/){
+		$kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+	    }
+	    else {
+		$min_ALT_use = "NA (older version)";
+	    }
         }
         foreach my $s (@samplesB){
             my ($temp_ALT)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
-            $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+	    if ($temp_ALT=~/\d/){
+		$kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+	    }
+	    else {
+		$min_ALT_use = "NA (older version)";
+	    }
         }
         next if ($kill_ALT == 1);
     }
