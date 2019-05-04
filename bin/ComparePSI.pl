@@ -119,8 +119,19 @@ if (defined $get_GO){
     }
 }
 
+
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!defined($ARGV[0]) || $helpFlag){
-    die "\nUsage: vast-tools compare /path/to/INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+    die "
+VAST-TOOLS v$version
+
+Usage: vast-tools compare /path/to/INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
 Compare two sample sets to find differentially regulated AS events. 
 INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command combine.

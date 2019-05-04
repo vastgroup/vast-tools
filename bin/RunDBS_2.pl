@@ -91,7 +91,7 @@ my $version;
 open (VERSION, "$binPath/../VERSION");
 $version=<VERSION>;
 chomp($version);
-$version="Not version found" if !$version;
+$version="No version found" if !$version;
 
 if ($helpFlag or (!defined $sp)){
     print STDERR "
