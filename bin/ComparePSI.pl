@@ -133,9 +133,12 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
-        --use_int_reads          Requires a minimum number (--fr_int_reads) of intron body reads for IR (default OFF)(from combine v2.1.3)
-        --fr_int_reads           Minimum fraction of reads in the intron bodies respect to the 
+        --use_int_reads          Requires a minimum fraction of intron body reads (--fr_int_reads) with respect to 
+                                   those in the EIJ for IR (default OFF)(combine >= v2.1.3)
+        --fr_int_reads fr        Minimum fraction of reads in the intron bodies respect to the 
                                    average of the EI/IE junctions (default 0.4). Only useful with --use_int_reads
+        --min_ALT_use i          Minimum inclusion of the exon in which the Alt3/Alt5 is located across all 
+                                   compared samples (default 25) (combine >= v2.2.1)
         --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
                                    - It does not allow ploting.
         --print_sets             Prints files with different sets for comparisons in Matt (http://matt.crg.eu):
