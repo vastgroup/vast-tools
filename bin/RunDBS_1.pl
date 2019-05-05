@@ -241,6 +241,14 @@ sub checkResumeOption{
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 my $inpType = !$fastaOnly ? "-f" : "-q"; 
 
 # Check database directory
@@ -257,7 +265,6 @@ open (VERSION, "$binPath/../VERSION");
 $version=<VERSION>;
 chomp($version);
 $version="No version found" if !$version;
-
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "
@@ -318,6 +325,9 @@ OPTIONS:
 
     exit $EXIT_STATUS;
 }
+
+# prints version (05/05/19)                                                                                                                                             
+verbPrint "VAST-TOOLS v$version";
 
 # Command line flags here
 if (defined $ARGV[1]) { $pairedEnd = 1; }
@@ -573,6 +583,24 @@ unless($resumed){
 }
 
 
+### Creates the LOG
+open (LOG, ">>VTS_LOG_commands.txt");
+my $all_args="-sp $species -o $outdir -c $cores -IR_version $IR_version -stepSize $trimStep -mismatchNum $bowtieV";
+$all_args.=" -noIR" if $noIRflag;
+$all_args.=" -onlyIR" if $onlyIRflag;
+$all_args.=" -trimLen $trimLen" if defined $trimLen;
+$all_args.=" -trim $trim" if defined $trim;
+$all_args.=" -keep" if $keepFlag;
+$all_args.=" -EEJ_counts" if $print_EEJs;
+$all_args.=" -resume" if $resume;
+$all_args.=" -rc1" if $rc1;
+$all_args.=" -rc2" if $rc2;
+$all_args.=" -nrc1" if $nrc1;
+$all_args.=" -nrc2" if $nrc2;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools align $all_args\n";
+
+
 if (!$genome_sub and !$useGenSub){
  my $cmd;
 #### Expression analysis (it maps only the first $le nucleotides of the read)
@@ -655,6 +683,7 @@ unless ($onlyIRflag){
 if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
 }
+
 
 #### Map to the EEJ:
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; 
