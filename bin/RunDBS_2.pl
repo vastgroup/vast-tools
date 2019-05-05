@@ -147,6 +147,8 @@ errPrintDie "Need output directory" unless (defined $outDir);
 errPrintDie "The output directory $outDir does not exist" unless (-e $outDir);
 errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_version != 2);
 
+# prints version (05/05/19)
+verbPrint "VAST-TOOLS v$version";
 
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../VASTDB";
@@ -188,6 +190,21 @@ else {
    @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).                                                                                                                                                                                                                                               
    $N=$#files+1;
 }
+
+### Creates the LOG
+open (LOG, ">>VTS_LOG_commands.txt");
+my $all_args="-sp $sp -o $outDir -IR_version $IR_version -extra_eej $extra_eej";
+$all_args.=" -noIR" if $noIRflag;
+$all_args.="  -onlyIR" if $onlyIRflag;
+$all_args.=" -onlyEX" if $onlyEXflag;
+$all_args.=" -noANNOT" if $noANNOTflag;
+$all_args.=" -use_all_excl_eej" if $use_all_excl_eej;
+$all_args.=" -exprONLY" if $onlyGEflag;
+$all_args.=" -no_expr" if $noGEflag;
+$all_args.=" -C" if $cRPKMCounts;
+$all_args.=" -norm" if $normalize;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args\n";
 
 if ($N != 0 && !$onlyGEflag) {
     unless ($onlyIRflag || $onlyGEflag){
@@ -339,5 +356,12 @@ if ($N + @rpkmFiles == 0) {
     verbPrint "By default this is -o vast_out, which contains vast_out/to_combine.\n";
 }
 
-
 verbPrint "Completed " . localtime;
+
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
