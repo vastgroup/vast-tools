@@ -2,9 +2,14 @@
 # Script to prepare and filter vast-tools PSI tables for other analyses
 
 use Getopt::Long;
+use Cwd qw(abs_path);
 
 ### Setting global variables:
 $Q="O[KW]\,.+?\,.+?\,.+?\,.+?\@"; # NEW quality search
+
+my $binPath = abs_path($0);
+$0 =~ s/^.*\///;
+$binPath =~ s/\/$0$//;
 
 $input_file=$ARGV[0];
 $min_SD=5; # min standard deviation of the event (def=5)
@@ -55,6 +60,14 @@ sub verbPrint {
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 # gets the array of samples
 if ($samples){
     @samples=split(/\,/,$samples);
@@ -80,8 +93,18 @@ $root_out.="-groups" if $groups;
 $output_file="$root_out-Tidy.tab" unless $output_file;
 $log_file="$root_out-Tidy.log" if $log;
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!$ARGV[0] || $helpFlag){
-    die "\nUsage: vast-tools tidy INCLUSION_LEVELS_FULL-SpN.tab \(--min_N min_N_samples OR --min_Fr min_fraction\) --min_SD min_SD [options]
+    die "
+VAST-TOOLS v$version
+
+Usage: vast-tools tidy INCLUSION_LEVELS_FULL-SpN.tab \(--min_N min_N_samples OR --min_Fr min_fraction\) --min_SD min_SD [options]
 
 Prepares and filters a vast-tools output for general analyses.
 
@@ -109,6 +132,27 @@ Prepares and filters a vast-tools output for general analyses.
 
 errPrintDie "*** You can only define a minimum fraction or absolute number of samples with good coverage\n" if $min_N && $min_Fraction;
 errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if !$min_N && !$min_Fraction;
+
+# prints version (05/05/19)
+verbPrint "VAST-TOOLS v$version";
+
+### Creates the LOG
+($folder)=$root=~/(.+)\//;
+open (LOG, ">>$folder/VTS_LOG_commands.txt");
+my $all_args="-min_SD $min_SD";
+$all_args.=" -min_N $min_N" if defined $min_N;
+$all_args.=" -min_Fr $min_Fraction" if defined $min_Fraction;
+$all_args.=" -p_IR" if $p_IR;
+$all_args.=" -noVLOW" if $noVLOW;
+$all_args.=" -samples $samples" if $samples;
+$all_args.=" -groups $group_file" if $group_file;
+$all_args.=" -log" if $log;
+$all_args.=" -onlyEX" if $onlyEXSK;
+$all_args.=" -add_names" if $AddName;
+$all_args.=" -outFile $output_file" if $output_file;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools tidy $all_args\n";
+
 
 open (I, $input_file) || die "Can't open input file\n";
 open (O, ">$output_file") || die "Can't open output file ($output_file)\n";
