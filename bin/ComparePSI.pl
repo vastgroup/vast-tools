@@ -100,6 +100,14 @@ sub verbPrint {
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 # Check database directory and set up ID file
 if (defined $get_GO){
     errPrintDie "Needs to provide species (\-\-sp) OR file with gene ID conversions (--GO_file) OR activate the --use_names flag\n" if (!defined $species && !defined $ID_file && !defined $use_names);
@@ -198,6 +206,30 @@ errPrintDie "print_dPSI cannot be used with plot\n" if (defined $print_dPSI) && 
 
 #### opens INCLUSION TABLE
 open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
+
+# prints version (05/05/19)
+verbPrint "VAST-TOOLS v$version";
+
+### Creates the LOG
+open (LOG, ">>$folder/VTS_LOG_commands.txt");
+my $all_args="-o $folder -min_dPSI $min_dPSI -min_range $min_range -a $samplesA -b $samplesB -min_ALT_use $min_ALT_use";
+$all_args.=" -paired" if $paired;
+$all_args.=" -noVLOW" if $noVLOW;
+$all_args.=" -p_IR" if $p_IR;
+$all_args.=" -use_int_reads" if $use_int_reads;
+$all_args.=" -fr_int_reads $fr_int_reads" if defined $fr_int_reads;
+$all_args.=" -print_dPSI" if $print_dPSI;
+$all_args.=" -print_sets" if $print_sets;
+$all_args.=" -print_all_ev" if $print_all_ev;
+$all_args.=" -print_AS_ev" if $print_AS_ev;
+$all_args.=" -max_dPSI=i"   if defined $max_dPSI;
+$all_args.=" -GO" if $get_GO;
+$all_args.=" -sp $species" if $species;
+$all_args.=" -outFile $output_file" if $output_file;
+$all_args.=" -plot_PSI" if $plot;
+$all_args.=" -only_samples" if $plot_only_samples;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools compare $all_args\n";
 
 # Common for all numbers of replicates
 # preparing the head
