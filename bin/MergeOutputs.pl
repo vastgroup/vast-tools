@@ -67,6 +67,14 @@ sub verbPrint {
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 # Check database directory
 if (defined $expr or defined $exprONLY){
     errPrintDie "Needs to provide species (\-\-sp)\n" if (!defined $species);
@@ -79,8 +87,18 @@ if (defined $expr or defined $exprONLY){
     errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 }
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!defined($groups) || $helpFlag){
-    die "\nUsage: vast-tools merge -g path/groups_file [-o align_output] [options]
+    die "
+VAST-TOOLS v$version
+
+Usage: vast-tools merge -g path/groups_file [-o align_output] [options]
 
 Merges vast-tools outputs from multiple subsamples into grouped samples
 
@@ -115,11 +133,27 @@ errPrintDie "IR version must be either 1 or 2\n" if ($IR_version != 1 && $IR_ver
 # from where user has called vast-tools merge
 my $groups_fullpath=abs_path($groups);
 
+# prints version (05/05/19)                                                                                                                                             
+verbPrint "VAST-TOOLS v$version";
+
+
 verbPrint "Using VASTDB -> $dbDir" if (defined $expr);
 # change directories
 errPrintDie "The output directory \"$folder/to_combine\" does not exist. Check path specified with argument -o." unless (-e "$folder/to_combine");
 chdir($folder) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $folder";
+
+### Creates the LOG
+open (LOG, ">>VTS_LOG_commands.txt");
+my $all_args="-o $folder -groups $groups -IR_version $IR_version";
+$all_args.=" -move_to_PARTS" if $move_to_PARTS;
+$all_args.=" -sp $species" if defined $species;
+$all_args.=" -expr" if $expr;
+$all_args.=" -exprONLY" if $exprONLY;
+$all_args.=" -noIR" if $noIR;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools merge $all_args\n";
+
 
 my %groups;
 my %files_2b_merged;
