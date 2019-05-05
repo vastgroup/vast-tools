@@ -92,8 +92,16 @@ sub verbPrint {
     my $verbMsg = shift;
     if($verboseFlag) {
 	chomp($verbMsg);
-	print STDERR "[vast compare]: $verbMsg\n";
+	print STDERR "[vast compare_expr]: $verbMsg\n";
     }
+}
+
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
 }
 
 ### Gets the version
@@ -153,6 +161,23 @@ errPrintDie "If paired comparison, the number of replicates must be the same\n" 
 $folder = "." unless (defined $folder);
 
 open (GE, $input_file) or errPrintDie "Needs a cRPKM + COUNTs table\n";
+
+# prints version (05/05/19)
+verbPrint "VAST-TOOLS v$version";
+
+### Creates the LOG
+open (LOG, ">>$folder/VTS_LOG_commands.txt");
+my $all_args="-a $samplesA -b $samplesB -min_fold_av $min_fold_av -min_fold_r $min_fold_r -min_reads $min_reads -min_cRPKM $min_cRPKM";
+$all_args.=" -paired" if $paired;
+$all_args.=" -min_cRPKM_loose" if $min_cRPKM_loose;
+$all_args.=" -norm" if $normalize;
+$all_args.=" -GO" if $get_GO;
+$all_args.=" -use_names" if $use_names;
+$all_args.=" -print_all" if $print_all;
+$all_args.=" -outRoot" if $out_root;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools compare_expr $all_args\n";
+
 
 ### Common for all numbers of replicates
 # preparing the head
