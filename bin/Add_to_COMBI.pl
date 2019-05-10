@@ -337,8 +337,8 @@ foreach $event (sort (keys %ALL)){
 #	    $Q.=",N";
 #	}
 # From v2.2.2: score 3 is the raw reads (10/05/19)
-	$Q.="$reads_inc1=$reads_inc2=$reads_exc";
-	$Qs.="$Rinc1=$Rinc2=$Rexc";	
+	$Q.=",$reads_inc1=$reads_inc2=$reads_exc";
+	$Qs.=",$Rinc1=$Rinc2=$Rexc";	
 ###
 
 ### Score 4: Calculate imbalance between inclusion EEJs (OK<B1<B2; Bl=not enough inclusion reads):	

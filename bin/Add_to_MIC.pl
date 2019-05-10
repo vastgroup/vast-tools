@@ -67,7 +67,7 @@ foreach $file (@files){
 #	elsif ($raw_reads_exc>=10 || $raw_reads_inc>=10){$Q.=",VLOW";}
 #	else {$Q.=",N";}
 #  From v2.2.2: only the raw reads (incl=exc)
-	$Q.="$raw_reads_inc=$raw_reads_exc";
+	$Q.=",$raw_reads_inc=$raw_reads_exc";
 #### No scores 4 and 5 for microexon pipeline.	
 	$Q.=",na,na";
 	
