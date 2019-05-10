@@ -316,26 +316,29 @@ foreach $event (sort (keys %ALL)){
 	}
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads
 	$total_simple_reads=$Rexc+$Rinc1+$Rinc2;
-	if (($Rexc >= 20 || (($Rinc1 >= 20 && $Rinc2 >= 15) || ($Rinc1 >= 15 && $Rinc2 >= 20))) && $total_simple_reads >= 100){
-	    $Qs="SOK";
-	    $Q.=",SOK";
-	}
-	elsif (($Rexc >= 20 || (($Rinc1 >= 20 && $Rinc2 >= 15) || ($Rinc1 >= 15 && $Rinc2 >= 20))) && $total_simple_reads < 100){
-	    $Qs="OK";
-	    $Q.=",OK";
-	}
-	elsif ($Rexc >= 15 || (($Rinc1 >= 15 && $Rinc2 >= 10) || ($Rinc1 >= 10 && $Rinc2 >= 15))){
-	    $Qs="LOW";
-	    $Q.=",LOW";
-	}
-	elsif ($Rexc >= 10 || (($Rinc1 >= 10 && $Rinc2 >= 5) || ($Rinc1 >= 5 && $Rinc2 >= 10))){
-	    $Qs="VLOW";
-	    $Q.=",VLOW";
-	}
-	else {
-	    $Qs="N";
-	    $Q.=",N";
-	}
+#	if (($Rexc >= 20 || (($Rinc1 >= 20 && $Rinc2 >= 15) || ($Rinc1 >= 15 && $Rinc2 >= 20))) && $total_simple_reads >= 100){
+#	    $Qs="SOK";
+#	    $Q.=",SOK";
+#	}
+#	elsif (($Rexc >= 20 || (($Rinc1 >= 20 && $Rinc2 >= 15) || ($Rinc1 >= 15 && $Rinc2 >= 20))) && $total_simple_reads < 100){
+#	    $Qs="OK";
+#	    $Q.=",OK";
+#	}
+#	elsif ($Rexc >= 15 || (($Rinc1 >= 15 && $Rinc2 >= 10) || ($Rinc1 >= 10 && $Rinc2 >= 15))){
+#	    $Qs="LOW";
+#	    $Q.=",LOW";
+#	}
+#	elsif ($Rexc >= 10 || (($Rinc1 >= 10 && $Rinc2 >= 5) || ($Rinc1 >= 5 && $Rinc2 >= 10))){
+#	    $Qs="VLOW";
+#	    $Q.=",VLOW";
+#	}
+#	else {
+#	    $Qs="N";
+#	    $Q.=",N";
+#	}
+# From v2.2.2: score 3 is the raw reads (10/05/19)
+	$Q.="$reads_inc1=$reads_inc2=$reads_exc";
+	$Qs.="$Rinc1=$Rinc2=$Rexc";	
 ###
 
 ### Score 4: Calculate imbalance between inclusion EEJs (OK<B1<B2; Bl=not enough inclusion reads):	
@@ -353,22 +356,22 @@ foreach $event (sort (keys %ALL)){
 		$Qs.=",OK";
 	    }
 	}
-	else {
+	else { # changes from v2.2.2: B3 => imbalance with no reads in one. Cutoffs down to 15 and 10 (instead of 20 and 15)
 	    if (!$Creads_inc1){
-		$Q.=",B2" if $Creads_inc2>=20;
-		$Q.=",Bl" if ($Creads_inc2<20 && $Creads_inc2>=15);
-		$Q.=",Bn" if $Creads_inc2<15 && $Creads_inc2>0;
-		$Qs.=",B2" if $Creads_inc2>=20;
-		$Qs.=",Bl" if ($Creads_inc2<20 && $Creads_inc2>=15);
-		$Qs.=",Bn" if $Creads_inc2<15 && $Creads_inc2>0;
+		$Q.=",B3" if $Creads_inc2>=15;
+		$Q.=",Bl" if ($Creads_inc2<15 && $Creads_inc2>=10);
+		$Q.=",Bn" if $Creads_inc2<10 && $Creads_inc2>0;
+		$Qs.=",B3" if $Creads_inc2>=15;
+		$Qs.=",Bl" if ($Creads_inc2<15 && $Creads_inc2>=10);
+		$Qs.=",Bn" if $Creads_inc2<10 && $Creads_inc2>0;
 	    }
-	    if (!$Creads_inc2){
-		$Q.=",B2" if $Creads_inc1>=20;
-		$Q.=",Bl" if ($Creads_inc1<20 && $Creads_inc1>=15);
-		$Q.=",Bn" if $Creads_inc1<15;
-		$Qs.=",B2" if $Creads_inc1>=20;
-		$Qs.=",Bl" if ($Creads_inc1<20 && $Creads_inc1>=15);
-		$Qs.=",Bn" if $Creads_inc1<15;
+	    if (!$Creads_inc2){ # since it's not elsif, the no reads in both will end up here
+		$Q.=",B3" if $Creads_inc1>=15;
+		$Q.=",Bl" if ($Creads_inc1<15 && $Creads_inc1>=10);
+		$Q.=",Bn" if $Creads_inc1<10;
+		$Qs.=",B3" if $Creads_inc1>=15;
+		$Qs.=",Bl" if ($Creads_inc1<15 && $Creads_inc1>=10);
+		$Qs.=",Bn" if $Creads_inc1<10;
 	    }
 	}
 ### 
