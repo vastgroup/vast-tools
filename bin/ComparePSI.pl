@@ -29,7 +29,7 @@ my $repA; # number of replicates per type
 my $repB; # number of replicates per type
 my $min_range = 5; # min dPSI between ranges
 my $noVLOW;
-my $noB2; # to remove B2 in AltEx (09/05/19)
+my $noB3; # to remove B3 in AltEx (09/05/19)
 my $p_IR;
 my $ID_file;
 my $get_GO;
@@ -76,7 +76,7 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "plot_PSI" => \$plot,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW,
-			  "noB2" => \$noB2,
+			  "noB3" => \$noB3,
 			  "min_ALT_use=i" => \$min_ALT_use
     );
 
@@ -153,6 +153,7 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
+        --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
         --use_int_reads          Requires a minimum fraction of intron body reads (--fr_int_reads) with respect to 
                                    those in the EIJ for IR (default OFF)(combine >= v2.1.3)
@@ -217,7 +218,7 @@ open (LOG, ">>$folder/VTS_LOG_commands.txt");
 my $all_args="-o $folder -min_dPSI $min_dPSI -min_range $min_range -a $samplesA -b $samplesB -min_ALT_use $min_ALT_use";
 $all_args.=" -paired" if $paired;
 $all_args.=" -noVLOW" if $noVLOW;
-$all_args.=" -noB2" if $noB2;
+$all_args.=" -noB3" if $noB3;
 $all_args.=" -p_IR" if $p_IR;
 $all_args.=" -use_int_reads" if $use_int_reads;
 $all_args.=" -fr_int_reads $fr_int_reads" if defined $fr_int_reads;
@@ -276,7 +277,7 @@ my ($root)=$ARGV[0]=~/.+?\-([^\/]+?)\./;
 my $tail = ""; # to be added to the output name
 $tail.="-range$min_range" if (defined $min_range); 
 $tail.="-noVLOW" if $noVLOW;
-$tail.="-noB2" if $noB2;
+$tail.="-noB3" if $noB3;
 $tail.="-p_IR" if $p_IR;
 $tail.="-IR_reads" if $use_int_reads;
 $tail.="-min_ALT_use$min_ALT_use";
@@ -417,18 +418,18 @@ while (<PSI>){
     }
     next if ($kill_coverage == 1);
 
-    # B2 check for AltEx events
-    if ($type eq "AltEx" && $noB2){
-	my $kill_B2 = 0;
+    # B3 check for AltEx events
+    if ($type eq "AltEx" && $noB3){
+	my $kill_B3 = 0;
 	foreach my $s (@samplesA){
-	    my ($temp_B2)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,(.+?)\,.+?\@/;
-	    $kill_B2 = 1 if $temp_B2 eq "B2";
+	    my ($temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,(.+?)\,.+?\@/;
+	    $kill_B3 = 1 if $temp_B3 eq "B3";
 	}
 	foreach my $s (@samplesB){
-	    my ($temp_B2)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,(.+?)\,.+?\@/;
-	    $kill_B2 = 1 if $temp_B2 eq "B2";
+	    my ($temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,(.+?)\,.+?\@/;
+	    $kill_B3 = 1 if $temp_B3 eq "B3";
 	}
-	next if ($kill_B2 == 1);
+	next if ($kill_B3 == 1);
     }
 
     # min PSI-like usage for ALT3/5 (min_ALT_use) 04/05/19
@@ -846,7 +847,7 @@ if (defined $plot){
 verbPrint "Printing summary statistics\n";
 my $extras = "";
 $extras.=", noVLOW" if (defined $noVLOW);
-$extras.=", noB2" if (defined $noB2);
+$extras.=", noB3" if (defined $noB3);
 $extras.=", p_IR" if (defined $p_IR);
 $extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);
