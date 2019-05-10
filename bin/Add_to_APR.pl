@@ -151,21 +151,23 @@ foreach $event (sort keys %ALL){
 		$Q.=",N";
 	    }
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads
-	    if (($RexcS{$event}{$sample}>=20 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=20) || ($Rinc1S{$event}{$sample} >=20 && $Rinc2S{$event}{$sample}>=15)) && $total_ref_reads>=100){
-		$Q.=",SOK";
-	    }
-	    elsif (($RexcS{$event}{$sample}>=20 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=20) || ($Rinc1S{$event}{$sample} >=20 && $Rinc2S{$event}{$sample}>=15)) && $total_ref_reads<100){
-		$Q.=",OK";
-	    }
-	    elsif ($RexcS{$event}{$sample}>=15 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=10) || ($Rinc1S{$event}{$sample} >= 10 && $Rinc2S{$event}{$sample}>=15)){	
-		$Q.=",LOW";
-	    }
-	    elsif ($RexcS{$event}{$sample} >= 10 || ($Rinc1S{$event}{$sample} >= 10 && $Rinc2S{$event}{$sample} >= 5) || ($Rinc1S{$event}{$sample} >= 5 && $Rinc2S{$event}{$sample} >= 10)){	
-		$Q.=",VLOW";
-	    }
-	    else {
-		$Q.=",N";
-	    }
+#	    if (($RexcS{$event}{$sample}>=20 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=20) || ($Rinc1S{$event}{$sample} >=20 && $Rinc2S{$event}{$sample}>=15)) && $total_ref_reads>=100){
+#		$Q.=",SOK";
+#	    }
+#	    elsif (($RexcS{$event}{$sample}>=20 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=20) || ($Rinc1S{$event}{$sample} >=20 && $Rinc2S{$event}{$sample}>=15)) && $total_ref_reads<100){
+#		$Q.=",OK";
+#	    }
+#	    elsif ($RexcS{$event}{$sample}>=15 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=10) || ($Rinc1S{$event}{$sample} >= 10 && $Rinc2S{$event}{$sample}>=15)){	
+#		$Q.=",LOW";
+#	    }
+#	    elsif ($RexcS{$event}{$sample} >= 10 || ($Rinc1S{$event}{$sample} >= 10 && $Rinc2S{$event}{$sample} >= 5) || ($Rinc1S{$event}{$sample} >= 5 && $Rinc2S{$event}{$sample} >= 10)){	
+#		$Q.=",VLOW";
+#	    }
+#	    else {
+#		$Q.=",N";
+#	    }
+	    # From v2.2.2, score 3 is the raw read counts for INC1=INC2=EXC
+	    $Q.=",$Rinc1{$event}{$sample}=$Rinc2{$event}{$sample}=$Rexc{$event}{$sample}";
 	}
 	
 	if ($type eq "exskX"){
@@ -202,21 +204,23 @@ foreach $event (sort keys %ALL){
 		$Q.=",N";
 	    }
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads	
-	    if (($Rexc{$event}{$sample}>=20 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=20) || ($Rinc1{$event}{$sample} >=20 && $Rinc2{$event}{$sample}>=15)) && $total_raw_reads>=100){
-		$Q.=",SOK";
-	    }
-	    elsif (($Rexc{$event}{$sample}>=20 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=20) || ($Rinc1{$event}{$sample} >=20 && $Rinc2{$event}{$sample}>=15)) && $total_raw_reads<100){
-		$Q.=",OK";
-	    }
-	    elsif ($Rexc{$event}{$sample}>=15 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=10) || ($Rinc1{$event}{$sample} >= 10 && $Rinc2{$event}{$sample}>=15)){	
-		$Q.=",LOW";
-	    }
-	    elsif ($Rexc{$event}{$sample} >= 10 || ($Rinc1{$event}{$sample} >= 10 && $Rinc2{$event}{$sample} >= 5) || ($Rinc1{$event}{$sample} >= 5 && $Rinc2{$event}{$sample} >= 10)){	
-		$Q.=",VLOW";
-	    }
-	    else {
-		$Q.=",N";
-	    }
+#	    if (($Rexc{$event}{$sample}>=20 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=20) || ($Rinc1{$event}{$sample} >=20 && $Rinc2{$event}{$sample}>=15)) && $total_raw_reads>=100){
+#		$Q.=",SOK";
+#	    }
+#	    elsif (($Rexc{$event}{$sample}>=20 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=20) || ($Rinc1{$event}{$sample} >=20 && $Rinc2{$event}{$sample}>=15)) && $total_raw_reads<100){
+#		$Q.=",OK";
+#	    }
+#	    elsif ($Rexc{$event}{$sample}>=15 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=10) || ($Rinc1{$event}{$sample} >= 10 && $Rinc2{$event}{$sample}>=15)){	
+#		$Q.=",LOW";
+#	    }
+#	    elsif ($Rexc{$event}{$sample} >= 10 || ($Rinc1{$event}{$sample} >= 10 && $Rinc2{$event}{$sample} >= 5) || ($Rinc1{$event}{$sample} >= 5 && $Rinc2{$event}{$sample} >= 10)){	
+#		$Q.=",VLOW";
+#	    }
+#	    else {
+#		$Q.=",N";
+#	    }
+	    # From v2.2.2, score 3 is the raw read counts for INC1=INC2=EXC
+	    $Q.=",$Rinc1{$event}{$sample}=$Rinc2{$event}{$sample}=$Rexc{$event}{$sample}";
 	}
     
 ### Score 4: Calculate imbalance between inclusion EEJs (OK<B1<B2; Bl=not enough inclusion reads):
@@ -242,14 +246,14 @@ foreach $event (sort keys %ALL){
 	}
 	else {
 	    if (!$inc1){
-		$Q.=",B2" if $inc2>=20;
-		$Q.=",Bl" if ($inc2<20 && $inc2>=15);
-		$Q.=",Bn" if $inc2<15 && $inc2>0;
+		$Q.=",B3" if $inc2>=15;
+		$Q.=",Bl" if ($inc2<15 && $inc2>=10);
+		$Q.=",Bn" if $inc2<10 && $inc2>0;
 	    }
 	    if (!$inc2){
-		$Q.=",B2" if $inc1>=20;
-		$Q.=",Bl" if ($inc1<20 && $inc1>=15);
-		$Q.=",Bn" if $inc1<15;
+		$Q.=",B3" if $inc1>=15;
+		$Q.=",Bl" if ($inc1<15 && $inc1>=10);
+		$Q.=",Bn" if $inc1<10;
 	    }
 	}
     }
