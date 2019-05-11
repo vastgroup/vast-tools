@@ -419,15 +419,27 @@ while (<PSI>){
     next if ($kill_coverage == 1);
 
     # B3 check for AltEx events
-    if ($type eq "AltEx" && $noB3){
+    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
 	my $kill_B3 = 0;
 	foreach my $s (@samplesA){
-	    my ($temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,(.+?)\,.+?\@/;
-	    $kill_B3 = 1 if $temp_B3 eq "B3";
+	    my ($score3,$temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;	
+	    if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+		my ($i1,$i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+		$kill_B3 = 1 if $temp_B3 eq "B3" && $i1+$i2 > 15;
+	    }
+	    else {
+		$noB3="NA (older version)";
+	    }
 	}
 	foreach my $s (@samplesB){
-	    my ($temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,.+?\,(.+?)\,.+?\@/;
-	    $kill_B3 = 1 if $temp_B3 eq "B3";
+	    my ($score3,$temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
+	    if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+		my ($i1,$i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+		$kill_B3 = 1 if $temp_B3 eq "B3" && $i1+$i2 > 15;
+	    }
+	    else {
+		$noB3="NA (older version)";
+	    }
 	}
 	next if ($kill_B3 == 1);
     }
@@ -847,7 +859,8 @@ if (defined $plot){
 verbPrint "Printing summary statistics\n";
 my $extras = "";
 $extras.=", noVLOW" if (defined $noVLOW);
-$extras.=", noB3" if (defined $noB3);
+$extras.=", noB3" if (defined $noB3 && $noB3 ne "NA (older version)");
+$extras.=", noB3=NA (older version)" if (defined $noB3 && $noB3 eq "NA (older version)");
 $extras.=", p_IR" if (defined $p_IR);
 $extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);

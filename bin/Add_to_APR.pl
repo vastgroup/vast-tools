@@ -224,42 +224,45 @@ foreach $event (sort keys %ALL){
 	}
     
 ### Score 4: Calculate imbalance between inclusion EEJs (OK<B1<B2; Bl=not enough inclusion reads):
-    $inc1=$inc1S{$event}{$sample} if $type eq "MULTI3X"; # only corrected reads from reference
-    $inc2=$inc2S{$event}{$sample} if $type eq "MULTI3X"; # only corrected reads from reference
-    $inc1=$inc1{$event}{$sample} if $type eq "exskX";
-    $inc2=$inc2{$event}{$sample} if $type eq "exskX";
-    
-    if ($inc1 && $inc2 && $inc1 ne "NA" && $inc2 ne "NA"){
-	if (($inc1/$inc2 > 2 && $inc1/$inc2 <=5) || ($inc2/$inc1> 2 && $inc2/$inc1 <=5)){
-	    $Q.=",B1";
-	}
-	elsif (($inc1/$inc2 > 5) || ($inc2/$inc1>5)){
-	    $Q.=",B2";
-	}
-	else {
-	    $Q.=",OK";
-	}
-    }
-    else {
-	if ($inc1 eq "NA" || $inc2 eq "NA"){
-	    $Q.=",NA";
-	}
-	else {
-	    if (!$inc1){
-		$Q.=",B3" if $inc2>=15;
-		$Q.=",Bl" if ($inc2<15 && $inc2>=10);
-		$Q.=",Bn" if $inc2<10 && $inc2>0;
+#	$inc1=$inc1S{$event}{$sample} if $type eq "MULTI3X"; # only corrected reads from reference
+#	$inc2=$inc2S{$event}{$sample} if $type eq "MULTI3X"; # only corrected reads from reference
+#	$inc1=$inc1{$event}{$sample} if $type eq "exskX";
+#	$inc2=$inc2{$event}{$sample} if $type eq "exskX";
+	# From v2.2.2: all corrected reads for BOTH types
+	$inc1=$inc1{$event}{$sample};
+	$inc2=$inc2{$event}{$sample};
+	
+	if ($inc1 && $inc2 && $inc1 ne "NA" && $inc2 ne "NA"){
+	    if (($inc1/$inc2 > 2 && $inc1/$inc2 <=5) || ($inc2/$inc1> 2 && $inc2/$inc1 <=5)){
+		$Q.=",B1";
 	    }
-	    if (!$inc2){
-		$Q.=",B3" if $inc1>=15;
-		$Q.=",Bl" if ($inc1<15 && $inc1>=10);
-		$Q.=",Bn" if $inc1<10;
+	    elsif (($inc1/$inc2 > 5) || ($inc2/$inc1>5)){
+		$Q.=",B2";
+	    }
+	    else {
+		$Q.=",OK";
 	    }
 	}
-    }
+	else {
+	    if ($inc1 eq "NA" || $inc2 eq "NA"){
+		$Q.=",NA";
+	    }
+	    else {
+		if (!$inc1){
+		    $Q.=",B3" if $inc2>=15;
+		    $Q.=",Bl" if ($inc2<15 && $inc2>=10);
+		    $Q.=",Bn" if $inc2<10 && $inc2>0;
+		}
+		if (!$inc2){
+		    $Q.=",B3" if $inc1>=15;
+		    $Q.=",Bl" if ($inc1<15 && $inc1>=10);
+		    $Q.=",Bn" if $inc1<10;
+		}
+	    }
+	}
 #### Score 5: Complexity score (S<C1<C2<C3)	
-    $Q.=",S" if $type eq "exskX";
-    $Q.=",$complexity{$event}{$sample}" if $type eq "MULTI3X";
+	$Q.=",S" if $type eq "exskX";
+	$Q.=",$complexity{$event}{$sample}" if $type eq "MULTI3X";
 
 
    ### DIFF OUTPUT ADDITION TO QUAL SCORE!   --TSW
