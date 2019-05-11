@@ -20,6 +20,8 @@ $p_IR=0;
 $print_all = "";
 $samples = "";
 $group_file;
+$noB3;
+$min_ALT_use = 25;
 $verboseFlag = 1;  # on for debugging 
 $command_line=join(" ", @ARGV);
 @TYPES=("MIC","AltEx","IR","Alt3","Alt5");
@@ -32,6 +34,8 @@ GetOptions(               "min_SD=i" => \$min_SD,
                           "help" => \$helpFlag,
                           "p_IR" => \$p_IR,
                           "noVLOW" => \$noVLOW,
+			  "noB3" => \$noB3,
+			  "min_ALT_use=i" => \$min_ALT_use,
 			  "samples=s" => \$samples,
 			  "groups=s" => \$group_file,
 			  "log" => \$log,
@@ -85,7 +89,9 @@ $root_out.="-minN_$min_N" if $min_N;
 $root_out.="-minFr_$min_Fraction" if $min_Fraction;
 $root_out.="-minSD_$min_SD";
 $root_out.="-noVLOW" if $noVLOW;
+$root_out.="-noB3" if $noB3;
 $root_out.="-p_IR" if $p_IR;
+$root_out.="-min_ALT_use$min_ALT_use";
 $root_out.="-onlyEX" if $onlyEXSK;
 $root_out.="-samples$N_samples" if $samples;
 $root_out.="-groups" if $groups;
@@ -119,7 +125,10 @@ Prepares and filters a vast-tools output for general analyses.
                                    Format: SAMPLE_NAME\\tGROUP_IDENTIFIER
         -outFile                Output file name (default based on option parameters)
         --noVLOW                Do not use samples with VLOW coverage (default OFF)
+        --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                  Filter IR by the p-value of the binomial test (default OFF)
+        --min_ALT_use i          Minimum inclusion of the exon in which the Alt3/Alt5 is located across all 
+                                   compared samples (default 25) (combine >= v2.2.1)
         --onlyEX                Outputs only EXSK events (default OFF)
         --add_names             Adds gene name to the event_ID. E.g. Mta1\=MmuEX0029874 (default OFF)
         --log                   Print the summary stats into a file (default OFF)
@@ -139,11 +148,12 @@ verbPrint "VAST-TOOLS v$version";
 ### Creates the LOG
 ($folder)=$root=~/(.+)\//;
 open (LOG, ">>$folder/VTS_LOG_commands.txt");
-my $all_args="-min_SD $min_SD";
+my $all_args="-min_SD $min_SD -min_ALT_use $min_ALT_use";
 $all_args.=" -min_N $min_N" if defined $min_N;
 $all_args.=" -min_Fr $min_Fraction" if defined $min_Fraction;
 $all_args.=" -p_IR" if $p_IR;
 $all_args.=" -noVLOW" if $noVLOW;
+$all_args.=" -noB3" if $noB3;
 $all_args.=" -samples $samples" if $samples;
 $all_args.=" -groups $group_file" if $group_file;
 $all_args.=" -log" if $log;
@@ -256,6 +266,7 @@ while (<I>){
 	    if ($i%2==0){
 		next if !$valid_sample[$i];
 		if ($t[$i+1]=~/$Q/){
+		    ### For IR
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 			($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
@@ -264,7 +275,32 @@ while (<I>){
 			}
 			next if $p_i<0.05;
 		    }
-		    
+		    ### For Alt3 and Alt5
+		    if ($type eq "Alt3" || $type eq "Alt5"){
+			my $kill_ALT = 0;
+			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+			if ($temp_ALT=~/\d/){
+			    $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+			}
+			else {
+			    $min_ALT_use = "NA (older version)";
+			}
+			next if $kill_ALT;
+		    }
+		    # B3 check for AltEx events
+		    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
+			my $kill_B3 = 0;
+			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
+			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+			    $kill_B3 = 1 if $temp_B3 eq "B3" && $t_i1+$t_i2 > 15;
+			}
+			else {
+			    $noB3="NA (older version)";
+			}
+			next if $kill_B3;
+		    }
+			
 		    $total_N{$event}++;
 		    push(@PSIs,$t[$i]);
 		    
@@ -303,7 +339,32 @@ while (<I>){
 			}
 			next if $p_i<0.05;
 		    }
-		    
+		    ### For Alt3 and Alt5
+		    if ($type eq "Alt3" || $type eq "Alt5"){
+			my $kill_ALT = 0;
+			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+			if ($temp_ALT=~/\d/){
+			    $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+			}
+			else {
+			    $min_ALT_use = "NA (older version)";
+			}
+			next if $kill_ALT;
+		    }
+		    # B3 check for AltEx events
+		    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
+			my $kill_B3 = 0;
+			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
+			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+			    $kill_B3 = 1 if $temp_B3 eq "B3" && $t_i1+$t_i2 > 15;
+			}
+			else {
+			    $noB3="NA (older version)";
+			}
+			next if $kill_B3;
+		    }		    
+
 		    $total_N{$event}{$group}++;
 		    push(@{$PSIs{$group}},$t[$i]);
 		    
@@ -349,6 +410,9 @@ print LOG "OPTIONS: $command_line\n\n";
 
 $extras="";
 $extras.= " -noVOW" if $noVLOW;
+$extras.= " -noB3" if $noB3 && $noB3 ne "NA (older version)";
+$extras.= " -noB3=NA (older version)" if $noB3 && $noB3 eq "NA (older version)";
+$extras.= " -min_ALT_use $min_ALT_use";
 $extras.= " -p_IR" if $p_IR;
 $extras.= " GROUPS" if $group_file;
 
