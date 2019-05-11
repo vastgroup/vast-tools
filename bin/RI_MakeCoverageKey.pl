@@ -66,10 +66,11 @@ foreach my $file (@files){
     my $fname=$file;
     $fname =~ s/^.*\///;
     (my $sample2)=$fname=~/^(.*)\..*$/;
-    
-    unless(-e "to_combine/$sample2.info"){ die "Do not find to_combine/{$sample2}.info. You might need to run vast-tools align again.";}
-    open(my $fh_info,"to_combine/$sample2.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
-    my @fs=split("\t",$line);
+
+# bizarre code temporarily commented out    
+#    unless(-e "to_combine/$sample2.info"){ die "Do not find to_combine/{$sample2}.info. You might need to run vast-tools align again.";}
+#    open(my $fh_info,"to_combine/$sample2.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+#    my @fs=split("\t",$line);
     
     unless(-e "to_combine/$sample.info"){$mappability_href=\%mappability_ns;
     }else{
