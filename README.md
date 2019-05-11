@@ -581,20 +581,20 @@ Then, for each combined sample, a pair of columns:
 
  	* *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
  	* *Score 3*: This score has been recicled to contain different information from release v2.2.2: 
-		- EX (except microexon module): raw total read counts supporting uptream inclusion, downstream inclusion and skipping (format INC1=INC2=EXC).
-		- EX (microexon module):  raw total read counts supporting uptream inclusion and exclusion (format INC=EXC).
+		- EX (except microexon module): raw total read counts supporting upstream inclusion, downstream inclusion and skipping (format INC1=INC2=EXC).
+		- EX (microexon module):  raw total read counts supporting inclusion and exclusion (format INC=EXC).
 		- ALTD and ALTA: PSI-like value of the exon hosting the ALTD/ALTA event. This score is used to filter out events in `compare` based on the option `--min_ALT_use`.
-		- IR (from v2.1.3): corrected number of intron body reads (in a sample of 200bp in the middle of the intron, or the whole intron if shorter), and the number of mappable position in the same (maximum 151 positions) (format READS=POSITIONS).
-	- Before v2.1.3: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). 
- 	* *Score 4*: This score has different meaning depending on the event type:
-		- EX (except for microexon module): Imbalance of reads mapping to inclusion splice junctions.
-			- OK: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
-			- B1: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
-			- B2: the ratio between the total number of reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5.
-			- B3: when the corrected reads for inclusion from one side is at least 15 and 0 in the other. Used to filter out events in `compare` when the option `--noB3` is utilized.
-			- Bl/Bn: low/no read coverage for splice junctions supporting inclusion.
+		- IR (from v2.1.3): corrected number of intron body reads (in a sample of 200bp in the middle of the intron, or the whole intron if shorter), and the number of mappable position in that sample (maximum 151 positions) (format READS=POSITIONS).
+		- Before v2.1.3: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). 
+ 	* *Score 4*: This score has different meaning depending on the type of AS event:
+		- EX (except for microexon module): Imbalance of reads mapping to the inclusion splice junctions.
+			- OK: the ratio between the total number of corrected reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
+			- B1: the ratio between the total number of corrected reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 2 but < 5.
+			- B2: the ratio between the total number of corrected reads supporting inclusion for splice junctions upstream and downstream the alternative exon is > 5 (but none is 0).
+			- B3: when the corrected reads for inclusion from one side is at least 15 and 0 for the other. Used to filter out events in `compare` when the option `--noB3` is activated.
+			- Bl/Bn: low (between 10 and 14)/no read coverage (between 1 and 9) for splice junctions supporting inclusion.
 		- EX (microexon module): "na" (no information provided).
-		- ALTD and ALTA: raw read counts for the splice site, for the all the splice sites of the event together (total) and supporting skipping of the host exon. In versions early than v2.2.2, total reads for the event (all sites together) for all combinations or only for the reference acceptor (for ALTD) or donor (for ALTA). 
+		- ALTD and ALTA: raw read counts for the specific splice site, for the all the splice sites of the event together (=total reads) and for those supporting skipping of the host exon. In versions early than v2.2.2: total reads for the event for all combinations or only for the reference acceptor (for ALTD) or donor (for ALTA). 
 		- IR: raw read counts mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format EIJ=IEJ=EEJ). In versions earlier than v2.2.2, corrected counts were shown instead of raw read counts.
  	* *Score 5*: This score has different meaning depending on the event type:
 		- EX (except for microexon module): Complexity of the event. The score refers to the number of reads that come from the "reference" C1A, AC2 and C1C2 junctions. Complexity increases as: S < C1 < C2 < C3.
