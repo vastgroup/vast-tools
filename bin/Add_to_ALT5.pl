@@ -231,24 +231,30 @@ foreach $event_root (sort keys %ALL){
         $PSI_like="NA" if ($total_corr_reads_ALL+$skipping_corr_reads) == 0;
         $Q.=",$PSI_like";
 
-        ### Score 4: just the reads (as before)
-        $Q.=",$total_raw_reads_ALL=$total_raw_reads_S=$skipping_raw_reads";
-	
-        #### Score 5: COMPLEXITY
-        $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
-        $from_S=$total_corr_reads_S;
-	
-	if ($from_C > ($from_C+$from_S)/2) {$Q.=",C3"; $Qs.=",C3";}
-        elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q.=",C2";$Qs.=",C2";}
-        elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q.=",C1";$Qs.=",C1";}
-	else {$Q.=",S"; $Qs.=",S";}
+	### Scores 4 and 5 moved to splice site loop (v2.2.2, 11/05/19)
+
         ####### 
 	
 	for $i (0..$#junctions){
 	    $PSI[$i]=sprintf("%.2f",100*$corr_inc_reads_ALL[$i]/$total_corr_reads_ALL) if $total_corr_reads_ALL>0;
 	    $PSI[$i]="NA" if $total_corr_reads_ALL==0;
+
+	    ### Completes the Q scores:
+	    $Q[$i] = $Q; # only 3 scores here
 	    
-	    $Q[$i] = $Q;
+	    ### Score 4: from v2.2.2 is specific for each splice site
+	    $Q[$i].=",$raw_inc_reads_ALL[$i]=$total_raw_reads_ALL=$skipping_raw_reads";
+	    
+	    #### Score 5: COMPLEXITY
+	    $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
+	    $from_S=$total_corr_reads_S;
+	    
+	    if ($from_C > ($from_C+$from_S)/2) {$Q[$i].=",C3";}
+	    elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q[$i].=",C2";}
+	    elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q[$i].=",C1";}
+	    else {$Q[$i].=",S";}
+	    
+
 	    ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
 	    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
 	    ### These values are added to the qual score and used to infer the posterior distribution
