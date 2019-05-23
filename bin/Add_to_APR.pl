@@ -150,6 +150,11 @@ foreach $event (sort keys %ALL){
 	    else {
 		$Q.=",N";
 	    }
+
+#### To kill $Q info for MULTI with PSI eq "NA" (i.e. missing mappability for some EEJs)
+	    $Q="N,N" if $PSI eq "NA";
+
+
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads
 #	    if (($RexcS{$event}{$sample}>=20 || ($Rinc1S{$event}{$sample} >=15 && $Rinc2S{$event}{$sample}>=20) || ($Rinc1S{$event}{$sample} >=20 && $Rinc2S{$event}{$sample}>=15)) && $total_ref_reads>=100){
 #		$Q.=",SOK";
@@ -203,6 +208,11 @@ foreach $event (sort keys %ALL){
 	    else {
 		$Q.=",N";
 	    }
+
+#### To kill $Q info for MULTI with PSI eq "NA" (i.e. missing mappability for some EEJs)
+	    $Q="N,N" if $PSI eq "NA";
+
+
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads	
 #	    if (($Rexc{$event}{$sample}>=20 || ($Rinc1{$event}{$sample} >=15 && $Rinc2{$event}{$sample}>=20) || ($Rinc1{$event}{$sample} >=20 && $Rinc2{$event}{$sample}>=15)) && $total_raw_reads>=100){
 #		$Q.=",SOK";
@@ -265,9 +275,9 @@ foreach $event (sort keys %ALL){
 	$Q.=",$complexity{$event}{$sample}" if $type eq "MULTI3X";
 
 
-   ### DIFF OUTPUT ADDITION TO QUAL SCORE!   --TSW
-   ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
-   ### These values are added to the qual score and used to infer the posterior distribution
+	### DIFF OUTPUT ADDITION TO QUAL SCORE!   --TSW
+	### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
+	### These values are added to the qual score and used to infer the posterior distribution
 	unless($legacyFlag) {
 	    my $totalN = $Rexc{$event}{$sample} + $Rinc1{$event}{$sample} + $Rinc2{$event}{$sample};
 	    my($pPSI, $exValOfInc, $exValOfExc) = (0, 0, 0);
@@ -280,9 +290,6 @@ foreach $event (sort keys %ALL){
 	    $Q .= "\@$exValOfInc,$exValOfExc";
 	}
 	
-#### To kill $Q info for MULTI with PSI eq "NA" (i.e. missing mappability for some EEJs)
-	$Q="N,N,N,Bn,S" if $PSI eq "NA";
-
 	# Print out data
 	print PSIs "\t$PSI\t$Q";
 	print COUNTs "\t$Rexc{$event}{$sample}\t$Rinc1{$event}{$sample}\t$Rinc2{$event}{$sample}\t\t\t\t$PSI=$Q";
