@@ -160,13 +160,14 @@ errPrintDie "If paired comparison, the number of replicates must be the same\n" 
 ($folder) = $input_file =~/(.+)\//; # empty if no match (i.e. local folder)
 $folder = "." unless (defined $folder);
 
-open (GE, $input_file) or errPrintDie "Needs a cRPKM + COUNTs table\n";
+
+open (GE, $input_file) or errPrintDie "Needs a cRPKM + COUNTs table $!\n";
 
 # prints version (05/05/19)
 verbPrint "VAST-TOOLS v$version";
 
 ### Creates the LOG
-open (LOG, ">>$folder/VTS_LOG_commands.txt");
+open (LOG, ">>$folder/VTS_LOG_commands.txt"); # || die "Cannot open the LOG file";
 my $all_args="-a $samplesA -b $samplesB -min_fold_av $min_fold_av -min_fold_r $min_fold_r -min_reads $min_reads -min_cRPKM $min_cRPKM";
 $all_args.=" -paired" if $paired;
 $all_args.=" -min_cRPKM_loose" if $min_cRPKM_loose;
@@ -177,7 +178,6 @@ $all_args.=" -print_all" if $print_all;
 $all_args.=" -outRoot" if $out_root;
 
 print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools compare_expr $all_args\n";
-
 
 ### Common for all numbers of replicates
 # preparing the head
