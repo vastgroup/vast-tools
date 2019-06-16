@@ -280,6 +280,8 @@ while (<I>){
 			my $kill_ALT = 0;
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
 			if ($temp_ALT=~/\d/){
+			    $PRINT{$event}.="\tNA"; # storages the PSIs
+			    $tallyNA{$event}{$H[$i]}=1; # for summary stats 
 			    $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
 			}
 			else {
@@ -293,7 +295,12 @@ while (<I>){
 			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
 			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
 			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
-			    $kill_B3 = 1 if $temp_B3 eq "B3" && $t_i1+$t_i2 > 15;
+
+			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
+				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$tallyNA{$event}{$H[$i]}=1; # for summary stats 
+				$kill_B3 = 1;
+			    }
 			}
 			else {
 			    $noB3="NA (older version)";
