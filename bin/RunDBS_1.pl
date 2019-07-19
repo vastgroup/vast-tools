@@ -440,9 +440,6 @@ unless(defined($tmpDir)) {
 unless($EXIT_STATUS > 0) {
   verbPrint "Set tmp directory to $tmpDir!";
 }
-unless(-e "$tmpDir/tmp_read_files"){
-	mkdir("$tmpDir/tmp_read_files") or die "$!";
-}
 
 # Quality control for trim5
 if ($trimLen){
