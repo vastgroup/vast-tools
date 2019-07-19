@@ -13,6 +13,7 @@ use strict;
 use Cwd qw(abs_path cwd);
 use Getopt::Long;
 use File::Path qw(make_path);
+use File::Temp qw(tempdir);
 
 # INITIALIZE PATH AND FLAGS--TSW
 my $binPath = abs_path($0);
@@ -556,7 +557,7 @@ unless($resumed){
 				if($i==0){
 					unless($percR1n>=$maxThresh){print $fh_info "\t$fq1";next;}
 					open($fh,"".getPrefixCmd($fq1)." |");
-					$fn="$tmpDir/tmp_read_files/".pop(@{[split("/",$fq1)]});
+					$fn="".tempdir( DIR => "$tmpDir", TEMPLATE=>"tmpfqs_XXXXXXXX", CLEANUP =>  0 )."/".pop(@{[split("/",$fq1)]});
 					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">$fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq1; writing into $fn";
 					$fq1=$fn;
@@ -566,7 +567,7 @@ unless($resumed){
 					if($percR2n eq "NA"){next;}  # single-end data
 					unless($percR2n>=$maxThresh){print $fh_info "\t$fq2";next;}
 					open($fh,"".getPrefixCmd($fq2)." |");
-					$fn="$tmpDir/tmp_read_files/".pop(@{[split("/",$fq2)]});
+					$fn="".tempdir( DIR => "$tmpDir", TEMPLATE=>"tmpfqs_XXXXXXXX", CLEANUP =>  0 )."/".pop(@{[split("/",$fq2)]});
 					if(isZipped($fq2)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">$fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq2; writing into $fn";
 					$fq2=$fn;
