@@ -61,9 +61,13 @@ my $ribofoot = 0; # flag for ribosome footprinting libraries
 
 my $resume = 0;   # if this flag is set, vast-tools tries to resume a previous run 
 
+my $samplename="";  # $root deduced from file name will be replaced by user specified sample name
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
+			  "name=s" => \$samplename,
+			  "n=s" => \$samplename,
 			  "dbDir=s" => \$dbDir,
 			  "c=i" => \$cores, 
 			  "cores=i" => \$cores,
@@ -278,6 +282,8 @@ must be of same length.
 
 OPTIONS:
 	--sp Hsa/Mmu/etc	Three letter code for the database (default Hsa)
+	--name, -n <NAME>       Defines name for this sample. By default, the
+	                        sample name is deduced from the fastq file name.
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
@@ -389,11 +395,13 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
 	}
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;  # regex by --TSW
 	$root = $1;
+	if($samplename){$root=$samplename}
     }
     else { # anything is valid here
 	($length,$percF)=extractReadLen($fq1);
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;
 	$root = $1;
+	if($samplename){$root=$samplename}
     }
     if ($pairedEnd){
 	($length2,$percF2)=extractReadLen($fq2);
@@ -406,10 +414,9 @@ unless($fq2){verbPrint("Input RNA-seq file(s): $fq1");}else{verbPrint("Input RNA
 
 # if something went wrong with extraction of root of filenames
 if($root eq ""){ errPrintDie("Could not extract the base name from the RNA-seq input files, which must look like *.(fastq|fastq.gz|fq|fq.gz|fasta|fasta.gz|fa|fa.gz)");}
-
 unless($fq2){verbPrint("Most common read length detected for fq1: $length ($percF\%)");}
 else{verbPrint("Most common read lengths detected for fq1 & fq2: $length ($percF\%) and $length2 ($percF2\%)");}
-
+verbPrint "Sample name: $root "; 
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
 make_path($outdir) unless (-e $outdir);
