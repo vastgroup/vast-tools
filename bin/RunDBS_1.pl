@@ -509,14 +509,14 @@ unless($resumed){
 	print $fh_info "\tdue to given argument -ns, data are treated as being not strand-specific NA NA NA NA\t\t$bt_norc\t$mapcorr_fileswitch\tdone";
     }
     else{
-	my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
+	my $minNMappingReads=500;   # at least so many reads from all 100K reads must get mapped
 	my $minThresh=0.35;         # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
 	my $maxThresh=0.65; 
 	my ($fh,$fh2);
 	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
 	
-       	my $N=400000; # check 100K fastq reads 
-       	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=200000;}
+       	my $N=2000000; # check 500K fastq reads 
+       	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=1000000;}
        	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
        	my ($percR1p,$percR1n,$percR2p,$percR2n)=("NA","NA","NA","NA");
 
