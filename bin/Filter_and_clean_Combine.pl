@@ -280,14 +280,16 @@ while (<I>){
 			my $kill_ALT = 0;
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
 			if ($temp_ALT=~/\d/){
-			    $PRINT{$event}.="\tNA"; # storages the PSIs
-			    $tallyNA{$event}{$H[$i]}=1; # for summary stats 
-			    $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+			    if ($temp_ALT < $min_ALT_use){
+				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$tallyNA{$event}{$H[$i]}=1; 
+				$kill_ALT = 1;
+			    }
 			}
 			else {
 			    $min_ALT_use = "NA (older version)";
 			}
-			next if $kill_ALT;
+			next if $kill_ALT; 
 		    }
 		    # B3 check for AltEx events
 		    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
@@ -298,14 +300,14 @@ while (<I>){
 
 			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
 				$PRINT{$event}.="\tNA"; # storages the PSIs
-				$tallyNA{$event}{$H[$i]}=1; # for summary stats 
+				$tallyNA{$event}{$H[$i]}=1; # for summary stats
 				$kill_B3 = 1;
 			    }
 			}
 			else {
 			    $noB3="NA (older version)";
 			}
-			next if $kill_B3;
+			next if $kill_B3; 
 		    }
 			
 		    $total_N{$event}++;
@@ -356,7 +358,11 @@ while (<I>){
 			my $kill_ALT = 0;
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
 			if ($temp_ALT=~/\d/){
-			    $kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+			    if ($temp_ALT < $min_ALT_use){
+				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$tallyNA{$event}{$H[$i]}=1;
+                                $kill_ALT = 1;
+                            }
 			}
 			else {
 			    $min_ALT_use = "NA (older version)";
@@ -369,7 +375,12 @@ while (<I>){
 			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
 			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
 			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
-			    $kill_B3 = 1 if $temp_B3 eq "B3" && $t_i1+$t_i2 > 15;
+
+			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
+				$PRINT{$event}.="\tNA"; # storages the PSIs 
+				$tallyNA{$event}{$H[$i]}=1; # for summary stats 
+				$kill_B3 = 1;
+			    }
 			}
 			else {
 			    $noB3="NA (older version)";
@@ -413,8 +424,8 @@ foreach $ev (sort keys %OK){
     }
 }
 
-$min_N="NA" if !$min_N;
-$min_Fraction="NA" if !$min_Fraction;
+$min_N="NA" if $min_N !~/\d/;
+$min_Fraction="NA" if $min_Fraction !~/\d/;
 
 ### Print summary and LOG
 open (LOG, ">$log_file") if $log;
