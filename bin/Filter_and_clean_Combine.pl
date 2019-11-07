@@ -140,7 +140,7 @@ Prepares and filters a vast-tools output for general analyses.
 }
 
 errPrintDie "*** You can only define a minimum fraction or absolute number of samples with good coverage\n" if $min_N && $min_Fraction;
-errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if !$min_N && !$min_Fraction;
+errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if $min_N!~/\d/ && $min_Fraction!~/\d/;
 
 # prints version (05/05/19)
 verbPrint "VAST-TOOLS v$version";
@@ -323,8 +323,13 @@ while (<I>){
 	next if $min_N && $total_N{$event} < $min_N; # check for absolute number
 	next if $min_Fraction && $total_N{$event}/$max_N < $min_Fraction; # check for fraction
 	
-	$SD{$event}=&std_dev(@PSIs);
-	next if $SD{$event} < $min_SD;
+	if ($total_N{$event}>0){
+	    $SD{$event}=&std_dev(@PSIs);
+	}
+	else {
+	    $SD{$event}="NA";
+	}
+	next if $SD{$event} < $min_SD && $SD{$event} ne "NA";
 	
 	print O "$event_ID"."$PRINT{$event}\n";
 	$tally_type{$type}++;
@@ -445,7 +450,7 @@ print "\n";
 
 
 ########################
-sub average{
+sub average {
     my @data = @_;
 
     if ($#data==0) {
@@ -458,7 +463,7 @@ sub average{
     my $average = sprintf("%.2f",$total / ($#data+1));
     return $average;
 }
-sub std_dev{
+sub std_dev {
     my @data = @_;
     if($#data == 0){
 	return 0;
