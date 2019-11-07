@@ -250,7 +250,7 @@ while (<I>){
     }
 
     
-    next if $length==0; # to remove the internal ss in Alt3 and Alt5
+#    next if $length==0; # to remove the internal ss in Alt3 and Alt5
     next if $onlyEXSK && ($type=~/Alt[35]/ || $type=~/IR/);
     
     $event_ID="$gene_name=$event" if $AddName;
