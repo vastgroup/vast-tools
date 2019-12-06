@@ -172,6 +172,9 @@ foreach $event (sort keys %ALL){
 #		$Q.=",N";
 #	    }
 	    # From v2.2.2, score 3 is the raw read counts for INC1=INC2=EXC
+	    $Rinc1{$event}{$sample}=0 if !$Rinc1{$event}{$sample};
+	    $Rinc2{$event}{$sample}=0 if !$Rinc2{$event}{$sample};
+	    $Rexc{$event}{$sample}=0 if !$Rexc{$event}{$sample};
 	    $Q.=",$Rinc1{$event}{$sample}=$Rinc2{$event}{$sample}=$Rexc{$event}{$sample}";
 	}
 	
@@ -230,6 +233,9 @@ foreach $event (sort keys %ALL){
 #		$Q.=",N";
 #	    }
 	    # From v2.2.2, score 3 is the raw read counts for INC1=INC2=EXC
+	    $Rinc1{$event}{$sample}=0 if !$Rinc1{$event}{$sample};
+	    $Rinc2{$event}{$sample}=0 if !$Rinc2{$event}{$sample};
+	    $Rexc{$event}{$sample}=0 if !$Rexc{$event}{$sample};
 	    $Q.=",$Rinc1{$event}{$sample}=$Rinc2{$event}{$sample}=$Rexc{$event}{$sample}";
 	}
     
