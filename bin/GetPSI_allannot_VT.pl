@@ -11,9 +11,8 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
-my $ALL_EXC_EEJ=1; # non-active variable
 my $min_eff_complex = 2;  # cut-off for the minimum number of mappable position a "complex" eej can have (before 1)
-my $extra_eej; # original 5
+my $extra_eej; # original 5 => v2.3.0 => 10
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
 	   "extra_eej=i" => \$extra_eej, "verbose=i" => \$verboseFlag);
@@ -140,6 +139,11 @@ foreach $event (sort (keys %ALL)){
     $eej_inc1="$gene-$i1"; # EEJ for inclusion 1 (upstream)
     $eej_inc2="$gene-$i2"; # EEJ for inclusion 2 (downstream)
     
+    # Donor1 (d1), Donor2 (d2), Acceptor1 (a1) and Acceptor2 (a2)
+    ($d1,$a2)=$eej_exc=~/\-(\d+?)\-(\d+)/;
+    ($a1)=$eej_inc1=~/\-\d+?\-(\d+)/;
+    ($d2)=$eej_inc2=~/\-(\d+?)\-\d+/;
+    
     @DATA=split(/\t/,$ALL{$event});
     
     # Infer strand (encoded in C1 and C2 coordinates)
@@ -151,6 +155,29 @@ foreach $event (sort (keys %ALL)){
     ($acceptor_coord,$donor_coord)=$DATA[2]=~/\:(\d+?)\-(\d+)/ if $strand eq "+";
     ($donor_coord,$acceptor_coord)=$DATA[2]=~/\:(\d+?)\-(\d+)/ if $strand eq "-";
 
+    ### Decides on the first valid C1 donor and C2 acceptor (new in v2.3.0)
+    $first_d1=$first_a2="";
+    for $temp_d (0..$d2-1){
+	$first_d1 = $temp_d if ($D_CO_href->{$gene}{$temp_d} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$temp_d} > $acceptor_coord && $strand eq "-");
+    }
+    for $temp_a ($a1+1..$last_acceptor{$gene}){
+	$first_a2 = $temp_a if (($A_CO_href->{$gene}{$temp_a} > $donor_coord && $strand eq "+") || ($A_CO_href->{$gene}{$temp_a} < $donor_coord && $strand eq "-")) && $first_a2!~/\d/ ;
+    }
+    
+    #### Quantifying COMPLEX READS: doing it quite locally (+/-$extra acc/donors)
+    #### In v2.3.0 it uses first_d1 and first_a2
+    my $min_d;
+    my $max_a;
+    if ($d1 < $first_d1-$extra_eej || $first_d1!~/\d/){$min_d = $d1;}
+    else {$min_d = $first_d1-$extra_eej;}
+    if ($a2 > $first_a2+$extra_eej || $first_a2!~/\d/){$max_a = $a2;}
+    else {$max_a = $first_a2+$extra_eej;} 
+
+    $min_d = 0 if $min_d < 0;
+    $max_a = $last_acceptor{$gene} if $max_a > $last_acceptor{$gene};
+
+
+    ### Starts parsing EEJ read data
     foreach $file (@EEJ){
 	my $fname = $file;
 	$fname =~ s/^.*\///;
@@ -171,26 +198,13 @@ foreach $event (sort (keys %ALL)){
 	$Rinc1=$reads{$sample}{$eej_inc1} if $eff_href->{$length}{$eej_inc1};
 	$Rinc2=$reads{$sample}{$eej_inc2} if $eff_href->{$length}{$eej_inc2};
 	
-	# Donor1 (d1), Donor2 (d2), Acceptor1 (a1) and Acceptor2 (a2)
-	($d1,$a2)=$eej_exc=~/\-(\d+?)\-(\d+)/;
-	($a1)=$eej_inc1=~/\-\d+?\-(\d+)/;
-	($d2)=$eej_inc2=~/\-(\d+?)\-\d+/;
-
 	#### To calculate "complex" PSIs
 	$Rexc1C=$Rexc2C=$exc1C=$exc2C=$inc1C=$inc2C=$excC=$Rinc1C=$Rinc2C=$RexcC=0; # empty temporary variables for read counts for each sample
 	
-	#### Quantifying COMPLEX READS: doing it "very" locally (+/-$extra acc/donors)
-	my $min_d;
-	my $max_a;
-	if ($d1 < $d2-$extra_eej){$min_d = $d1;}
-	else {$min_d = $d2-$extra_eej;}
-	if ($a2 > $a1+$extra_eej){$max_a = $a2;}
-	else {$max_a = $a1+$extra_eej;} 
-	
-
-	### Inclusion reads
-	for $i ($d1-$extra_eej..$d2-1){ # stays in v2.1.1
-#	for $i ($min_d..$d2-1){
+	### Inclusion COMPLEX reads
+	# The use of d2-1 and a1+1 allows to also include INTERNAL ss
+#	for $i ($d1-$extra_eej..$d2-1){ # in v2.1.1
+	for $i ($min_d..$d2-1){ # v2.3.0
 	    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $acceptor_coord && $strand eq "-")) && $D_CO_href->{$gene}{$i} && $i != $d1 && $i>=0){
 		$temp_eej="$gene-$i-$a1";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -199,8 +213,8 @@ foreach $event (sort (keys %ALL)){
 		} 
 	    }
 	}
-	for $i ($a1+1..$a2+$extra_eej){ # stays in v2.1.1
-#	for $i ($a1+1..$max_a){
+#	for $i ($a1+1..$a2+$extra_eej){ #  in v2.1.1
+	for $i ($a1+1..$max_a){ # v2.3.0
 	    if ((($A_CO_href->{$gene}{$i} > $donor_coord && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $donor_coord && $strand eq "-")) && $A_CO_href->{$gene}{$i} && $i != $a2 && $i<=$last_acceptor{$gene}){
 		$temp_eej="$gene-$d2-$i";
 		if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
@@ -209,63 +223,19 @@ foreach $event (sort (keys %ALL)){
 		}
 	    }
 	}
-	### Exclusion reads
-	### COMBI-like:
-	### Exclusion reads (It does NOT take all EEJs around the alternative exon, but only those including C1 or C2.)
-	if (!$ALL_EXC_EEJ){
-	    for $i ($d1-$extra_eej..$d1-1){
-		if ($i>=0){
-		    $temp_eej="$gene-$i-$a2";
-		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
-			$exc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
-			$Rexc1C+=$reads{$sample}{$temp_eej};
-		    }
-		}
-	    }
-	    for $i ($d1+1..$d1+$extra_eej){
-		if (($D_CO_href->{$gene}{$i} < $A_CO_href->{$gene}{$a1} && $strand eq "+") || ($D_CO_href->{$gene}{$i} > $A_CO_href->{$gene}{$a1} && $strand eq "-") && $i <= $last_donor{$gene}){
-		    $temp_eej="$gene-$i-$a2";
-		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
-			$exc1C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
-			$Rexc1C+=$reads{$sample}{$temp_eej};
-		    }
-		}
-	    }
-	    for $i ($a2+1..$a2+$extra_eej){
-		if ($i <= $last_acceptor{$gene}){
-		    $temp_eej="$gene-$d1-$i";
-		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
-			$exc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
-			$Rexc2C+=$reads{$sample}{$temp_eej};
-		    }
-		}
-	    }
-	    for $i ($a2-$extra_eej..$a2-1){
-		if (($A_CO_href->{$gene}{$i} > $D_CO_href->{$gene}{$d2} && $strand eq "+") || ($A_CO_href->{$gene}{$i} < $D_CO_href->{$gene}{$d2} && $strand eq "-") && $i >= 0){
-		    $temp_eej="$gene-$d1-$i";
-		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
-			$exc2C+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
-			$Rexc2C+=$reads{$sample}{$temp_eej};
-		    }
-		}
-	    }
-            $excC=$exc1C+$exc2C;
-	    $RexcC=$Rexc1C+$Rexc2C;
-	}
+	### Exclusion COMPLEX reads
 	### ALL exclusion (prone to more false positives)
-	elsif ($ALL_EXC_EEJ){
 #	    for $i ($d1-$extra_eej..$d2-1){ # changed in v2.1.1
 #		for $j ($a1+1..$a2+$extra_eej){ # changed in v2.1.1
-	    for $i ($min_d..$d2-1){ 
-		for $j ($a1+1..$max_a){
-		    if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || 
-			 ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) 
-			&& $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
-			$temp_eej="$gene-$i-$j";
-			if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
-			    $excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
-			    $RexcC+=$reads{$sample}{$temp_eej};
-			}
+	for $i ($min_d..$first_d1){ 
+	    for $j ($first_a2..$max_a){ 
+		if ((($D_CO_href->{$gene}{$i} < $acceptor_coord && $A_CO_href->{$gene}{$j} > $donor_coord && $strand eq "+") || 
+		     ($D_CO_href->{$gene}{$i} > $acceptor_coord && $A_CO_href->{$gene}{$j} < $donor_coord && $strand eq "-")) 
+		    && $D_CO_href->{$gene}{$i} && $A_CO_href->{$gene}{$j} && ($i != $d1 || $j != $a2) && $i >= 0 && $j <= $last_acceptor{$gene}){ # either of the two or both are not the cannonical
+		    $temp_eej="$gene-$i-$j";
+		    if ($eff_href->{$length}{$temp_eej} >= $min_eff_complex){
+			$excC+=$reads{$sample}{$temp_eej}/$eff_href->{$length}{$temp_eej};
+			$RexcC+=$reads{$sample}{$temp_eej};
 		    }
 		}
 	    }
