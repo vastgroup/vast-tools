@@ -27,7 +27,7 @@ my $onlyIRflag = 0; # only run intron retention
 my $IR_version = 2;  # either 1 or 2
 my $onlyEXflag = 0; # only run exon skipping
 my $noANNOTflag = 0;
-my $extra_eej = 5; # default extra eej to use in ANNOT and in COMBI if use_all_excl_eej is provided
+my $extra_eej = 10; # default extra eej to use in ANNOT and in COMBI if use_all_excl_eej is provided
 my $use_all_excl_eej = 0; # for COMBI flag
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
