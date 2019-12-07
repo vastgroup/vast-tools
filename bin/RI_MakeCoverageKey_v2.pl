@@ -198,6 +198,8 @@ foreach my $event (sort keys %corrected_reads){
             ### Includes keys 2,3 and 4 of other events, but only 2 is real. 3 is always
             ### "NA" and "Reads" is just all the reads.
             ### The 5th key would be Ulrich's imbalanced test p-value and will be added later
+	    # to solve a warning for some cases without mappability (likely older versions)
+	    $intron_sample_cor_counts{$event}{$sample}="NA=0" if (!defined $intron_sample_cor_counts{$event}{$sample});
             if (! (defined $eEI && defined $eIE && defined $eEE)) {
                 $Q.=",N,$intron_sample_cor_counts{$event}{$sample},$reads";
             }
