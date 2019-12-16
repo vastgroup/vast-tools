@@ -8,19 +8,12 @@
 
 suppressPackageStartupMessages(require(optparse))
 
-# make_option(c("-h", "--help"), action="store_true", default=FALSE, 
-#               help="Show this help message and exit")
-option_list <- list( 
-  make_option(c("-p", "--prompt"), action="store_true", default=TRUE,
-      help="User prompt during installation [default]"),
-  make_option(c("-q", "--quiet"), action="store_false", 
-      dest="prompt", help="Quiet installation, no prompt"),
-  make_option(c("-f", "--file"), action="store", default="", type='character',
-            help="From where to run install script"),
+option_list <- list(
+  make_option(c("-p", "--prompt"), action="store_true", default=TRUE, type="logical", help="User prompt during installation [default %default]"),
+  make_option(c("-q", "--quiet"), action="store_false", dest="prompt",  type="logical", help="Quiet installation, no prompt"),
+  make_option(c("-f", "--file"), action="store", default="", type='character', help="From where to run install script"),
 )
 
-# get command line options, if help option encountered print help and exit,
-# otherwise if options not found on command line then set defaults, 
 opt <- parse_args(OptionParser(option_list=option_list))
 
 scriptPath <- dirname( opt$file )
