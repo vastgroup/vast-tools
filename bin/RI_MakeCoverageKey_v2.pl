@@ -179,7 +179,7 @@ foreach my $event (sort keys %corrected_reads){
         $rIE=0 if !$raw_reads{$event}{EI2}{$sample};
         $rEE=0 if !$raw_reads{$event}{EE}{$sample};
 
-        my $reads="$eEI=$eIE=$eEE"; # string with the corrected read counts for the three junctions (from v2.1.3)
+        my $reads="$rEI=$rIE=$rEE"; # string with the corrected read counts for the three junctions (from v2.1.3)
 
         my $Q;
 

@@ -61,11 +61,13 @@ foreach $file (@files){
 	elsif ($corr_reads_exc>=10 || $corr_reads_inc>=10){$Q.=",VLOW";}
 	else {$Q.=",N";}
 #### Score 3: Using simple (=reference, C1A, AC2, C1C2) raw reads                                                                       
-	if (($raw_reads_exc+$raw_reads_inc)>=100){$Q.=",SOK";}
-	elsif ($raw_reads_exc>=20 || $raw_reads_inc>=20){$Q.=",OK";}
-	elsif ($raw_reads_exc>=15 || $raw_reads_inc>=15){$Q.=",LOW";}
-	elsif ($raw_reads_exc>=10 || $raw_reads_inc>=10){$Q.=",VLOW";}
-	else {$Q.=",N";}
+#	if (($raw_reads_exc+$raw_reads_inc)>=100){$Q.=",SOK";}
+#	elsif ($raw_reads_exc>=20 || $raw_reads_inc>=20){$Q.=",OK";}
+#	elsif ($raw_reads_exc>=15 || $raw_reads_inc>=15){$Q.=",LOW";}
+#	elsif ($raw_reads_exc>=10 || $raw_reads_inc>=10){$Q.=",VLOW";}
+#	else {$Q.=",N";}
+#  From v2.2.2: only the raw reads (incl=exc)
+	$Q.=",$raw_reads_inc=$raw_reads_exc";
 #### No scores 4 and 5 for microexon pipeline.	
 	$Q.=",na,na";
 	

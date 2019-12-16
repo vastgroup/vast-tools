@@ -37,6 +37,14 @@ while (<TEMPLATE>){
     $pre_data{$event}=$_; # First 6 information columns
     ($event_root,$N_ss)=$event=~/(.+)\-\d+?\/(\d+)/;
     $ALL{$event_root}=$N_ss; # keeps the total number of alternative splice sites; placeholder for event_root
+
+    ### gets the strand of gene
+    ($gene)=$event=~/(.+?)\-/;
+    ($C2)=$t[4]=~/.+\,(\d+)/;
+    ($core)=$t[4]=~/\:[^\d]*?(\d+)/;
+    die "Can't identify a C2 ($C2) or core ($core) coordinate for $event\n" if !$C2 || !$core;
+    $strand{$gene}="+" if $C2 > $core;
+    $strand{$gene}="-" if $C2 <= $core;
 }
 close TEMPLATE;
 
@@ -52,9 +60,13 @@ foreach $file (@EFF){
     while (<MAPPABILITY>){
 	chomp;
 	@t=split(/\t/);
-	($gene,$donor,$acceptor)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-\d+?\_\d+/;
+	($gene,$donor,$acceptor,$co_donor,$co_acceptor)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
 	$eej="$gene-$donor-$acceptor";
 	$eff_ns{$length}{$eej}=$t[1];
+
+	### keeps the coordinates for global PSI-like (04/05/19)
+	$co_donor{$gene}{$donor}=$co_donor;
+	$co_acceptor{$gene}{$acceptor}=$co_acceptor;
     }
     close MAPPABILITY;
 }
@@ -110,6 +122,7 @@ foreach $file (@EEJ){
         $reads{$sample}{$gene_eej}=$t[2];
         ($donor,$acceptor)=$eej=~/(\d+?)\-(\d+)/;
         $last_acceptor{$gene}=$acceptor if $last_acceptor{$gene}<$acceptor; # keeps track of the last acceptor used
+	$last_donor{$gene}=$donor if $last_donor{$gene}<$donor; # keeps track of the last donor used
     }
     close EEJ;
 }
@@ -170,7 +183,34 @@ foreach $event_root (sort keys %ALL){
 	    $total_corr_reads_ALL+=$corr_inc_reads_ALL[$i];
 	    $total_raw_reads_ALL+=$raw_inc_reads_ALL[$i];
 	}
-	 
+	# reads that jump over the event (any upstream donor to any downstream acceptor)
+	$skipping_corr_reads=0; $skipping_raw_reads=0;
+
+	($ext_donor)=$junctions[$#junctions]=~/(\d+?)\-\d+/;
+	($int_donor)=$junctions[0]=~/(\d+?)\-\d+/;
+	
+	for $t_don (0..$last_donor{$gene}){
+	    for $t_acc (0..$last_acceptor{$gene}){ # redundant call for ext/int, just in case
+		if ($strand{$gene} eq "+" && 
+		    $co_donor{$gene}{$t_don} < $co_donor{$gene}{$ext_donor} && $co_donor{$gene}{$t_don} < $co_donor{$gene}{$int_donor} &&
+		    $co_acceptor{$gene}{$t_acc} > $co_donor{$gene}{$ext_donor} && $co_acceptor{$gene}{$t_acc} > $co_donor{$gene}{$int_donor}){
+		    
+		    $eej="$gene-$t_don-$t_acc";
+		    $skipping_corr_reads+=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
+		    $skipping_raw_reads+=$reads{$sample}{$eej} if $eff_href->{$length}{$eej};    
+		}
+		elsif ($strand{$gene} eq "-" && 
+		       $co_donor{$gene}{$t_don} > $co_donor{$gene}{$ext_donor} && $co_donor{$gene}{$t_don} > $co_donor{$gene}{$int_donor} &&
+		       $co_acceptor{$gene}{$t_acc} < $co_donor{$gene}{$ext_donor} && $co_acceptor{$gene}{$t_acc} < $co_donor{$gene}{$int_donor}){
+		    
+		    $eej="$gene-$t_don-$t_acc";
+		    $skipping_corr_reads+=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
+		    $skipping_raw_reads+=$reads{$sample}{$eej} if $eff_href->{$length}{$eej};    
+		}
+	    }
+	}
+	
+	
 #### QUALITY SCORES
 	$Q="";
 	### Score 1
@@ -185,28 +225,36 @@ foreach $event_root (sort keys %ALL){
 	$Q.=",LOW" if $total_corr_reads_ALL >= 25 && $total_corr_reads_ALL < 40;
         $Q.=",VLOW" if $total_corr_reads_ALL >= 15 && $total_corr_reads_ALL < 25;
         $Q.=",N" if $total_corr_reads_ALL < 15;
-        ### Score 3 (instead of Score 4, read count)
-	$Q.=",SOK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 100;
-	$Q.=",OK,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 40 && $total_raw_reads_S < 100;
-	$Q.=",LOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 25 && $total_raw_reads_S < 40;
-	$Q.=",VLOW,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S >= 15 && $total_raw_reads_S < 25;
-	$Q.=",N,$total_raw_reads_ALL=$total_raw_reads_S" if $total_raw_reads_S < 15;
-	
-        #### Score 5: COMPLEXITY
-        $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
-        $from_S=$total_corr_reads_S;
-	
-	if ($from_C > ($from_C+$from_S)/2) {$Q.=",C3"; $Qs.=",C3";}
-        elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q.=",C2";$Qs.=",C2";}
-        elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q.=",C1";$Qs.=",C1";}
-	else {$Q.=",S"; $Qs.=",S";}
+
+        ### Score 3: PSI-like score for the event as a whole (instead of coverage score by raw reads) ## main diff from 04/05/19
+        $PSI_like=sprintf("%.2f",100*$total_corr_reads_ALL/($total_corr_reads_ALL+$skipping_corr_reads)) if ($total_corr_reads_ALL+$skipping_corr_reads)>0;
+        $PSI_like="NA" if ($total_corr_reads_ALL+$skipping_corr_reads) == 0;
+        $Q.=",$PSI_like";
+
+	### Scores 4 and 5 moved to splice site loop (v2.2.2, 11/05/19)
+
         ####### 
 	
 	for $i (0..$#junctions){
 	    $PSI[$i]=sprintf("%.2f",100*$corr_inc_reads_ALL[$i]/$total_corr_reads_ALL) if $total_corr_reads_ALL>0;
 	    $PSI[$i]="NA" if $total_corr_reads_ALL==0;
+
+	    ### Completes the Q scores:
+	    $Q[$i] = $Q; # only 3 scores here
 	    
-	    $Q[$i] = $Q;
+	    ### Score 4: from v2.2.2 is specific for each splice site
+	    $Q[$i].=",$raw_inc_reads_ALL[$i]=$total_raw_reads_ALL=$skipping_raw_reads";
+	    
+	    #### Score 5: COMPLEXITY
+	    $from_C=$total_corr_reads_ALL-$total_corr_reads_S; # All reads minus simple reads
+	    $from_S=$total_corr_reads_S;
+	    
+	    if ($from_C > ($from_C+$from_S)/2) {$Q[$i].=",C3";}
+	    elsif ($from_C > ($from_C+$from_S)/5 && $from_C <= ($from_C+$from_S)/2){$Q[$i].=",C2";}
+	    elsif ($from_C > ($from_C+$from_S)/20 && $from_C <= ($from_C+$from_S)/5){$Q[$i].=",C1";}
+	    else {$Q[$i].=",S";}
+	    
+
 	    ### DIFF OUTPUT ADDITION TO QUAL SCORE!  --TSW
 	    ### Essentially adding the expected number of reads re-distributed to INC or EXC after normalization..
 	    ### These values are added to the qual score and used to infer the posterior distribution

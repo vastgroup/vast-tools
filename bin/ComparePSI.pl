@@ -29,6 +29,7 @@ my $repA; # number of replicates per type
 my $repB; # number of replicates per type
 my $min_range = 5; # min dPSI between ranges
 my $noVLOW;
+my $noB3; # to remove B3 in AltEx (09/05/19)
 my $p_IR;
 my $ID_file;
 my $get_GO;
@@ -44,6 +45,7 @@ my $print_all_ev;
 my $print_AS_ev;
 my $use_int_reads;
 my $fr_int_reads = 0.4;
+my $min_ALT_use = 25;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -73,7 +75,9 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "max_dPSI=i"   => \$max_dPSI,
 			  "plot_PSI" => \$plot,
 			  "only_samples" => \$plot_only_samples,
-			  "noVLOW" => \$noVLOW
+			  "noVLOW" => \$noVLOW,
+			  "noB3" => \$noB3,
+			  "min_ALT_use=i" => \$min_ALT_use
     );
 
 our $EXIT_STATUS = 0;
@@ -98,6 +102,14 @@ sub verbPrint {
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 # Check database directory and set up ID file
 if (defined $get_GO){
     errPrintDie "Needs to provide species (\-\-sp) OR file with gene ID conversions (--GO_file) OR activate the --use_names flag\n" if (!defined $species && !defined $ID_file && !defined $use_names);
@@ -117,23 +129,38 @@ if (defined $get_GO){
     }
 }
 
+
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!defined($ARGV[0]) || $helpFlag){
-    die "\nUsage: vast-tools compare /path/to/INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
+    die "
+VAST-TOOLS v$version
+
+Usage: vast-tools compare /path/to/INCLUSION_LEVELS_FULL-root.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
 Compare two sample sets to find differentially regulated AS events. 
 INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command combine.
 
 [General options] 
-        --min_dPSI i             Minimum delta PSI of the averages (default 15)
-        --min_range i            Minimum distance between the ranges of both groups (default 5)
+        --min_dPSI i             Minimum delta PSI of the averages (default >15)
+        --min_range i            Minimum distance between the ranges of both groups (default >5)
         --outFile file           Output file name (default based on option parameters)
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
+        --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
-        --use_int_reads          Requires a minimum number (--fr_int_reads) of intron body reads for IR (default OFF)(from combine v2.1.3)
-        --fr_int_reads           Minimum fraction of reads in the intron bodies respect to the 
+        --use_int_reads          Requires a minimum fraction of intron body reads (--fr_int_reads) with respect to 
+                                   those in the EIJ for IR (default OFF)(combine >= v2.1.3)
+        --fr_int_reads fr        Minimum fraction of reads in the intron bodies respect to the 
                                    average of the EI/IE junctions (default 0.4). Only useful with --use_int_reads
+        --min_ALT_use i          Minimum inclusion of the exon in which the Alt3/Alt5 is located across all 
+                                   compared samples (default 25) (combine >= v2.2.1)
         --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
                                    - It does not allow ploting.
         --print_sets             Prints files with different sets for comparisons in Matt (http://matt.crg.eu):
@@ -183,6 +210,31 @@ errPrintDie "print_dPSI cannot be used with plot\n" if (defined $print_dPSI) && 
 #### opens INCLUSION TABLE
 open (PSI, $input_file) or errPrintDie "Needs a PSI INCLUSION table\n";
 
+# prints version (05/05/19)
+verbPrint "VAST-TOOLS v$version";
+
+### Creates the LOG
+open (LOG, ">>$folder/VTS_LOG_commands.txt");
+my $all_args="-o $folder -min_dPSI $min_dPSI -min_range $min_range -a $samplesA -b $samplesB -min_ALT_use $min_ALT_use";
+$all_args.=" -paired" if $paired;
+$all_args.=" -noVLOW" if $noVLOW;
+$all_args.=" -noB3" if $noB3;
+$all_args.=" -p_IR" if $p_IR;
+$all_args.=" -use_int_reads" if $use_int_reads;
+$all_args.=" -fr_int_reads $fr_int_reads" if defined $fr_int_reads;
+$all_args.=" -print_dPSI" if $print_dPSI;
+$all_args.=" -print_sets" if $print_sets;
+$all_args.=" -print_all_ev" if $print_all_ev;
+$all_args.=" -print_AS_ev" if $print_AS_ev;
+$all_args.=" -max_dPSI=i"   if defined $max_dPSI;
+$all_args.=" -GO" if $get_GO;
+$all_args.=" -sp $species" if $species;
+$all_args.=" -outFile $output_file" if $output_file;
+$all_args.=" -plot_PSI" if $plot;
+$all_args.=" -only_samples" if $plot_only_samples;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools compare $all_args\n";
+
 # Common for all numbers of replicates
 # preparing the head
 my $head_row=<PSI>;
@@ -224,9 +276,11 @@ $name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
 my ($root)=$ARGV[0]=~/.+?\-([^\/]+?)\./;
 my $tail = ""; # to be added to the output name
 $tail.="-range$min_range" if (defined $min_range); 
-$tail.="-noVLOW" if (defined $noVLOW);
-$tail.="-p_IR" if (defined $p_IR);
-$tail.="-IR_reads" if (defined $use_int_reads);
+$tail.="-noVLOW" if $noVLOW;
+$tail.="-noB3" if $noB3;
+$tail.="-p_IR" if $p_IR;
+$tail.="-IR_reads" if $use_int_reads;
+$tail.="-min_ALT_use$min_ALT_use";
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
 $tail.="-with_dPSI" if (defined $print_dPSI);
@@ -363,6 +417,56 @@ while (<PSI>){
 	push(@PSI_B,$t[$s]);
     }
     next if ($kill_coverage == 1);
+
+    # B3 check for AltEx events
+    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
+	my $kill_B3 = 0;
+	foreach my $s (@samplesA){
+	    my ($score3,$temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;	
+	    if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+		my ($i1,$i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+		$kill_B3 = 1 if $temp_B3 eq "B3" && $i1+$i2 > 15;
+	    }
+	    else {
+		$noB3="NA (older version)";
+	    }
+	}
+	foreach my $s (@samplesB){
+	    my ($score3,$temp_B3)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
+	    if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+		my ($i1,$i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+		$kill_B3 = 1 if $temp_B3 eq "B3" && $i1+$i2 > 15;
+	    }
+	    else {
+		$noB3="NA (older version)";
+	    }
+	}
+	next if ($kill_B3 == 1);
+    }
+
+    # min PSI-like usage for ALT3/5 (min_ALT_use) 04/05/19
+    if ($type eq "Alt3" || $type eq "Alt5"){
+	my $kill_ALT = 0;
+        foreach my $s (@samplesA){
+            my ($temp_ALT)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+	    if ($temp_ALT=~/\d/){
+		$kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+	    }
+	    else {
+		$min_ALT_use = "NA (older version)";
+	    }
+        }
+        foreach my $s (@samplesB){
+            my ($temp_ALT)=$t[$s+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+	    if ($temp_ALT=~/\d/){
+		$kill_ALT = 1 if $temp_ALT < $min_ALT_use;
+	    }
+	    else {
+		$min_ALT_use = "NA (older version)";
+	    }
+        }
+        next if ($kill_ALT == 1);
+    }
 
     # IR check (only checks the p if the p_IR is active)
     if (($type eq "IR") && (defined $p_IR)){ # only checks the p if the p_IR is active
@@ -755,11 +859,13 @@ if (defined $plot){
 verbPrint "Printing summary statistics\n";
 my $extras = "";
 $extras.=", noVLOW" if (defined $noVLOW);
+$extras.=", noB3" if (defined $noB3 && $noB3 ne "NA (older version)");
+$extras.=", noB3=NA (older version)" if (defined $noB3 && $noB3 eq "NA (older version)");
 $extras.=", p_IR" if (defined $p_IR);
 $extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);
 
-print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras\n";
+print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras, min_ALT_use=$min_ALT_use\n";
 print "*** Summary statistics:\n";
 print "\tAS_TYPE\tHigher_in_$name_A\tHigher_in_$name_B\tTOTAL_EV\tTOTAL_AS(10<PSI<90)\n";
 print "\tMicroexons\t$tally{MIC}{DOWN}\t$tally{MIC}{UP}\t$tally_total{MIC}\t$tally_total_AS{MIC}\n";

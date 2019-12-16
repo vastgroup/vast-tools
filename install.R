@@ -59,15 +59,26 @@ NveUrl <- joinStr("http://vastdb.crg.eu/libs/", NveDbFile)
 #
 
 writeLines("Looking for VAST Database [VASTDB]")
+auto <- "invalid"
 if(!file.exists("VASTDB")) {
-  cat("Cannot find 'VASTDB'.. Do you want me to download it for you? [y/n]: ")
+  cat("Cannot find 'VASTDB'.. Do you want to download it? [y/n]: ")
   auto <- readLines(file("stdin"),1)
   close(file("stdin"))
-  if(as.character(auto) == 'y') {
-    cat("Please choose database [all, Hsa, Mmu, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve]: ")
-    db <- readLines(file("stdin"),1)
-    db <- as.character(db)
-    close(file("stdin"))
+}
+if(file.exists("VASTDB")) {
+  cat("Found 'VASTDB'.. Do you want to download yet uninstalled datasets or update installed datasets? [y/n]: ")
+  auto <- readLines(file("stdin"),1)
+  close(file("stdin"))
+}
+
+if(as.character(auto) == 'y') {
+  cat("Please choose one or more, e.g. Hsa,Mmu,Dre, from [all, Hsa, Mmu, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve] : ")
+  db <- readLines(file("stdin"),1)
+  db <- as.character(db)
+  close(file("stdin"))
+  
+  dbs<-strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]]
+  for(db in dbs){
     if(db == 'Hsa' || db == 'all') {
       downloadDb(humanUrl, humanDbFile)
     }
@@ -102,9 +113,8 @@ if(!file.exists("VASTDB")) {
       downloadDb(NveUrl, NveDbFile)
     }
   }
-} else {
-  writeLines("Found what appears to be VASTDB.. OK")
 }
+
 
 # custom install from include.R
 loadPackages(c("MASS", "getopt", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel", "devtools"), local.lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))

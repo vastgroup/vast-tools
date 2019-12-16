@@ -2,9 +2,14 @@
 # Script to prepare and filter vast-tools PSI tables for other analyses
 
 use Getopt::Long;
+use Cwd qw(abs_path);
 
 ### Setting global variables:
 $Q="O[KW]\,.+?\,.+?\,.+?\,.+?\@"; # NEW quality search
+
+my $binPath = abs_path($0);
+$0 =~ s/^.*\///;
+$binPath =~ s/\/$0$//;
 
 $input_file=$ARGV[0];
 $min_SD=5; # min standard deviation of the event (def=5)
@@ -15,6 +20,8 @@ $p_IR=0;
 $print_all = "";
 $samples = "";
 $group_file;
+$noB3;
+$min_ALT_use = 25;
 $verboseFlag = 1;  # on for debugging 
 $command_line=join(" ", @ARGV);
 @TYPES=("MIC","AltEx","IR","Alt3","Alt5");
@@ -27,6 +34,8 @@ GetOptions(               "min_SD=i" => \$min_SD,
                           "help" => \$helpFlag,
                           "p_IR" => \$p_IR,
                           "noVLOW" => \$noVLOW,
+			  "noB3" => \$noB3,
+			  "min_ALT_use=i" => \$min_ALT_use,
 			  "samples=s" => \$samples,
 			  "groups=s" => \$group_file,
 			  "log" => \$log,
@@ -55,6 +64,14 @@ sub verbPrint {
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 # gets the array of samples
 if ($samples){
     @samples=split(/\,/,$samples);
@@ -72,7 +89,9 @@ $root_out.="-minN_$min_N" if $min_N;
 $root_out.="-minFr_$min_Fraction" if $min_Fraction;
 $root_out.="-minSD_$min_SD";
 $root_out.="-noVLOW" if $noVLOW;
+$root_out.="-noB3" if $noB3;
 $root_out.="-p_IR" if $p_IR;
+$root_out.="-min_ALT_use$min_ALT_use";
 $root_out.="-onlyEX" if $onlyEXSK;
 $root_out.="-samples$N_samples" if $samples;
 $root_out.="-groups" if $groups;
@@ -80,8 +99,18 @@ $root_out.="-groups" if $groups;
 $output_file="$root_out-Tidy.tab" unless $output_file;
 $log_file="$root_out-Tidy.log" if $log;
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!$ARGV[0] || $helpFlag){
-    die "\nUsage: vast-tools tidy INCLUSION_LEVELS_FULL-SpN.tab \(--min_N min_N_samples OR --min_Fr min_fraction\) --min_SD min_SD [options]
+    die "
+VAST-TOOLS v$version
+
+Usage: vast-tools tidy INCLUSION_LEVELS_FULL-SpN.tab \(--min_N min_N_samples OR --min_Fr min_fraction\) --min_SD min_SD [options]
 
 Prepares and filters a vast-tools output for general analyses.
 
@@ -96,7 +125,10 @@ Prepares and filters a vast-tools output for general analyses.
                                    Format: SAMPLE_NAME\\tGROUP_IDENTIFIER
         -outFile                Output file name (default based on option parameters)
         --noVLOW                Do not use samples with VLOW coverage (default OFF)
+        --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                  Filter IR by the p-value of the binomial test (default OFF)
+        --min_ALT_use i          Minimum inclusion of the exon in which the Alt3/Alt5 is located across all 
+                                   compared samples (default 25) (combine >= v2.2.1)
         --onlyEX                Outputs only EXSK events (default OFF)
         --add_names             Adds gene name to the event_ID. E.g. Mta1\=MmuEX0029874 (default OFF)
         --log                   Print the summary stats into a file (default OFF)
@@ -108,7 +140,29 @@ Prepares and filters a vast-tools output for general analyses.
 }
 
 errPrintDie "*** You can only define a minimum fraction or absolute number of samples with good coverage\n" if $min_N && $min_Fraction;
-errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if !$min_N && !$min_Fraction;
+errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if $min_N!~/\d/ && $min_Fraction!~/\d/;
+
+# prints version (05/05/19)
+verbPrint "VAST-TOOLS v$version";
+
+### Creates the LOG
+($folder)=$root=~/(.+)\//;
+open (LOG, ">>$folder/VTS_LOG_commands.txt");
+my $all_args="-min_SD $min_SD -min_ALT_use $min_ALT_use";
+$all_args.=" -min_N $min_N" if defined $min_N;
+$all_args.=" -min_Fr $min_Fraction" if defined $min_Fraction;
+$all_args.=" -p_IR" if $p_IR;
+$all_args.=" -noVLOW" if $noVLOW;
+$all_args.=" -noB3" if $noB3;
+$all_args.=" -samples $samples" if $samples;
+$all_args.=" -groups $group_file" if $group_file;
+$all_args.=" -log" if $log;
+$all_args.=" -onlyEX" if $onlyEXSK;
+$all_args.=" -add_names" if $AddName;
+$all_args.=" -outFile $output_file" if $output_file;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools tidy $all_args\n";
+
 
 open (I, $input_file) || die "Can't open input file\n";
 open (O, ">$output_file") || die "Can't open output file ($output_file)\n";
@@ -196,7 +250,7 @@ while (<I>){
     }
 
     
-    next if $length==0; # to remove the internal ss in Alt3 and Alt5
+#    next if $length==0; # to remove the internal ss in Alt3 and Alt5
     next if $onlyEXSK && ($type=~/Alt[35]/ || $type=~/IR/);
     
     $event_ID="$gene_name=$event" if $AddName;
@@ -212,6 +266,7 @@ while (<I>){
 	    if ($i%2==0){
 		next if !$valid_sample[$i];
 		if ($t[$i+1]=~/$Q/){
+		    ### For IR
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 			($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
@@ -220,7 +275,41 @@ while (<I>){
 			}
 			next if $p_i<0.05;
 		    }
-		    
+		    ### For Alt3 and Alt5
+		    if ($type eq "Alt3" || $type eq "Alt5"){
+			my $kill_ALT = 0;
+			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+			if ($temp_ALT=~/\d/){
+			    if ($temp_ALT < $min_ALT_use){
+				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$tallyNA{$event}{$H[$i]}=1; 
+				$kill_ALT = 1;
+			    }
+			}
+			else {
+			    $min_ALT_use = "NA (older version)";
+			}
+			next if $kill_ALT; 
+		    }
+		    # B3 check for AltEx events
+		    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
+			my $kill_B3 = 0;
+			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
+			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+
+			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
+				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$tallyNA{$event}{$H[$i]}=1; # for summary stats
+				$kill_B3 = 1;
+			    }
+			}
+			else {
+			    $noB3="NA (older version)";
+			}
+			next if $kill_B3; 
+		    }
+			
 		    $total_N{$event}++;
 		    push(@PSIs,$t[$i]);
 		    
@@ -236,8 +325,13 @@ while (<I>){
 	next if $min_N && $total_N{$event} < $min_N; # check for absolute number
 	next if $min_Fraction && $total_N{$event}/$max_N < $min_Fraction; # check for fraction
 	
-	$SD{$event}=&std_dev(@PSIs);
-	next if $SD{$event} < $min_SD;
+	if ($total_N{$event}>0){
+	    $SD{$event}=&std_dev(@PSIs);
+	}
+	else {
+	    $SD{$event}="NA";
+	}
+	next if $SD{$event} < $min_SD && $SD{$event} ne "NA";
 	
 	print O "$event_ID"."$PRINT{$event}\n";
 	$tally_type{$type}++;
@@ -259,7 +353,41 @@ while (<I>){
 			}
 			next if $p_i<0.05;
 		    }
-		    
+		    ### For Alt3 and Alt5
+		    if ($type eq "Alt3" || $type eq "Alt5"){
+			my $kill_ALT = 0;
+			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
+			if ($temp_ALT=~/\d/){
+			    if ($temp_ALT < $min_ALT_use){
+				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$tallyNA{$event}{$H[$i]}=1;
+                                $kill_ALT = 1;
+                            }
+			}
+			else {
+			    $min_ALT_use = "NA (older version)";
+			}
+			next if $kill_ALT;
+		    }
+		    # B3 check for AltEx events
+		    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
+			my $kill_B3 = 0;
+			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
+			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
+
+			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
+				$PRINT{$event}.="\tNA"; # storages the PSIs 
+				$tallyNA{$event}{$H[$i]}=1; # for summary stats 
+				$kill_B3 = 1;
+			    }
+			}
+			else {
+			    $noB3="NA (older version)";
+			}
+			next if $kill_B3;
+		    }		    
+
 		    $total_N{$event}{$group}++;
 		    push(@{$PSIs{$group}},$t[$i]);
 		    
@@ -296,8 +424,8 @@ foreach $ev (sort keys %OK){
     }
 }
 
-$min_N="NA" if !$min_N;
-$min_Fraction="NA" if !$min_Fraction;
+$min_N="NA" if $min_N !~/\d/;
+$min_Fraction="NA" if $min_Fraction !~/\d/;
 
 ### Print summary and LOG
 open (LOG, ">$log_file") if $log;
@@ -305,6 +433,9 @@ print LOG "OPTIONS: $command_line\n\n";
 
 $extras="";
 $extras.= " -noVOW" if $noVLOW;
+$extras.= " -noB3" if $noB3 && $noB3 ne "NA (older version)";
+$extras.= " -noB3=NA (older version)" if $noB3 && $noB3 eq "NA (older version)";
+$extras.= " -min_ALT_use $min_ALT_use";
 $extras.= " -p_IR" if $p_IR;
 $extras.= " GROUPS" if $group_file;
 
@@ -330,7 +461,7 @@ print "\n";
 
 
 ########################
-sub average{
+sub average {
     my @data = @_;
 
     if ($#data==0) {
@@ -343,7 +474,7 @@ sub average{
     my $average = sprintf("%.2f",$total / ($#data+1));
     return $average;
 }
-sub std_dev{
+sub std_dev {
     my @data = @_;
     if($#data == 0){
 	return 0;

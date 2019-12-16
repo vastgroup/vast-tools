@@ -13,6 +13,7 @@ use strict;
 use Cwd qw(abs_path cwd);
 use Getopt::Long;
 use File::Path qw(make_path);
+use File::Temp qw(tempdir);
 
 # INITIALIZE PATH AND FLAGS--TSW
 my $binPath = abs_path($0);
@@ -61,9 +62,13 @@ my $ribofoot = 0; # flag for ribosome footprinting libraries
 
 my $resume = 0;   # if this flag is set, vast-tools tries to resume a previous run 
 
+my $samplename="";  # $root deduced from file name will be replaced by user specified sample name
+
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(		  "bowtieProg=s" => \$bowtie,
 			  "sp=s" => \$species,
+			  "name=s" => \$samplename,
+			  "n=s" => \$samplename,
 			  "dbDir=s" => \$dbDir,
 			  "c=i" => \$cores, 
 			  "cores=i" => \$cores,
@@ -241,6 +246,14 @@ sub checkResumeOption{
     }
 }
 
+sub time {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+    $year += 1900;
+    $mon += 1;
+    my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
+    return $datetime;
+}
+
 my $inpType = !$fastaOnly ? "-f" : "-q"; 
 
 # Check database directory
@@ -251,8 +264,18 @@ $dbDir = abs_path($dbDir);
 $dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 
+### Gets the version
+my $version;
+open (VERSION, "$binPath/../VERSION");
+$version=<VERSION>;
+chomp($version);
+$version="No version found" if !$version;
+
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
-    print "\nUsage: vast-tools align fastq_file_1 [fastq_file_2] [options]
+    print "
+VAST-TOOLS v$version
+
+Usage: vast-tools align fastq_file_1 [fastq_file_2] [options]
 
 Align a single RNA-Seq sample to VASTDB genome and junction libraries.
 Length of reads must be at least 50 nt; for expression analysis, all reads
@@ -260,6 +283,8 @@ must be of same length.
 
 OPTIONS:
 	--sp Hsa/Mmu/etc	Three letter code for the database (default Hsa)
+	--name, -n <NAME>       Defines name for this sample. By default, the
+	                        sample name is deduced from the fastq file name.
 	--dbDir db		Database directory (default VASTDB)
 	--cores, -c i		Number of cores to use for bowtie (default 1)
 	--output, -o		Output directory (default vast_out)
@@ -307,6 +332,9 @@ OPTIONS:
 
     exit $EXIT_STATUS;
 }
+
+# prints version (05/05/19)                                                                                                                                             
+verbPrint "VAST-TOOLS v$version";
 
 # Command line flags here
 if (defined $ARGV[1]) { $pairedEnd = 1; }
@@ -368,11 +396,13 @@ if ($fileName1 =~ /\-e\.f/){ # it has to be a fastq file (not fasta)
 	}
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;  # regex by --TSW
 	$root = $1;
+	if($samplename){$root=$samplename}
     }
     else { # anything is valid here
 	($length,$percF)=extractReadLen($fq1);
 	$fileName1 =~ /(\S+)\.(fastq|fq|fasta|fa)(\.gz)?/;
 	$root = $1;
+	if($samplename){$root=$samplename}
     }
     if ($pairedEnd){
 	($length2,$percF2)=extractReadLen($fq2);
@@ -385,10 +415,9 @@ unless($fq2){verbPrint("Input RNA-seq file(s): $fq1");}else{verbPrint("Input RNA
 
 # if something went wrong with extraction of root of filenames
 if($root eq ""){ errPrintDie("Could not extract the base name from the RNA-seq input files, which must look like *.(fastq|fastq.gz|fq|fq.gz|fasta|fasta.gz|fa|fa.gz)");}
-
 unless($fq2){verbPrint("Most common read length detected for fq1: $length ($percF\%)");}
 else{verbPrint("Most common read lengths detected for fq1 & fq2: $length ($percF\%) and $length2 ($percF2\%)");}
-
+verbPrint "Sample name: $root "; 
 verbPrint "Using VASTDB -> $dbDir";
 # change directories
 make_path($outdir) unless (-e $outdir);
@@ -410,9 +439,6 @@ unless(defined($tmpDir)) {
 }
 unless($EXIT_STATUS > 0) {
   verbPrint "Set tmp directory to $tmpDir!";
-}
-unless(-e "$tmpDir/tmp_read_files"){
-	mkdir("$tmpDir/tmp_read_files") or die "$!";
 }
 
 # Quality control for trim5
@@ -483,14 +509,14 @@ unless($resumed){
 	print $fh_info "\tdue to given argument -ns, data are treated as being not strand-specific NA NA NA NA\t\t$bt_norc\t$mapcorr_fileswitch\tdone";
     }
     else{
-	my $minNMappingReads=500;   # at least so many reads from all 10000 reads must get mapped
+	my $minNMappingReads=500;   # at least so many reads from all 100K reads must get mapped
 	my $minThresh=0.35;         # If fraction of reads mapping to strand - is larger than this threshold, we assume the data is indeed strand-specific.
 	my $maxThresh=0.65; 
 	my ($fh,$fh2);
 	sub rvcmplt{ $_=$_[0]; tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy\[\]/TVGHCDKNYSAABWXRtvghcdknysaabwxr\]\[/; return(reverse($_));} 
 	
-       	my $N=400000; # check 100K fastq reads 
-       	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=200000;}
+       	my $N=2000000; # check 500K fastq reads 
+       	my $bowtie_fa_fq_flag="-q";  if($fq1 =~ /fasta$|fasta\.gz$|fa$|fa\.gz$/){$bowtie_fa_fq_flag="-f";$N=1000000;}
        	my ($p1,$n1,$p2,$n2)=(0,0,0,0);   # number of reads 1 mapping to strand + and - , number of reads 2 mapping to strand + and -
        	my ($percR1p,$percR1n,$percR2p,$percR2n)=("NA","NA","NA","NA");
 
@@ -528,7 +554,7 @@ unless($resumed){
 				if($i==0){
 					unless($percR1n>=$maxThresh){print $fh_info "\t$fq1";next;}
 					open($fh,"".getPrefixCmd($fq1)." |");
-					$fn="$tmpDir/tmp_read_files/".pop(@{[split("/",$fq1)]});
+					$fn="".tempdir( DIR => "$tmpDir", TEMPLATE=>"tmpfqs_XXXXXXXX", CLEANUP =>  0 )."/".pop(@{[split("/",$fq1)]});
 					if(isZipped($fq1)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">$fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq1; writing into $fn";
 					$fq1=$fn;
@@ -538,7 +564,7 @@ unless($resumed){
 					if($percR2n eq "NA"){next;}  # single-end data
 					unless($percR2n>=$maxThresh){print $fh_info "\t$fq2";next;}
 					open($fh,"".getPrefixCmd($fq2)." |");
-					$fn="$tmpDir/tmp_read_files/".pop(@{[split("/",$fq2)]});
+					$fn="".tempdir( DIR => "$tmpDir", TEMPLATE=>"tmpfqs_XXXXXXXX", CLEANUP =>  0 )."/".pop(@{[split("/",$fq2)]});
 					if(isZipped($fq2)){open($fh2,"| gzip -c > $fn" ) or die "$!";}else{open($fh2,">$fn") or die "$!";}
 					verbPrint "   reverse-complementing reads from $fq2; writing into $fn";
 					$fq2=$fn;
@@ -560,6 +586,24 @@ unless($resumed){
 	}
 	close($fh_info);
 }
+
+
+### Creates the LOG
+open (LOG, ">>VTS_LOG_commands.txt");
+my $all_args="-sp $species -o $outdir -c $cores -IR_version $IR_version -stepSize $trimStep -mismatchNum $bowtieV";
+$all_args.=" -noIR" if $noIRflag;
+$all_args.=" -onlyIR" if $onlyIRflag;
+$all_args.=" -trimLen $trimLen" if defined $trimLen;
+$all_args.=" -trim $trim" if defined $trim;
+$all_args.=" -keep" if $keepFlag;
+$all_args.=" -EEJ_counts" if $print_EEJs;
+$all_args.=" -resume" if $resume;
+$all_args.=" -rc1" if $rc1;
+$all_args.=" -rc2" if $rc2;
+$all_args.=" -nrc1" if $nrc1;
+$all_args.=" -nrc2" if $nrc2;
+
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools align $all_args\n";
 
 
 if (!$genome_sub and !$useGenSub){
@@ -644,6 +688,7 @@ unless ($onlyIRflag){
 if ($EXIT_STATUS) {
     exit $EXIT_STATUS;
 }
+
 
 #### Map to the EEJ:
 my $runArgs = "-dbDir=$dbDir -sp=$species -readLen=$le -root=$root"; 
