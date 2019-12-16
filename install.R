@@ -11,7 +11,7 @@ suppressPackageStartupMessages(require(optparse))
 option_list <- list(
   make_option(c("-p", "--prompt"), action="store_true", default=TRUE, type="logical", help="User prompt during installation [default %default]"),
   make_option(c("-q", "--quiet"), action="store_false", dest="prompt",  type="logical", help="Quiet installation, no prompt"),
-  make_option(c("-f", "--file"), action="store", default="", type='character', help="From where to run install script"),
+  make_option(c("-f", "--file"), action="store", default=".", type='character', help="From where to run install script")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
