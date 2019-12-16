@@ -39,7 +39,7 @@ VOLUME /VASTDB
 
 RUN cd /usr/local/vast-tools; ln -s /VASTDB .
 
-RUN cd /usr/local/vast-tools; ./install.R
+RUN cd /usr/local/vast-tools; ./install.R --quiet
 
 # Let's put in PATH
 RUN cd /usr/local/bin; ln -s ../vast-tools/vast-tools .

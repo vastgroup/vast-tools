@@ -6,8 +6,17 @@
 # Updates: Manuel Irimia, 2015-present
 # mirimia@gmail.com
 
-argv <- commandArgs(trailingOnly = F)
-scriptPath <- dirname(sub("--file=","",argv[grep("--file",argv)]))
+suppressPackageStartupMessages(require(optparse))
+
+option_list <- list(
+  make_option(c("-p", "--prompt"), action="store_true", default=TRUE, type="logical", help="User prompt during installation [default %default]"),
+  make_option(c("-q", "--quiet"), action="store_false", dest="prompt",  type="logical", help="Quiet installation, no prompt"),
+  make_option(c("-f", "--file"), action="store", default=".", type='character', help="From where to run install script")
+)
+
+opt <- parse_args(OptionParser(option_list=option_list))
+
+scriptPath <- dirname( opt$file )
 
 joinStr <- function(x,y) {
   return(paste(c(as.character(x), as.character(y)), collapse=""))
@@ -57,64 +66,66 @@ planariaUrl <- joinStr("http://vastdb.crg.eu/libs/", planariaDbFile)
 NveUrl <- joinStr("http://vastdb.crg.eu/libs/", NveDbFile)
 
 #
+if ( opt$prompt ) {
 
-writeLines("Looking for VAST Database [VASTDB]")
-auto <- "invalid"
-if(!file.exists("VASTDB")) {
-  cat("Cannot find 'VASTDB'.. Do you want to download it? [y/n]: ")
-  auto <- readLines(file("stdin"),1)
-  close(file("stdin"))
-}
-if(file.exists("VASTDB")) {
-  cat("Found 'VASTDB'.. Do you want to download yet uninstalled datasets or update installed datasets? [y/n]: ")
-  auto <- readLines(file("stdin"),1)
-  close(file("stdin"))
-}
-
-if(as.character(auto) == 'y') {
-  cat("Please choose one or more, e.g. Hsa,Mmu,Dre, from [all, Hsa, Mmu, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve] : ")
-  db <- readLines(file("stdin"),1)
-  db <- as.character(db)
-  close(file("stdin"))
+  writeLines("Looking for VAST Database [VASTDB]")
+  auto <- "invalid"
+  if(!file.exists("VASTDB")) {
+    cat("Cannot find 'VASTDB'.. Do you want to download it? [y/n]: ")
+    auto <- readLines(file("stdin"),1)
+    close(file("stdin"))
+  }
+  if(file.exists("VASTDB")) {
+    cat("Found 'VASTDB'.. Do you want to download yet uninstalled datasets or update installed datasets? [y/n]: ")
+    auto <- readLines(file("stdin"),1)
+    close(file("stdin"))
+  }
   
-  dbs<-strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]]
-  for(db in dbs){
-    if(db == 'Hsa' || db == 'all') {
-      downloadDb(humanUrl, humanDbFile)
-    }
-    if(db == 'Mmu' || db == 'all') {
-      downloadDb(mouseUrl, mouseDbFile)
-    }
-    if(db == 'Gga' || db == 'all') {
-      downloadDb(chickenUrl, chickenDbFile)
-    }
-    if(db == 'Dre' || db == 'all') {
-      downloadDb(DreUrl, DreDbFile)
-    }
-    if(db == 'Bla' || db == 'all') {
-      downloadDb(BlaUrl, BlaDbFile)
-    }
-    if(db == 'Spu' || db == 'all') {
-      downloadDb(SpuUrl, SpuDbFile)
-    }
-    if(db == 'Dme' || db == 'all') {
-      downloadDb(DmeUrl, DmeDbFile)
-    }
-    if(db == 'Sma' || db == 'all') {
-      downloadDb(SmaUrl, SmaDbFile)
-    }
-    if(db == 'Cel' || db == 'all') {
-      downloadDb(CelUrl, CelDbFile)
-    }
-    if(db == 'Sme' || db == 'all') {
-      downloadDb(planariaUrl, planariaDbFile)
-    }
-    if(db == 'Nve' || db == 'all') {
-      downloadDb(NveUrl, NveDbFile)
+  if(as.character(auto) == 'y') {
+    cat("Please choose one or more, e.g. Hsa,Mmu,Dre, from [all, Hsa, Mmu, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve] : ")
+    db <- readLines(file("stdin"),1)
+    db <- as.character(db)
+    close(file("stdin"))
+    
+    dbs<-strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]]
+    for(db in dbs){
+      if(db == 'Hsa' || db == 'all') {
+        downloadDb(humanUrl, humanDbFile)
+      }
+      if(db == 'Mmu' || db == 'all') {
+        downloadDb(mouseUrl, mouseDbFile)
+      }
+      if(db == 'Gga' || db == 'all') {
+        downloadDb(chickenUrl, chickenDbFile)
+      }
+      if(db == 'Dre' || db == 'all') {
+        downloadDb(DreUrl, DreDbFile)
+      }
+      if(db == 'Bla' || db == 'all') {
+        downloadDb(BlaUrl, BlaDbFile)
+      }
+      if(db == 'Spu' || db == 'all') {
+        downloadDb(SpuUrl, SpuDbFile)
+      }
+      if(db == 'Dme' || db == 'all') {
+        downloadDb(DmeUrl, DmeDbFile)
+      }
+      if(db == 'Sma' || db == 'all') {
+        downloadDb(SmaUrl, SmaDbFile)
+      }
+      if(db == 'Cel' || db == 'all') {
+        downloadDb(CelUrl, CelDbFile)
+      }
+      if(db == 'Sme' || db == 'all') {
+        downloadDb(planariaUrl, planariaDbFile)
+      }
+      if(db == 'Nve' || db == 'all') {
+        downloadDb(NveUrl, NveDbFile)
+      }
     }
   }
-}
 
+}
 
 # custom install from include.R
 loadPackages(c("MASS", "getopt", "optparse", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel", "devtools"), local.lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))
