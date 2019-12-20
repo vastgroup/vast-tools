@@ -103,65 +103,62 @@ $ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 ~~~~
 **Manual DB Installation:**
 
-For manual, install each species or all of them to any location by:
+For manual, install each species or all of them to any location by, e.g. for Hsa:
 
-Human (hg19) - 6.3G [vastdb.hsa.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz):
 ~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
-> tar xzvf vastdb.hsa.16.02.18.tar.gz
+> wget http://vastdb.crg.eu/libs/vastdb.hsa.20.12.19.tar.gz
+> tar xzvf vastdb.hsa.20.12.19.tar.gz
 ~~~~
-Mouse (mm9) - 5.7G [vastdb.mmu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz
-> tar xzvf vastdb.mmu.16.02.18.tar.gz
-~~~~
-Chicken (galGal3) - 1.6G [vastdb.gga.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.gga.16.02.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.gga.16.02.18.tar.gz
-> tar xzvf vastdb.gga.16.02.18.tar.gz
-~~~~
-Zebrafish (danRer10) - 2.2G [vastdb.dre.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz
-> tar xzvf vastdb.dre.01.12.18.tar.gz
-~~~~
-Amphioxus (Bl71nemr) - 1.5G [vastdb.bla.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.bla.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.bla.01.12.18.tar.gz
-> tar xzvf vastdb.bla.01.12.18.tar.gz
-~~~~
-Sea urchin (Spur3.1) - 1.2G [vastdb.spu.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz
-> tar xzvf vastdb.spu.01.12.18.tar.gz
-~~~~
-Fruitfly (BDGP6) - 317M [vastdb.dme.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz
-> tar xzvf vastdb.dme.01.12.18.tar.gz
-~~~~
-Centipede (Smar1) - 585M [vastdb.sma.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz
-> tar xzvf vastdb.sma.01.12.18.tar.gz
-~~~~
-C. elegans (WBcel235) - 395M [vastdb.cel.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz
-> tar xzvf vastdb.cel.01.12.18.tar.gz
-~~~~
-Planarian (v31) - 952M [vastdb.sme.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz
-> tar xzvf vastdb.sme.16.02.18.tar.gz
-~~~~
-Sea anemone (GCA_000209225) - 679M [vastdb.nve.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz):
-~~~~
-> wget http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz
-> tar xzvf vastdb.nve.01.12.18.tar.gz
-~~~~
+
+Available libraries and species:
+
+Human (Hsa, hg19):
+- Current version: 
+- Previous versions: 6.3G [vastdb.hsa.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz).
+
+Mouse (Mmu, mm9): 
+- Current version: 
+- Previous versions: 5.7G [vastdb.mmu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz).
+
+Chicken (Gg3, galGal3): 
+- Current version: 
+- Previous versions: 1.6G [vastdb.gg3.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg3.16.02.18.tar.gz).
+
+Zebrafish (Dre, danRer10):
+- Current version:
+- Previous versions: 2.2G [vastdb.dre.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz).
+
+Amphioxus (Bla, Bl71nemr):
+- Current version:
+- Previous versions: 1.5G [vastdb.bla.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.bla.01.12.18.tar.gz).
+
+Sea urchin (Spu, Spur3.1):
+- Current version:
+- Previous versions: 1.2G [vastdb.spu.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz).
+
+Fruitfly (Dme, BDGP6):
+- Current version:
+- Previous versions: 317M [vastdb.dme.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz).
+
+Centipede (Sma, Smar1): 
+- Current version:
+- Previous versions: 585M [vastdb.sma.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz).
+
+C. elegans (Cel, WBcel235):
+- Current version:
+- Previous versions: 395M [vastdb.cel.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz).
+
+Planarian (Sme, v31):
+- Current version:
+- Previous versions: 952M [vastdb.sme.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz).
+
+Sea anemone (Nve, GCA_000209225):
+- Current version:
+- Previous versions: 679M [vastdb.nve.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz).
+
 
 ** NOTE: from release v2.0.0, new VASTDB libraries are needed for all species.
+** NOTE: release v2.3.0 included a new release of libraries (\*.20.12.19.tar.gz). These libraries can be used (and are adviced to be used) with any previous vast-tools version.
 
 If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
