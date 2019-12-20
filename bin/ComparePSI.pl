@@ -46,6 +46,7 @@ my $print_AS_ev;
 my $use_int_reads;
 my $fr_int_reads = 0.4;
 my $min_ALT_use = 25;
+my $legacy_ALT;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -77,7 +78,8 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "only_samples" => \$plot_only_samples,
 			  "noVLOW" => \$noVLOW,
 			  "noB3" => \$noB3,
-			  "min_ALT_use=i" => \$min_ALT_use
+			  "min_ALT_use=i" => \$min_ALT_use,
+			  "legacy_ALT" => \$legacy_ALT
     );
 
 our $EXIT_STATUS = 0;
@@ -161,6 +163,9 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
                                    average of the EI/IE junctions (default 0.4). Only useful with --use_int_reads
         --min_ALT_use i          Minimum inclusion of the exon in which the Alt3/Alt5 is located across all 
                                    compared samples (default 25) (combine >= v2.2.1)
+        --legacy_ALT             Runs as <= v2.2.2 for ALTA and ALTD events.
+                                   I.e. discarding the most internal splice site and quantifying up and down sequence inclusion.
+                                        From >= v2.2.3 only tests specific up-regulated splice site usage. 
         --print_dPSI             Prints the mean dPSI (PSI_B-PSI_A) as last column (default OFF)
                                    - It does not allow ploting.
         --print_sets             Prints files with different sets for comparisons in Matt (http://matt.crg.eu):
@@ -222,6 +227,7 @@ $all_args.=" -noB3" if $noB3;
 $all_args.=" -p_IR" if $p_IR;
 $all_args.=" -use_int_reads" if $use_int_reads;
 $all_args.=" -fr_int_reads $fr_int_reads" if defined $fr_int_reads;
+$all_args.=" -legacy_ALT" if $legacy_ALT;
 $all_args.=" -print_dPSI" if $print_dPSI;
 $all_args.=" -print_sets" if $print_sets;
 $all_args.=" -print_all_ev" if $print_all_ev;
@@ -281,6 +287,7 @@ $tail.="-noB3" if $noB3;
 $tail.="-p_IR" if $p_IR;
 $tail.="-IR_reads" if $use_int_reads;
 $tail.="-min_ALT_use$min_ALT_use";
+$tail.="-upreg_ALT" if !$legacy_ALT; 
 $tail.="-paired" if (defined $paired);
 $tail.="_$name_A-vs-$name_B";
 $tail.="-with_dPSI" if (defined $print_dPSI);
@@ -394,7 +401,8 @@ while (<PSI>){
     my %av_junct_reads = ();
     my $event = $t[1];
 
-    next if $t[3] == 0; # removes the internal Alt3 and Alt5 splice sites to avoid double counting
+    next if $t[3] == 0 && $legacy_ALT; # removes the internal Alt3 and Alt5 splice sites to avoid double counting
+                                       # from v2.2.3, only if used with legacy_ALT
     
     # defines AS type
     my $type="";
@@ -583,7 +591,7 @@ while (<PSI>){
 		}
 	    }
 	}
-	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range){
+	if ($dPSI < -1*$min_dPSI && $min_A > $max_B+$min_range && ($type!~/Alt[35]/ || $legacy_ALT)){
 	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && $av_int_reads{A} eq "NA")  || ($type eq "IR" && $av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads)){
 		$tally{$type}{DOWN}++;
 		unless (defined $print_dPSI){
@@ -714,7 +722,7 @@ while (<PSI>){
 		}
 	    }
 	}
-	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range){ 
+	if ($av_paired_dPSI < -$min_dPSI && $max_indiv_dPSI < -$min_range && ($type!~/Alt[35]/ || $legacy_ALT)){ 
 	    if (($type ne "IR") || (!defined $use_int_reads) || ($type eq "IR" && $av_int_reads{A} eq "NA") || ($type eq "IR" && $av_int_reads{A}/$av_junct_reads{A} >= $fr_int_reads)){
 		$tally{$type}{DOWN}++;
 		unless (defined $print_dPSI){
@@ -858,12 +866,16 @@ if (defined $plot){
 
 verbPrint "Printing summary statistics\n";
 my $extras = "";
+$extras.=", legacy_ALT" if (defined $legacy_ALT);
 $extras.=", noVLOW" if (defined $noVLOW);
 $extras.=", noB3" if (defined $noB3 && $noB3 ne "NA (older version)");
 $extras.=", noB3=NA (older version)" if (defined $noB3 && $noB3 eq "NA (older version)");
 $extras.=", p_IR" if (defined $p_IR);
 $extras.=", use_int_reads" if (defined $use_int_reads);
 $extras.=", paired" if (defined $paired);
+
+$tally{Alt3}{DOWN}="NA" if (!defined $legacy_ALT);
+$tally{Alt5}{DOWN}="NA" if (!defined $legacy_ALT);
 
 print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras, min_ALT_use=$min_ALT_use\n";
 print "*** Summary statistics:\n";
