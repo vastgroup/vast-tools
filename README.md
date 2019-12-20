@@ -158,6 +158,7 @@ Sea anemone (Nve, GCA_000209225):
 
 
 ** NOTE: from release v2.0.0, new VASTDB libraries are needed for all species.
+
 ** NOTE: release v2.3.0 included a new release of libraries (\*.20.12.19.tar.gz). These libraries can be used (and are adviced to be used) with any previous vast-tools version.
 
 If manually installed to central location, link the database files to vast-tools directory using:
