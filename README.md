@@ -555,7 +555,7 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
  * **Column 3**: Genomic coordinate of the alternative sequence.
  * **Column 4**: Length of the alternative sequence. In ALTD/ALTA events, the first splice site within each event has a length of 0 nt, by definition.
  * **Column 5**: Full set of genomic coordinates of the alternative splicing event. 
- 	* For EX: *chromosome:C1donor,Aexon,C2acceptor*. Where C1donor is the reference upstream exon's donor, C2acceptor the reference downstream exon's acceptor, and A the alternative exon. Strand is "+" if C1donor < C2acceptor. If multiple acceptor/donors exist in any of the exons, they are shown separated by "+". 
+ 	* For EX: *chromosome:C1donor,Aexon,C2acceptor*. Where C1donor is the "reference" upstream exon's donor, C2acceptor the "reference" downstream exon's acceptor, and A the alternative exon. Strand is "+" if C1donor < C2acceptor. If multiple acceptor/donors exist in any of the exons, they are shown separated by "+". **NOTE**: The "reference" upstream and downstream C1/C2 coordinates are not necessarily the closest upstream and downstream C1/C2 exons, but the most external ones with sufficient support (to facilitate primer design, etc). If you wish to perform analyses of exon features and/or draw RNA binding maps, you are recommended to use [Matt](http://matt.crg.eu/).
  	* For ALTD: *chromosome:Aexon,C2acceptor*. Multiple donors of the event are separated by "+".
  	* For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
  	* For INT: *chromosome:C1exon=C2exon:strand*.
