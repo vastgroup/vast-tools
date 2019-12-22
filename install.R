@@ -40,17 +40,17 @@ downloadDb <- function(speUrl, speFile) {
    }
 }
 
-humanDbFile <- "vastdb.hsa.16.02.18.tar.gz"
-mouseDbFile <- "vastdb.mmu.16.02.18.tar.gz"
-chickenDbFile <- "vastdb.gga.16.02.18.tar.gz"
-DreDbFile <- "vastdb.dre.01.12.18.tar.gz"
-BlaDbFile <- "vastdb.bla.01.12.18.tar.gz"
-SpuDbFile <- "vastdb.spu.01.12.18.tar.gz"
-DmeDbFile <- "vastdb.dme.01.12.18.tar.gz"
-SmaDbFile <- "vastdb.sma.01.12.18.tar.gz"
-CelDbFile <- "vastdb.cel.01.12.18.tar.gz"
-planariaDbFile <- "vastdb.sme.16.02.18.tar.gz"
-NveDbFile <- "vastdb.nve.01.12.18.tar.gz"
+humanDbFile <- "vastdb.hsa.20.12.19.tar.gz"
+mouseDbFile <- "vastdb.mmu.20.12.19.tar.gz"
+chickenDbFile <- "vastdb.gg3.20.12.19.tar.gz"
+DreDbFile <- "vastdb.dre.20.12.19.tar.gz"
+BlaDbFile <- "vastdb.bla.20.12.19.tar.gz"
+SpuDbFile <- "vastdb.spu.20.12.19.tar.gz"
+DmeDbFile <- "vastdb.dme.20.12.19.tar.gz"
+SmaDbFile <- "vastdb.sma.20.12.19.tar.gz"
+CelDbFile <- "vastdb.cel.20.12.19.tar.gz"
+planariaDbFile <- "vastdb.sme.20.12.19.tar.gz"
+NveDbFile <- "vastdb.nve.20.12.19.tar.gz"
 
 
 humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
@@ -82,7 +82,7 @@ if ( opt$prompt ) {
   }
   
   if(as.character(auto) == 'y') {
-    cat("Please choose one or more, e.g. Hsa,Mmu,Dre, from [all, Hsa, Mmu, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve] : ")
+    cat("Please choose one or more, e.g. Hsa,Mmu,Dre, from [all, Hsa, Mmu, Gg3, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve] : ")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
@@ -95,7 +95,7 @@ if ( opt$prompt ) {
       if(db == 'Mmu' || db == 'all') {
         downloadDb(mouseUrl, mouseDbFile)
       }
-      if(db == 'Gga' || db == 'all') {
+      if(db == 'Gg3' || db == 'all') {
         downloadDb(chickenUrl, chickenDbFile)
       }
       if(db == 'Dre' || db == 'all') {
