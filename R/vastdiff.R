@@ -2,7 +2,7 @@
 
 # Author: Tim Sterne-Weiler, 2014
 # tim.sterne.weiler@utoronto.ca
-# Modifications Ulrich Braunschweig 2018
+# Modifications Ulrich Braunschweig 2018-2019
 
 # Copyright (C) 2014 Tim Sterne-Weiler
 #
@@ -70,7 +70,7 @@ option.list <- list(
         help = "Threshold for min diff where P( (psi1 - psi2) > threshold ) > --prob [default %default]"),
     make_option(c("-e", "--minReads"), type = "numeric", default = 10,
         help = "Threshold for min reads in a sample (use this flag unless you believe the prior) [default %default]"),
-    make_option(c("-S","--minSamples"), type = "numeric", default = 1,
+    make_option(c("-S","--minSamples"), type = "integer", default = 1,
         help = "Threshold for min samples with min reads in a group  [default %default]"),
     make_option(c("--alpha"), type = "numeric", default = 1,
         help = "First shape parameter for the Beta prior distribution P(psi), Uniform by default [default %default]"),
@@ -100,6 +100,16 @@ if (length(commandArgs(TRUE)) == 2 & commandArgs(TRUE)[1] == "-o") {
     print_help(parser)
     stop("No input")
 }
+
+## input checks
+if (opt$prob < 0 | opt$prob >= 1) {
+    stop ("--prob must be a positive number < 1")
+}
+
+if (opt$minDiff < 0 | opt$minDiff >= 1) {
+    stop ("--minDiff must be a positive number < 1")
+}	
+
 
 loadPackages(c("MASS", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
