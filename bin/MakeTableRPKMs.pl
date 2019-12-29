@@ -32,7 +32,7 @@ open (NAMES, "$dbDir/FILES/$sp.ID.names.txt");
 while (<NAMES>){
     chomp;
     my @t=split(/\t/);
-    $names{$t[0]}=$t[1];
+    $names{$t[0]}=$t[1] if (defined $t[0]);
 }
 close NAMES;
 
