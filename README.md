@@ -313,17 +313,16 @@ Strand-unspecific RNAseq data will be aligned strand-unspecifically (equivalent 
 
 ### Combining Results 
 
-``vast-tools combine`` will join all of the files sent to the same output
-directory found in <output_dir>/to_combine/, to form one final table in the main
-<output_dir> folder.  This is the file you give to ``compare`` or ``diff`` in the case that you
-intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. At least two samples must be combined. In addition, the version of intron retention used in ``align`` can be specified using ``--IR_version``. 
-From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This needs to be provided using the ``-a`` option. (Output in mm10 and hg38 need an extra file in VASTDB. If you have downloaded a VASTDB version older than vastdb.*.22.06.16, you will need to download the following patch: [PATCH_mm10-hg38.tar.gz](http://vastdb.crg.eu/libs/PATCH_mm10-hg38.tar.gz)
+``vast-tools combine`` will join all of the files sent to the same output directory found in <output_dir>/to_combine/, to form one final table in the main <output_dir> folder.  This is the file you give to ``compare`` or ``diff`` in the case that you
+intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. In addition, the version of intron retention used in ``align`` can be specified using ``--IR_version`` (version 2 is used by default).
 
 ~~~~
-> vast-tools combine -o outputdir -sp [Hsa|Mmu|Gga] --IR_version [1|2]
+> vast-tools combine -o output_dir -sp [Hsa|Mmu|Gga|etc] [Options]
 ~~~~
 
-From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; IDs starting with 6). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: This module has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
+From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This needs to be provided using the ``-a`` option. 
+
+From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference GTF annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; exons from this module are labeled as "ANN" in the "COMPLEX" column of the combine output, see [below](#combine-output-format)). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: This module has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
 
 
 ### Differential Splicing Analysis
