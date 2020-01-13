@@ -5,6 +5,7 @@
 # 03/08/16: added fold and mean cRPKM to output table (local)
 # 29/10/16: outputs a BG list with fold changes (for enrichment analysis)
 # 31/12/16: added option to normalize cRPKMs using 'normalizebetweenarrays' from limma
+# 14/01/20: correction to rescue a few missing BG genes due to a bug.
 
 use Getopt::Long;
 use warnings;
@@ -408,38 +409,40 @@ while (<GE>){
 	if ($log2_fold_change > $min_fold_log_av){
 	    # get fold change of ranges
 	    my $fold_change_r = ($min_B+0.001)/($max_A+0.001);
-	    next if $fold_change_r < $min_fold_r;
 	    
-	    $tally{UP}++;
-	    print O "$short_line\n" unless (defined $print_all);
-	    print O "$_\t$log2_fold_change\n" if (defined $print_all); 
-	    
-	    # print for GO
-	    if (defined$get_GO){
-		unless ($use_names){
-		    print UP "$t[0]\n";
-		}
-		else {
-		    print UP "$t[1]\n";
+	    unless ($fold_change_r < $min_fold_r){
+		$tally{UP}++;
+		print O "$short_line\n" unless (defined $print_all);
+		print O "$_\t$log2_fold_change\n" if (defined $print_all); 
+		
+		# print for GO
+		if (defined$get_GO){
+		    unless ($use_names){
+			print UP "$t[0]\n";
+		    }
+		    else {
+			print UP "$t[1]\n";
+		    }
 		}
 	    }
 	}
 	if ($log2_fold_change < -1*$min_fold_log_av){
 	    # get fold change of ranges
 	    my $fold_change_r = ($min_A+0.001)/($max_B+0.001);
-	    next if $fold_change_r < $min_fold_r;
-
-	    $tally{DOWN}++;
-	    print O "$short_line\n" unless (defined $print_all);
-	    print O "$_\t$log2_fold_change\n" if (defined $print_all); 
 	    
-	    #print for GO
-	    if (defined$get_GO){
-		unless ($use_names){
-		    print DOWN "$t[0]\n";
-		}
-		else {
-		    print DOWN "$t[1]\n";
+	    unless ($fold_change_r < $min_fold_r){
+		$tally{DOWN}++;
+		print O "$short_line\n" unless (defined $print_all);
+		print O "$_\t$log2_fold_change\n" if (defined $print_all); 
+		
+		#print for GO
+		if (defined$get_GO){
+		    unless ($use_names){
+			print DOWN "$t[0]\n";
+		    }
+		    else {
+			print DOWN "$t[1]\n";
+		    }
 		}
 	    }
 	}
