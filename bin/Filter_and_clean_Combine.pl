@@ -410,12 +410,13 @@ while (<I>){
 	    $OK_group++;
 	    push(@PSIs_both_groups,@{$PSIs{$group}});
 	}
-	$SD{$event}=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
-	
-	if ($OK_group==2 && $SD{$event} >= $min_SD){
-	    print O "$event_ID"."$PRINT{$event}\n";
-	    $tally_type{$type}++;
-	    $OK{$event}=1;
+	if ($OK_group==2){
+	    $SD{$event}=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
+	    if ($SD{$event} >= $min_SD){
+		print O "$event_ID"."$PRINT{$event}\n";
+		$tally_type{$type}++;
+		$OK{$event}=1;
+	    }
 	}
     }
     $done{$event}=1;
