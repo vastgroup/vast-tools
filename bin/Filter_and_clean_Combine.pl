@@ -117,8 +117,8 @@ Prepares and filters a vast-tools output for general analyses.
 [General options] 
         -min_N i                Minimum number of samples with good coverage. Alternatively, you can define it by fraction
         -min_Fr f               Minimum fraction of samples with good coverage. 
-        -min_SD i               Minimum standard deviation of the event (def=5)
-        -samples S1,S2,...      Samples to be considered (default all)
+        -min_SD i               Minimum standard deviation of the event (it does not apply when using groups)(def=5)
+        -samples S1,S2,...      Samples to be considered (it does not apply when using groups)(default all)
         -groups FILE            Provide a config file to set two groups. (default OFF)
                                    The number/fraction of minimal samples will be applied to EACH group.
                                    The output table will have samples ordered by group.
@@ -141,6 +141,7 @@ Prepares and filters a vast-tools output for general analyses.
 
 errPrintDie "*** You can only define a minimum fraction or absolute number of samples with good coverage\n" if $min_N && $min_Fraction;
 errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if $min_N!~/\d/ && $min_Fraction!~/\d/;
+errPrintDie "*** If groups are provided, you cannot provide samples\n" if $samples && $group_file;
 
 # prints version (05/05/19)
 verbPrint "VAST-TOOLS v$version";
@@ -403,8 +404,8 @@ while (<I>){
 	    next if $min_N && $total_N{$event}{$group} < $min_N; # check for absolute number in each group
 	    next if $min_Fraction && $total_N{$event}{$group}/$max_N_groups{$group} < $min_Fraction; # check for fraction
 	    
-	    $SD{$event}{$group}=&std_dev(@{$PSIs{$group}});
-	    next if $SD{$event}{$group} < $min_SD;
+#	    $SD{$event}{$group}=&std_dev(@{$PSIs{$group}});
+#	    next if $SD{$event}{$group} < $min_SD;
 	    $OK_group++;
 	}
 	if ($OK_group==2){
