@@ -117,7 +117,7 @@ Prepares and filters a vast-tools output for general analyses.
 [General options] 
         -min_N i                Minimum number of samples with good coverage. Alternatively, you can define it by fraction
         -min_Fr f               Minimum fraction of samples with good coverage. 
-        -min_SD i               Minimum standard deviation of the event (it does not apply when using groups)(def=5)
+        -min_SD i               Minimum standard deviation of the event (def=5)
         -samples S1,S2,...      Samples to be considered (it does not apply when using groups)(default all)
         -groups FILE            Provide a config file to set two groups. (default OFF)
                                    The number/fraction of minimal samples will be applied to EACH group.
@@ -340,6 +340,7 @@ while (<I>){
     }
     else {
 	%PSIs=();
+	@PSIs_both_groups=();
 	$OK_group=0;
 	foreach $group (sort keys %group_samples){
 	    foreach $sample (@{$group_samples{$group}}){
@@ -407,8 +408,11 @@ while (<I>){
 #	    $SD{$event}{$group}=&std_dev(@{$PSIs{$group}});
 #	    next if $SD{$event}{$group} < $min_SD;
 	    $OK_group++;
+	    push(@PSIs_both_groups,@{$PSIs{$group}});
 	}
-	if ($OK_group==2){
+	$SD{$event}=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
+	
+	if ($OK_group==2 && $SD{$event} >= $min_SD){
 	    print O "$event_ID"."$PRINT{$event}\n";
 	    $tally_type{$type}++;
 	    $OK{$event}=1;
