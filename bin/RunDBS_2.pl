@@ -115,7 +115,7 @@ GENERAL OPTIONS:
 	--dbDir DBDIR	        Database directory
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
-	-h, --help		Print this help messagev
+	-h, --help		Print this help message
 
 AS OPTIONS:
         --onlyEX                Only run the exon skpping pipelines (default off)
