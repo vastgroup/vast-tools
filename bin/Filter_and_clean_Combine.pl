@@ -38,6 +38,7 @@ GetOptions(               "min_SD=i" => \$min_SD,
 			  "min_ALT_use=i" => \$min_ALT_use,
 			  "samples=s" => \$samples,
 			  "groups=s" => \$group_file,
+			  "g=s" => \$group_file,
 			  "log" => \$log,
 			  "onlyEX" => \$onlyEXSK,
 			  "verbose" => \$verboseFlag,
@@ -119,7 +120,7 @@ Prepares and filters a vast-tools output for general analyses.
         -min_Fr f               Minimum fraction of samples with good coverage. 
         -min_SD i               Minimum standard deviation of the event (def=5)
         -samples S1,S2,...      Samples to be considered (it does not apply when using groups)(default all)
-        -groups FILE            Provide a config file to set two groups. (default OFF)
+        -groups/g FILE          Provide a config file to set two groups. (default OFF)
                                    The number/fraction of minimal samples will be applied to EACH group.
                                    The output table will have samples ordered by group.
                                    Format: SAMPLE_NAME\\tGROUP_IDENTIFIER
