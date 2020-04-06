@@ -90,10 +90,10 @@ if ( opt$prompt ) {
    11 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
    12 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
    13 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
-   14 - Caenorhabditis elegans (WBcel235, Cel). Scaffold annotation: Ensembl v87.
+   14 - Caenorhabditis elegans (ce11, Cel). Scaffold annotation: Ensembl v87.
    15 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
    16 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
-   17 - Arabidopsis thaliana (TAIR10, Ath). araTha10.  Scaffold annotation: Ensembl  Plants v31.
+   17 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
    18 - All VASTDB libraries
 
 ")
