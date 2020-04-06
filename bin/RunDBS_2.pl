@@ -12,6 +12,7 @@ $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
 my $sp;              #species Hsa no longer default
+my $sp_assembly;     # the input and output
 my $dbDir;
 
 my $verboseFlag = 1;
@@ -36,12 +37,14 @@ my $install_limma = 0; # installs limma
 my $noGEflag = 0;
 my $onlyGEflag = 0;
 
-my $asmbly;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
+#my $asmbly           # the variable is deprecated by $lift_coord
+my $lift_coord;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
+                      
  
 GetOptions("help"  	       => \$helpFlag,
 	   "dbDir=s"           => \$dbDir,
-	   "sp=s"              => \$sp,
-	   "a=s"               => \$asmbly,
+	   "sp=s"              => \$sp_assembly,
+	   "a=s"               => \$lift_coord,
 	   "verbose"           => \$verboseFlag,
 	   "output=s"          => \$outDir,
 	   "o=s"               => \$outDir,
@@ -93,25 +96,23 @@ $version=<VERSION>;
 chomp($version);
 $version="No version found" if !$version;
 
-if ($helpFlag or (!defined $sp)){
+if ($helpFlag or (!defined $sp_assembly)){
     print STDERR "
 VAST-TOOLS v$version
 
-Usage: vast-tools combine -o OUTPUTDIR -sp [Hsa|Mmu|etc] [options]
+Usage: vast-tools combine -o OUTPUTDIR -sp [hg19|mm10|etc] [options]
 
 Combine multiple samples analyzed using \"vast-tools align\" into a single summary table. 
 
 GENERAL OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 				Must contain sub-folders to_combine or expr_out from align steps.
-	-sp Hsa/Mmu/etc		Species selection (mandatory)
-	-a			Genome assembly of the output coordinates (only for -sp Hsa or Mmu) 
-				For -sp Hsa: hg19 or hg38, (default hg19)
-				    - vast-tools works internally with hg19; 
-                                      if you choose hg38, the output gets lifted-over to hg38
-				For -sp Mmu: mm9 or mm10, (default mm9)
-				    - vast-tools will work internally with mm9; 
-                                      if you choose mm10, the output gets lifted-over to mm10
+        -sp Assembly            Assembly code for the species (e.g. hg38, mm10) (mandatory).
+                                   The legacy 3-species code can also be provided.
+	-lift_coord     	To lift the coordinates of the output file to a newer assembly.
+                                   Only for -sp hg19/Hsa or mm9/Mmu, which are converted to hg38 or mm10.
+				   NOTE 1: vast-tools works internally with hg19/Hsa and mm9/Mmu.
+                                   NOTE 2: this options substitutes -a from v2.4.0.
 	--dbDir DBDIR	        Database directory
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
@@ -147,8 +148,12 @@ errPrintDie "Need output directory" unless (defined $outDir);
 errPrintDie "The output directory $outDir does not exist" unless (-e $outDir);
 errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_version != 2);
 
+### Redefines species and sp_assembly
+get_internal_sp_key($sp_assembly);
+
 # prints version (05/05/19)
 verbPrint "VAST-TOOLS v$version";
+verbPrint "Species assembly: $sp_assembly, VASTDB Species key: $sp";
 
 if(!defined($dbDir)) {
   $dbDir = "$binPath/../VASTDB";
@@ -164,15 +169,20 @@ mkdir("raw_incl") unless (-e "raw_incl"); # make new output directories.  --TSW
 mkdir("raw_reads") unless (-e "raw_reads"); # ^
 
 ### Settings:
-errPrintDie "Needs species 3-letter key\n" if !defined($sp);  #ok for now, needs to be better. --TSW
+errPrintDie "Needs species 3-letter key to be found\n" if !defined($sp);  #ok for now, needs to be better. --TSW
 
 # if species is not human nor mouse, we override $asmbly ignoring potential user input
-if($sp ne "Hsa" && $sp ne "Mmu"){$asmbly="";}
+if ($sp ne "Hsa" && $sp ne "Mmu"){$lift_coord="";}
 # get assembly specification for human and mouse
-if( $sp eq "Hsa" ){if(!defined($asmbly)){$asmbly="hg19";}; unless($asmbly =~ /(hg19|hg38)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
-if( $sp eq "Mmu" ){if(!defined($asmbly)){$asmbly="mm9";};  unless($asmbly =~ /(mm9|mm10)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
+#if ($sp eq "Hsa") {
+#    if (!defined($lift_coord)){	$lift_coord="hg19";} 
+#unless($lift_coord =~ /(hg19|hg38)/){
+#    errPrintDie "Specified assmbly $lift_coord either unknown or inapplicable for species $sp\n"}
+#}
+#if( $sp eq "Mmu" ){if(!defined($asmbly)){$asmbly="mm9";};  unless($asmbly =~ /(mm9|mm10)/){errPrintDie "Specified assmbly $asmbly either unknown or inapplicable for species $sp\n"}}
 # we add leading "-" for convenience during defining output file name later 
-if($asmbly ne ""){$asmbly="-".$asmbly;}
+#if($asmbly ne ""){$asmbly="-".$asmbly;}
+# This is all deprecated from version v2.4.0.
 
 my @files;
 my $N = 0;
@@ -302,14 +312,25 @@ if ($N != 0 && !$onlyGEflag) {
 	}
     }
     
-    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N$asmbly.tab";
+#    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N$asmbly.tab";
+    my $finalOutput;
+    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N.tab" if (!defined $lift_coord);
+    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38.tab" if (defined $lift_coord && $sp_assembly eq "hg19");
+    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_mm10.tab" if (defined $lift_coord && $sp_assembly eq "mm9");
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
     
     # lift-over if necessary (hg19->hg38 or mm9->mm10)
-    if( $asmbly=~/(hg38|mm10)/ ){
+#    if( $asmbly=~/(hg38|mm10)/ ){
+    if ($lift_coord){
+	my $dictionary;
     	# select liftOvr dictionary
-    	my $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; if($asmbly=~/mm10/){$dictionary="lftOvr_dict_from_mm9_to_mm10.pdat";}
+	if ($sp_assembly eq "hg19"){
+	    $dictionary="lftOvr_dict_from_hg19_to_hg38.pdat"; 
+	}
+	if ($sp_assembly eq "mm9"){
+	    $dictionary="lftOvr_dict_from_mm9_to_mm10.pdat";
+	}
     	# do liftOvr
     	sysErrMsg "$binPath/LftOvr_INCLUSION_LEVELS_FULL.pl translate $finalOutput $dbDir/FILES/$dictionary ${finalOutput}.lifted";
     	# move files
@@ -330,9 +351,9 @@ my @rpkmFiles=glob("expr_out/*.cRPKM");
 unless ($noGEflag){
     if (@rpkmFiles > 0) {
 	verbPrint "Combining cRPKMs into a single table\n";
-	my $cRPKMOutput = "cRPKM-$sp" . @rpkmFiles . ".tab";
-	my $cRPKMOutput_b = "cRPKM_AND_COUNTS-$sp" . @rpkmFiles . ".tab";
-	my $cRPKMOutput_c = "cRPKM-$sp" . @rpkmFiles . "-NORM.tab";
+	my $cRPKMOutput = "cRPKM-$sp_assembly-" . @rpkmFiles . ".tab";
+	my $cRPKMOutput_b = "cRPKM_AND_COUNTS-$sp_assembly-" . @rpkmFiles . ".tab";
+	my $cRPKMOutput_c = "cRPKM-$sp_assembly-" . @rpkmFiles . "-NORM.tab";
 	$cRPKMCounts = $cRPKMCounts ? "-C" : "";
 	$normalize = $normalize ? "-norm" : "";
 	$install_limma = $install_limma ? "-install_limma" : "";
@@ -364,4 +385,51 @@ sub time {
     $mon += 1;
     my $datetime = sprintf "%04d-%02d-%02d (%02d:%02d)", $year, $mday, $mon, $hour, $min;
     return $datetime;
+}
+
+
+sub get_internal_sp_key {
+    my @temp_assembly = @_;
+
+    my %assembly_to_species;
+    $assembly_to_species{hg19}="Hsa"; $assembly_to_species{hg38}="Hs2"; $assembly_to_species{panTro4}="Ptr";
+    $assembly_to_species{rheMac2}="Mma"; $assembly_to_species{mm9}="Mmu"; $assembly_to_species{mm10}="Mm2";
+    $assembly_to_species{bosTau6}="Bta"; $assembly_to_species{bosTau9}="Bt2"; $assembly_to_species{monDom5}="Mdo";
+    $assembly_to_species{galGal3}="Gg3"; $assembly_to_species{galGal4}="Gg4"; $assembly_to_species{galGal6}="Gga";
+    $assembly_to_species{xenTro3}="Xt1"; $assembly_to_species{xenTro9}="Xtr"; 
+    $assembly_to_species{danRer10}="Dre"; $assembly_to_species{danRer11}="Dr2";
+    $assembly_to_species{lepOcu1}="Loc"; $assembly_to_species{esoLuc2}="Elu"; $assembly_to_species{eshark1}="Cm1";
+    $assembly_to_species{calMil1}="Cmi"; $assembly_to_species{braLan2}="Bl1"; $assembly_to_species{braLan3}="Bla";
+    $assembly_to_species{strPur4}="Spu"; $assembly_to_species{dm6}="Dme"; $assembly_to_species{AaegL5}="Aae";
+    $assembly_to_species{bomMor1}="Bmo"; $assembly_to_species{triCas5}="Tca"; $assembly_to_species{apiMel4}="Ame";
+    $assembly_to_species{blaGer1}="Bge"; $assembly_to_species{cloDip2}="Cdi"; $assembly_to_species{strMar1}="Sma";
+    $assembly_to_species{WBcel235}="Cel"; $assembly_to_species{octBim1}="Obi"; $assembly_to_species{octMin1}="Omi";
+    $assembly_to_species{schMed31}="Sme"; $assembly_to_species{nemVec1}="Nve"; $assembly_to_species{TAIR10}="Ath";
+    my %species_to_assembly;
+    $species_to_assembly{Hsa}="hg19"; $species_to_assembly{Hs2}="hg38"; $species_to_assembly{Ptr}="panTro4";
+    $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
+    $species_to_assembly{Bta}="bosTau6"; $species_to_assembly{Bt2}="bosTau9"; $species_to_assembly{Mdo}="monDom5";
+    $species_to_assembly{Gg3}="galGal3"; $species_to_assembly{Gg4}="galGal4"; $species_to_assembly{Gga}="galGal6";
+    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9";
+    $species_to_assembly{Dre}="danRer10"; $species_to_assembly{Dr2}="danRer11";
+    $species_to_assembly{Loc}="lepOcu1"; $species_to_assembly{Elu}="esoLuc2"; $species_to_assembly{Cm1}="eshark1";
+    $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
+    $species_to_assembly{Spu}="strPur4"; $species_to_assembly{Dme}="dm6"; $species_to_assembly{Aae}="AaegL5";
+    $species_to_assembly{Bmo}="bomMor1"; $species_to_assembly{Tca}="triCas5"; $species_to_assembly{Ame}="apiMel4";
+    $species_to_assembly{Bge}="blaGer1"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
+    $species_to_assembly{Cel}="WBcel235"; $species_to_assembly{Obi}="octBim1"; $species_to_assembly{Omi}="octMin1";
+    $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="TAIR10";
+
+    if (defined $assembly_to_species{$temp_assembly[0]}){ # it's a proper assembly
+	$sp = $assembly_to_species{$temp_assembly[0]};
+    }
+    else {
+	if (defined $species_to_assembly{$temp_assembly[0]}){
+	    $sp_assembly = $species_to_assembly{$temp_assembly[0]};
+	    $sp = $temp_assembly[0];
+	}
+	else {
+	    errPrintDie "$temp_assembly[0] is not a valid species\n";
+	}
+    }
 }
