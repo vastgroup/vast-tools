@@ -41,23 +41,24 @@ downloadDb <- function(speUrl, speFile) {
 }
 
 ### To be updated with every release:
-DbFile_1 <- "vastdb.hsa.20.12.19.tar.gz"
-DbFile_2 <- "vastdb.hs2.20.12.19.tar.gz"
-DbFile_3 <- "vastdb.mmu.20.12.19.tar.gz"
-DbFile_4 <- "vastdb.mm2.20.12.19.tar.gz"
-DbFile_5 <- "vastdb.bta.20.12.19.tar.gz"
-DbFile_6 <- "vastdb.gg3.20.12.19.tar.gz"
-DbFile_7 <- "vastdb.gg4.06.04.20.tar.gz"
-DbFile_8 <- "vastdb.xt1.06.04.20.tar.gz"
-DbFile_9 <- "vastdb.dre.20.12.19.tar.gz"
-DbFile_10 <- "vastdb.bl1.20.12.19.tar.gz"
-DbFile_11 <- "vastdb.spu.20.12.19.tar.gz"
-DbFile_12 <- "vastdb.dme.20.12.19.tar.gz"
-DbFile_13 <- "vastdb.sma.20.12.19.tar.gz"
-DbFile_14 <- "vastdb.cel.20.12.19.tar.gz"
-DbFile_15 <- "vastdb.sme.20.12.19.tar.gz"
-DbFile_16 <- "vastdb.nve.20.12.19.tar.gz"
-DbFile_17 <- "vastdb.ath.20.12.19.tar.gz"
+vastdbFiles<-c(
+"vastdb.hsa.20.12.19.tar.gz",
+"vastdb.hs2.20.12.19.tar.gz",
+"vastdb.mmu.20.12.19.tar.gz",
+"vastdb.mm2.20.12.19.tar.gz",
+"vastdb.bta.20.12.19.tar.gz",
+"vastdb.gg3.20.12.19.tar.gz",
+"vastdb.gg4.06.04.20.tar.gz",
+"vastdb.xt1.06.04.20.tar.gz",
+"vastdb.dre.20.12.19.tar.gz",
+"vastdb.bl1.20.12.19.tar.gz",
+"vastdb.spu.20.12.19.tar.gz",
+"vastdb.dme.20.12.19.tar.gz",
+"vastdb.sma.20.12.19.tar.gz",
+"vastdb.cel.20.12.19.tar.gz",
+"vastdb.sme.20.12.19.tar.gz",
+"vastdb.nve.20.12.19.tar.gz",
+"vastdb.ath.20.12.19.tar.gz");
 
 
 if ( opt$prompt ) {
@@ -94,19 +95,17 @@ if ( opt$prompt ) {
    15 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
    16 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
    17 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
-   18 - All VASTDB libraries
 
 ")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
     
-    dbs<-strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]]
-    for(db in dbs){
-      temp_DBFile =  paste("DbFile_", db, sep = "")
-      Url <- paste("http://vastdb.crg.eu/libs/", temp_DBFile, sep = "")
-#      Url <- joinStr("http://vastdb.crg.eu/libs/", temp_DBFile)       
-      downloadDb(Url, temp_DBFile)
+    dbs<-as.numeric(strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]])
+    for (db in dbs){
+      if (db<1 || db>length(vastdbFiles)) {stop("Input ",db," is out of range.")}
+      Url <- paste("http://vastdb.crg.eu/libs/", vastdbFiles[db], sep = "")
+      downloadDb(Url, vastdbFiles[db])
     }
   }
 
