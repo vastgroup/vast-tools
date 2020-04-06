@@ -20,6 +20,7 @@ my $helpFlag = 0;
 my $verboseFlag = 1; 
 my $dbDir; # directory of VASTDB
 my $species; # needed to run expr merge automatically
+my $sp_assembly; # the new input from v2.4.0
 my $groups; # list with the groupings: sample1_rep1\tgroup_1\n sample1_rep2\tgroup_1\n...
 my $folder; # actual folder where the vast-tools outputs are (the to_combine folder!)
 my $mapcorr_fileswitch="";
@@ -37,7 +38,7 @@ GetOptions("groups=s" => \$groups,
 	"outDir=s" => \$folder,
 	"o=s" => \$folder,
 	"IR_version=i" => \$IR_version,
-	"sp=s" => \$species,
+	"sp=s" => \$sp_assembly,
 	"expr" => \$expr,
 	"exprONLY" => \$exprONLY,
 	"help" => \$helpFlag,
@@ -75,18 +76,6 @@ sub time {
     return $datetime;
 }
 
-# Check database directory
-if (defined $expr or defined $exprONLY){
-    errPrintDie "Needs to provide species (\-\-sp)\n" if (!defined $species);
-
-    unless(defined($dbDir)) {
-	$dbDir = "$binPath/../VASTDB";
-    }
-    $dbDir = abs_path($dbDir);
-    $dbDir .= "/$species";
-    errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
-}
-
 ### Gets the version
 my $version;
 open (VERSION, "$binPath/../VERSION");
@@ -106,7 +95,8 @@ OPTIONS:
         -g, --groups file        File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
                                  Must contain sub-folders to_combine or expr_out from align steps.
-        --sp Hsa/Mmu/etc         Three letter code for the database (only needed if merging cRPKMs)
+        --sp hg19/mm10/etc       Assembly of the species (e.g. hg19, mm10).
+                                   The legacy three letter code for the database can also be used.
         --dbDir db               Database directory (default VASTDB)
         --IR_version 1/2         Version of the Intron Retention pipeline (1 or 2) (default 2)
         --expr                   Merges cRPKM files (default OFF)
@@ -119,6 +109,21 @@ OPTIONS:
 *** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
 
 ";
+}
+
+### Redefines species and sp_assembly
+get_internal_sp_key($sp_assembly);
+
+# Check database directory
+if (defined $expr or defined $exprONLY){
+    errPrintDie "Needs to provide species (\-\-sp)\n" if (!defined $sp_assembly);
+
+    unless(defined($dbDir)) {
+	$dbDir = "$binPath/../VASTDB";
+    }
+    $dbDir = abs_path($dbDir);
+    $dbDir .= "/$species";
+    errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 }
 
 # If exprONLY, activates expr
@@ -147,7 +152,7 @@ verbPrint "Setting output directory to $folder";
 open (LOG, ">>$folder/VTS_LOG_commands.txt");
 my $all_args="-o $folder -groups $groups -IR_version $IR_version";
 $all_args.=" -move_to_PARTS" if $move_to_PARTS;
-$all_args.=" -sp $species" if defined $species;
+$all_args.=" -sp $sp_assembly" if defined $sp_assembly;
 $all_args.=" -expr" if $expr;
 $all_args.=" -exprONLY" if $exprONLY;
 $all_args.=" -noIR" if $noIR;
@@ -735,3 +740,50 @@ foreach my $group (sort keys %groups){
 }
 
 verbPrint "Merge finished successfully\n";
+
+
+sub get_internal_sp_key {
+    my @temp_assembly = @_;
+
+    my %assembly_to_species;
+    $assembly_to_species{hg19}="Hsa"; $assembly_to_species{hg38}="Hs2"; $assembly_to_species{panTro4}="Ptr";
+    $assembly_to_species{rheMac2}="Mma"; $assembly_to_species{mm9}="Mmu"; $assembly_to_species{mm10}="Mm2";
+    $assembly_to_species{bosTau6}="Bta"; $assembly_to_species{bosTau9}="Bt2"; $assembly_to_species{monDom5}="Mdo";
+    $assembly_to_species{galGal3}="Gg3"; $assembly_to_species{galGal4}="Gg4"; $assembly_to_species{galGal6}="Gga";
+    $assembly_to_species{xenTro3}="Xt1"; $assembly_to_species{xenTro9}="Xtr"; 
+    $assembly_to_species{danRer10}="Dre"; $assembly_to_species{danRer11}="Dr2";
+    $assembly_to_species{lepOcu1}="Loc"; $assembly_to_species{esoLuc2}="Elu"; $assembly_to_species{eshark1}="Cm1";
+    $assembly_to_species{calMil1}="Cmi"; $assembly_to_species{braLan2}="Bl1"; $assembly_to_species{braLan3}="Bla";
+    $assembly_to_species{strPur4}="Spu"; $assembly_to_species{dm6}="Dme"; $assembly_to_species{AaegL5}="Aae";
+    $assembly_to_species{bomMor1}="Bmo"; $assembly_to_species{triCas5}="Tca"; $assembly_to_species{apiMel4}="Ame";
+    $assembly_to_species{blaGer1}="Bge"; $assembly_to_species{cloDip2}="Cdi"; $assembly_to_species{strMar1}="Sma";
+    $assembly_to_species{WBcel235}="Cel"; $assembly_to_species{octBim1}="Obi"; $assembly_to_species{octMin1}="Omi";
+    $assembly_to_species{schMed31}="Sme"; $assembly_to_species{nemVec1}="Nve"; $assembly_to_species{TAIR10}="Ath";
+    my %species_to_assembly;
+    $species_to_assembly{Hsa}="hg19"; $species_to_assembly{Hs2}="hg38"; $species_to_assembly{Ptr}="panTro4";
+    $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
+    $species_to_assembly{Bta}="bosTau6"; $species_to_assembly{Bt2}="bosTau9"; $species_to_assembly{Mdo}="monDom5";
+    $species_to_assembly{Gg3}="galGal3"; $species_to_assembly{Gg4}="galGal4"; $species_to_assembly{Gga}="galGal6";
+    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9";
+    $species_to_assembly{Dre}="danRer10"; $species_to_assembly{Dr2}="danRer11";
+    $species_to_assembly{Loc}="lepOcu1"; $species_to_assembly{Elu}="esoLuc2"; $species_to_assembly{Cm1}="eshark1";
+    $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
+    $species_to_assembly{Spu}="strPur4"; $species_to_assembly{Dme}="dm6"; $species_to_assembly{Aae}="AaegL5";
+    $species_to_assembly{Bmo}="bomMor1"; $species_to_assembly{Tca}="triCas5"; $species_to_assembly{Ame}="apiMel4";
+    $species_to_assembly{Bge}="blaGer1"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
+    $species_to_assembly{Cel}="WBcel235"; $species_to_assembly{Obi}="octBim1"; $species_to_assembly{Omi}="octMin1";
+    $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="TAIR10";
+
+    if (defined $assembly_to_species{$temp_assembly[0]}){ # it's a proper assembly
+	$species = $assembly_to_species{$temp_assembly[0]};
+    }
+    else {
+	if (defined $species_to_assembly{$temp_assembly[0]}){
+	    $sp_assembly = $species_to_assembly{$temp_assembly[0]};
+	    $species = $temp_assembly[0];
+	}
+	else {
+	    errPrintDie "$temp_assembly[0] is not a valid species\n";
+	}
+    }
+}

@@ -44,7 +44,7 @@ my $lift_coord;       # for human and mouse: vts formats the output wrt. hg19/hg
 GetOptions("help"  	       => \$helpFlag,
 	   "dbDir=s"           => \$dbDir,
 	   "sp=s"              => \$sp_assembly,
-	   "a=s"               => \$lift_coord,
+	   "lift_coord"        => \$lift_coord,
 	   "verbose"           => \$verboseFlag,
 	   "output=s"          => \$outDir,
 	   "o=s"               => \$outDir,
@@ -314,9 +314,9 @@ if ($N != 0 && !$onlyGEflag) {
     
 #    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N$asmbly.tab";
     my $finalOutput;
-    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N.tab" if (!defined $lift_coord);
-    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38.tab" if (defined $lift_coord && $sp_assembly eq "hg19");
-    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_mm10.tab" if (defined $lift_coord && $sp_assembly eq "mm9");
+    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N.tab" if (!$lift_coord);
+    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38.tab" if ($lift_coord && $sp_assembly eq "hg19");
+    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_mm10.tab" if ($lift_coord && $sp_assembly eq "mm9");
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
     
