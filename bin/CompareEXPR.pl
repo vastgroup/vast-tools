@@ -23,7 +23,6 @@ $binPath =~ s/\/$0$//;
 my $helpFlag = 0;
 my $verboseFlag = 1; 
 my $dbDir; # directory of VASTDB
-my $species; # to get the GO conversion file
 my $Q = "O[KW]\,.+?\,.+?\,.+?\,.+?\@"; # quality search
 my $input_file = $ARGV[0];
 #my $output_file; => #changed for out_root
