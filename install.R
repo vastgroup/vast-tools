@@ -40,34 +40,27 @@ downloadDb <- function(speUrl, speFile) {
    }
 }
 
-humanDbFile <- "vastdb.hsa.20.12.19.tar.gz"
-mouseDbFile <- "vastdb.mmu.20.12.19.tar.gz"
-chickenDbFile <- "vastdb.gg3.20.12.19.tar.gz"
-DreDbFile <- "vastdb.dre.20.12.19.tar.gz"
-BlaDbFile <- "vastdb.bla.20.12.19.tar.gz"
-SpuDbFile <- "vastdb.spu.20.12.19.tar.gz"
-DmeDbFile <- "vastdb.dme.20.12.19.tar.gz"
-SmaDbFile <- "vastdb.sma.20.12.19.tar.gz"
-CelDbFile <- "vastdb.cel.20.12.19.tar.gz"
-planariaDbFile <- "vastdb.sme.20.12.19.tar.gz"
-NveDbFile <- "vastdb.nve.20.12.19.tar.gz"
+### To be updated with every release:
+DbFile_1 <- "vastdb.hsa.20.12.19.tar.gz"
+DbFile_2 <- "vastdb.hs2.20.12.19.tar.gz"
+DbFile_3 <- "vastdb.mmu.20.12.19.tar.gz"
+DbFile_4 <- "vastdb.mm2.20.12.19.tar.gz"
+DbFile_5 <- "vastdb.bta.20.12.19.tar.gz"
+DbFile_6 <- "vastdb.gg3.20.12.19.tar.gz"
+DbFile_7 <- "vastdb.gg4.06.04.20.tar.gz"
+DbFile_8 <- "vastdb.xt1.06.04.20.tar.gz"
+DbFile_9 <- "vastdb.dre.20.12.19.tar.gz"
+DbFile_10 <- "vastdb.bl1.20.12.19.tar.gz"
+DbFile_11 <- "vastdb.spu.20.12.19.tar.gz"
+DbFile_12 <- "vastdb.dme.20.12.19.tar.gz"
+DbFile_13 <- "vastdb.sma.20.12.19.tar.gz"
+DbFile_14 <- "vastdb.cel.20.12.19.tar.gz"
+DbFile_15 <- "vastdb.sme.20.12.19.tar.gz"
+DbFile_16 <- "vastdb.nve.20.12.19.tar.gz"
+DbFile_17 <- "vastdb.ath.20.12.19.tar.gz"
 
 
-humanUrl <- joinStr("http://vastdb.crg.eu/libs/", humanDbFile)
-mouseUrl <- joinStr("http://vastdb.crg.eu/libs/", mouseDbFile)
-chickenUrl <- joinStr("http://vastdb.crg.eu/libs/", chickenDbFile)
-DreUrl <- joinStr("http://vastdb.crg.eu/libs/", DreDbFile)
-BlaUrl <- joinStr("http://vastdb.crg.eu/libs/", BlaDbFile)
-SpuUrl <- joinStr("http://vastdb.crg.eu/libs/", SpuDbFile)
-DmeUrl <- joinStr("http://vastdb.crg.eu/libs/", DmeDbFile)
-SmaUrl <- joinStr("http://vastdb.crg.eu/libs/", SmaDbFile)
-CelUrl <- joinStr("http://vastdb.crg.eu/libs/", CelDbFile)
-planariaUrl <- joinStr("http://vastdb.crg.eu/libs/", planariaDbFile)
-NveUrl <- joinStr("http://vastdb.crg.eu/libs/", NveDbFile)
-
-#
 if ( opt$prompt ) {
-
   writeLines("Looking for VAST Database [VASTDB]")
   auto <- "invalid"
   if(!file.exists("VASTDB")) {
@@ -82,46 +75,38 @@ if ( opt$prompt ) {
   }
   
   if(as.character(auto) == 'y') {
-    cat("Please choose one or more, e.g. Hsa,Mmu,Dre, from [all, Hsa, Mmu, Gg3, Dre, Bla, Spu, Dme, Sma, Cel, Sme, Nve] : ")
+    cat("Please choose one or more (comma-separated) from: 
+
+    1 - Homo sapiens (hg19, Hsa). Scaffold annotation: Ensembl v60.
+    2 - Homo sapiens (hg38, Hs2). Scaffold annotation: Ensembl v88.
+    3 - Mus musculus (mm9, Mmu). Scaffold annotation: Ensembl v62.
+    4 - Mus musculus (mm10, Mm2). Scaffold annotation: Ensembl v88.
+    5 - Bos taurus (bosTau6, Bta). Scaffold annotation: Ensembl v76.
+    6 - Gallus gallus (galGal3, Gg3). Scaffold annotation: Ensembl v65.
+    7 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
+    8 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
+    9 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
+   10 - Branchiostoma lanceolatum (braLan2, Bl1).  Scaffold annotation: Ensembl Metazoa v46.
+   11 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
+   12 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
+   13 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
+   14 - Caenorhabditis elegans (WBcel235, Cel). Scaffold annotation: Ensembl v87.
+   15 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
+   16 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
+   17 - Arabidopsis thaliana (TAIR10, Ath). araTha10.  Scaffold annotation: Ensembl  Plants v31.
+   18 - All VASTDB libraries
+
+")
     db <- readLines(file("stdin"),1)
     db <- as.character(db)
     close(file("stdin"))
     
     dbs<-strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]]
     for(db in dbs){
-      if(db == 'Hsa' || db == 'all') {
-        downloadDb(humanUrl, humanDbFile)
-      }
-      if(db == 'Mmu' || db == 'all') {
-        downloadDb(mouseUrl, mouseDbFile)
-      }
-      if(db == 'Gg3' || db == 'all') {
-        downloadDb(chickenUrl, chickenDbFile)
-      }
-      if(db == 'Dre' || db == 'all') {
-        downloadDb(DreUrl, DreDbFile)
-      }
-      if(db == 'Bla' || db == 'all') {
-        downloadDb(BlaUrl, BlaDbFile)
-      }
-      if(db == 'Spu' || db == 'all') {
-        downloadDb(SpuUrl, SpuDbFile)
-      }
-      if(db == 'Dme' || db == 'all') {
-        downloadDb(DmeUrl, DmeDbFile)
-      }
-      if(db == 'Sma' || db == 'all') {
-        downloadDb(SmaUrl, SmaDbFile)
-      }
-      if(db == 'Cel' || db == 'all') {
-        downloadDb(CelUrl, CelDbFile)
-      }
-      if(db == 'Sme' || db == 'all') {
-        downloadDb(planariaUrl, planariaDbFile)
-      }
-      if(db == 'Nve' || db == 'all') {
-        downloadDb(NveUrl, NveDbFile)
-      }
+      temp_DBFile =  paste("DbFile_", db, sep = "")
+      Url <- paste("http://vastdb.crg.eu/libs/", temp_DBFile, sep = "")
+#      Url <- joinStr("http://vastdb.crg.eu/libs/", temp_DBFile)       
+      downloadDb(Url, temp_DBFile)
     }
   }
 
