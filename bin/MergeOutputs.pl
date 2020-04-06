@@ -149,7 +149,7 @@ chdir($folder) or errPrint "Unable to change directories into output" and die;
 verbPrint "Setting output directory to $folder";
 
 ### Creates the LOG
-open (LOG, ">>$folder/VTS_LOG_commands.txt");
+open (LOG, ">>VTS_LOG_commands.txt") || die "Cannot open VTS_LOG_commands.txt in $folder\n";
 my $all_args="-o $folder -groups $groups -IR_version $IR_version";
 $all_args.=" -move_to_PARTS" if $move_to_PARTS;
 $all_args.=" -sp $sp_assembly" if defined $sp_assembly;
