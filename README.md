@@ -85,7 +85,29 @@ VAST-TOOLS looks for VASTDB inside its own directory
 
 In addition to these libraries, [VastDB](http://vastdb.crg.eu/) also refers to a web server
 that provides information about AS events profiled by VAST-TOOLS through their stable
-VastID (e.g. [HsaEX0040388](http://vastdb.crg.eu/wiki/Event:HsaEX0040388@Genome:hg19)).
+VastID (e.g. [HsaEX0040388](http://vastdb.crg.eu/wiki/Event:HsaEX0040388@Genome:hg19)). * NOTE: EventIDs are maintained across assemblies from the same species. While not all species are available in VastDB yet, they soon will.
+
+These are the `vast-tools` assemblies available in v2.4.0:
+
+~~~~
+    1 - Homo sapiens (hg19, Hsa). Scaffold annotation: Ensembl v60.
+    2 - Homo sapiens (hg38, Hs2). Scaffold annotation: Ensembl v88.
+    3 - Mus musculus (mm9, Mmu). Scaffold annotation: Ensembl v62.
+    4 - Mus musculus (mm10, Mm2). Scaffold annotation: Ensembl v88.
+    5 - Bos taurus (bosTau6, Bta). Scaffold annotation: Ensembl v76.
+    6 - Gallus gallus (galGal3, Gg3). Scaffold annotation: Ensembl v65.
+    7 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
+    8 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
+    9 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
+   10 - Branchiostoma lanceolatum (braLan2, Bl1). Bl71nemr. Scaffold annotation: Ensembl Metazoa v46.
+   11 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
+   12 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
+   13 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
+   14 - Caenorhabditis elegans (ce11, Cel). Scaffold annotation: Ensembl v87.
+   15 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
+   16 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
+   17 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
+~~~~
 
 **Automatic DB Installation:**
 
@@ -110,57 +132,76 @@ For manual, install each species or all of them to any location by, e.g. for Hsa
 > tar xzvf vastdb.hsa.20.12.19.tar.gz
 ~~~~
 
-Available libraries and species:
+Available libraries and species (assembly, species_key):
 
-Human (Hsa, hg19):
+Human (hg38, Hs2):
+- Current version:   4.8G [vastdb.hs2.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.hs2.20.12.19.tar.gz).
+
+Human (hg19, Hsa):
 - Current version:   6.3G [vastdb.hsa.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.20.12.19.tar.gz).
 - Previous versions: 6.3G [vastdb.hsa.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz).
 
-Mouse (Mmu, mm9): 
+Mouse (mm10, Mm2):
+- Current version:   3.9G [vastdb.mm2.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.mm2.20.12.19.tar.gz).
+
+Mouse (mm9, Mmu): 
 - Current version:   5.7G [vastdb.mmu.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.20.12.19.tar.gz).
 - Previous versions: 5.7G [vastdb.mmu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz).
 
-Chicken (Gg3, galGal3): 
+Cow (bosTau6, Bta): 
+- Current version:   3.3G [vastdb.bta.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.bta.20.12.19.tar.gz).
+
+Chicken (galGal4, Gg4): 
+- Current version:   1.9G [vastdb.gg4.06.04.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg4.06.04.20.tar.gz).
+
+Chicken (galGal3, Gg3): 
 - Current version:   1.7G [vastdb.gg3.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg3.20.12.19.tar.gz).
 - Previous versions: 1.6G [vastdb.gg3.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg3.16.02.18.tar.gz).
+
+Xenopus (xenTro3, Xt1): 
+- Current version:   2.1G [vastdb.xt1.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.xt1.20.12.19.tar.gz).
 
 Zebrafish (Dre, danRer10):
 - Current version:   2.2G [vastdb.dre.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.20.12.19.tar.gz).
 - Previous versions: 2.2G [vastdb.dre.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz).
 
-Amphioxus (Bla, Bl71nemr):
-- Current version:   1.5G [vastdb.bla.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.bla.20.12.19.tar.gz).
-- Previous versions: 1.5G [vastdb.bla.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.bla.01.12.18.tar.gz).
+Amphioxus (braLan2, Bl1):
+- Current version:   1.5G [vastdb.bl1.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.bl1.20.12.19.tar.gz).
+- Previous versions with species key "Bla" deprecated (a new assembly is being prepared for amphioxus).
 
-Sea urchin (Spu, Spur3.1):
+Sea urchin (strPur4, Spu):
 - Current version:   1.2G [vastdb.spu.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.20.12.19.tar.gz).
 - Previous versions: 1.2G [vastdb.spu.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz).
 
-Fruitfly (Dme, BDGP6):
+Fruitfly (dm6, Dme):
 - Current version:   319M [vastdb.dme.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.20.12.19.tar.gz).
 - Previous versions: 317M [vastdb.dme.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz).
 
-Centipede (Sma, Smar1): 
+Centipede (strMar1, Sma): 
 - Current version:   585M [vastdb.sma.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.20.12.19.tar.gz).
 - Previous versions: 585M [vastdb.sma.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz).
 
-C. elegans (Cel, WBcel235):
+C. elegans (ce11, Cel):
 - Current version:   395M [vastdb.cel.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.20.12.19.tar.gz).
 - Previous versions: 395M [vastdb.cel.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz).
 
-Planarian (Sme, v31):
+Planarian (schMed31, Sme):
 - Current version:   952M [vastdb.sme.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.20.12.19.tar.gz).
 - Previous versions: 952M [vastdb.sme.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz).
 
-Sea anemone (Nve, GCA_000209225):
+Sea anemone (nemVec1, Nve):
 - Current version:   679M [vastdb.nve.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.20.12.19.tar.gz).
 - Previous versions: 679M [vastdb.nve.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz).
+
+Arabidopsis thaliana (araTha10, Ath):
+- Current version:   568M [vastdb.ath.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.ath.20.12.19.tar.gz).
 
 
 ** NOTE: from release v2.0.0, new VASTDB libraries are needed for all species.
 
 ** NOTE: release v2.3.0 included a new release of libraries (\*.20.12.19.tar.gz). These libraries can be used (and are adviced to be used) with any previous vast-tools version.
 
+** NOTE: EventIDs are maintained across assemblies from the same species.
 
 If manually installed to central location, link the database files to vast-tools directory using:
 ~~~~
@@ -203,19 +244,20 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 ### Quick Usage
 
 NOTE: Unless specified, all options are default, for example the output
-directory is assumed to be 'vast_out', the database to be
-``<path>/vast-tools/VASTDB``, and the species ``Hsa``. To change these use
-the ``--output``, ``-dbDir`` and ``-sp`` flags!
+directory is assumed to be 'vast_out', the database to be ``<path>/vast-tools/VASTDB``. 
+To change these use the ``--output`` and ``-dbDir`` flags! 
+* NOTE: From v2.4.0, human is not the default species, which need to be provided.
+
 
 VAST-TOOLS can be run as simply as:
 
 ~~~~
-> vast-tools align tissueA_rep1.fq.gz
-> vast-tools align tissueA_rep2.fq.gz
-> vast-tools align tissueB_rep1.fq.gz
-> vast-tools align tissueB_rep2.fq.gz
+> vast-tools align tissueA_rep1.fq.gz -sp hg38
+> vast-tools align tissueA_rep2.fq.gz -sp hg38
+> vast-tools align tissueB_rep1.fq.gz -sp hg38
+> vast-tools align tissueB_rep2.fq.gz -sp hg38
 
-> vast-tools combine
+> vast-tools combine -sp hg38
 
 > vast-tools compare -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2
 OR
@@ -228,7 +270,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 ``diff``.
 
 ~~~~
-> vast-tools align tissueA_rep1.fq.gz -c 8
+> vast-tools align tissueA_rep1.fq.gz -sp hg38 -c 8
 ~~~~ 
 AND
 ~~~~
@@ -245,7 +287,7 @@ unmapped reads, and these are then aligned to predefined splice junction librari
 in the output directory as ``<sample>-50-e.fa.gz``, where ``sample`` is the sample
 name. The input reads can be compressed (via gzip) or uncompressed.
 
-Currently, VAST-TOOLS supports the following species: human (Hsa), mouse (Mmu), chicken (Gga), zebrafish (Dre), sea urchin (Spu), and planarian (Sme). By default, the ``-sp`` option is ``Hsa``.
+Currently, `vast-tools` supports multiple species and assemblies and is constantly growing in coordination with [VastDB](http://vastdb.crg.eu/). From v2.4.0, the species is provided using the standard assembly (e.g. hg38, mm9, etc). The 3-letter species key, as in previous versions, can also be provided.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs pluscRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
 
@@ -256,7 +298,7 @@ In addition to a file named *.cRPKM containing cRPKMs for each gene, a file name
 For example, to perform alignment with expression and 3′bias analysis on mouse data:
 
 ~~~~
-> vast-tools align mouse_tissue.fq.gz -sp Mmu --expr
+> vast-tools align mouse_tissue.fq.gz -sp mm10 --expr
 ~~~~
 
 If this alignment step needs to be repeated, the initial genome alignment step
@@ -266,7 +308,7 @@ step. Gene expression and intron retention analyses *cannot* be run from this st
 from the raw reads).
 
 ~~~~
-> vast-tools align mouse_tissue-50-e.fa.gz -sp Mmu
+> vast-tools align mouse_tissue-50-e.fa.gz -sp mm9
 ~~~~
 
 Although you can specify two fastq files to vast-tools in a 'paired-end' format,
@@ -317,7 +359,7 @@ Strand-unspecific RNAseq data will be aligned strand-unspecifically (equivalent 
 intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. In addition, the version of intron retention used in ``align`` can be specified using ``--IR_version`` (version 2 is used by default).
 
 ~~~~
-> vast-tools combine -o output_dir -sp [Hsa|Mmu|Gga|etc] [Options]
+> vast-tools combine -o output_dir -sp [hg38|mm10|galGal4|etc] [Options]
 ~~~~
 
 From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This needs to be provided using the ``-a`` option. 
@@ -639,7 +681,7 @@ Example command:
 
     cd ~/myshared
     fastq-dump SRR7802623
-    docker exec myvast vast-tools align /share/reads/SRR7802623.fastq -sp Hsa --expr -o /share/out/test
+    docker exec myvast vast-tools align /share/reads/SRR7802623.fastq -sp hg38 --expr -o /share/out/test
 
 In HPC environments we strongly encourage to use [Singularity](https://www.sylabs.io/singularity/). It is very easy to generate a Singularity image from Docker:
 
