@@ -87,7 +87,7 @@ if ( opt$prompt ) {
     7 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
     8 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
     9 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
-   10 - Branchiostoma lanceolatum (braLan2, Bl1).  Scaffold annotation: Ensembl Metazoa v46.
+   10 - Branchiostoma lanceolatum (braLan2, Bl1). Bl71nemr. Scaffold annotation: Ensembl Metazoa v46.
    11 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
    12 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
    13 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
