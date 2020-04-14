@@ -46,6 +46,19 @@ while (<TEMPLATE>){
     die "Can't identify a C1 ($C1) or core ($core) coordinate for $event\n" if !$C1 || !$core;
     $strand{$gene}="+" if $C1<$core;
     $strand{$gene}="-" if $C1>=$core;
+
+    ###
+    if ($strand{$gene} eq "+"){
+	$pre_data{$event}=$_; # also acts as holder for all event ids
+    }
+    else {
+	($chr,$A,$B,$C)=$t[4]=~/(.+?)\:(.*?)\,(.*)\-(.*)/;
+	@C=sort{$a<=>$b}(split(/\+/,$C));
+	$C=join("+",@C);
+	$t[4]="$chr:$A,$B-$C";
+	$temp_pre=join("\t",@t);
+	$pre_data{$event}=$temp_pre;
+    }
 }
 close TEMPLATE;
 
