@@ -279,7 +279,7 @@ foreach my $temp_path (@sp_in_vastdb){
 	    $a++;
 	}
 	else {
-	    $vastdb_sp_list.="$valid_sp ($temp_sp),\n                                  ";
+	    $vastdb_sp_list.="$valid_sp ($temp_sp),\n                                   ";
 	    $a=1;
 	}
     }
@@ -301,7 +301,7 @@ OPTIONS:
 	--sp Assembly	        Assembly code for the species (e.g. hg38, mm10).
                                 The legacy 3-species code can also be provided.
                                 Species currently available in local VASTDB:
-                                  $vastdb_sp_list                                   
+                                   $vastdb_sp_list                                   
 	--name, -n <NAME>       Defines name for this sample. By default, the
 	                        sample name is deduced from the fastq file name.
 	--dbDir db		Database directory (default VASTDB)
