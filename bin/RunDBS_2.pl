@@ -125,6 +125,7 @@ GENERAL OPTIONS:
 				Must contain sub-folders to_combine or expr_out from align steps.
         -sp Assembly            Assembly code for the species (e.g. hg38, mm10) (mandatory).
                                    The legacy 3-species code can also be provided.
+                                   Species currently available in local VASTDB:
 $vastdb_sp_list
 	-lift_coord     	To lift the coordinates of the output file to a newer assembly.
                                    Only for -sp hg19/Hsa or mm9/Mmu, which are converted to hg38 or mm10.
