@@ -120,21 +120,6 @@ $version=<VERSION>;
 chomp($version);
 $version="No version found" if !$version;
 
-# Checks available species
-unless (defined($dbDir)) {
-    $dbDir = "$binPath/../VASTDB";
-}
-$dbDir = abs_path($dbDir);
-my @sp_in_vastdb = glob("$dbDir/*/");
-my $vastdb_sp_list;
-foreach my $temp_path (@sp_in_vastdb){
-    my ($temp_sp) = $temp_path =~ /$dbDir\/(.+?)\//;
-    my $valid_sp = validate_vastdb_sp($temp_sp);
-    if ($valid_sp ne "Not valid"){
-	$vastdb_sp_list.="                                      - $valid_sp ($temp_sp)\n";
-    }
-}
-
 ### If species is needed
 if ($sp_assembly){
     get_internal_sp_key($sp_assembly);
@@ -210,8 +195,6 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         --use_names              Uses gene names (first column in INCLUSION table)
         --species/-sp Assembly   Assembly code for the species (e.g. hg38, mm10) (mandatory).
                                    The legacy 3-species code can also be provided.
-                                   Species currently available in local VASTDB:
-$vastdb_sp_list
         --dbDir db               Database directory (default VASTDB)
 
 
