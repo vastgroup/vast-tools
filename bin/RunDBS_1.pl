@@ -269,13 +269,22 @@ unless (defined($dbDir)) {
 $dbDir = abs_path($dbDir);
 my @sp_in_vastdb = glob("$dbDir/*/");
 my $vastdb_sp_list;
+my $a=1;
 foreach my $temp_path (@sp_in_vastdb){
     my ($temp_sp) = $temp_path =~ /$dbDir\/(.+?)\//;
     my $valid_sp = validate_vastdb_sp($temp_sp);
     if ($valid_sp ne "Not valid"){
-	$vastdb_sp_list.="                                      - $valid_sp ($temp_sp)\n";
+	if ($a<=3){
+	    $vastdb_sp_list.="$valid_sp ($temp_sp), ";
+	    $a++;
+	}
+	else {
+	    $vastdb_sp_list.="$valid_sp ($temp_sp),\n                                  ";
+	    $a=1;
+	}
     }
 }
+$vastdb_sp_list =~ s/\,\n\s+$/\./;
 
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
@@ -290,9 +299,9 @@ must be of same length.
 
 OPTIONS:
 	--sp Assembly	        Assembly code for the species (e.g. hg38, mm10).
-                                   The legacy 3-species code can also be provided.
-                                   Species currently available in local VASTDB:
-$vastdb_sp_list                                   
+                                The legacy 3-species code can also be provided.
+                                Species currently available in local VASTDB:
+                                  $vastdb_sp_list                                   
 	--name, -n <NAME>       Defines name for this sample. By default, the
 	                        sample name is deduced from the fastq file name.
 	--dbDir db		Database directory (default VASTDB)
@@ -358,9 +367,21 @@ my $inpType = !$fastaOnly ? "-f" : "-q";
 $dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 
+my $VASTDB_version;
+if (-e "$dbDir/VASTDB_VERSION"){
+    open (VV, "$dbDir/VASTDB_VERSION");
+    $VASTDB_version=<VV>;
+    chomp($VASTDB_version);
+    close VV;
+}
+else {
+    $VASTDB_version="No information about VASTDB VERSION";
+}
+
 # prints version (05/05/19) 
 verbPrint "VAST-TOOLS v$version";
 verbPrint "Species assembly: $sp_assembly, VASTDB Species key: $species";
+verbPrint "VASTDB Version: $VASTDB_version";
 
 # Command line flags here
 if (defined $ARGV[1]) { $pairedEnd = 1; }
@@ -629,7 +650,7 @@ $all_args.=" -rc2" if $rc2;
 $all_args.=" -nrc1" if $nrc1;
 $all_args.=" -nrc2" if $nrc2;
 
-print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools align $all_args\n";
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools align $all_args (VASTDB: $VASTDB_version)\n";
 
 
 if (!$genome_sub and !$useGenSub){
