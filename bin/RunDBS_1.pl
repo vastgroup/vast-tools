@@ -262,6 +262,21 @@ $version=<VERSION>;
 chomp($version);
 $version="No version found" if !$version;
 
+# Checks available species
+unless (defined($dbDir)) {
+    $dbDir = "$binPath/../VASTDB";
+}
+$dbDir = abs_path($dbDir);
+my @sp_in_vastdb = glob("$dbDir/*/");
+my $vastdb_sp_list;
+foreach my $temp_path (@sp_in_vastdb){
+    my ($temp_sp) = $temp_path =~ /$dbDir\/(.+?)\//;
+    my $valid_sp = validate_vastdb_sp($temp_sp);
+    if ($valid_sp ne "Not valid"){
+	$vastdb_sp_list.="                                      - $valid_sp ($temp_sp)\n";
+    }
+}
+
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
     print "
@@ -276,6 +291,8 @@ must be of same length.
 OPTIONS:
 	--sp Assembly	        Assembly code for the species (e.g. hg38, mm10).
                                    The legacy 3-species code can also be provided.
+                                   Species currently available in local VASTDB:
+$vastdb_sp_list                                   
 	--name, -n <NAME>       Defines name for this sample. By default, the
 	                        sample name is deduced from the fastq file name.
 	--dbDir db		Database directory (default VASTDB)
@@ -333,11 +350,11 @@ get_internal_sp_key($sp_assembly);
 
 my $inpType = !$fastaOnly ? "-f" : "-q"; 
 
-# Check database directory
-unless(defined($dbDir)) {
-    $dbDir = "$binPath/../VASTDB";
-}
-$dbDir = abs_path($dbDir);
+# Check database directory (done above, 14/04/20)
+#unless(defined($dbDir)) {
+#    $dbDir = "$binPath/../VASTDB";
+#}
+#$dbDir = abs_path($dbDir);
 $dbDir .= "/$species";
 errPrint "The database directory $dbDir does not exist" unless (-e $dbDir or $helpFlag);
 
@@ -820,6 +837,7 @@ sub get_internal_sp_key {
     $assembly_to_species{blaGer1}="Bge"; $assembly_to_species{cloDip2}="Cdi"; $assembly_to_species{strMar1}="Sma";
     $assembly_to_species{ce11}="Cel"; $assembly_to_species{octBim1}="Obi"; $assembly_to_species{octMin1}="Omi";
     $assembly_to_species{schMed31}="Sme"; $assembly_to_species{nemVec1}="Nve"; $assembly_to_species{araTha10}="Ath";
+    $assembly_to_species{rn6}="Rno"; $assembly_to_species{xenLae2}="Xla"; $assembly_to_species{pelSin1}="Psi";
     my %species_to_assembly;
     $species_to_assembly{Hsa}="hg19"; $species_to_assembly{Hs2}="hg38"; $species_to_assembly{Ptr}="panTro4";
     $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
@@ -834,6 +852,7 @@ sub get_internal_sp_key {
     $species_to_assembly{Bge}="blaGer1"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
     $species_to_assembly{Cel}="ce11"; $species_to_assembly{Obi}="octBim1"; $species_to_assembly{Omi}="octMin1";
     $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="araTha10";
+    $species_to_assembly{Rno}="rn6"; $species_to_assembly{Xla}="xenLae2"; $species_to_assembly{Psi}="pelSin1";
 
     if (defined $assembly_to_species{$temp_assembly[0]}){ # it's a proper assembly
 	$species = $assembly_to_species{$temp_assembly[0]};
@@ -846,5 +865,32 @@ sub get_internal_sp_key {
 	else {
 	    errPrintDie "$temp_assembly[0] is not a valid species\n";
 	}
+    }
+}
+
+sub validate_vastdb_sp {
+    my @temp_assembly = @_;
+
+    my %species_to_assembly;
+    $species_to_assembly{Hsa}="hg19"; $species_to_assembly{Hs2}="hg38"; $species_to_assembly{Ptr}="panTro4";
+    $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
+    $species_to_assembly{Bta}="bosTau6"; $species_to_assembly{Bt2}="bosTau9"; $species_to_assembly{Mdo}="monDom5";
+    $species_to_assembly{Gg3}="galGal3"; $species_to_assembly{Gg4}="galGal4"; $species_to_assembly{Gga}="galGal6";
+    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9";
+    $species_to_assembly{Dre}="danRer10"; $species_to_assembly{Dr2}="danRer11";
+    $species_to_assembly{Loc}="lepOcu1"; $species_to_assembly{Elu}="esoLuc2"; $species_to_assembly{Cm1}="eshark1";
+    $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
+    $species_to_assembly{Spu}="strPur4"; $species_to_assembly{Dme}="dm6"; $species_to_assembly{Aae}="aedAeg5";
+    $species_to_assembly{Bmo}="bomMor1"; $species_to_assembly{Tca}="triCas5"; $species_to_assembly{Ame}="apiMel4";
+    $species_to_assembly{Bge}="blaGer1"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
+    $species_to_assembly{Cel}="ce11"; $species_to_assembly{Obi}="octBim1"; $species_to_assembly{Omi}="octMin1";
+    $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="araTha10";
+    $species_to_assembly{Rno}="rn6"; $species_to_assembly{Xla}="xenLae2"; $species_to_assembly{Psi}="pelSin1";
+
+    if (defined $species_to_assembly{$temp_assembly[0]}){
+	return ($species_to_assembly{$temp_assembly[0]});
+    }
+    else {
+	return ("Not valid");
     }
 }
