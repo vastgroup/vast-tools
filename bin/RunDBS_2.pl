@@ -103,14 +103,22 @@ unless (defined($dbDir)) {
 $dbDir = abs_path($dbDir);
 my @sp_in_vastdb = glob("$dbDir/*/");
 my $vastdb_sp_list;
+my $a=1;
 foreach my $temp_path (@sp_in_vastdb){
     my ($temp_sp) = $temp_path =~ /$dbDir\/(.+?)\//;
     my $valid_sp = validate_vastdb_sp($temp_sp);
     if ($valid_sp ne "Not valid"){
-	$vastdb_sp_list.="                                      - $valid_sp ($temp_sp)\n";
+	if ($a<=3){
+	    $vastdb_sp_list.="$valid_sp ($temp_sp), ";
+	    $a++;
+	}
+	else {
+	    $vastdb_sp_list.="$valid_sp ($temp_sp),\n                                   ";
+	    $a=1;
+	}
     }
 }
-
+$vastdb_sp_list =~ s/\,\n\s+$/\./;
 
 if ($helpFlag or (!defined $sp_assembly)){
     print STDERR "
@@ -124,9 +132,9 @@ GENERAL OPTIONS:
 	-o, --output 		Output directory to combine samples from (default vast_out)
 				Must contain sub-folders to_combine or expr_out from align steps.
         -sp Assembly            Assembly code for the species (e.g. hg38, mm10) (mandatory).
-                                   The legacy 3-species code can also be provided.
-                                   Species currently available in local VASTDB:
-$vastdb_sp_list
+                                The legacy 3-species code can also be provided.
+                                Species currently available in local VASTDB:
+                                   $vastdb_sp_list
 	-lift_coord     	To lift the coordinates of the output file to a newer assembly.
                                    Only for -sp hg19/Hsa or mm9/Mmu, which are converted to hg38 or mm10.
 				   NOTE 1: vast-tools works internally with hg19/Hsa and mm9/Mmu.
@@ -180,7 +188,18 @@ verbPrint "Species assembly: $sp_assembly, VASTDB Species key: $sp";
 $dbDir .= "/$sp";
 errPrintDie "The database directory $dbDir does not exist" unless (-e $dbDir);
 verbPrint "Using VASTDB -> $dbDir";
-### VASTDB version here
+
+my $VASTDB_version;
+if (-e "$dbDir/VASTDB_VERSION"){
+    open (VV, "$dbDir/VASTDB_VERSION");
+    $VASTDB_version=<VV>;
+    chomp($VASTDB_version);
+    close VV;
+}
+else {
+    $VASTDB_version="No information about VASTDB VERSION";
+}
+verbPrint "VASTDB Version: $VASTDB_version";
 
 chdir($outDir);
 
@@ -233,7 +252,7 @@ $all_args.=" -no_expr" if $noGEflag;
 $all_args.=" -C" if $cRPKMCounts;
 $all_args.=" -norm" if $normalize;
 
-print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args\n";
+print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args (VASTDB: $VASTDB_version)\n";
 
 if ($N != 0 && !$onlyGEflag) {
     unless ($onlyIRflag || $onlyGEflag){
