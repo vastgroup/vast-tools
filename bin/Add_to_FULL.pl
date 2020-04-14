@@ -120,6 +120,19 @@ while (<$TEMPLATE>){
 #    die "Non-unique key value pair in $TEMPLATE!\n";
 #  }
 
+  ### Added on v2.4.1 to sort coordinates consistently with Alt5 (14/04/20)
+  if ($l[5] eq "Alt3"){
+      my ($t_A,$t_B,$t_C,$t_D) = $l[4] =~ /(.+?)\:(.*)\,(.*)\-(.*)/;
+      my $t_strand;
+      $t_strand = "+" if $t_C =~ /\+/;
+      $t_strand = "-" if $t_D =~ /\+/;
+      
+      if ($t_strand eq "-"){
+	  my $new_coord = join("+", (sort{$a<=>$b}(split(/\+/,$t_D))));
+	  $l[4]="$t_A:$t_B,$t_C-$new_coord";
+      }
+  }
+
   @l = @l[0..5]; # to make sure unexpected extras are not included --MI [30/12/15] (old: \@l)
   $template{$l[1]} = \@l; 
   
