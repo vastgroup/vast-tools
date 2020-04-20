@@ -178,7 +178,7 @@ errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_vers
 get_internal_sp_key($sp_assembly);
 
 # prints version (05/05/19)
-tverbPrint "VAST-TOOLS v$version";
+verbPrint "VAST-TOOLS v$version";
 verbPrint "Species assembly: $sp_assembly, VASTDB Species key: $sp";
 
 #if(!defined($dbDir)) {
