@@ -119,6 +119,7 @@ foreach my $temp_path (@sp_in_vastdb){
     }
 }
 $vastdb_sp_list =~ s/\,\n\s+$/\./;
+$vastdb_sp_list =~ s/\,\s+$/\./;
 
 if ($helpFlag or (!defined $sp_assembly)){
     print STDERR "

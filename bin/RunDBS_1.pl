@@ -285,6 +285,7 @@ foreach my $temp_path (@sp_in_vastdb){
     }
 }
 $vastdb_sp_list =~ s/\,\n\s+$/\./;
+$vastdb_sp_list =~ s/\,\s+$/\./;
 
 
 if (!defined($ARGV[0]) or $helpFlag or $EXIT_STATUS){
