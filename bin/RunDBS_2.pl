@@ -178,7 +178,7 @@ errPrintDie "IR version must be either 1 or 2." if ($IR_version != 1 && $IR_vers
 get_internal_sp_key($sp_assembly);
 
 # prints version (05/05/19)
-verbPrint "VAST-TOOLS v$version";
+tverbPrint "VAST-TOOLS v$version";
 verbPrint "Species assembly: $sp_assembly, VASTDB Species key: $sp";
 
 #if(!defined($dbDir)) {
@@ -434,7 +434,7 @@ sub get_internal_sp_key {
     $assembly_to_species{rheMac2}="Mma"; $assembly_to_species{mm9}="Mmu"; $assembly_to_species{mm10}="Mm2";
     $assembly_to_species{bosTau6}="Bta"; $assembly_to_species{bosTau9}="Bt2"; $assembly_to_species{monDom5}="Mdo";
     $assembly_to_species{galGal3}="Gg3"; $assembly_to_species{galGal4}="Gg4"; $assembly_to_species{galGal6}="Gga";
-    $assembly_to_species{xenTro3}="Xt1"; $assembly_to_species{xenTro9}="Xtr"; 
+    $assembly_to_species{xenTro3}="Xt1"; $assembly_to_species{xenTro9}="Xtr"; $assembly_to_species{rheMac10}="Mml";
     $assembly_to_species{danRer10}="Dre"; $assembly_to_species{danRer11}="Dr2";
     $assembly_to_species{lepOcu1}="Loc"; $assembly_to_species{esoLuc2}="Elu"; $assembly_to_species{eshark1}="Cm1";
     $assembly_to_species{calMil1}="Cmi"; $assembly_to_species{braLan2}="Bl1"; $assembly_to_species{braLan3}="Bla";
@@ -449,7 +449,7 @@ sub get_internal_sp_key {
     $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
     $species_to_assembly{Bta}="bosTau6"; $species_to_assembly{Bt2}="bosTau9"; $species_to_assembly{Mdo}="monDom5";
     $species_to_assembly{Gg3}="galGal3"; $species_to_assembly{Gg4}="galGal4"; $species_to_assembly{Gga}="galGal6";
-    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9";
+    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9"; $species_to_assembly{Mml}="rheMac10";
     $species_to_assembly{Dre}="danRer10"; $species_to_assembly{Dr2}="danRer11";
     $species_to_assembly{Loc}="lepOcu1"; $species_to_assembly{Elu}="esoLuc2"; $species_to_assembly{Cm1}="eshark1";
     $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
@@ -482,7 +482,7 @@ sub validate_vastdb_sp {
     $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
     $species_to_assembly{Bta}="bosTau6"; $species_to_assembly{Bt2}="bosTau9"; $species_to_assembly{Mdo}="monDom5";
     $species_to_assembly{Gg3}="galGal3"; $species_to_assembly{Gg4}="galGal4"; $species_to_assembly{Gga}="galGal6";
-    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9";
+    $species_to_assembly{Xt1}="xenTro3"; $species_to_assembly{Xtr}="xenTro9"; $species_to_assembly{Mml}="rheMac10";
     $species_to_assembly{Dre}="danRer10"; $species_to_assembly{Dr2}="danRer11";
     $species_to_assembly{Loc}="lepOcu1"; $species_to_assembly{Elu}="esoLuc2"; $species_to_assembly{Cm1}="eshark1";
     $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
