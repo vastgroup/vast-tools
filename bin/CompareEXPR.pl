@@ -50,6 +50,8 @@ my $normalize; # does quantile normalization (using limma)
 my $install_limma;
 my $out_root;
 my @data_fold;
+my $name_A;
+my $name_B;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_fold_av=f" => \$min_fold_av,
@@ -71,7 +73,9 @@ GetOptions(               "min_fold_av=f" => \$min_fold_av,
 			  "GO" => \$get_GO,
 			  "use_names" => \$use_names,
 			  "print_all" => \$print_all,
-			  "paired" => \$paired
+			  "paired" => \$paired,
+			  "name_A=s" => \$name_A,
+			  "name_B=s" => \$name_B
     );
 
 our $EXIT_STATUS = 0;
@@ -130,6 +134,8 @@ Compare two sample sets to find differentially expressed genes based on fold cha
         --install_limma          Installs limma package if needed (default OFF)
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
+        -name_A groupA           A custom name can be provided for sample group A (otherwise, automatically generated) 
+        -name_B groupB           A custom name can be provided for sample group B (otherwise, automatically generated) 
         --print_all              Print all samples (default OFF\; prints only the tested samples) 
         --paired                 Does a paired comparison (A1 vs B1, A2 vs B2, etc.)
                                    - It uses min_fold_av as the minimum fold change for the averages of individual fold changes
@@ -283,10 +289,14 @@ foreach my $j (0..$#samplesB){
 $short_head.= "\tCV_A\tCV_B\tAv_A\tAv_B\tLog2_Fold_Ch";
 
 # representative names
-my $name_A=$head[$samplesA[0]];
-my $name_B=$head[$samplesB[0]];
-$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a"
-$name_B=~s/(.+)\_.+/$1/ unless $repA == 1;
+if (!defined $name_A){
+    $name_A=$head[$samplesA[0]];
+    $name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a"
+}
+if (!defined $name_B){
+    $name_B=$head[$samplesB[0]];
+    $name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
+}
 
 # defining default output file name
 my ($root)=$ARGV[0]=~/.+\-(.+?)\./;
