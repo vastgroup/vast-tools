@@ -436,7 +436,7 @@ if($pairedEnd){
 	$N_fq1=$N_fq1/2;
 	$N_fq2=$N_fq2/2;
     }
-    errPrintDie "Number of R1 and R2 reads do not match ($N_fq1 vs $N_fq2)\n" if $N_fq1 != $N_fq2;
+    errPrintDie "The number of R1 and R2 reads does not match ($N_fq1 vs $N_fq2)\n" if $N_fq1 != $N_fq2;
 }
 
 my $fq;     # takes the fastq file to be processed at each step
