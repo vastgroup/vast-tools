@@ -410,10 +410,33 @@ unless(substr($fq1,0,1) eq "/" ){# file path is relative
 }
 my $fq2;
 if($pairedEnd){
-	$fq2 = $ARGV[1];
-	unless(substr($fq2,0,1) eq "/" ){# file path is relative
-		$fq2=cwd() . "/$fq2";    #  add to file path current working directory; necessary because later we change the working directory
-	}
+    $fq2 = $ARGV[1];
+    unless(substr($fq2,0,1) eq "/" ){# file path is relative
+	$fq2=cwd() . "/$fq2";    #  add to file path current working directory; necessary because later we change the working directory
+    }
+
+    ### Check for read numbers in R1 and R2
+    my $N_fq1;
+    my $N_fq2;
+    if ($fq1=~/\.gz/){
+	$N_fq1=`gzip -dc $fq1 \| wc -l`;
+	$N_fq2=`gzip -dc $fq2 \| wc -l`;
+    }
+    else {
+	$N_fq1=`wc -l $fq1`;
+	$N_fq2=`wc -l $fq2`;
+    }
+    chomp($N_fq1);
+    chomp($N_fq2);
+    unless (defined $trimmed && !defined $fastaOnly){
+	$N_fq1=$N_fq1/4;
+	$N_fq2=$N_fq2/4;
+    }
+    else {
+	$N_fq1=$N_fq1/2;
+	$N_fq2=$N_fq2/2;
+    }
+    errPrintDie "Number of R1 and R2 reads do not match ($N_fq1 vs $N_fq2)\n" if $N_fq1 != $N_fq2;
 }
 
 my $fq;     # takes the fastq file to be processed at each step
