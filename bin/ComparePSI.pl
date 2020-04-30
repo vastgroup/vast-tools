@@ -166,7 +166,7 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -name_A groupA           A custom name can be provided for sample group A (otherwise, automatically generated) 
-        -name_B grou             A custom name can be provided for sample group B (otherwise, automatically generated) 
+        -name_B groupB           A custom name can be provided for sample group B (otherwise, automatically generated) 
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
