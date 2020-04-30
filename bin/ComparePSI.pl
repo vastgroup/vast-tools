@@ -48,6 +48,8 @@ my $use_int_reads;
 my $fr_int_reads = 0.4;
 my $min_ALT_use = 25;
 my $legacy_ALT;
+my $name_A; # names for the outputs and summary
+my $name_B;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_dPSI=i" => \$min_dPSI,
@@ -80,7 +82,9 @@ GetOptions(               "min_dPSI=i" => \$min_dPSI,
 			  "noVLOW" => \$noVLOW,
 			  "noB3" => \$noB3,
 			  "min_ALT_use=i" => \$min_ALT_use,
-			  "legacy_ALT" => \$legacy_ALT
+			  "legacy_ALT" => \$legacy_ALT,
+			  "name_A=s" => \$name_A,
+			  "name_B=s" => \$name_B
     );
 
 our $EXIT_STATUS = 0;
@@ -161,6 +165,8 @@ INCLUSION_LEVELS_FULL-root.tab is final table produced by VAST-TOOLs command com
         --outFile file           Output file name (default based on option parameters)
         -a/--samplesA sA1,sA2    Required, 1:n sample names or column_\# separated by , (mandatory)
         -b/--samplesB sB1,sB2    Required, 1:n sample names or column_\# separated by , (mandatory)
+        -name_A groupA           A custom name can be provided for sample group A (otherwise, automatically generated) 
+        -name_B grou             A custom name can be provided for sample group B (otherwise, automatically generated) 
         --noVLOW                 Does not use samples with VLOW coverage (default OFF)
         --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                   Filter IR by the p-value of the binomial test (default OFF)
@@ -281,10 +287,14 @@ errPrintDie "Column numbers do not seem 0-based or conversion did not work prope
 errPrintDie "Column numbers do not seem to correspond to INCLUSION samples\n" if (defined $kill_6lower);
 
 # gets representative names
-my $name_A=$head[$samplesA[0]];
-my $name_B=$head[$samplesB[0]];
-$name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a" or "_1", but if it's only one, it's left as is
-$name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
+if (!defined $name_A){
+    $name_A=$head[$samplesA[0]];
+    $name_A=~s/(.+)\_.+/$1/ unless $repA == 1; # usually the rep number/id is encoded as "_a" or "_1", but if it's only one, it's left as is
+}
+if (!defined $name_B){
+    $name_B=$head[$samplesB[0]];
+    $name_B=~s/(.+)\_.+/$1/ unless $repB == 1;
+}
 
 ####### Output file
 # defining default output file name
