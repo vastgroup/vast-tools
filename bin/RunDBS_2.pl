@@ -91,6 +91,29 @@ sub verbPrint {
   }
 }
 
+
+sub handleParallelJob{
+	my $packageid=$_[0];
+	my $childid=$_[1];
+	my $Ncores=$_[2];
+	my @dopackage=@{$_[3]};
+	my $message=$_[4];
+	my $call=$_[5];
+
+	unless($dopackage[$Ncores]->[$packageid]==$childid){return()}
+
+	# childs should not generate any output while running to prevent mixed and messed-up output from parallel processes
+	my $output=`$call 2>&1`;
+	if ($? ne '0'){ # error in child
+		die "[vast combine error]: in call $call\n$output\n";
+	}else{          # no error in child
+		if($verboseFlag) {print STDERR "[vast combine]: $message\n$output\n"}
+	}
+
+return();
+}
+
+
 ### Check and re-set Ncores
 if($Ncores>6){$Ncores=6}                # we run in parallel at most 6 packages
 if($Ncores<6 && $Ncores>4){$Ncores=5}
@@ -269,6 +292,7 @@ $all_args.=" -norm" if $normalize;
 
 print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args (VASTDB: $VASTDB_version)\n";
 
+my $output;
 if ($N != 0 && !$onlyGEflag) {
 
   # start $N parallel processes
@@ -278,37 +302,22 @@ if ($N != 0 && !$onlyGEflag) {
 
 	    unless ($onlyIRflag || $onlyGEflag){
 		  ### Gets the PSIs for the events in the a posteriori pipeline
-		  if($dopackage[$Ncores]->[0]==$child){
-		    verbPrint "Building Table for COMBI (splice-site based pipeline)\n";
-		    sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
-		  }
-		
+		  handleParallelJob(0,$child,$Ncores,\@dopackage,"Building Table for COMBI (splice-site based pipeline)","$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej");
+		  		
 		  ### Gets the PSIs for the a priori, SIMPLE
-		  if($dopackage[$Ncores]->[1]==$child){
-		    verbPrint "Building Table for EXSK (transcript-based pipeline, single)\n";
-		    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-		  }
+		  handleParallelJob(1,$child,$Ncores,\@dopackage,"Building Table for EXSK (transcript-based pipeline, single)","$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag");		  
 
 		  ### Gets the PSIs for the a priori, COMPLEX
-		  if($dopackage[$Ncores]->[2]==$child){
-		    verbPrint "Building Table for MULTI (transcript-based pipeline, multiexon)\n";
-		    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-		  }
+		  handleParallelJob(2,$child,$Ncores,\@dopackage,"Building Table for MULTI (transcript-based pipeline, multiexon)","$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag");		  
 		
 		  ### Gets the PSIs for the MIC pipeline
-		  if($dopackage[$Ncores]->[3]==$child){
-		    verbPrint "Building Table for MIC (microexon pipeline)\n";
-		    sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-		  }
+		  handleParallelJob(3,$child,$Ncores,\@dopackage,"Building Table for MIC (microexon pipeline)","$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag");
 	    }# unless onlyIRflag
 	
 	    #### New in v2.0 (added 15/01/18)
 	    unless ($noANNOTflag || $onlyIRflag || $onlyGEflag){
 		### Gets the PSIs for ALL annotated exons directly
-		  if($dopackage[$Ncores]->[4]==$child){
-		    verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
-		    sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
-		  }
+		  handleParallelJob(4,$child,$Ncores,\@dopackage,"Building Table for ANNOT (annotation-based pipeline)","$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej");
 	    }
 
 	    # To define version [02/10/15]; minimize changes for users
@@ -328,34 +337,23 @@ if ($N != 0 && !$onlyGEflag) {
 	
 	    unless($noIRflag || $onlyEXflag || $onlyGEflag) {
 		### Gets the PIRs for the Intron Retention pipeline
-		  if($dopackage[$Ncores]->[5]==$child){
-		    verbPrint "Building quality score table for intron retention (version $IR_version)\n";
-		    sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
-		    verbPrint "Building Table for intron retention (version $IR_version)\n";
-		    sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
-		      " -c " . abs_path("to_combine") .
-		      " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
-		      " -o " . abs_path("raw_incl");
-		  }
+		  handleParallelJob(5,$child,$Ncores,\@dopackage,"Building quality score table for intron retention (version $IR_version)","$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine"));
+		  handleParallelJob(5,$child,$Ncores,\@dopackage,"Building Table for intron retention (version $IR_version)","$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" ." -c " . abs_path("to_combine") ." -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" ." -o " . abs_path("raw_incl"));
 	    }
 	
 	    unless ($onlyIRflag || $onlyEXflag || $onlyGEflag){
 		  ### Gets PSIs for ALT5ss and adds them to the general database
-		  if($dopackage[$Ncores]->[6]==$child){
-		    verbPrint "Building Table for Alternative 5'ss choice events\n";
-		    sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-		  }
+		  handleParallelJob(6,$child,$Ncores,\@dopackage,"Building Table for Alternative 5'ss choice events","$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag");
 		
 		  ### Gets PSIs for ALT3ss and adds them to the general database
-		  if($dopackage[$Ncores]->[7]==$child){
-		    verbPrint "Building Table for Alternative 3'ss choice events\n";
-		    sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-		  }
+		  handleParallelJob(7,$child,$Ncores,\@dopackage,"Building Table for Alternative 3'ss choice events","$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag");
 	    }
 	    
 	    exit; # quit child
+  	  }# if pid==0
   	} # for-child
-    ### wait until all childreen have finished
+ 
+    ### Here we are back to parent process: Wait until all childreen have finished
     for (1 .. $N) { wait(); }
     
     ### Combine results into unified "FULL" table
@@ -391,7 +389,6 @@ if ($N != 0 && !$onlyGEflag) {
 	}
     }
     
-#    my $finalOutput = "INCLUSION_LEVELS_FULL-$sp$N$asmbly.tab";
     my $finalOutput;
     $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N.tab" if (!$lift_coord);
     $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38.tab" if ($lift_coord && $sp_assembly eq "hg19");
@@ -399,8 +396,6 @@ if ($N != 0 && !$onlyGEflag) {
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
     
-    # lift-over if necessary (hg19->hg38 or mm9->mm10)
-#    if( $asmbly=~/(hg38|mm10)/ ){
     if ($lift_coord){
 	my $dictionary;
     	# select liftOvr dictionary
