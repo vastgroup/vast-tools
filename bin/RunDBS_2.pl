@@ -91,6 +91,17 @@ sub verbPrint {
   }
 }
 
+### Check and re-set Ncores
+if($Ncores>6){$Ncores=6}                # we run in parallel at most 6 packages
+if($Ncores<6 && $Ncores>4){$Ncores=5}
+if($Ncores<5 && $Ncores>1){$Ncores=4}   
+if($Ncores<2){$Ncores=1}                # no parallelization
+
+### Definition of distribution of work packages to sub-processes
+# Positions in dopackage correspond to different Ncores values
+# Numbers are sub-process ids and positions correspond to work packages 1-8
+my @dopackage=(undef,[0,0,0,0,0,0,0,0],undef,undef,[0,1,1,1,1,1,2,3],[0,1,1,1,2,1,3,4],[0,1,1,1,2,3,4,5]);
+
 ### Gets the version
 my $version;
 open (VERSION, "$binPath/../VERSION");
@@ -138,7 +149,7 @@ GENERAL OPTIONS:
                                 The legacy 3-species code can also be provided.
                                 Species currently available in local VASTDB:
                                    $vastdb_sp_list
-	--cores     		Number of cores. Choose from 1, 4, 8. (default 1)
+	--cores     		Number of cores. Choose from 1, 4, 5, 6. (default 1)
 	-lift_coord     	To lift the coordinates of the output file to a newer assembly.
                                    Only for -sp hg19/Hsa or mm9/Mmu, which are converted to hg38 or mm10.
 				   NOTE 1: vast-tools works internally with hg19/Hsa and mm9/Mmu.
@@ -259,67 +270,93 @@ $all_args.=" -norm" if $normalize;
 print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args (VASTDB: $VASTDB_version)\n";
 
 if ($N != 0 && !$onlyGEflag) {
-    unless ($onlyIRflag || $onlyGEflag){
-	### Gets the PSIs for the events in the a posteriori pipeline
-	verbPrint "Building Table for COMBI (splice-site based pipeline)\n";
-	sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
-	
-	### Gets the PSIs for the a priori, SIMPLE
-	verbPrint "Building Table for EXSK (transcript-based pipeline, single)\n";
-	sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-	
-	### Gets the PSIs for the a priori, COMPLEX
-	verbPrint "Building Table for MULTI (transcript-based pipeline, multiexon)\n";
-	sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-	
-	### Gets the PSIs for the MIC pipeline
-	verbPrint "Building Table for MIC (microexon pipeline)\n";
-	sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-    }
 
-    #### New in v2.0 (added 15/01/18)
-    unless ($noANNOTflag || $onlyIRflag || $onlyGEflag){
-	### Gets the PSIs for ALL annotated exons directly
-	verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
-	sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
-    }
+  # start $N parallel processes
+  for(my $child=0;$child<$Ncores;$child++){
+  	my $pid = fork; die "Error while creating sub-processes for parallelization" if not defined $pid;
+  	if ($pid==0) {  # in one of the child processes
 
-    
-    # To define version [02/10/15]; minimize changes for users
-    # $v => "" or "_v2" [v1/v2]
-    my $v;
-    my @irFiles;
-    if ($IR_version == 1){
-	$v="";
-	@irFiles = glob(abs_path("to_combine") . "/*.IR");
-    }
-    elsif ($IR_version == 2){
-	$v="_v2";
-	@irFiles = glob(abs_path("to_combine") . "/*.IR2");
-    }
-    
-    $noIRflag = 1 if @irFiles == 0;
+	    unless ($onlyIRflag || $onlyGEflag){
+		  ### Gets the PSIs for the events in the a posteriori pipeline
+		  if($dopackage[$Ncores]->[0]==$child){
+		    verbPrint "Building Table for COMBI (splice-site based pipeline)\n";
+		    sysErrMsg "$binPath/Add_to_COMBI.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -use_all_excl_eej=$use_all_excl_eej -extra_eej=$extra_eej";
+		  }
+		
+		  ### Gets the PSIs for the a priori, SIMPLE
+		  if($dopackage[$Ncores]->[1]==$child){
+		    verbPrint "Building Table for EXSK (transcript-based pipeline, single)\n";
+		    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=exskX -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+		  }
 
-    unless($noIRflag || $onlyEXflag || $onlyGEflag) {
-	### Gets the PIRs for the Intron Retention pipeline
-	verbPrint "Building quality score table for intron retention (version $IR_version)\n";
-	sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
-	verbPrint "Building Table for intron retention (version $IR_version)\n";
-	sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
-	    " -c " . abs_path("to_combine") .
-	    " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
-	    " -o " . abs_path("raw_incl");
-    }
-
-    unless ($onlyIRflag || $onlyEXflag || $onlyGEflag){
-	### Gets PSIs for ALT5ss and adds them to the general database
-	verbPrint "Building Table for Alternative 5'ss choice events\n";
-	sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+		  ### Gets the PSIs for the a priori, COMPLEX
+		  if($dopackage[$Ncores]->[2]==$child){
+		    verbPrint "Building Table for MULTI (transcript-based pipeline, multiexon)\n";
+		    sysErrMsg "$binPath/Add_to_APR.pl -sp=$sp -type=MULTI3X -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+		  }
+		
+		  ### Gets the PSIs for the MIC pipeline
+		  if($dopackage[$Ncores]->[3]==$child){
+		    verbPrint "Building Table for MIC (microexon pipeline)\n";
+		    sysErrMsg "$binPath/Add_to_MIC.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+		  }
+	    }# unless onlyIRflag
 	
-	### Gets PSIs for ALT3ss and adds them to the general database
-	verbPrint "Building Table for Alternative 3'ss choice events\n";
-	sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
-    }
+	    #### New in v2.0 (added 15/01/18)
+	    unless ($noANNOTflag || $onlyIRflag || $onlyGEflag){
+		### Gets the PSIs for ALL annotated exons directly
+		  if($dopackage[$Ncores]->[4]==$child){
+		    verbPrint "Building Table for ANNOT (annotation-based pipeline)\n";
+		    sysErrMsg "$binPath/GetPSI_allannot_VT.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag -extra_eej=$extra_eej";
+		  }
+	    }
+
+	    # To define version [02/10/15]; minimize changes for users
+	    # $v => "" or "_v2" [v1/v2]
+	    my $v;
+	    my @irFiles;
+	    if ($IR_version == 1){
+		$v="";
+		@irFiles = glob(abs_path("to_combine") . "/*.IR");
+	    }
+	    elsif ($IR_version == 2){
+		$v="_v2";
+		@irFiles = glob(abs_path("to_combine") . "/*.IR2");
+	    }
+	    
+	    $noIRflag = 1 if @irFiles == 0;
+	
+	    unless($noIRflag || $onlyEXflag || $onlyGEflag) {
+		### Gets the PIRs for the Intron Retention pipeline
+		  if($dopackage[$Ncores]->[5]==$child){
+		    verbPrint "Building quality score table for intron retention (version $IR_version)\n";
+		    sysErrMsg "$binPath/RI_MakeCoverageKey$v.pl -sp $sp -dbDir $dbDir " . abs_path("to_combine");
+		    verbPrint "Building Table for intron retention (version $IR_version)\n";
+		    sysErrMsg "$binPath/RI_MakeTablePIR.R --verbose $verboseFlag -s $dbDir --IR_version $IR_version" .
+		      " -c " . abs_path("to_combine") .
+		      " -q " . abs_path("to_combine") . "/Coverage_key$v-$sp$N.IRQ" .
+		      " -o " . abs_path("raw_incl");
+		  }
+	    }
+	
+	    unless ($onlyIRflag || $onlyEXflag || $onlyGEflag){
+		  ### Gets PSIs for ALT5ss and adds them to the general database
+		  if($dopackage[$Ncores]->[6]==$child){
+		    verbPrint "Building Table for Alternative 5'ss choice events\n";
+		    sysErrMsg "$binPath/Add_to_ALT5.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+		  }
+		
+		  ### Gets PSIs for ALT3ss and adds them to the general database
+		  if($dopackage[$Ncores]->[7]==$child){
+		    verbPrint "Building Table for Alternative 3'ss choice events\n";
+		    sysErrMsg "$binPath/Add_to_ALT3.pl -sp=$sp -dbDir=$dbDir -len=$globalLen -verbose=$verboseFlag";
+		  }
+	    }
+	    
+	    exit; # quit child
+  	} # for-child
+    ### wait until all childreen have finished
+    for (1 .. $N) { wait(); }
     
     ### Combine results into unified "FULL" table
     verbPrint "Combining results into a single table\n";
