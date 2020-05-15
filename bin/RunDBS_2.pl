@@ -100,10 +100,11 @@ sub handleParallelJob{
 	my $message=$_[4];
 	my $call=$_[5];
 
-	unless($dopackage[$Ncores]->[$packageid]==$childid){return()}
-
+print "Ncores=$Ncores  packageid=$packageid  childid=$childid  $message: ";
+	unless($dopackage[$Ncores]->[$packageid]==$childid){print "skipped\n";return()}
+print "executed\n";
 	# childs should not generate any output while running to prevent mixed and messed-up output from parallel processes
-	my $output=`$call 2>&1`;
+	my $output="$call\n"; #`$call 2>&1`;
 	if ($? ne '0'){ # error in child
 		die "[vast combine error]: in call $call\n$output\n";
 	}else{          # no error in child
