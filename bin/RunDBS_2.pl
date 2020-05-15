@@ -295,7 +295,7 @@ print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args (VASTD
 my $output;
 if ($N != 0 && !$onlyGEflag) {
 
-  # start $N parallel processes
+  # start $Ncores parallel processes
   for(my $child=0;$child<$Ncores;$child++){
   	my $pid = fork; die "Error while creating sub-processes for parallelization" if not defined $pid;
   	if ($pid==0) {  # in one of the child processes
