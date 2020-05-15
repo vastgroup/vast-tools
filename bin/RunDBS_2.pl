@@ -100,7 +100,6 @@ sub handleParallelJob{
 	my $message=$_[4];
 	my $call=$_[5];
 
-#print "Ncores=$Ncores  packageid=$packageid  childid=$childid  $message: "; unless($dopackage[$Ncores]->[$packageid]==$childid){print "skipped\n";return()}
 	unless($dopackage[$Ncores]->[$packageid]==$childid){return()}
 
 	# childs should not generate any output while running to prevent mixed and messed-up output from parallel processes
@@ -354,8 +353,8 @@ if ($N != 0 && !$onlyGEflag) {
   	  }# if pid==0
   	} # for-child
  
-    ### Here we are back to parent process: Wait until all childreen have finished
-    for (1 .. $N) { wait(); }
+    ### Here we are back to parent process: Wait until all Ncores childreen have finished
+    for (1 .. $Ncores) { wait(); }
     
     ### Combine results into unified "FULL" table
     verbPrint "Combining results into a single table\n";
