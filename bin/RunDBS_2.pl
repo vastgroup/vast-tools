@@ -36,6 +36,7 @@ my $normalize = 0; # gets an expression table with normalized values
 my $install_limma = 0; # installs limma
 my $noGEflag = 0;
 my $onlyGEflag = 0;
+my $Ncores=1;
 
 #my $asmbly           # the variable is deprecated by $lift_coord
 my $lift_coord;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
@@ -45,6 +46,7 @@ GetOptions("help"  	       => \$helpFlag,
 	   "dbDir=s"           => \$dbDir,
 	   "sp=s"              => \$sp_assembly,
 	   "lift_coord"        => \$lift_coord,
+	   "cores=i"           => \$Ncores,
 	   "verbose"           => \$verboseFlag,
 	   "output=s"          => \$outDir,
 	   "o=s"               => \$outDir,
@@ -136,6 +138,7 @@ GENERAL OPTIONS:
                                 The legacy 3-species code can also be provided.
                                 Species currently available in local VASTDB:
                                    $vastdb_sp_list
+	--cores     		Number of cores. Choose from 1, 4, 8. (default 1)
 	-lift_coord     	To lift the coordinates of the output file to a newer assembly.
                                    Only for -sp hg19/Hsa or mm9/Mmu, which are converted to hg38 or mm10.
 				   NOTE 1: vast-tools works internally with hg19/Hsa and mm9/Mmu.
