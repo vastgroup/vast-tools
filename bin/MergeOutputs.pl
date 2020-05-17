@@ -93,6 +93,9 @@ Merges vast-tools outputs from multiple subsamples into grouped samples
 
 OPTIONS: 
         -g, --groups file        File with groupings (subsample1\\tsampleA\\nsubsample2\\tsampleA...)
+                                   * If there are multiple files to be merged, it is adviced the merge
+                                     is split into various runs using config files with fewer groups 
+                                     (e.g. 20 to 50 subsamples) to reduce memory consumption.
         -o, --outDir             Path to output folder of vast-tools align (default vast_out)
                                  Must contain sub-folders to_combine or expr_out from align steps.
         --sp hg19/mm10/etc       Assembly of the species (e.g. hg19, mm10).
