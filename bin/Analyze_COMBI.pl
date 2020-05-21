@@ -33,10 +33,11 @@ while (<STDIN>) {
     $hit=$t[2];
     ($gene, $donor, $acceptor, $donor_coord, $acceptor_coord)=$hit=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
     $eej="$donor-$acceptor";
-    
+    $gene_eej="$gene-$eej";
+
     if ($read ne $previous_read){ 
 	$EEJ{$gene}{$eej}++;
-	$POS{$gene}{$eej}{$t[3]}++;
+	$POS{$gene_eej}{$t[3]}++;
     }
     $previous_read=$read;
 }
@@ -46,10 +47,11 @@ open (OUTPUT, ">to_combine/$root.eej2"); # read counts for all EEJ
 foreach $gene (keys %EEJ) {  
     foreach $eej (sort {$a<=>$b}(keys %{$EEJ{$gene}})){
 	$p_p="";
-	foreach $POS (sort {$a<=>$b}(keys %{$POS{$gene}{$eej}})){
-	    $p_p.="$POS:$POS{$gene}{$eej}{$POS},"; # read count at each EEJ position (POS)
+	$gene_eej="$gene-$eej";
+	foreach $POS (sort {$a<=>$b}(keys %{$POS{$gene_eej}})){
+	    $p_p.="$POS:$POS{$gene_eej}{$POS},"; # read count at each EEJ position (POS)
 	}
-	chop($p_p);	
+	chop($p_p);
 	print OUTPUT "$gene\t$eej\t$EEJ{$gene}{$eej}\tNA\t$p_p\n";
     }
 }
