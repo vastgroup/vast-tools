@@ -10,6 +10,7 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
+my $extra_eej = 15; # hardcoded for now
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
 			  "verbose=i" => \$verboseFlag);
@@ -36,6 +37,9 @@ while (<TEMPLATE>){
     $event=$t[1];
     $pre_data{$event}=$_; # First 6 information columns
     ($event_root,$N_ss)=$event=~/(.+)\-\d+?\/(\d+)/;
+
+    next if $N_ss > 15; # change 1 for speed
+
     $ALL{$event_root}=$N_ss; # keeps the total number of alternative splice sites; placeholder for event_root
 
     ### gets the strand of gene
@@ -165,15 +169,14 @@ foreach $event_root (sort keys %ALL){
 	if($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
 	
 	$max_mappability=$length-15;
-	for $i (0..$#junctions){ #does Simple read counts
-	    $eej="$gene-$junctions[$i]";
-	    $corr_inc_reads_S[$i]=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
-	    $raw_inc_reads_S[$i]=$reads{$sample}{$eej} if $eff_href->{$length}{$eej};
+	for $i (0..$#junctions){ # does Simple and Complex read counts
+	    $eejS="$gene-$junctions[$i]";
+	    $corr_inc_reads_S[$i]=$max_mappability*($reads{$sample}{$eejS}/$eff_href->{$length}{$eejS}) if $eff_href->{$length}{$eejS};
+	    $raw_inc_reads_S[$i]=$reads{$sample}{$eejS} if $eff_href->{$length}{$eejS};
 	    $total_corr_reads_S+=$corr_inc_reads_S[$i];
 	    $total_raw_reads_S+=$raw_inc_reads_S[$i];
-	}
-	
-	for $i (0..$#junctions){ # does Simple and Complex read counts
+
+	    ### Multi Q
 	    ($donor)=$junctions[$i]=~/(\d+?)\-\d+/;
 	    for $j (0..$last_acceptor{$gene}){  # It includes the "reference" acceptor
 		$eej="$gene-$donor-$j"; 
@@ -186,11 +189,24 @@ foreach $event_root (sort keys %ALL){
 	# reads that jump over the event (any upstream donor to any downstream acceptor)
 	$skipping_corr_reads=0; $skipping_raw_reads=0;
 
+	($ref_acceptor)=$junctions[0]=~/\d+?\-(\d+)/;
 	($ext_donor)=$junctions[$#junctions]=~/(\d+?)\-\d+/;
 	($int_donor)=$junctions[0]=~/(\d+?)\-\d+/;
+
+	$min_donor=$int_donor-($extra_eej*2);
+	$min_donor=0 if $min_donor<0;
+	$max_donor=$int_donor-1;
+	$max_donor=0 if $max_donor<0;
+
+	$min_acceptor=$ref_acceptor-$extra_eej;
+	$min_acceptor=0 if $min_acceptor<0;
+	$max_acceptor=$ref_acceptor+$extra_eej;
+	$max_acceptor=$last_acceptor{$gene} if $max_acceptor > $last_acceptor{$gene};
 	
-	for $t_don (0..$last_donor{$gene}){
-	    for $t_acc (0..$last_acceptor{$gene}){ # redundant call for ext/int, just in case
+#	for $t_don (0..$last_donor{$gene}){
+#	    for $t_acc (0..$last_acceptor{$gene}){ # redundant call for ext/int, just in case
+	for $t_don ($min_donor..$max_donor){ # change 3 to improve speed 
+	    for $t_acc ($min_acceptor..$max_acceptor){ # change 3 to improve speed
 		if ($strand{$gene} eq "+" && 
 		    $co_donor{$gene}{$t_don} < $co_donor{$gene}{$ext_donor} && $co_donor{$gene}{$t_don} < $co_donor{$gene}{$int_donor} &&
 		    $co_acceptor{$gene}{$t_acc} > $co_donor{$gene}{$ext_donor} && $co_acceptor{$gene}{$t_acc} > $co_donor{$gene}{$int_donor}){

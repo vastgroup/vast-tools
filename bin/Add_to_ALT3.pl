@@ -10,6 +10,7 @@ my $dbDir;
 my $sp;
 my $verboseFlag;
 my $samLen;
+my $extra_eej = 15; # hardcoded for now
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "verbose=i" => \$verboseFlag,
 			  "len=i" => \$samLen);
@@ -37,6 +38,9 @@ while (<TEMPLATE>){
     $event=$t[1];
     $pre_data{$event}=$_; # also acts as holder for all event ids
     ($event_root,$N_ss)=$event=~/(.+)\-\d+?\/(\d+)/;
+
+    next if $N_ss > 15; # change 1 to improve speed (it discards a few heavy and unreliable events)
+
     $ALL{$event_root}=$N_ss; # keeps the total number of alternative splice sites
 
     ### gets the strand of gene
@@ -179,16 +183,15 @@ foreach $event_root (sort (keys %ALL)){
 	if($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
 	
 	$max_mappability=$length-15;
-	for $i (0..$#junctions){ #does Simple read counts
-	    $eej="$gene-$junctions[$i]";
-	    $corr_inc_reads_S[$i]=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
-	    $raw_inc_reads_S[$i]=$reads{$sample}{$eej} if $eff_href->{$length}{$eej};
+	for $i (0..$#junctions){ # does Simple and Complex read counts
+	    $eejS="$gene-$junctions[$i]"; # moved here to improve speed (change 2)
+	    $corr_inc_reads_S[$i]=$max_mappability*($reads{$sample}{$eejS}/$eff_href->{$length}{$eejS}) if $eff_href->{$length}{$eejS};
+	    $raw_inc_reads_S[$i]=$reads{$sample}{$eejS} if $eff_href->{$length}{$eejS};
 	    $total_corr_reads_S+=$corr_inc_reads_S[$i];
 	    $total_raw_reads_S+=$raw_inc_reads_S[$i];
-	}
-
-	for $i (0..$#junctions){ # does Simple and Complex read counts
-	    ($acceptor)=$junctions[$i]=~/\d+?\-(\d+)/;	    
+	    
+	    ### For complex
+	    ($acceptor)=$junctions[$i]=~/\d+?\-(\d+)/;
 	    for $j (0..$last_donor{$gene}){ # any donor to the tested acceptor
 		$eej="$gene-$j-$acceptor";
 		$corr_inc_reads_ALL[$i]+=$max_mappability*($reads{$sample}{$eej}/$eff_href->{$length}{$eej}) if $eff_href->{$length}{$eej};
@@ -198,14 +201,28 @@ foreach $event_root (sort (keys %ALL)){
 	    $total_corr_reads_ALL+=$corr_inc_reads_ALL[$i];
 	    $total_raw_reads_ALL+=$raw_inc_reads_ALL[$i];
 	}
+
 	# reads that jump over the event (any upstream donor to any downstream acceptor)
 	$skipping_corr_reads=0; $skipping_raw_reads=0;
-
+	
+	($ref_donor)=$junctions[0]=~/(\d+?)\-\d+/;	    
 	($ext_acceptor)=$junctions[$#junctions]=~/\d+?\-(\d+)/;
 	($int_acceptor)=$junctions[0]=~/\d+?\-(\d+)/;
 
-	for $t_don (0..$last_donor{$gene}){
-	    for $t_acc (0..$last_acceptor{$gene}){ # redundant call for ext/int, just in case
+	$min_donor=$ref_donor-$extra_eej;
+	$min_donor=0 if $min_donor<0;
+	$max_donor=$ref_donor+$extra_eej;
+	$max_donor=$last_donor{$gene} if $max_donor > $last_donor{$gene};
+
+	$min_acceptor=$int_acceptor+1;
+	$min_acceptor=$last_acceptor{$gene} if $min_acceptor > $last_acceptor{$gene};	
+	$max_acceptor=$int_acceptor+($extra_eej*2);
+	$max_acceptor=$last_acceptor{$gene} if $max_acceptor > $last_acceptor{$gene};
+
+	for $t_don ($min_donor..$max_donor){ # change 3 to improve speed 
+	    for $t_acc ($min_acceptor..$max_acceptor){ # change 3 to improve speed
+#	for $t_don (0..$last_donor{$gene}){
+#	    for $t_acc (0..$last_acceptor{$gene}){ # redundant call for ext/int, just in case
 		if ($strand{$gene} eq "+" && 
 		    $co_donor{$gene}{$t_don} < $co_acceptor{$gene}{$ext_acceptor} && $co_donor{$gene}{$t_don} < $co_acceptor{$gene}{$int_acceptor} &&
 		    $co_acceptor{$gene}{$t_acc} > $co_acceptor{$gene}{$ext_acceptor} && $co_acceptor{$gene}{$t_acc} > $co_acceptor{$gene}{$int_acceptor}){
