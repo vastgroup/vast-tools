@@ -40,6 +40,7 @@ while (<TEMPLATE>){
     ($event_root,$N_ss)=$event=~/(.+)\-\d+?\/(\d+)/;
 
     next if $N_ss > 15; # change 1 to improve speed (it discards a few heavy and unreliable events)
+    next if $event_root =~ /ENSG00000198626\-70/ && $sp eq "Hs2"; # hardcoded removal of wrong ALT3 event in Hs2
 
     $ALL{$event_root}=$N_ss; # keeps the total number of alternative splice sites
 
