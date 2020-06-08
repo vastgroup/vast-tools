@@ -137,7 +137,50 @@ foreach $file (@EEJ){
  	$gene=$t[0];
 	$eej=$t[1];
         $gene_eej="$gene-$t[1]";
-        $reads{$sample}{$gene_eej}=$t[2];
+
+	# to correct for stack reads per sample
+	$new_count=0;
+	$risky_pos=0;
+	@temp_vals=();
+	@temp_POS=split(/\,/,$t[4]);
+	foreach $t_var (@temp_POS){
+	        ($pos,$pos_count)=$t_var=~/(.+?)\:(.+)/;
+		push(@temp_vals,$pos_count);
+		$risky_pos++ if $pos <= 1 || $pos >= 33;
+	}
+	$median=median(@temp_vals);
+	$positive_pos=$#temp_vals+1;
+
+	if ($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
+
+	if ($eff_href->{$length}{$gene_eej} <= 5){
+	    $new_count = $t[2];
+	}
+	elsif ($t[2] >= 2 && $positive_pos <= 2 && $risky_pos == $positive_pos){ # i.e. 3 or more reads stack into the first or last position
+	        # pos is the last in "memory"
+	    $new_count = 0; # not needed, but to make it explicit
+	}
+	elsif ($t[2] >= 3 && $positive_pos == 1){ # i.e. 3 or more reads stack into 1 position
+	    $new_count = 0; # not needed, but to make it explicit
+	}
+	elsif ($t[2] >= 4 && $positive_pos == 2){ # i.e. 8 or more reads stack into 2 position
+	    $new_count = 0; # not needed, but to make it explicit
+	}
+	elsif ($t[2] >= 6 && $positive_pos == 3){ # i.e. 12 or more reads stack into 3 position
+	    $new_count = 0; # not needed, but to make it explicit
+	}
+	else {
+	    foreach $temp_val (@temp_vals){
+		if ($temp_val > $median*4){ # this median can never be 0 by definition.
+		    $new_count+=$median*4;
+		}
+		else {
+		    $new_count+=$temp_val;
+		}
+	    }
+	}
+	
+        $reads{$sample}{$gene_eej}=$new_count;
         ($donor,$acceptor)=$eej=~/(\d+?)\-(\d+)/;
 	$last_donor{$gene}=$donor if $last_donor{$gene}<$donor; # keeps track of the last donor used
 	$last_acceptor{$gene}=$acceptor if $last_acceptor{$gene}<$acceptor; # keeps track of the last acceptor used 
@@ -319,3 +362,21 @@ foreach $event_root (sort (keys %ALL)){
 }
 close PSIs;
 close COUNTs;
+
+
+sub median {
+    my @temp=@_;
+    
+    @temp=sort{$a<=>$b}(@temp);
+    $ind=$#temp+1; # number of positions with counts
+    if ($ind%2 != 0){
+        $m = int($ind/2);
+        $median=$temp[$m];
+    }
+    else {
+        $m1 = int($ind/2)-1;
+        $m2 = int($ind/2);
+        $median = ($temp[$m1]+$temp[$m2])/2;
+    }
+    return $median;
+}
