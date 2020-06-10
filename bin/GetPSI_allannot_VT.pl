@@ -134,10 +134,12 @@ foreach $file (@EEJ){
 	if ($eff_href->{$length}{$event} <= 5){
 	    $new_count = $t[2];
 	}
-	elsif ($t[2] >= 2 && $positive_pos <= 2 && $risky_pos == $positive_pos){ # i.e. 3 or more reads stack into the first or last position
-	    # pos is the last in "memory"
-	    $new_count = 0; # not needed, but to make it explicit
-	}
+        elsif ($t[2] >= 2 && $positive_pos == 1 && $risky_pos == $positive_pos){ # i.e. 2 or more reads stack into the same first or last position
+            $new_count = 0; # not needed, but to make it explicit
+        }
+        elsif ($t[2] >= 3 && $positive_pos == 2 && $risky_pos == $positive_pos){ # i.e. 3 or more reads stack into the first or last position
+            $new_count = 0; # not needed, but to make it explicit
+        }
 	elsif ($t[2] >= 3 && $positive_pos == 1){ # i.e. 3 or more reads stack into 1 position
 	    $new_count = 0; # not needed, but to make it explicit
 	}
