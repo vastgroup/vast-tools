@@ -143,12 +143,12 @@ foreach $file (@EEJ){
 	elsif ($t[2] >= 3 && $positive_pos == 1){ # i.e. 3 or more reads stack into 1 position
 	    $new_count = 0; # not needed, but to make it explicit
 	}
-	elsif ($t[2] >= 4 && $positive_pos == 2){ # i.e. 8 or more reads stack into 2 position
+	elsif ($t[2] >= 4 && $positive_pos == 2){ # i.e. 4 or more reads stack into 2 position
 	    $new_count = 0; # not needed, but to make it explicit
 	}
-	elsif ($t[2] >= 6 && $positive_pos == 3){ # i.e. 12 or more reads stack into 3 position
-	    $new_count = 0; # not needed, but to make it explicit
-	}
+#	elsif ($t[2] >= 6 && $positive_pos == 3){ # i.e. 6 or more reads stack into 3 position
+#	    $new_count = 0; # not needed, but to make it explicit
+#	}
 	else {
 	    foreach $temp_val (@temp_vals){
 		if ($temp_val > $median*4){ # this median can never be 0 by definition.
