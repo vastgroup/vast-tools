@@ -117,6 +117,7 @@ foreach $file (@EEJ){
 	$event="$gene-$eej";
 
 	# to correct for stack reads per sample
+	if ($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
 	$new_count=0;
 	$risky_pos=0;
 	@temp_vals=();
@@ -124,31 +125,23 @@ foreach $file (@EEJ){
 	foreach $t_var (@temp_POS){
 	    ($pos,$pos_count)=$t_var=~/(.+?)\:(.+)/;
 	    push(@temp_vals,$pos_count);
-	    $risky_pos++ if $pos <= 1 || $pos >= 33;
+            $risky_pos++ if ($pos == 0 || ($pos == 34 || $pos == $eff_href->{$length}{$event}-1));
 	}
 	$median=median(@temp_vals);
 	$positive_pos=$#temp_vals+1;
 
-	if ($is_ss{$sample}){$eff_href=\%eff_ss}else{$eff_href=\%eff_ns}
-
-	if ($eff_href->{$length}{$event} <= 5){
+	if ($eff_href->{$length}{$event} < 5){ # 4 or fewer positions => same
 	    $new_count = $t[2];
 	}
         elsif ($t[2] >= 2 && $positive_pos == 1 && $risky_pos == $positive_pos){ # i.e. 2 or more reads stack into the same first or last position
             $new_count = 0; # not needed, but to make it explicit
         }
-        elsif ($t[2] >= 3 && $positive_pos == 2 && $risky_pos == $positive_pos){ # i.e. 3 or more reads stack into the first or last position
-            $new_count = 0; # not needed, but to make it explicit
-        }
-	elsif ($t[2] >= 3 && $positive_pos == 1){ # i.e. 3 or more reads stack into 1 position
+	elsif ($t[2] >= 4 && $positive_pos == 1){ # i.e. 4 or more reads stack into 1 position
 	    $new_count = 0; # not needed, but to make it explicit
 	}
-	elsif ($t[2] >= 4 && $positive_pos == 2){ # i.e. 4 or more reads stack into 2 position
+	elsif ($t[2] >= 8 && $positive_pos == 2){ # i.e. 8 or more reads stack into 2 position
 	    $new_count = 0; # not needed, but to make it explicit
 	}
-#	elsif ($t[2] >= 6 && $positive_pos == 3){ # i.e. 6 or more reads stack into 3 position
-#	    $new_count = 0; # not needed, but to make it explicit
-#	}
 	else {
 	    foreach $temp_val (@temp_vals){
 		if ($temp_val > $median*4){ # this median can never be 0 by definition.
