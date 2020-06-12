@@ -134,13 +134,16 @@ foreach $file (@EEJ){
 	    $new_count = $t[2];
 	}
         elsif ($t[2] >= 2 && $positive_pos == 1 && $risky_pos == $positive_pos){ # i.e. 2 or more reads stack into the same first or last position
-            $new_count = 0; # not needed, but to make it explicit
+	    $new_count = 1 if $t[2]<=3; 
+	    $new_count = 0 if $t[2]>3;
         }
-	elsif ($t[2] >= 4 && $positive_pos == 1){ # i.e. 4 or more reads stack into 1 position
-	    $new_count = 0; # not needed, but to make it explicit
+	elsif ($t[2] >= 3 && $positive_pos == 1){ # i.e. 3 or more reads stack into 1 position
+	    $new_count = 1 if $t[2]<=4;
+            $new_count = 0 if $t[2]>4;
 	}
-	elsif ($t[2] >= 8 && $positive_pos == 2){ # i.e. 8 or more reads stack into 2 position
-	    $new_count = 0; # not needed, but to make it explicit
+	elsif ($t[2] >= 6 && $positive_pos == 2){ # i.e. 6 or more reads stack into 2 position
+	    $new_count = 2 if $t[2]<=10;
+            $new_count = 0 if $t[2]>10;
 	}
 	else {
 	    foreach $temp_val (@temp_vals){
