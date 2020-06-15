@@ -134,7 +134,7 @@ foreach $file (@EEJ){
 	$median=median(@temp_vals);
 	$positive_pos=$#temp_vals+1;
 
-	if ($eff_href->{$length}{$event} < 5){ # if 5 or fewer mappable positions, use all counts
+	if ($eff_href->{$length}{$event} < 4){ # if 3 or fewer mappable positions, use all counts
 	    $new_count = $t[2];
 	}
 	elsif ($t[2] >= 2 && $positive_pos == 1 && $risky_pos == $positive_pos){ # i.e. 2 or more reads stack into the same first or last position
