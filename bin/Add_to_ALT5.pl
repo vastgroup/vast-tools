@@ -10,7 +10,7 @@ my $dbDir;
 my $sp;
 my $samLen;
 my $verboseFlag;
-my $extra_eej = 15; # hardcoded for now
+my $extra_eej = 10; # hardcoded for now
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "len=i" => \$samLen,
 			  "verbose=i" => \$verboseFlag);
