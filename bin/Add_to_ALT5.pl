@@ -54,7 +54,7 @@ close TEMPLATE;
 
 @EEJ=glob("to_combine/*.eej2");
 
-@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.ef*");
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.eff");
 die "Needs strand-unspecific effective\n" if !@EFF;
 verbPrint "Loading mappability files (strand-unspecific and strand-specific):\n";
 foreach $file (@EFF){
@@ -75,7 +75,7 @@ foreach $file (@EFF){
     close MAPPABILITY;
 }
 
-@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA-SS.ef*");
+@EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA-SS.eff");
 die "Needs strand-specific effective (strand-specific)\n" if !@EFF;
 foreach $file (@EFF){
     ($length)=$file=~/COMBI\-[A-Z]\-(\d+?)\-/;

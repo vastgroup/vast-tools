@@ -30,8 +30,8 @@ die "Needs Species key\n" if !defined($sp);
 $COMB="M"; # Only available version
 
 @EEJ=glob("to_combine/*.eej2"); # uses the same input files as COMBI
-@EFF_ns=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.ef*"); die "[vast combine combi error] Needs effective (strand-unspecific) from database!\n" if !@EFF_ns;
-@EFF_ss=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA-SS.ef*"); die "[vast combine combi error] Needs effective (strand-specific) from database!\n" if !@EFF_ss;
+@EFF_ns=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.eff"); die "[vast combine combi error] Needs effective (strand-unspecific) from database!\n" if !@EFF_ns;
+@EFF_ss=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA-SS.eff"); die "[vast combine combi error] Needs effective (strand-specific) from database!\n" if !@EFF_ss;
 
 ###
 verbPrint "Loading strand-unspecific mappability for each EEJ and length:\n";
