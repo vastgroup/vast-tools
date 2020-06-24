@@ -42,23 +42,23 @@ downloadDb <- function(speUrl, speFile) {
 
 ### To be updated with every release:
 vastdbFiles<-c(
-"vastdb.hsa.20.12.19.tar.gz",
-"vastdb.hs2.20.12.19.tar.gz",
-"vastdb.mmu.20.12.19.tar.gz",
-"vastdb.mm2.20.12.19.tar.gz",
-"vastdb.bta.20.12.19.tar.gz",
-"vastdb.gg3.20.12.19.tar.gz",
-"vastdb.gg4.06.04.20.tar.gz",
-"vastdb.xt1.06.04.20.tar.gz",
-"vastdb.dre.20.12.19.tar.gz",
-"vastdb.bl1.20.12.19.tar.gz",
-"vastdb.spu.20.12.19.tar.gz",
-"vastdb.dme.20.12.19.tar.gz",
-"vastdb.sma.20.12.19.tar.gz",
-"vastdb.cel.20.12.19.tar.gz",
-"vastdb.sme.20.12.19.tar.gz",
-"vastdb.nve.20.12.19.tar.gz",
-"vastdb.ath.20.12.19.tar.gz");
+"vastdb.hsa.23.06.20.tar.gz",
+"vastdb.hs2.23.06.20.tar.gz",
+"vastdb.mmu.23.06.20.tar.gz",
+"vastdb.mm2.23.06.20.tar.gz",
+"vastdb.bta.23.06.20.tar.gz",
+"vastdb.gg3.23.06.20.tar.gz",
+"vastdb.gg4.23.06.20.tar.gz",
+"vastdb.xt1.23.06.20.tar.gz",
+"vastdb.dre.23.06.20.tar.gz",
+"vastdb.bl1.23.06.20.tar.gz",
+"vastdb.spu.23.06.20.tar.gz",
+"vastdb.dme.23.06.20.tar.gz",
+"vastdb.sma.23.06.20.tar.gz",
+"vastdb.cel.23.06.20.tar.gz",
+"vastdb.sme.23.06.20.tar.gz",
+"vastdb.nve.23.06.20.tar.gz",
+"vastdb.ath.23.06.20.tar.gz");
 
 
 if ( opt$prompt ) {
