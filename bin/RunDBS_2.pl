@@ -37,6 +37,7 @@ my $install_limma = 0; # installs limma
 my $noGEflag = 0;
 my $onlyGEflag = 0;
 my $Ncores=1;
+my $add_version = 0;
 
 #my $asmbly           # the variable is deprecated by $lift_coord
 my $lift_coord;       # for human and mouse: vts formats the output wrt. hg19/hg3, mm9/mm10 depending on user's choice of argument -a
@@ -60,6 +61,7 @@ GetOptions("help"  	       => \$helpFlag,
 	   "use_all_excl_eej"  => \$use_all_excl_eej,
 	   "exprONLY"          => \$onlyGEflag,
 	   "no_expr"           => \$noGEflag,
+	   "add_version"       => \$add_version,
            "C"                 => \$cRPKMCounts,
 	   "norm"              => \$normalize,
 	   "install_limma"     => \$install_limma);
@@ -178,14 +180,15 @@ GENERAL OPTIONS:
 				   NOTE 1: vast-tools works internally with hg19/Hsa and mm9/Mmu.
                                    NOTE 2: this options substitutes -a from v2.4.0.
 	--dbDir DBDIR	        Database directory
+        --add_version           Adds vast-tools version to the final PSI table (default OFF)
 	-z			Compress all output files using gzip
 	-v, --verbose		Verbose messages
 	-h, --help		Print this help message
 
 AS OPTIONS:
-        --onlyEX                Only run the exon skpping pipelines (default off)
-	--noIR			Don't run intron retention pipeline (default off)
-        --onlyIR                Only run intron retention pipeline (default off) 
+        --onlyEX                Only run the exon skpping pipelines (default OFF)
+	--noIR			Don't run intron retention pipeline (default OFF)
+        --onlyIR                Only run intron retention pipeline (default OFF) 
         --IR_version 1/2        Version of the IR analysis (default 2)
         --noANNOT               Don't use exons quantified directly from annotation (default off)
         --use_all_excl_eej      Use all exclusion EEJs (within extra_eej limit) in ss-based module (default off)
@@ -390,9 +393,18 @@ if ($N != 0 && !$onlyGEflag) {
     }
     
     my $finalOutput;
-    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N.tab" if (!$lift_coord);
-    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38.tab" if ($lift_coord && $sp_assembly eq "hg19");
-    $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_mm10.tab" if ($lift_coord && $sp_assembly eq "mm9");
+  if ($add_version){
+      my $pseudo_version="v$version";
+      $pseudo_version=~s/\.//g;
+      $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-$pseudo_version.tab" if (!$lift_coord);
+      $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38-$pseudo_version.tab" if ($lift_coord && $sp_assembly eq "hg19");
+      $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_mm10-$pseudo_version.tab" if ($lift_coord && $sp_assembly eq "mm9");
+  }
+  else {
+      $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N.tab" if (!$lift_coord);
+      $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_hg38.tab" if ($lift_coord && $sp_assembly eq "hg19");
+      $finalOutput = "INCLUSION_LEVELS_FULL-$sp_assembly-$N-lifted_mm10.tab" if ($lift_coord && $sp_assembly eq "mm9");
+  }
     sysErrMsg "cat @input | $binPath/Add_to_FULL.pl -sp=$sp -dbDir=$dbDir " .
 	"-len=$globalLen -verbose=$verboseFlag > $finalOutput";
     
