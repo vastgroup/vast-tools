@@ -116,7 +116,7 @@ loadPackages(c("MASS", "getopt", "optparse", "RColorBrewer", "reshape2", "ggplot
 
 # install github packages
 if (!require('psiplot', character.only=T)) {
-  with_lib(new=paste(c(scriptPath,"/R/Rlib"), collapse=""), install_github('kcha/psiplot'))
+  install_github('kcha/psiplot', lib=paste(c(scriptPath,"/R/Rlib"), collapse=""))
   writeLines(sprintf("psiplot has been installed locally in R/Rlib!"), stderr())
 }
 
