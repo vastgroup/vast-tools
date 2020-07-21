@@ -897,6 +897,7 @@ $tally{Alt3}{DOWN}="NA" if (!defined $legacy_ALT);
 $tally{Alt5}{DOWN}="NA" if (!defined $legacy_ALT);
 
 print "\n*** Options: dPSI=$min_dPSI, range_dif=$min_range$extras, min_ALT_use=$min_ALT_use\n";
+print "\n*** WARNING: Events between $min_dPSI and abs($min_dPSI) will be duplicated\n\n" if $min_dPSI < 0 && $min_range < 0;
 print "*** Summary statistics:\n";
 print "\tAS_TYPE\tHigher_in_$name_A\tHigher_in_$name_B\tTOTAL_EV\tTOTAL_AS(10<PSI<90)\n";
 print "\tMicroexons\t$tally{MIC}{DOWN}\t$tally{MIC}{UP}\t$tally_total{MIC}\t$tally_total_AS{MIC}\n";
