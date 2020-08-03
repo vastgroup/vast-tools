@@ -663,7 +663,7 @@ Then, for each combined sample, a pair of columns:
 		- EX (microexon module): "na" (no information provided).
 		- ALTD and ALTA: similar complexity score as per exons. In this case, a given donor (for ALTA) or acceptor (for ALTD) is considered the "reference" site, and the complex reads are those coming from any other donor/acceptor.
 		- IR: p-value of a binomial test of balance between reads mapping to the upstream and downstream exon-intron junctions, modified by reads mapping to a 200-bp window in the centre of the intron (see Braunschweig et al., 2014).
- 	* inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion.
+ 	* inc,exc: total number of reads, corrected for mappability, supporting inclusion and exclusion, such that PSI = inc/(inc+exc). Thus, when inclusion reads involve upstream and downstream junction sets, inc and exc are scaled.
 
 Investigating event-level conservation
 --------------------------------------
