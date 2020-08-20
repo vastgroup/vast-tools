@@ -31,19 +31,19 @@ Table of Contents:
 - [Running as a container](#running-as-a-container)
 - [Issues](#issues)
 - [Contributions](#contributions)
-- [Citation](#citation)
+- [Citation](#citations)
 - [Species databases](#species-databases)
 - [References](#references)
 	
 Summary
 -------
-Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB](http://vastdb.crg.eu/) web server, and [Matt](http://matt.crg.eu), a toolkit for downstream analyses of alternative splicing.
+Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB][] web server, and [Matt][], a toolkit for downstream analyses of alternative splicing.
 
 Requirements
 ------------
 
 VAST-TOOLS requires the following software:
- * bowtie 1.0.0 (Langmead et al., 2009), http://bowtie-bio.sourceforge.net/index.shtml
+ * [bowtie 1.0.0](http://bowtie-bio.sourceforge.net) (Langmead et al., 2009)
  * R 3.1 or higher, with the following packages installed (see Installation Section):
    * optparse
    * RColorBrewer
@@ -83,7 +83,7 @@ link can be created in the root of VAST-TOOLS directory. By default,
 VAST-TOOLS looks for VASTDB inside its own directory 
 (e.g. `~/bin/vast-tools/VASTDB`).
 
-In addition to these libraries, [VastDB](http://vastdb.crg.eu/) also refers to a web server
+In addition to these libraries, [VastDB][] also refers to a web server
 that provides information about AS events profiled by VAST-TOOLS through their stable
 VastID (e.g. [HsaEX0040388](http://vastdb.crg.eu/wiki/Event:HsaEX0040388@Genome:hg19)). * NOTE: EventIDs are maintained across assemblies from the same species. While not all species are available in VastDB yet, they soon will.
 
@@ -304,7 +304,7 @@ unmapped reads, and these are then aligned to predefined splice junction librari
 in the output directory as ``<sample>-50-e.fa.gz``, where ``sample`` is the sample
 name. The input reads can be compressed (via gzip) or uncompressed.
 
-Currently, `vast-tools` supports multiple species and assemblies and is constantly growing in coordination with [VastDB](http://vastdb.crg.eu/). From v2.4.0, the species is provided using the standard assembly (e.g. hg38, mm9, etc). The 3-letter species key, as in previous versions, can also be provided.
+Currently, `vast-tools` supports multiple species and assemblies and is constantly growing in coordination with [VastDB][]. From v2.4.0, the species is provided using the standard assembly (e.g. hg38, mm9, etc). The 3-letter species key, as in previous versions, can also be provided.
 
 To enable gene expression analysis, use either the option ``--expr`` (PSI/PSU/PIRs pluscRPKM calculations [corrected-for-mappability Reads per Kbp and Million mapped reads; see Labbé *et al*, 2012 for details]) or ``--exprONLY`` (cRPKMs only). cRPKMs are obtained by mapping only the first 50 nucleotides of each read, or only the first 50 nucleotides of the forward read if paired-end reads are provided.
 
@@ -613,7 +613,7 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
  * **Column 3**: Genomic coordinate of the alternative sequence.
  * **Column 4**: Length of the alternative sequence. In ALTD/ALTA events, the first splice site within each event has a length of 0 nt, by definition.
  * **Column 5**: Full set of genomic coordinates of the alternative splicing event. 
- 	* For EX: *chromosome:C1donor,Aexon,C2acceptor*. Where C1donor is the "reference" upstream exon's donor, C2acceptor the "reference" downstream exon's acceptor, and A the alternative exon. Strand is "+" if C1donor < C2acceptor. If multiple acceptor/donors exist in any of the exons, they are shown separated by "+". **NOTE**: The "reference" upstream and downstream C1/C2 coordinates are not necessarily the closest upstream and downstream C1/C2 exons, but the most external ones with sufficient support (to facilitate primer design, etc). If you wish to perform analyses of exon features and/or draw RNA binding maps, you are recommended to use [Matt](http://matt.crg.eu/).
+ 	* For EX: *chromosome:C1donor,Aexon,C2acceptor*. Where C1donor is the "reference" upstream exon's donor, C2acceptor the "reference" downstream exon's acceptor, and A the alternative exon. Strand is "+" if C1donor < C2acceptor. If multiple acceptor/donors exist in any of the exons, they are shown separated by "+". **NOTE**: The "reference" upstream and downstream C1/C2 coordinates are not necessarily the closest upstream and downstream C1/C2 exons, but the most external ones with sufficient support (to facilitate primer design, etc). If you wish to perform analyses of exon features and/or draw RNA binding maps, you are recommended to use [Matt][].
  	* For ALTD: *chromosome:Aexon,C2acceptor*. Multiple donors of the event are separated by "+".
  	* For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
  	* For INT: *chromosome:C1exon=C2exon:strand*.
@@ -671,11 +671,11 @@ A major feature of VAST-TOOLS event IDs is that they are fixed for each species 
 
 Interconnection with VastDB Web
 -------------------------------
-[VastDB](http://vastdb.crg.eu/) is a web server that is tightly interconnected with VAST-TOOLS. [VastDB](http://vastdb.crg.eu/) contains information about AS events profiled by VAST-TOOLS for several species. It contains basic information about the events (including sequences, splice site strength, overlap with protein domains and disordered regions) and PSI quantifications for a large range of cell and tissue types and developmental stages, as profiled by VAST-TOOLS. Events have stable IDs that are identical in VAST-TOOLS and [VastDB](http://vastdb.crg.eu/). Therefore, results obtained using VAST-TOOLS can be directly checked in [VastDB](http://vastdb.crg.eu/) to obtain physiological information about the AS events of interest. Moreover, [VastDB](http://vastdb.crg.eu/) provides event-level orthology information, allowing to compare information across the different species included in [VastDB](http://vastdb.crg.eu/) and VAST-TOOLS. Finally, general gene-level information is also provided, including quantifications of expression using cRPKMs.
+[VastDB][] is a web server that is tightly interconnected with VAST-TOOLS. [VastDB][] contains information about AS events profiled by VAST-TOOLS for several species. It contains basic information about the events (including sequences, splice site strength, overlap with protein domains and disordered regions) and PSI quantifications for a large range of cell and tissue types and developmental stages, as profiled by VAST-TOOLS. Events have stable IDs that are identical in VAST-TOOLS and [VastDB][]. Therefore, results obtained using VAST-TOOLS can be directly checked in [VastDB][] to obtain physiological information about the AS events of interest. Moreover, [VastDB][] provides event-level orthology information, allowing to compare information across the different species included in [VastDB][] and VAST-TOOLS. Finally, general gene-level information is also provided, including quantifications of expression using cRPKMs.
 
 Interconnection with Matt
 -------------------------------
-[Matt](http://matt.crg.eu) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
+[Matt][] is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
 
 Running as a container
 ----------------------
@@ -707,8 +707,7 @@ In HPC environments we strongly encourage to use [Singularity](https://www.sylab
 
 Issues
 ------
-Please report all bugs and issues using the GitHub [issue tracker]
-(https://github.com/vastgroup/vast-tools/issues).
+Please report all bugs and issues using the GitHub [issue tracker](https://github.com/vastgroup/vast-tools/issues).
 
 Contributions
 -------------
@@ -722,21 +721,21 @@ Contributions
 Citations
 ---------
 
-* `vast-tools` main paper, including benchmarking and [VastDB](http://vastdb.crg.eu/):
+* `vast-tools` main paper, including benchmarking and [VastDB][]:
 
-Tapial, J., Ha, K.C.H., Sterne-Weiler, T., Gohr, A., Braunschweig, U., Hermoso-Pulido, A., Quesnel-Vallières, M., Permanyer, J., Sodaei, R., Marquez, Y., Cozzuto, L., Wang, X., Gómez-Velázquez, M., Rayón, M., Manzanares, M., Ponomarenko, J., Blencowe, B.J., Irimia, M. (2017). An Alternative Splicing Atlas Reveals New Regulatory Programs and Genes Simultaneously Expressing Multiple Major Isoforms in Vertebrates. *Genome Res*, 27(10):1759-1768
+Tapial, J., Ha, K.C.H., Sterne-Weiler, T., Gohr, A., Braunschweig, U., Hermoso-Pulido, A., Quesnel-Vallières, M., Permanyer, J., Sodaei, R., Marquez, Y., Cozzuto, L., Wang, X., Gómez-Velázquez, M., Rayón, M., Manzanares, M., Ponomarenko, J., Blencowe, B.J., Irimia, M. (2017). [An atlas of alternative splicing profiles and functional associations reveals new regulatory programs and genes that simultaneously express multiple major isoforms](https://doi.org/10.1101/gr.220962.117). *Genome Res*, 27(10):1759-1768
 
 * `vast-tools` original paper:
 
-Irimia, M., Weatheritt, R.J., Ellis, J., Parikshak, N.N., Gonatopoulos-Pournatzis, T., Babor, M., Quesnel-Vallières, M., Tapial, J., Raj, B., O’Hanlon, D., Barrios-Rodiles, M., Sternberg, M.J.E., Cordes, S.P., Roth, F.P., Wrana, J.L., Geschwind, D.H., Blencowe, B.B. (2014). A highly conserved program of neuronal microexons is misregulated in autistic brains. *Cell*, 59:1511-23.
+Irimia, M., Weatheritt, R.J., Ellis, J., Parikshak, N.N., Gonatopoulos-Pournatzis, T., Babor, M., Quesnel-Vallières, M., Tapial, J., Raj, B., O’Hanlon, D., Barrios-Rodiles, M., Sternberg, M.J.E., Cordes, S.P., Roth, F.P., Wrana, J.L., Geschwind, D.H., Blencowe, B.B. (2014). [A highly conserved program of neuronal microexons is misregulated in autistic brains](https://doi.org/10.1016/j.cell.2014.11.035). *Cell*, 59:1511-23.
 
 * Intron retention analysis:
 
-Braunschweig, U., Barbosa-Morais, N.L., Pan, Q., Nachman, E., Alipahani, B., Gonatopoulos-Pournatzis, T., Frey, B., Irimia, M., Blencowe, B.J. (2014). Widespread intron retention in mammals functionally tunes transcriptomes. *Genome Research*, 24:1774-86
+Braunschweig, U., Barbosa-Morais, N.L., Pan, Q., Nachman, E., Alipahani, B., Gonatopoulos-Pournatzis, T., Frey, B., Irimia, M., Blencowe, B.J. (2014). [Widespread intron retention in mammals functionally tunes transcriptomes](https://dx.doi.org/10.1101%2Fgr.177790.114). *Genome Research*, 24:1774-86
 
 * `diff` module:
 
-Han H, Braunschweig U.,  Gonatopoulos-Pournatzis T., Weatheritt R.J., Hirsch C.L., Ha K.C., Radovani E., Nabeel-Shah S., Sterne-Weiler T., Wang J., O'Hanlon D., Pan Q., Ray D., Vizeacoumar F., Datti A., Magomedova L., Cummins C.L., Hughes T.R., Greenblatt J.F., Wrana J.L., Moffat J., Blencowe B.J. (2017). Multilayered control of alternative splicing regulatory networks by transcription factors. *Mol Cell*, 65(3):539-553
+Han H, Braunschweig U.,  Gonatopoulos-Pournatzis T., Weatheritt R.J., Hirsch C.L., Ha K.C., Radovani E., Nabeel-Shah S., Sterne-Weiler T., Wang J., O'Hanlon D., Pan Q., Ray D., Vizeacoumar F., Datti A., Magomedova L., Cummins C.L., Hughes T.R., Greenblatt J.F., Wrana J.L., Moffat J., Blencowe B.J. (2017). [Multilayered control of alternative splicing regulatory networks by transcription factors](https://doi.org/10.1016/j.molcel.2017.01.011). *Mol Cell*, 65(3):539-553
 
 
 Species databases
@@ -744,19 +743,19 @@ Species databases
 
 * Chicken database:
 
-Gueroussov, S., Gonatopoulos-Pournatzis, T., Irimia, M., Raj, B., Lin, Z.Y., Gingras, A.C., Blencowe, B.J. (2015). An alternative splicing event amplifies evolutionary differences between vertebrates. *Science*, 349:868-73
+Gueroussov, S., Gonatopoulos-Pournatzis, T., Irimia, M., Raj, B., Lin, Z.Y., Gingras, A.C., Blencowe, B.J. (2015). [An alternative splicing event amplifies evolutionary differences between vertebrates](https://doi.org/10.1126/science.aaa8381). *Science*, 349:868-73
 
 * Zebrafish and sea urchin databases:
 
-Burguera, D., Marquez, Y., Racioppi, C., Permanyer, J., Torres-Mendez, T., Esposito, R., Albuixech, B., Fanlo, L., D'Agostino, Y., Gohr, A., Navas-Perez, E., Riesgo, A., Cuomo, C., Benvenuto, G., Christiaen, L.A., Martí, E., D'Aniello, S., Spagnuolo, A., Ristoratore, F., Arnone, M.I., Garcia-Fernàndez, J., Irimia, M. (2017). Evolutionary recruitment of flexible Esrp-dependent splicing programs into diverse embryonic morphogenetic processes. *Nat Commun*, 8:1799.
+Burguera, D., Marquez, Y., Racioppi, C., Permanyer, J., Torres-Mendez, T., Esposito, R., Albuixech, B., Fanlo, L., D'Agostino, Y., Gohr, A., Navas-Perez, E., Riesgo, A., Cuomo, C., Benvenuto, G., Christiaen, L.A., Martí, E., D'Aniello, S., Spagnuolo, A., Ristoratore, F., Arnone, M.I., Garcia-Fernàndez, J., Irimia, M. (2017). [Evolutionary recruitment of flexible Esrp-dependent splicing programs into diverse embryonic morphogenetic processes](https://doi.org/10.1038/s41467-017-01961-y). *Nat Commun*, 8:1799.
 
 * Amphioxus, fruitfly, centipede, C. elegans and sea anemone databases:
 
-Torres-Méndez, A., Bonnal, S., Marquez, Y., Roth, J., Iglesias, M., Permanyer, J., Almudí, I., O’Hanlon, D., Guitart, T., Soller, M., Gingras, A.-C., Gebauer, F., Rentzsch, F., Blencowe, B.J.B., Valcárcel, J., Irimia, M. (2019). A novel protein domain in an ancestral splicing factor drove the evolution of neural microexons. *Nature Ecol Evol*, 3:691-701.
+Torres-Méndez, A., Bonnal, S., Marquez, Y., Roth, J., Iglesias, M., Permanyer, J., Almudí, I., O’Hanlon, D., Guitart, T., Soller, M., Gingras, A.-C., Gebauer, F., Rentzsch, F., Blencowe, B.J.B., Valcárcel, J., Irimia, M. (2019). [A novel protein domain in an ancestral splicing factor drove the evolution of neural microexons](https://doi.org/10.1038/s41559-019-0813-6). *Nature Ecol Evol*, 3:691-701.
 
 * Planarian database: 
 
-Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians. *Elife*, 5:e16797. 
+Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). [Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians](https://dx.doi.org/10.7554%2FeLife.16797). *Elife*, 5:e16797. 
 
 
 References
@@ -764,12 +763,15 @@ References
 
 * *Matt*:
 
-Gohr, A., Irimia, M. (2018). Matt: Unix tools for alternative splicing analysis. *Bioinformatics*, 35:130-132.
+Gohr, A., Irimia, M. (2018). [Matt: Unix tools for alternative splicing analysis](https://doi.org/10.1093/bioinformatics/bty606). *Bioinformatics*, 35:130-132.
 
 * cRPKMs:
 
-Labbé, R.M., Irimia, M., Currie, K.W., Lin, A., Zhu, S.J., Brown, D.D., Ross, E.J., Voisin, V., Bader, G.D., Blencowe, B.J., Pearson, B.J. (2012). A comparative transcriptomic analysis reveals conserved features of stem cell pluripotency in planarians and mammals. *Stem Cells*, 30:1734-45.
+Labbé, R.M., Irimia, M., Currie, K.W., Lin, A., Zhu, S.J., Brown, D.D., Ross, E.J., Voisin, V., Bader, G.D., Blencowe, B.J., Pearson, B.J. (2012). [A comparative transcriptomic analysis reveals conserved features of stem cell pluripotency in planarians and mammals](https://doi.org/10.1002/stem.1144). *Stem Cells*, 30:1734-45.
 
 * *bowtie*:
 
-Langmead, B., Trapnell, C., Pop, M., Salzberg, S.L. (2009). Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. *Genome Biology*, 10:R25.
+Langmead, B., Trapnell, C., Pop, M., Salzberg, S.L. (2009). [Ultrafast and memory-efficient alignment of short DNA sequences to the human genome](https://doi.org/10.1186/gb-2009-10-3-r25). *Genome Biology*, 10:R25.
+
+[VastDB]: http://vastdb.crg.eu/
+[Matt]: http://matt.crg.eu
