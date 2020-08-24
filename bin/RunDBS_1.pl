@@ -879,10 +879,11 @@ sub get_internal_sp_key {
     $assembly_to_species{calMil1}="Cmi"; $assembly_to_species{braLan2}="Bl1"; $assembly_to_species{braLan3}="Bla";
     $assembly_to_species{strPur4}="Spu"; $assembly_to_species{dm6}="Dme"; $assembly_to_species{aedAeg5}="Aae";
     $assembly_to_species{bomMor1}="Bmo"; $assembly_to_species{triCas5}="Tca"; $assembly_to_species{apiMel4}="Ame";
-    $assembly_to_species{blaGer1}="Bge"; $assembly_to_species{cloDip2}="Cdi"; $assembly_to_species{strMar1}="Sma";
+    $assembly_to_species{blaGer2}="Bge"; $assembly_to_species{cloDip2}="Cdi"; $assembly_to_species{strMar1}="Sma";
     $assembly_to_species{ce11}="Cel"; $assembly_to_species{octBim1}="Obi"; $assembly_to_species{octMin1}="Omi";
     $assembly_to_species{schMed31}="Sme"; $assembly_to_species{nemVec1}="Nve"; $assembly_to_species{araTha10}="Ath";
     $assembly_to_species{rn6}="Rno"; $assembly_to_species{xenLae2}="Xla"; $assembly_to_species{pelSin1}="Psi";
+    $assembly_to_species{epiBal1}="Eba";
     my %species_to_assembly;
     $species_to_assembly{Hsa}="hg19"; $species_to_assembly{Hs2}="hg38"; $species_to_assembly{Ptr}="panTro4";
     $species_to_assembly{Mma}="rheMac2"; $species_to_assembly{Mmu}="mm9"; $species_to_assembly{Mm2}="mm10";
@@ -894,10 +895,11 @@ sub get_internal_sp_key {
     $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
     $species_to_assembly{Spu}="strPur4"; $species_to_assembly{Dme}="dm6"; $species_to_assembly{Aae}="aedAeg5";
     $species_to_assembly{Bmo}="bomMor1"; $species_to_assembly{Tca}="triCas5"; $species_to_assembly{Ame}="apiMel4";
-    $species_to_assembly{Bge}="blaGer1"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
+    $species_to_assembly{Bge}="blaGer2"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
     $species_to_assembly{Cel}="ce11"; $species_to_assembly{Obi}="octBim1"; $species_to_assembly{Omi}="octMin1";
     $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="araTha10";
     $species_to_assembly{Rno}="rn6"; $species_to_assembly{Xla}="xenLae2"; $species_to_assembly{Psi}="pelSin1";
+    $species_to_assembly{Eba}="epiBal1";
 
     if (defined $assembly_to_species{$temp_assembly[0]}){ # it's a proper assembly
 	$species = $assembly_to_species{$temp_assembly[0]};
@@ -927,10 +929,11 @@ sub validate_vastdb_sp {
     $species_to_assembly{Cmi}="calMil1"; $species_to_assembly{Bl1}="braLan2"; $species_to_assembly{Bla}="braLan3";
     $species_to_assembly{Spu}="strPur4"; $species_to_assembly{Dme}="dm6"; $species_to_assembly{Aae}="aedAeg5";
     $species_to_assembly{Bmo}="bomMor1"; $species_to_assembly{Tca}="triCas5"; $species_to_assembly{Ame}="apiMel4";
-    $species_to_assembly{Bge}="blaGer1"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
+    $species_to_assembly{Bge}="blaGer2"; $species_to_assembly{Cdi}="cloDip2"; $species_to_assembly{Sma}="strMar1";
     $species_to_assembly{Cel}="ce11"; $species_to_assembly{Obi}="octBim1"; $species_to_assembly{Omi}="octMin1";
     $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="araTha10";
     $species_to_assembly{Rno}="rn6"; $species_to_assembly{Xla}="xenLae2"; $species_to_assembly{Psi}="pelSin1";
+    $species_to_assembly{Eba}="epiBal1";
 
     if (defined $species_to_assembly{$temp_assembly[0]}){
 	return ($species_to_assembly{$temp_assembly[0]});
