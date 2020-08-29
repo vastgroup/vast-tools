@@ -1,30 +1,36 @@
 #!/usr/bin/perl
 # Script to prepare and filter vast-tools PSI tables for other analyses
-
+use strict;
+use warnings;
 use Getopt::Long;
 use Cwd qw(abs_path);
 
 ### Setting global variables:
-$Q="O[KW]\,.+?\,.+?\,.+?\,.+?\@"; # NEW quality search
+my $Q="O[KW]\,.+?\,.+?\,.+?\,.+?\@"; # NEW quality search
 
 my $binPath = abs_path($0);
 $0 =~ s/^.*\///;
 $binPath =~ s/\/$0$//;
 
-$input_file=$ARGV[0];
-$min_SD=5; # min standard deviation of the event (def=5)
-#$min_Fraction=0.8; # min fraction of samples with good coverage (def=0.8)
-#$min_N=10; # min number of samples with good coverage (def=10)
-$noVLOW=0;
-$p_IR=0;
-$print_all = "";
-$samples = "";
-$group_file;
-$noB3;
-$min_ALT_use = 25;
-$verboseFlag = 1;  # on for debugging 
-$command_line=join(" ", @ARGV);
-@TYPES=("MIC","AltEx","IR","Alt3","Alt5");
+my $input_file=$ARGV[0];
+my $min_SD=5; # min standard deviation of the event (def=5)
+my $min_Fraction; # min fraction of samples with good coverage (def=0.8)
+my $min_N; # min number of samples with good coverage (def=10)
+my $noVLOW=0;
+my $p_IR=0;
+my $print_all;
+my $samples;
+my $group_file;
+my $noB3;
+my $min_ALT_use = 25;
+my $verboseFlag = 1;  # on for debugging 
+my $command_line = join(" ", @ARGV);
+my @TYPES=("MIC","AltEx","IR","Alt3","Alt5");
+my $output_file;
+my $helpFlag;
+my $log;
+my $onlyEXSK;
+my $AddName;
 
 Getopt::Long::Configure("no_auto_abbrev");
 GetOptions(               "min_SD=i" => \$min_SD,
@@ -44,6 +50,7 @@ GetOptions(               "min_SD=i" => \$min_SD,
 			  "verbose" => \$verboseFlag,
 			  "add_names" => \$AddName
     );
+our $EXIT_STATUS = 0;
 
 sub errPrint {
     my $errMsg = shift;
@@ -74,20 +81,26 @@ sub time {
 }
 
 # gets the array of samples
-if ($samples){
+my @samples;
+my $N_samples;
+if (defined $samples){
     @samples=split(/\,/,$samples);
     $N_samples=$#samples+1;
 }
 
 # sanity checks for min_Fraction
-errPrintDie "min_Fr has to be between 0 and 1\n" if $min_Fraction > 1;
-errPrintDie "min_N ($min_N) cannot be higher than N of samples ($N_samples)\n" if $min_N > $N_samples && $samples;
+if (defined $min_Fraction){
+    errPrintDie "min_Fr has to be between 0 and 1\n" if $min_Fraction > 1;
+}
+if (defined $min_N && defined $samples){
+    errPrintDie "min_N ($min_N) cannot be higher than N of samples ($N_samples)\n" if $min_N > $N_samples && $samples;
+}
 
 # defining default output file name
-($root)=$input_file=~/(.+)\./;
-$root_out=$root;
-$root_out.="-minN_$min_N" if $min_N;
-$root_out.="-minFr_$min_Fraction" if $min_Fraction;
+my ($root)=$input_file=~/(.+)\./;
+my $root_out=$root;
+$root_out.="-minN_$min_N" if defined $min_N;
+$root_out.="-minFr_$min_Fraction" if defined $min_Fraction;
 $root_out.="-minSD_$min_SD";
 $root_out.="-noVLOW" if $noVLOW;
 $root_out.="-noB3" if $noB3;
@@ -95,10 +108,10 @@ $root_out.="-p_IR" if $p_IR;
 $root_out.="-min_ALT_use$min_ALT_use";
 $root_out.="-onlyEX" if $onlyEXSK;
 $root_out.="-samples$N_samples" if $samples;
-$root_out.="-groups" if $groups;
+$root_out.="-groups" if $group_file;
 
 $output_file="$root_out-Tidy.tab" unless $output_file;
-$log_file="$root_out-Tidy.log" if $log;
+my $log_file="$root_out-Tidy.log" if $log;
 
 ### Gets the version
 my $version;
@@ -140,15 +153,15 @@ Prepares and filters a vast-tools output for general analyses.
 ";
 }
 
-errPrintDie "*** You can only define a minimum fraction or absolute number of samples with good coverage\n" if $min_N && $min_Fraction;
-errPrintDie "*** You need to define either a minimum fraction or absolute number of samples with good coverage\n" if $min_N!~/\d/ && $min_Fraction!~/\d/;
+errPrintDie "*** You can only define a minimum fraction or absolute number of samples with good coverage\n" if (defined $min_N) && (defined $min_Fraction);
 errPrintDie "*** If groups are provided, you cannot provide samples\n" if $samples && $group_file;
 
 # prints version (05/05/19)
 verbPrint "VAST-TOOLS v$version";
 
 ### Creates the LOG
-($folder)=$root=~/(.+)\//;
+my ($folder)=$root=~/(.+)\//;
+$folder = "." if !defined $folder;
 open (LOG, ">>$folder/VTS_LOG_commands.txt");
 my $all_args="-min_SD $min_SD -min_ALT_use $min_ALT_use";
 $all_args.=" -min_N $min_N" if defined $min_N;
@@ -173,11 +186,13 @@ open (O, ">$output_file") || die "Can't open output file ($output_file)\n";
 verbPrint "Cleaning and filtering $ARGV[0]\n";
 
 ### Open group_file
-if ($group_file){
+my %sample_group;
+my %group_samples;
+if (defined $group_file){
     open (GROUPS, $group_file) || die "Cannot open group config file\n";
     while (<GROUPS>){
-	chomp;
-	@t=split(/\t/);
+	chomp($_);
+	my @t=split(/\t/);
 	$sample_group{$t[0]}=$t[1];
 	push(@{$group_samples{$t[1]}},$t[0]);
     }
@@ -186,13 +201,14 @@ if ($group_file){
 
 ### Printing a new clean heading (only Event_ID and PSI)
 print O "EVENT";
-$head=<I>;
+my $head=<I>;
 chomp($head);
-@H=split(/\t/,$head);
-for $i (6..$#H){
+my @H=split(/\t/,$head);
+my (@valid_sample, %TISSUES, %sample_index, $max_N);
+for my $i (6..$#H){
     if ($i%2==0){
 	if ($samples){
-	    foreach $j (0..$#samples){
+	    foreach my $j (0..$#samples){
 		if ($samples[$j] eq $H[$i]){
 		    $valid_sample[$i] = 1;
 		    print O "\t$H[$i]";
@@ -205,6 +221,7 @@ for $i (6..$#H){
 	    if ($sample_group{$H[$i]}){
 		$sample_index{$H[$i]}=$i;
 		$TISSUES{$H[$i]}=1;
+                $max_N++;
 	    }
 	}
 	else {
@@ -215,9 +232,11 @@ for $i (6..$#H){
 	}
     }
 }
-if ($group_file){ # prints them in order by groups
-    foreach $group (sort keys %group_samples){
-	foreach $sample (@{$group_samples{$group}}){
+
+my %max_N_groups;
+if (defined $group_file){ # prints them in order by groups
+    foreach my $group (sort keys %group_samples){
+	foreach my $sample (@{$group_samples{$group}}){
 	    print O "\t$sample";
 	    die "Sample ($sample) from $group not found\n" if !$sample_index{$sample};
 	    $max_N_groups{$group}++;
@@ -228,14 +247,18 @@ if ($group_file){ # prints them in order by groups
 print O "\n";
 
 ### Processing events
+my %done; # avoid repeated eventIDs
+my (%tallyNA, %PRINT, %total_N, %tally_type, %OK);
+my (%SD);
 while (<I>){
     s/VLOW/N/g if $noVLOW;
-    chomp;
-    @t=split(/\t/);
+    chomp($_);
+    my @t=split(/\t/,$_);
 
-    $gene_name=$t[0];
-    $event=$t[1];
-    $length=$t[3];
+    my $gene_name=$t[0];
+    my $event=$t[1];
+    my $length=$t[3];
+    my $type;
     if ($t[5]=~/Alt/){
 	$type=$t[5];
     }
@@ -255,22 +278,23 @@ while (<I>){
 #    next if $length==0; # to remove the internal ss in Alt3 and Alt5
     next if $onlyEXSK && ($type=~/Alt[35]/ || $type=~/IR/);
     
+    my $event_ID;
     $event_ID="$gene_name=$event" if $AddName;
     $event_ID=$event if !$AddName;
 
-    %PRINT=();
+    my %PRINT=();
     next if $done{$event}; # to avoid possible repeated IDs (in preliminary tables)
     
     #### STANDARD TIDY
-    if (!$group_file){
-	@PSIs=();
-	foreach $i (6..$#t){
+    if (!defined $group_file){
+	my @PSIs=();
+	foreach my $i (6..$#t){
 	    if ($i%2==0){
 		next if !$valid_sample[$i];
 		if ($t[$i+1]=~/$Q/){
 		    ### For IR
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
-			($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
+			my ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
 			    $PRINT{$event}.="\tNA"; # storages the PSIs
 			    $tallyNA{$event}{$H[$i]}=1; # for summary stats 
@@ -281,7 +305,7 @@ while (<I>){
 		    if ($type eq "Alt3" || $type eq "Alt5"){
 			my $kill_ALT = 0;
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
-			if ($temp_ALT=~/\d/){
+			if (defined $temp_ALT && $temp_ALT=~/\d/){
 			    if ($temp_ALT < $min_ALT_use){
 				$PRINT{$event}.="\tNA"; # storages the PSIs
 				$tallyNA{$event}{$H[$i]}=1; 
@@ -297,9 +321,8 @@ while (<I>){
 		    if (($type eq "AltEx" || $type eq "MIC") && $noB3){ 
 			my $kill_B3 = 0;
 			my ($score3,$temp_B3)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,(.+?)\,.+?\@/;
-			if ($score3 =~ /\=/){ # i.e. from v2.2.2 onwards
+			if ($score3 =~ /\=/ && defined $score3){ # i.e. from v2.2.2 onwards
 			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
-
 			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
 				$PRINT{$event}.="\tNA"; # storages the PSIs
 				$tallyNA{$event}{$H[$i]}=1; # for summary stats
@@ -324,8 +347,9 @@ while (<I>){
 		}
 	    }
 	}
-	next if $min_N && $total_N{$event} < $min_N; # check for absolute number
-	next if $min_Fraction && $total_N{$event}/$max_N < $min_Fraction; # check for fraction
+        next if (!defined $total_N{$event});
+	next if (defined $min_N) && $total_N{$event} < $min_N; # check for absolute number
+	next if (defined $min_Fraction) && ($total_N{$event}/$max_N) < $min_Fraction; # check for fraction
 	
 	if ($total_N{$event}>0){
 	    $SD{$event}=&std_dev(@PSIs);
@@ -335,21 +359,28 @@ while (<I>){
 	}
 	next if $SD{$event} < $min_SD && $SD{$event} ne "NA";
 	
-	print O "$event_ID"."$PRINT{$event}\n";
-	$tally_type{$type}++;
-	$OK{$event}=1;
+        my @temp_check=split(/\t/,$PRINT{$event}); # it comes with a first empty tab
+        if ($#temp_check == $max_N){
+            print O "$event_ID"."$PRINT{$event}\n";
+	    $tally_type{$type}++;
+	    $OK{$event}=1;
+        }
+        else {
+            verbPrint "WARNING: Skipping $event (too few valid samples)\n";
+        }
+
     }
     else {
-	%PSIs=();
-	@PSIs_both_groups=();
-	$OK_group=0;
-	foreach $group (sort keys %group_samples){
-	    foreach $sample (@{$group_samples{$group}}){
-		$i=$sample_index{$sample};
+	my %PSIs=();
+	my @PSIs_both_groups=();
+	my $OK_group;
+	foreach my $group (sort keys %group_samples){
+	    foreach my $sample (@{$group_samples{$group}}){
+		my $i=$sample_index{$sample};
 		
 		if ($t[$i+1]=~/$Q/){
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
-			($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
+			my ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
 			    $PRINT{$event}.="\tNA"; # storages the PSIs
 			    $tallyNA{$event}{$H[$i]}=1; # for summary stats 
@@ -360,7 +391,7 @@ while (<I>){
 		    if ($type eq "Alt3" || $type eq "Alt5"){
 			my $kill_ALT = 0;
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
-			if ($temp_ALT=~/\d/){
+			if ($temp_ALT=~/\d/ && defined $temp_ALT){
 			    if ($temp_ALT < $min_ALT_use){
 				$PRINT{$event}.="\tNA"; # storages the PSIs
 				$tallyNA{$event}{$H[$i]}=1;
@@ -403,20 +434,31 @@ while (<I>){
 		}
 	    }
 	    ### At the level of group
+            next if (!defined $total_N{$event}{$group});
 	    next if $min_N && $total_N{$event}{$group} < $min_N; # check for absolute number in each group
 	    next if $min_Fraction && $total_N{$event}{$group}/$max_N_groups{$group} < $min_Fraction; # check for fraction
-	    
+
+            ### This would test SD PER GROUP	    
 #	    $SD{$event}{$group}=&std_dev(@{$PSIs{$group}});
 #	    next if $SD{$event}{$group} < $min_SD;
+
 	    $OK_group++;
 	    push(@PSIs_both_groups,@{$PSIs{$group}});
 	}
-	if ($OK_group==2){
-	    $SD{$event}=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
-	    if ($SD{$event} >= $min_SD){
-		print O "$event_ID"."$PRINT{$event}\n";
-		$tally_type{$type}++;
-		$OK{$event}=1;
+        if (defined $OK_group){
+	    if ($OK_group==2){
+	        $SD{$event}=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
+	        if ($SD{$event} >= $min_SD){
+                    my @temp_check=split(/\t/,$PRINT{$event}); # it comes with a first empty tab
+                    if ($#temp_check == $max_N){
+     		         print O "$event_ID"."$PRINT{$event}\n";
+	                 $tally_type{$type}++;
+       	                 $OK{$event}=1;
+                    }
+                    else {
+                         verbPrint "WARNING: Skipping $event (too few valid samples)\n";
+                    }
+                } 
 	    }
 	}
     }
@@ -424,21 +466,23 @@ while (<I>){
 }
 
 ### this scores the number of events missing in each sample
-foreach $ev (sort keys %OK){
+my $total_events=0;
+my %CUENTA;
+foreach my $ev (sort keys %OK){
     $total_events++;
-    foreach $tis (sort (keys %TISSUES)){
+    foreach my $tis (sort (keys %TISSUES)){
 	$CUENTA{$tis}++ if $tallyNA{$ev}{$tis};
     }
 }
 
-$min_N="NA" if $min_N !~/\d/;
-$min_Fraction="NA" if $min_Fraction !~/\d/;
+$min_N="NA" if (!defined $min_N);
+$min_Fraction="NA" if (!defined $min_Fraction);
 
 ### Print summary and LOG
 open (LOG, ">$log_file") if $log;
 print LOG "OPTIONS: $command_line\n\n";
 
-$extras="";
+my $extras;
 $extras.= " -noVOW" if $noVLOW;
 $extras.= " -noB3" if $noB3 && $noB3 ne "NA (older version)";
 $extras.= " -noB3=NA (older version)" if $noB3 && $noB3 eq "NA (older version)";
@@ -450,15 +494,15 @@ print LOG "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extra
 verbPrint "Settings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
 print LOG "TOTAL # of Events: $total_events\n";
 print "\t\tTOTAL # of Events: $total_events\n";
-foreach $type (@TYPES){
+foreach my  $type (@TYPES){
     print LOG "$type\t$tally_type{$type}\n";
     print "\t\t$type\t$tally_type{$type}\n";
 }
 print LOG "\nTISSUE\tMISSING\t\%\n";
 print "\n\t\tTISSUE\tMISSING\t\%\n";
-foreach $tis (sort (keys %TISSUES)){
+foreach my $tis (sort (keys %TISSUES)){
     $CUENTA{$tis}=0 if !$CUENTA{$tis};
-    $perc=sprintf("%.2f",100*$CUENTA{$tis}/$total_events);
+    my $perc=sprintf("%.2f",100*$CUENTA{$tis}/$total_events);
     print LOG "$tis\t$CUENTA{$tis}\t$perc\n";
     print "\t\t$tis\t$CUENTA{$tis}\t$perc\n";
 }
