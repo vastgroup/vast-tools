@@ -189,8 +189,10 @@ print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools compare_expr $all_args\n
 # preparing the head
 my $head_row=<GE>;
 chomp($head_row);
-$head_row =~ s/\-R\t/\t/g; # to remove the "-R" that says it's a cRPKM column
-$head_row =~ s/\-cRPKM\t/\t/g; # to remove the "-R" that says it's a cRPKM column
+$head_row =~ s/\-Counts\t/\t/g; # to remove the "-Counts" that says it's a cRPKM column
+$head_row =~ s/\-Counts$//; # to remove the "-Counts" that says it's a cRPKM column
+$head_row =~ s/\-cRPKM\t/\t/g; # to remove the "-cRPKM" that says it's a cRPKM column
+$head_row =~ s/\-TPM\t/\t/g; # to remove the "-TPM" that says it's a cRPKM column
 my @head=split(/\t/,$head_row);
 foreach my $i (2..$#head){
     if ($i%2==0){ # to match sample names with column number
