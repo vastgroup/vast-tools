@@ -36,6 +36,8 @@ my $normalize = 0; # gets an expression table with normalized values
 my $install_limma = 0; # installs limma
 my $noGEflag = 0;
 my $onlyGEflag = 0;
+my $get_TPMs = 0;
+
 my $Ncores=1;
 my $add_version = 0;
 
@@ -64,6 +66,7 @@ GetOptions("help"  	       => \$helpFlag,
 	   "add_version"       => \$add_version,
            "C"                 => \$cRPKMCounts,
 	   "norm"              => \$normalize,
+	   "TPM"               => \$get_TPMs,
 	   "install_limma"     => \$install_limma);
 
 our $EXIT_STATUS = 0;
@@ -193,15 +196,17 @@ AS OPTIONS:
         --noANNOT               Don't use exons quantified directly from annotation (default off)
         --use_all_excl_eej      Use all exclusion EEJs (within extra_eej limit) in ss-based module (default off)
         --extra_eej i           Use +/- extra_eej neighboring junctions to calculate skipping in 
-                                     ANNOT (from A) and splice-site-based (from C1/C2) modules (default 5)
+                                    ANNOT (from A) and splice-site-based (from C1/C2) modules (default 5)
 
 GE OPTIONS:
         -no_expr                Does not create gene expression tables (default OFF)
         -exprONLY               Only creates gene expression tables (default OFF)
-	-C			Create a cRPKM plus read counts summary table. By default, a
-    				table containing ONLY cRPKM is produced. This option is only
-           			applicable when expression analysis is enabled.
-        --norm                  Create a cRPKM table normalized using 'normalizeBetweenArrays' from limma (default OFF)
+	-C			Create a table with cRPKMs plus read count (default OFF)
+                                    By default, a table containing ONLY cRPKM is produced. 
+                                    If TPM option is active, it also creates a TPM + counts table.
+    				    This option is only applicable when expression analysis is enabled.
+        --TPM                   Create a table with TPMs (default OFF). 
+        --norm                  Create cRPKM/TPM tables normalized using 'normalizeBetweenArrays' from limma (default OFF)
         --install_limma         Installs limma package if needed for normalization (default OFF)
 
 
@@ -292,6 +297,7 @@ $all_args.=" -exprONLY" if $onlyGEflag;
 $all_args.=" -no_expr" if $noGEflag;
 $all_args.=" -C" if $cRPKMCounts;
 $all_args.=" -norm" if $normalize;
+$all_args.=" -TPM" if $get_TPMs;
 
 print LOG "[VAST-TOOLS v$version, ".&time."] vast-tools combine $all_args (VASTDB: $VASTDB_version)\n";
 
@@ -440,20 +446,39 @@ unless ($noGEflag){
 	my $cRPKMOutput = "cRPKM-$sp_assembly-" . @rpkmFiles . ".tab";
 	my $cRPKMOutput_b = "cRPKM_AND_COUNTS-$sp_assembly-" . @rpkmFiles . ".tab";
 	my $cRPKMOutput_c = "cRPKM-$sp_assembly-" . @rpkmFiles . "-NORM.tab";
+	my $TPMOutput = "TPM-$sp_assembly-" . @rpkmFiles . ".tab";
+	my $TPMOutput_b = "TPM_AND_COUNTS-$sp_assembly-" . @rpkmFiles . ".tab";
+	my $TPMOutput_c = "TPM-$sp_assembly-" . @rpkmFiles . "-NORM.tab";
+
 	$cRPKMCounts = $cRPKMCounts ? "-C" : "";
 	$normalize = $normalize ? "-norm" : "";
+	$get_TPMs = $get_TPMs ? "-TPM" : "";
 	$install_limma = $install_limma ? "-install_limma" : "";
-	sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts $normalize $install_limma";
+	sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts $normalize $install_limma $get_TPMs";
 	
 	if ($compress) {
 	    verbPrint "Compressing files\n";
 	    sysErrMsg "gzip -v expr_out/*.cRPKM $cRPKMOutput";
+	    sysErrMsg "gzip -v $cRPKMOutput_b" if $cRPKMCounts;
+	    sysErrMsg "gzip -v $cRPKMOutput_c" if $normalize;
+	    sysErrMsg "gzip -v $TPMOutput" if $get_TPMs;
+	    sysErrMsg "gzip -v $TPMOutput_b" if $cRPKMCounts && $get_TPMs;
+	    sysErrMsg "gzip -v $TPMOutput_c" if $normalize && $get_TPMs;
 	    $cRPKMOutput .= ".gz";
+	    $cRPKMOutput_b .= ".gz" if $cRPKMCounts;
+	    $cRPKMOutput_c .= ".gz" if $normalize;
+	    $TPMOutput .= ".gz" if $get_TPMs;
+	    $TPMOutput_b .= ".gz" if $cRPKMCounts && $get_TPMs;
+	    $TPMOutput_c .= ".gz" if $normalize && $get_TPMs;
+	    
 	}
 	
 	verbPrint "Final cRPKM table saved as: " . abs_path($cRPKMOutput) . "\n";
 	verbPrint "Final cRPKM and COUNTS table saved as: " . abs_path($cRPKMOutput_b) . "\n" if $cRPKMCounts;
 	verbPrint "Final normalized cRPKM table saved as: " . abs_path($cRPKMOutput_c) . "\n" if $normalize;
+	verbPrint "Final TPM table saved as: " . abs_path($TPMOutput) . "\n" if $get_TPMs;
+	verbPrint "Final TPM and COUNTS table saved as: " . abs_path($TPMOutput_b) . "\n" if $cRPKMCounts && $get_TPMs;
+	verbPrint "Final normalized TPM table saved as: " . abs_path($TPMOutput_c) . "\n" if $normalize && $get_TPMs;
     }
 }
 

@@ -16,8 +16,9 @@ my $sp_assembly;
 my $cRPKMCounts = 0;
 my $normalize = 0;
 my $install_limma = 0;
+my $get_TPMs = 0;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "install_limma" => \$install_limma);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "install_limma" => \$install_limma, "TPM" => \$get_TPMs);
 
 die "[vast combine cRPKM error] Needs Species\n" if !$sp;
 my @files=glob("expr_out/*.cRPKM");
@@ -30,6 +31,8 @@ get_internal_sp_key($sp);
 my $OUTPUT;
 open ($OUTPUT, ">cRPKM_AND_COUNTS-$sp_assembly-$index.tab") if $cRPKMCounts;
 open (RPKM, ">cRPKM-$sp_assembly-$index.tab");
+open (O_TPM1, ">TPM-$sp_assembly-$index.tab") if $get_TPMs;
+open (O_TPM2, ">TPM_AND_COUNTS-$sp_assembly-$index.tab") if $get_TPMs && $cRPKMCounts;
 
 my %names;
 open (NAMES, "$dbDir/FILES/$sp.ID.names.txt");
@@ -42,13 +45,20 @@ close NAMES;
 
 my %data;
 my %RPKM;
+my %dataTPM1;
+my %dataTPM2;
+my %sum_cRPKM;
 my $head="ID\tNAME";
 my $headRPKM=$head;
+my $headTPM1=$head;
+my $headTPM2=$head;
 my $first_sample_count=0;
 foreach my $f (@files){
     my ($root)=$f=~/([^\/]+).cRPKM/;
     $head.="\t$root-cRPKM\t$root-Counts";
     $headRPKM.="\t$root";
+    $headTPM1.="\t$root";
+    $headTPM2.="\t$root-TPM\t$root-Counts";
     my $sample_count=0;
     
     open (INPUT, $f);
@@ -65,12 +75,33 @@ foreach my $f (@files){
         } elsif ($t[1] != 0) {
             $cRPKM=sprintf("%.2f",$t[1]);
             $raw_count=$t[2];
+	    $sum_cRPKM{$f}+=$t[1];
         }
-        
         $data{$t[0]}.="\t$cRPKM\t$raw_count";
         $RPKM{$t[0]}.="\t$cRPKM";
     }
     close INPUT;
+
+    if ($get_TPMs){
+	open (INPUT2, $f);
+	while (<INPUT2>){
+	    chomp;
+	    my @t=split(/\t/);
+	    my $TPM = sprintf("%.2f", 0);
+	    my $raw_count = 0;
+	    
+	    if ($t[1] eq 'NA') {
+		$TPM = 'NA';
+		$raw_count = 'NA';
+	    } elsif ($t[1] != 0) {
+		$TPM = sprintf("%.2f",1000000*$t[1]/$sum_cRPKM{$f});
+		$raw_count=$t[2];
+	    }
+	    $dataTPM1{$t[0]}.="\t$TPM";
+	    $dataTPM2{$t[0]}.="\t$TPM\t$raw_count";
+	}
+	close INPUT2;
+    }    
 
     if ($sample_count >0 && $first_sample_count==0){
 	$first_sample_count=$sample_count;
@@ -82,15 +113,22 @@ foreach my $f (@files){
 
 print $OUTPUT "$head\n" if $cRPKMCounts;
 print RPKM "$headRPKM\n";
+print O_TPM1 "$headTPM1\n" if $get_TPMs;
+print O_TPM2 "$headTPM2\n" if $get_TPMs && $cRPKMCounts;
 
 foreach my $gene (sort (keys %data)){
     $names{$gene}="NA" if (!defined $names{$gene});
     print $OUTPUT "$gene\t$names{$gene}$data{$gene}\n" if $cRPKMCounts;
     print RPKM "$gene\t$names{$gene}$RPKM{$gene}\n";
+    if ($get_TPMs){
+	print O_TPM1 "$gene\t$names{$gene}$dataTPM1{$gene}\n";
+	print O_TPM2 "$gene\t$names{$gene}$dataTPM2{$gene}\n" if $cRPKMCounts;
+    }
 }
 close $OUTPUT if $cRPKMCounts;
 close RPKM;
-
+close O_TPM1 if $get_TPMs;
+close O_TPM2 if $get_TPMs && $cRPKMCounts;
 
 ### Makes normalized table:
 my %norm_cRPKMs;
@@ -136,6 +174,49 @@ write.table(NmatrixF,\"$root_input-NORM.tab\",
     system "rm $input_path/temp*";
 }
 
+my %norm_TPMs;
+if ($normalize && $get_TPMs){
+    my $input_file = "TPM-$sp_assembly-$index.tab";
+    open (GE_2, $input_file) || die "[vast combine TPM error] Needs a TPM table\n";
+    my ($input_path,$root_input);
+    if ($input_file=~/\//){
+	($input_path,$root_input) = $input_file =~/(.+)\/(.+)\./;
+    }
+    else {
+	$input_path=".";
+	($root_input) = $input_file =~/(.+)\./;
+    }
+    open (TEMP, ">$input_path/temp_TPMs.tab");
+    while (<GE_2>){
+	chomp($_);
+	my @t=split(/\t/,$_);
+	print TEMP "$t[0]";
+	foreach my $i (2..$#t){ # not count table
+	    print TEMP "\t$t[$i]";
+	}
+	print TEMP "\n";
+    }
+    close TEMP;
+    close GE_2;
+    
+    open (Temp_R, ">$input_path/temp.R");
+    print Temp_R "
+library(limma)
+setwd(\"$input_path/\")
+matrix=as.matrix(read.table(\"temp_TPMs.tab\", row.names=1, header=TRUE,sep=\"\\t\"))
+Nmatrix=normalizeBetweenArrays(as.matrix(matrix))
+NmatrixF=cbind(Names=row.names(matrix),Nmatrix)
+write.table(NmatrixF,\"$root_input-NORM.tab\",
+            sep=\"\\t\",col.names=T,row.names=F,quote=F)";
+    close Temp_R;
+    
+    system "Rscript $input_path/temp.R";
+    system "rm $input_path/temp*";
+}
+
+
+
+########
 sub get_internal_sp_key {
     my @temp_assembly = @_;
 
