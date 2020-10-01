@@ -122,6 +122,7 @@ VAST-TOOLS v$version
 Usage: vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 
 Compare two sample sets to find differentially expressed genes based on fold changes of cRPKM values
+If a TPM_AND_COUNTS table from combine is provided, all options apply, but referring to TPMs, not cRPKMs.
 
 [General options] 
         --min_fold_av f          Minimum fold change of the averages (default 2)
