@@ -48,6 +48,7 @@ my %RPKM;
 my %dataTPM1;
 my %dataTPM2;
 my %sum_cRPKM;
+my @sum_cRPKM;
 my $head="ID\tNAME";
 my $headRPKM=$head;
 my $headTPM1=$head;
@@ -84,6 +85,7 @@ foreach my $f (@files){
 
     if ($get_TPMs){
 	open (INPUT2, $f);
+	push(@sum_cRPKM,$sum_cRPKM{$f});
 	while (<INPUT2>){
 	    chomp;
 	    my @t=split(/\t/);
@@ -198,13 +200,22 @@ if ($normalize && $get_TPMs){
     }
     close TEMP;
     close GE_2;
-    
+    # This is what edgeR function voom would do as first step before modeling mean-variance relationship
+    # We are not interested in the latter so we actually don't need to call voom explicitly.
+    # Voom is called with normalize.method="none"
+    # y <- t(log2(t(counts + 0.5)/(lib.size + 1) * 1e+06))
+    # y <- normalizeBetweenArrays(y, method = normalize.method)
     open (Temp_R, ">$input_path/temp.R");
     print Temp_R "
-library(limma)
-setwd(\"$input_path/\")
+library(edgeR)
+setwd(\"$input_path/\")\nlib.sizes=c(".join(",",@sum_cRPKM).")
 matrix=as.matrix(read.table(\"temp_TPMs.tab\", row.names=1, header=TRUE,sep=\"\\t\"))
-Nmatrix=normalizeBetweenArrays(as.matrix(matrix))
+matrix=t(t(matrix)*lib.sizes)/1000000
+ids.na<-which(is.na(matrix))
+matrix[ids.na]<-0
+lib.sizes<-calcNormFactors(matrix)*lib.sizes
+matrix<-t(t(matrix)/(lib.size+1)*1e+06)
+Nmatrix=normalizeBetweenArrays(matrix)
 NmatrixF=cbind(Names=row.names(matrix),Nmatrix)
 write.table(NmatrixF,\"$root_input-NORM.tab\",
             sep=\"\\t\",col.names=T,row.names=F,quote=F)";
