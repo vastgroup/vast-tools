@@ -216,6 +216,7 @@ matrix[ids.na]<-0
 lib.sizes<-calcNormFactors(matrix)*lib.sizes
 matrix<-t(t(matrix)/(lib.size+1)*1e+06)
 Nmatrix=normalizeBetweenArrays(matrix)
+Nmatris[ids.na]<-NA
 NmatrixF=cbind(Names=row.names(matrix),Nmatrix)
 write.table(NmatrixF,\"$root_input-NORM.tab\",
             sep=\"\\t\",col.names=T,row.names=F,quote=F)";
