@@ -203,8 +203,14 @@ if ($normalize && $get_TPMs){
     # This is what edgeR function voom would do as first step before modeling mean-variance relationship
     # We are not interested in the latter so we actually don't need to call voom explicitly.
     # Voom is called with normalize.method="none"
+    # but lib.sizes are not simply the sum of reads per sample but something more complex that happens in calcNormFactors
     # y <- t(log2(t(counts + 0.5)/(lib.size + 1) * 1e+06))
     # y <- normalizeBetweenArrays(y, method = normalize.method)
+    # So the idea of mimicing what voom would do is
+    # 1.) Take as before TPMs as input
+    # 2.) TPMs => raw counts
+    # 3.) re-compute lib.sizes as voom would do 
+    # 4.) normalize as voom would do with the new lib.sizes
     open (Temp_R, ">$input_path/temp.R");
     print Temp_R "
 library(edgeR)
