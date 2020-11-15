@@ -561,7 +561,7 @@ while (<PSI>){
     # NOT PAIRED: gets the average PSI for A and B and the lowest (min) and highest (max) PSI for each replicate
     if (!defined $paired){
 	# get dPSI
-	my $dPSI = $av_PSI_B-$av_PSI_A;
+	my $dPSI = sprintf("%.2f",$av_PSI_B-$av_PSI_A);
 
 	### To count the total number of AS events considered and print sets if required
 	if (($av_PSI_A>10 && $av_PSI_A<90) || ($av_PSI_B>10 && $av_PSI_B<90) || abs($av_PSI_A-$av_PSI_B)>10){
