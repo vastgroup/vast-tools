@@ -33,7 +33,7 @@ my $use_all_excl_eej = 0; # for COMBI flag
 
 my $cRPKMCounts = 0; # print a second cRPKM summary file containing read counts
 my $normalize = 0; # gets an expression table with normalized values
-my $install_limma = 0; # installs limma
+#my $install_limma = 0; # installs limma
 my $noGEflag = 0;
 my $onlyGEflag = 0;
 my $get_TPMs = 0;
@@ -66,8 +66,8 @@ GetOptions("help"  	       => \$helpFlag,
 	   "add_version"       => \$add_version,
            "C"                 => \$cRPKMCounts,
 	   "norm"              => \$normalize,
-	   "TPM"               => \$get_TPMs,
-	   "install_limma"     => \$install_limma);
+	   "TPM"               => \$get_TPMs
+    );
 
 our $EXIT_STATUS = 0;
 
@@ -206,8 +206,8 @@ GE OPTIONS:
                                     If TPM option is active, it also creates a TPM + counts table.
     				    This option is only applicable when expression analysis is enabled.
         --TPM                   Create a table with TPMs (default OFF). 
-        --norm                  Create cRPKM/TPM tables normalized using 'normalizeBetweenArrays' from limma (default OFF)
-        --install_limma         Installs limma package if needed for normalization (default OFF)
+        --norm                  Normalized the cRPKM tables using a quantile normalization with 'normalizeBetweenArrays' 
+                                    For TPMs, it uses 'edgeR' to compute lib.sizes before calculating TPMs (default OFF)
 
 
 *** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
@@ -453,8 +453,8 @@ unless ($noGEflag){
 	$cRPKMCounts = $cRPKMCounts ? "-C" : "";
 	$normalize = $normalize ? "-norm" : "";
 	$get_TPMs = $get_TPMs ? "-TPM" : "";
-	$install_limma = $install_limma ? "-install_limma" : "";
-	sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts $normalize $install_limma $get_TPMs";
+#	$install_limma = $install_limma ? "-install_limma" : "";
+	sysErrMsg "$binPath/MakeTableRPKMs.pl -sp=$sp -dbDir=$dbDir $cRPKMCounts $normalize $get_TPMs";
 	
 	if ($compress) {
 	    verbPrint "Compressing files\n";
