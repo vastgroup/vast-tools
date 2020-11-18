@@ -13,10 +13,9 @@ use Getopt::Long;
 my $dbDir;
 my $sp; # here, the internal sp key is provided only.
 my $sp_assembly;
-my $cRPKMCounts = 0;
-my $normalize = 0;
-my $install_limma = 0;
-my $get_TPMs = 0;
+my $cRPKMCounts;
+my $normalize;
+my $get_TPMs;
 
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "install_limma" => \$install_limma, "TPM" => \$get_TPMs);
 
@@ -30,6 +29,7 @@ get_internal_sp_key($sp);
 # creates output files where run
 my $OUTPUT;
 open ($OUTPUT, ">cRPKM_AND_COUNTS-$sp_assembly-$index.tab") if $cRPKMCounts;
+open (O_COUNTS, ">COUNTS-$sp_assembly-$index.tab") if $cRPKMCounts;
 open (RPKM, ">cRPKM-$sp_assembly-$index.tab");
 open (O_TPM1, ">TPM-$sp_assembly-$index.tab") if $get_TPMs;
 open (O_TPM2, ">TPM_AND_COUNTS-$sp_assembly-$index.tab") if $get_TPMs && $cRPKMCounts;
@@ -47,10 +47,12 @@ my %data;
 my %RPKM;
 my %dataTPM1;
 my %dataTPM2;
+my %dataCOUNTS;
 my %sum_cRPKM;
 my @sum_cRPKM;
 my $head="ID\tNAME";
 my $headRPKM=$head;
+my $headCOUNTS=$head;
 my $headTPM1=$head;
 my $headTPM2=$head;
 my $first_sample_count=0;
@@ -80,6 +82,7 @@ foreach my $f (@files){
         }
         $data{$t[0]}.="\t$cRPKM\t$raw_count";
         $RPKM{$t[0]}.="\t$cRPKM";
+	$dataCOUNTS{$t[0]}.="\t$raw_count";
     }
     close INPUT;
 
@@ -114,6 +117,7 @@ foreach my $f (@files){
 }
 
 print $OUTPUT "$head\n" if $cRPKMCounts;
+print O_COUNTS "$headRPKM\n" if $cRPKMCounts;
 print RPKM "$headRPKM\n";
 print O_TPM1 "$headTPM1\n" if $get_TPMs;
 print O_TPM2 "$headTPM2\n" if $get_TPMs && $cRPKMCounts;
@@ -121,6 +125,7 @@ print O_TPM2 "$headTPM2\n" if $get_TPMs && $cRPKMCounts;
 foreach my $gene (sort (keys %data)){
     $names{$gene}="NA" if (!defined $names{$gene});
     print $OUTPUT "$gene\t$names{$gene}$data{$gene}\n" if $cRPKMCounts;
+    print O_COUNTS "$gene\t$names{$gene}$dataCOUNTS{$gene}\n" if $cRPKMCounts;
     print RPKM "$gene\t$names{$gene}$RPKM{$gene}\n";
     if ($get_TPMs){
 	print O_TPM1 "$gene\t$names{$gene}$dataTPM1{$gene}\n";
@@ -128,6 +133,7 @@ foreach my $gene (sort (keys %data)){
     }
 }
 close $OUTPUT if $cRPKMCounts;
+close O_COUNTS if $cRPKMCounts;
 close RPKM;
 close O_TPM1 if $get_TPMs;
 close O_TPM2 if $get_TPMs && $cRPKMCounts;
@@ -159,9 +165,6 @@ if ($normalize){
     close GE_2;
     
     open (Temp_R, ">$input_path/temp.R");
-    print Temp_R "source(\"https://bioconductor.org/biocLite.R\")
-biocLite(\"limma\")\n" if ($install_limma);
-    
     print Temp_R "
 library(limma)
 setwd(\"$input_path/\")
