@@ -17,7 +17,7 @@ my $cRPKMCounts;
 my $normalize;
 my $get_TPMs;
 
-GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "install_limma" => \$install_limma, "TPM" => \$get_TPMs);
+GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "TPM" => \$get_TPMs);
 
 die "[vast combine cRPKM error] Needs Species\n" if !$sp;
 my @files=glob("expr_out/*.cRPKM");
