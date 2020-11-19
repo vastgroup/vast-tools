@@ -193,8 +193,8 @@ AS OPTIONS:
 	--noIR			Don't run intron retention pipeline (default OFF)
         --onlyIR                Only run intron retention pipeline (default OFF) 
         --IR_version 1/2        Version of the IR analysis (default 2)
-        --noANNOT               Don't use exons quantified directly from annotation (default off)
-        --use_all_excl_eej      Use all exclusion EEJs (within extra_eej limit) in ss-based module (default off)
+        --noANNOT               Don't use exons quantified directly from annotation (default OFF)
+        --use_all_excl_eej      Use all exclusion EEJs (within extra_eej limit) in ss-based module (default OFF)
         --extra_eej i           Use +/- extra_eej neighboring junctions to calculate skipping in 
                                     ANNOT (from A) and splice-site-based (from C1/C2) modules (default 5)
 
@@ -205,9 +205,9 @@ GE OPTIONS:
                                     By default, a table containing ONLY cRPKM is produced. 
                                     If TPM option is active, it also creates a TPM + counts table.
     				    This option is only applicable when expression analysis is enabled.
-        --TPM                   Create a table with TPMs (default OFF). 
-        --norm                  Normalized the cRPKM tables using a quantile normalization with 'normalizeBetweenArrays' 
-                                    For TPMs, it uses 'edgeR' to compute lib.sizes before calculating TPMs (default OFF)
+        --TPM                   Creates a table with TPMs (default OFF). 
+        --norm                  Normalizes the cRPKM tables using a quantile normalization with 'normalizeBetweenArrays' (default OFF)
+                                For TPMs, it performs a library normalization across samples using 'calcNormFactors' from edgeR.
 
 
 *** Questions \& Bug Reports: Manuel Irimia (mirimia\@gmail.com)
