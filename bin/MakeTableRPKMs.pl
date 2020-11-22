@@ -257,6 +257,7 @@ sub get_internal_sp_key {
     $assembly_to_species{schMed31}="Sme"; $assembly_to_species{nemVec1}="Nve"; $assembly_to_species{araTha10}="Ath";
     $assembly_to_species{rn6}="Rno"; $assembly_to_species{xenLae2}="Xla"; $assembly_to_species{pelSin1}="Psi";
     $assembly_to_species{epiBal1}="Eba";
+    $assembly_to_species{bomImp1}="Bim"; $assembly_to_species{eugDil1}="Edi"; $assembly_to_species{megRot1}="Mro"; $assembly_to_species{tetCar1}="Tec";
     
     my %species_to_assembly;
     $species_to_assembly{Hsa}="hg19"; $species_to_assembly{Hs2}="hg38"; $species_to_assembly{Ptr}="panTro4";
@@ -274,6 +275,7 @@ sub get_internal_sp_key {
     $species_to_assembly{Sme}="schMed31"; $species_to_assembly{Nve}="nemVec1"; $species_to_assembly{Ath}="araTha10";
     $species_to_assembly{Rno}="rn6"; $species_to_assembly{Xla}="xenLae2"; $species_to_assembly{Psi}="pelSin1";
     $species_to_assembly{Eba}="epiBal1";
+    $species_to_assembly{Bim}="bomImp1"; $species_to_assembly{Edi}="eugDil1"; $species_to_assembly{Mro}="megRot1"; $species_to_assembly{Tec}="tetCar1";
 
     if (defined $species_to_assembly{$temp_assembly[0]}){
 	$sp_assembly = $species_to_assembly{$temp_assembly[0]};
