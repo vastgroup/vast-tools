@@ -283,7 +283,7 @@ my %IR;
 my %IRsum;
 my $IR_head;
 my $IRsum_head;
-my $MIC_head;
+my $MIC_head = "GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX\tPSI\tRaw_reads_exc\tRaw_reads_inc\tCorr_reads_exc\tCorr_reads_inc\n";
 my %MIC;
 my %dataMIC;
 my %EEJ;
@@ -428,8 +428,15 @@ unless (defined $exprONLY){
 	$N_MIC++;
 
 	verbPrint "  Processing $file\n";
+	
+	### Added to check if the file has header or not (some don't from pre-vast-tools)
+	open (TEST, $file) || errPrintDie "Can't open $file\n";
+	my $MIC_head_test=<TEST>;
+	my $has_header="";
+	$has_header=1 if $MIC_head_test=~/EVENT\tCOORD/;
+
 	open (I, $file) || errPrintDie "Can't open $file\n";
-	$MIC_head=<I>;
+	<I> if $has_header;
 	while (<I>){
 	    chomp($_);
 	    my @temp=split(/\t/,$_);
