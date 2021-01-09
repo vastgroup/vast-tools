@@ -85,7 +85,7 @@ VAST-TOOLS looks for VASTDB inside its own directory
 
 In addition to these libraries, [VastDB][] also refers to a web server
 that provides information about AS events profiled by VAST-TOOLS through their stable
-VastID (e.g. [HsaEX0040388](http://vastdb.crg.eu/wiki/Event:HsaEX0040388@Genome:hg19)). * NOTE: EventIDs are maintained across assemblies from the same species. While not all species are available in VastDB yet, they soon will.
+VastID (e.g. [HsaEX0040388](https://vastdb.crg.eu/event/HsaEX0040388@hg38)). * NOTE: EventIDs are maintained across assemblies from the same species. While not all species are available in VastDB yet, they soon will.
 
 These are the `vast-tools` assemblies available in v2.4.0:
 
