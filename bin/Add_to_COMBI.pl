@@ -98,6 +98,8 @@ foreach $file (@EEJ){
     ($sample)=$fname=~/^(.*)\..*$/;
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-ReC\t$sample-Ri1C\t$sample-Ri2C\t$sample-Q";
+
+    die "[vast combine combi error]: The file $file seems empty; vast-tools align may have not worked properly (e.g. RAM issue)\n" if (-z $file);
     
     unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
     }else{

@@ -95,6 +95,8 @@ foreach $file (@EEJ){
     $fname =~ s/^.*\///;
     ($sample)=$fname=~/^(.*)\..*$/;
     $head_PSIs.="\t$sample\t$sample-Q";
+
+    die "[vast combine annot error]: The file $file seems empty; vast-tools align may have not worked properly (e.g. RAM issue)\n" if (-z $file);
     
     unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
     }else{
