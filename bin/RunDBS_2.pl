@@ -281,8 +281,12 @@ if ($onlyIRflag){
     $N=$#files+1;
 }
 else {
-   @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).                                                                                                                                                                                                                                               
+   @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
    $N=$#files+1;
+   my @test_eej2=glob("to_combine/*eej2");
+   foreach my $test_file (@test_eej2){
+       die "[vast combine error]: At least the file $test_file seems empty; vast-tools align may have not worked properly (e.g. RAM issue)\n" if (-z $test_file);
+   }
 }
 
 ### Creates the LOG
