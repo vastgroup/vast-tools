@@ -775,6 +775,9 @@ unless ($onlyIRflag){
 	"$binPath/Analyze_COMBI.pl deprecated " .
 	"$dbDir/COMBI/$species/$species"."_COMBI-M-$le-gDNA${mapcorr_fileswitch}.eff $runArgs";   # produces to_combine/$root.eej2
     
+    ### check for eej2 completion
+    errPrintDie "The file $root.eej2 seems empty; vast-tools align may need more RAM\n" if (-z "to_combine/$root.eej2");
+
     verbPrint "Mapping reads to the \"transcript-based\" (aka \"a priori\") SIMPLE EEJ library and Analyzing...\n";
     checkResumeOption("to_combine/$root.MULTI3X");
     sysErrMsg "$preCmd | $bowtie $bt_norc $inpType -p $cores -m 1 -v $bowtieV " .
