@@ -759,7 +759,7 @@ Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial
 
 * Arabidopsis database:
 
-Martin, G., Márquez, Y., Duque, P., Irimia, M. (2021). [Alternative splicing landscapes in <i>Arabidopsis thaliana</i> across tissues and stress conditions highlight major functional differences with animals](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-02258-y). *Genome Biol*, 22:35.
+Martín, G., Márquez, Y., Duque, P., Irimia, M. (2021). [Alternative splicing landscapes in <i>Arabidopsis thaliana</i> across tissues and stress conditions highlight major functional differences with animals](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-02258-y). *Genome Biol*, 22:35.
 
 
 References
