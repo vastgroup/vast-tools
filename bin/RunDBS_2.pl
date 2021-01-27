@@ -273,17 +273,25 @@ my $N = 0;
 
 if ($onlyIRflag){
     if ($IR_version == 1){
-	@files=glob("to_combine/*IR"); #gathers all IR files
+	my @files1=glob("to_combine/*IR"); #gathers all IR files
+	my @files2=glob("to_combine/*IR.gz"); #gathers all IR files
+	@files=(@files1,@files2); #gathers all IR files
     }
     else {
-	@files=glob("to_combine/*IR2"); #gathers all IR2 files
+	my @files1=glob("to_combine/*IR2"); #gathers all IR2 files
+	my @files2=glob("to_combine/*IR2.gz"); #gathers all IR2 files
+	@files=(@files1,@files2); #gathers all IR2 files
     }
     $N=$#files+1;
 }
 else {
-   @files=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
+   my @files1=glob("to_combine/*exskX"); #gathers all exskX files (a priori, simple).
+   my @files2=glob("to_combine/*exskX.gz"); #gathers all exskX files (a priori, simple).
+   @files=(@files1,@files2); #gathers all exskX files (a priori, simple).
    $N=$#files+1;
-   my @test_eej2=glob("to_combine/*eej2");
+   my @test_eej2_1=glob("to_combine/*eej2");
+   my @test_eej2_2=glob("to_combine/*eej2.gz");
+   my @test_eej2=(@test_eej2_1,@test_eej2_2);
    foreach my $test_file (@test_eej2){
        die "[vast combine error]: At least the file $test_file seems empty; vast-tools align may have not worked properly (e.g. RAM issue)\n" if (-z $test_file);
    }
@@ -339,11 +347,15 @@ if ($N != 0 && !$onlyGEflag) {
 	    my @irFiles;
 	    if ($IR_version == 1){
 		$v="";
-		@irFiles = glob(abs_path("to_combine") . "/*.IR");
+		my @irFiles1 = glob(abs_path("to_combine") . "/*.IR");
+		my @irFiles2 = glob(abs_path("to_combine") . "/*.IR.gz");
+		@irFiles = (@irFiles1,@irFiles2);
 	    }
 	    elsif ($IR_version == 2){
 		$v="_v2";
-		@irFiles = glob(abs_path("to_combine") . "/*.IR2");
+		my @irFiles1 = glob(abs_path("to_combine") . "/*.IR2");
+		my @irFiles2 = glob(abs_path("to_combine") . "/*.IR2.gz");
+		@irFiles = (@irFiles1,@irFiles2);
 	    }
 	    
 	    $noIRflag = 1 if @irFiles == 0;
@@ -443,7 +455,9 @@ if ($N != 0 && !$onlyGEflag) {
 }
 
 ### Combine cRPKM files, if present
-my @rpkmFiles=glob("expr_out/*.cRPKM"); 
+my @rpkmFiles1=glob("expr_out/*.cRPKM"); 
+my @rpkmFiles2=glob("expr_out/*.cRPKM.gz"); 
+my @rpkmFiles=(@rpkmFiles1,@rpkmFiles2);
 unless ($noGEflag){
     if (@rpkmFiles > 0) {
 	verbPrint "Combining cRPKMs into a single table\n";

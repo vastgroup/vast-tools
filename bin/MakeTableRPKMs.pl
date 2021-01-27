@@ -20,7 +20,9 @@ my $get_TPMs;
 GetOptions("dbDir=s" => \$dbDir, "sp=s" => \$sp, "C" => \$cRPKMCounts, "norm" => \$normalize, "TPM" => \$get_TPMs);
 
 die "[vast combine cRPKM error] Needs Species\n" if !$sp;
-my @files=glob("expr_out/*.cRPKM");
+my @files1=glob("expr_out/*.cRPKM");
+my @files2=glob("expr_out/*.cRPKM.gz");
+my @files=(@files1,@files2);
 my $index=$#files+1;
 
 ### gets the species assembly
@@ -64,7 +66,12 @@ foreach my $f (@files){
     $headTPM2.="\t$root-TPM\t$root-Counts";
     my $sample_count=0;
     
-    open (INPUT, $f);
+    
+    if ($f=~/\.gz$/){
+	open (INPUT, "gunzip -c $f | ") || die "It cannot open the $f\n";
+    } else {
+        open (INPUT, $f);
+    }
     while (<INPUT>){
         chomp;
         my @t=split(/\t/);
@@ -87,7 +94,11 @@ foreach my $f (@files){
     close INPUT;
 
     if ($get_TPMs){
-	open (INPUT2, $f);
+	if ($f=~/\.gz$/){
+	    open (INPUT2, "gunzip -c $f | ") || die "It cannot open the $f\n";
+	} else {
+	    open (INPUT2, $f);
+	}
 	push(@sum_cRPKM,$sum_cRPKM{$f});
 	while (<INPUT2>){
 	    chomp;

@@ -26,7 +26,9 @@ OPTIONS:
 
 my $combineFolder = $ARGV[0];
 
-my @files=glob($combineFolder . "/*.IR"); # This should take all the counts in the folder for "combine sample"
+my @files1=glob($combineFolder . "/*.IR"); # This should take all the counts in the folder for "combine sample"
+my @files2=glob($combineFolder . "/*.IR.gz"); # This should take all the counts in the folder for "combine sample"
+my @files=(@files1,@files2);
 my $N=$#files+1;
 
 die "Error in $0: No samples found in folder $combineFolder\n" if ($N == 0);
@@ -64,13 +66,19 @@ foreach my $file (@files){
     $samples{$sample}=1;
     my $fname=$file;
     $fname =~ s/^.*\///;
-    (my $sample2)=$fname=~/^(.*)\..*$/;
+#    (my $sample2)=$fname=~/^(.*)\.IR/;
 
-    unless(-e "to_combine/$sample.info"){
+    unless(-e "to_combine/$sample.info" || -e "to_combine/$sample.info.gz"){
     	print STDERR "[vast combine IR]: Do not find to_combine/${sample}.info. Sample $sample will be treated as being not strand-specific.";
     	$mappability_href=\%mappability_ns;
     }else{
-    	open(my $fh_info,"to_combine/$sample.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+	my $fh_info;
+        if (-e "to_combine/$sample.info.gz"){
+            open($fh_info, "gunzip -c to_combine/$sample.info.gz | ") or die "$!";
+        } else {
+            open($fh_info, "to_combine/$sample.info") or die "$!";
+        }
+	my $line=<$fh_info>; close($fh_info);
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
     		print STDERR "[vast combine IR]: Do not find to_combine/${sample}.info. Sample $sample will be treated as being strand-specific.";
@@ -80,8 +88,13 @@ foreach my $file (@files){
     		$mappability_href=\%mappability_ns;
     	}
     }
-    
-    open (IN, $file);
+
+    ### opens file
+    if ($file=~/\.gz$/){
+	open (IN, "gunzip -c $file | ") || die"It cannot open the $file\n";
+    } else {
+        open (IN, $file);
+    }
     <IN>;
     while (<IN>){ # Format:  Event_ID EIJ1 EIJ2 EEJ I
         chomp;

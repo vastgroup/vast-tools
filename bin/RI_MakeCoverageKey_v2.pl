@@ -41,7 +41,9 @@ sub verbPrint {
 }
 
 # One intermediary file that contains the raw and the corrected read counts
-my @files_counts=glob($combineFolder . "/*.summary_v2.txt"); # This contains raw and corrected counts
+my @files_counts1=glob($combineFolder . "/*.summary_v2.txt"); # This contains raw and corrected counts
+my @files_counts2=glob($combineFolder . "/*.summary_v2.txt.gz"); # This contains raw and corrected counts
+my @files_counts=(@files_counts1,@files_counts2); # This contains raw and corrected counts
 my $N=$#files_counts+1;
 
 die "Error in $0: No samples found in folder $combineFolder\n" if ($N == 0);
@@ -69,15 +71,23 @@ while (<MAP_I_SS>){
 close MAP_I_SS;
 
 my %is_ss;
-my @files_IR2=glob($combineFolder . "/*.IR2"); # This contains the corrected counts, including the I (colum 5)
+my @files_IR2_1=glob($combineFolder . "/*.IR2"); # This contains the corrected counts, including the I (colum 5)
+my @files_IR2_2=glob($combineFolder . "/*.IR2.gz"); # This contains the corrected counts, including the I (colum 5)
+my @files_IR2=(@files_IR2_1,@files_IR2_2); # This contains the corrected counts, including the I (colum 5)
 my $M = $#files_IR2+1;
 die "Error in $0: Different number of IR2 and IR.summary_v2.txt files\n" if ($M != $N);
 foreach my $file (@files_IR2){
-    my ($sample)=$file=~/([^\/]+)\.IR2$/;
+    my ($sample)=$file=~/([^\/]+)\.IR2/;
     
-    unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
-    }else{
-	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    unless(-e "to_combine/${sample}.info" || -e "to_combine/${sample}.info.gz"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
+    } else{
+	my $fh_info;
+        if (-e "to_combine/${sample}.info.gz"){
+            open($fh_info, "gunzip -c to_combine/${sample}.info.gz | ") or die "$!";
+        } else {
+            open($fh_info, "to_combine/${sample}.info") or die "$!";
+        }
+	my $line=<$fh_info>; close($fh_info);
 	my @fs=split("\t",$line);
 	if($fs[@fs-2] eq "-SS"){
 	    $is_ss{$sample}=1;
@@ -88,7 +98,11 @@ foreach my $file (@files_IR2){
 	}
     }
     
-    open (IN, $file) || die "Can't open input file";
+    if ($file=~/\.gz$/){
+	open (IN, "gunzip -c $file | ") || die "It cannot open the $file\n";
+    } else {
+        open (IN, $file);
+    }
     <IN>;
     while (<IN>){ #Format:  Event_ID EIJ1 EIJ2 EEJ I (all corrected)
         chomp;
@@ -125,10 +139,15 @@ my %raw_reads;
 my %ne_events;
 
 foreach my $file (@files_counts){
-    my ($sample)=$file=~/([^\/]+)\.IR\.summary_v2\.txt$/;
+    my ($sample)=$file=~/([^\/]+)\.IR\.summary_v2\.txt/;
     
     $samples_counts{$sample}=1;
-    open (IN, $file);
+
+    if ($file=~/\.gz$/){
+	open (IN, "gunzip -c $file | ") || die "It cannot open the $file\n";
+    } else {
+        open (IN, $file);
+    }
     <IN>;
     while (<IN>){ # Format:  Event_ID cEIJ1 cEIJ2 cEEJ rEIJ1 rEIJ2 rEEJ
         chomp;

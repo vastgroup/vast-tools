@@ -28,7 +28,9 @@ sub verbPrint {
 $type_of_template="EXSK" if $type eq "exskX";
 $type_of_template="MULTI" if $type eq "MULTI3X";
 
-my(@EXSK) = glob("to_combine/*$type");  # not sure what to do with this.  TEST PLZ --TSW
+my (@EXSK1) = glob("to_combine/*$type");  
+my (@EXSK2) = glob("to_combine/*$type.gz");
+my @EXSK = (@EXSK1,@EXSK2);
 
 open (TEMPLATE, "$dbDir/TEMPLATES/$sp.$type_of_template.Template.2.txt") || die "Can't find $type_of_template template file for $sp\n";
 $head=<TEMPLATE>;
@@ -46,11 +48,16 @@ verbPrint "Loading and parsing data for each sample for $type_of_template\n";
 foreach my $file (@EXSK){
     my $fname = $file;
     $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
+    ($sample)=$fname=~/^(.*)\.$type/;
     $head.="\t$sample\t$sample-Q";
     $head_reads.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-e\t$sample-i1\t$sample-i2\t$sample-Q";
-
-    open (I, $file);
+    
+    ### opens file
+    if ($file=~/\.gz$/){
+	open (I, "gunzip -c $file | ") || die "It cannot open the $file\n";
+    } else {
+        open (I, $file);
+    }
     while (<I>){
 	chomp;
 	@t=split(/\t/);
@@ -109,7 +116,7 @@ foreach $event (sort keys %ALL){
     foreach $file (@EXSK){
 	my $fname = $file;
 	$fname =~ s/^.*\///;
-	($sample)=$fname=~/^(.*)\..*$/;
+	($sample)=$fname=~/^(.*)\.$type/;
 	
 	$PSI=sprintf("%.2f",$PSI{$event}{$sample})  if $PSI{$event}{$sample}=~/\d/;
 	$PSI="NA"  if $PSI{$event}{$sample} eq "NA";

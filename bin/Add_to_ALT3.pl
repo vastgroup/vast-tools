@@ -67,7 +67,9 @@ while (<TEMPLATE>){
 }
 close TEMPLATE;
 
-@EEJ=glob("to_combine/*.eej2");
+@EEJ1=glob("to_combine/*.eej2");
+@EEJ2=glob("to_combine/*.eej2.gz");
+@EEJ=(@EEJ1,@EEJ2);
 
 @EFF=glob("$dbDir/FILES/$sp"."_COMBI-$COMB-*gDNA.eff");
 die "[vast combine alt3]: Needs strand-unspecific effective from database!\n" if !@EFF;
@@ -111,16 +113,22 @@ verbPrint "Loading EEJ data for ALT3\n";
 foreach $file (@EEJ){
     my $fname = $file;
     $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
+    ($sample)=$fname=~/^(.*)\.eej/;
     $length = $samLen; # replacement --TSW
     
     # generates headings
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Ri\t$sample-Rtot\t$sample-Q";
 
-    unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
-    }else{
-    	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+    unless(-e "to_combine/${sample}.info" || -e "to_combine/${sample}.info.gz"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
+    } else{
+	my $fh_info;
+        if (-e "to_combine/${sample}.info.gz"){
+            open($fh_info, "gunzip -c to_combine/${sample}.info.gz | ") or die "$!";
+        } else {
+            open($fh_info, "to_combine/${sample}.info") or die "$!";
+        }
+	my $line=<$fh_info>; close($fh_info);
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
     		$is_ss{$sample}=1;
@@ -130,7 +138,11 @@ foreach $file (@EEJ){
     	}
     }
     ### Loads EEJ files
-    open (EEJ, $file);
+    if ($file=~/\.gz$/){
+	open (EEJ, "gunzip -c $file | ") || die "It cannot open the $file\n";
+    } else {
+	open (EEJ, $file);
+    }
     while (<EEJ>){
         chomp;
         @t=split(/\t/);
@@ -211,7 +223,7 @@ foreach $event_root (sort (keys %ALL)){
     foreach $file (@EEJ){
 	my $fname = $file;
 	$fname =~ s/^.*\///;
-	($sample)=$fname=~/^(.*)\..*$/;
+	($sample)=$fname=~/^(.*)\.eej/;
 	$length = $samLen;  #replacement --TSW
 	
 	# Emptying variables and arrays with read counts per sample

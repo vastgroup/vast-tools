@@ -25,17 +25,23 @@ sub verbPrint {
 
 die "[vast combine micro]: Needs the 3-letter species key\n" if !defined($sp);
 
-@files=glob("to_combine/*micX");
+@files1=glob("to_combine/*micX");
+@files2=glob("to_combine/*micX.gz");
+@files=(@files1,@files2);
 
 $head_counts=$head_PSI="GENE\tEVENT\tCOORD\tLENGTH\tFullCO\tCOMPLEX";
 foreach $file (@files){
     my $fname = $file;
     $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
+    ($sample)=$fname=~/^(.*)\.micX/;
     $head_PSI.="\t$sample\t$sample-Q";
     $head_counts.="\t$sample-Rexc\t$sample-Rinc\t$sample-exc\t$sample-inc\tPSI=Q";
 
-    open (INPUT, $file);
+    if ($file=~/\.gz$/){
+	open (INPUT, "gunzip -c $file | ") || die"It cannot open the $file\n";
+    } else {
+        open (INPUT, $file);
+    }
     while (<INPUT>){
 	chomp;
 	@t=split(/\t/);

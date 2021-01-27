@@ -32,7 +32,10 @@ die "Needs Species key\n" if !defined($sp);
 
 $COMB="M"; # Only available version
 
-@EEJ=glob("to_combine/*.eej2"); # from v2, only works with eej2
+@EEJ1=glob("to_combine/*.eej2"); # from v2, only works with eej2
+@EEJ2=glob("to_combine/*.eej2.gz"); # from v2, only works with eej2
+@EEJ=(@EEJ1,@EEJ2); # from v2, only works with eej2
+
 @EFF_ns=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA.eff"); die "[vast combine combi error] Needs effective (strand-unspecific) from database!\n" if !@EFF_ns;
 @EFF_ss=glob("$dbDir/FILES/$sp*-$COMB-*-gDNA-SS.eff"); die "[vast combine combi error] Needs effective (strand-specific) from database!\n" if !@EFF_ss;
 
@@ -67,7 +70,7 @@ foreach $file (@EFF_ss){
 	($gene,$donor,$acceptor,$donor_coord,$acceptor_coord)=$t[0]=~/(.+?)\-(\d+?)\_(\d+?)\-(\d+?)\_(\d+)/;
 	$eej="$gene-$donor-$acceptor";
 	$eff_ss{$length}{$eej}=$t[1];
-
+	
 	# keeps the coordinate for each donor/acceptor
 	$D_CO_ss{$gene}{$donor}=$donor_coord;
 	$A_CO_ss{$gene}{$acceptor}=$acceptor_coord;
@@ -95,15 +98,21 @@ verbPrint "Loading EEJ read counts data\n";
 foreach $file (@EEJ){
     my $fname = $file;
     $fname =~ s/^.*\///;
-    ($sample)=$fname=~/^(.*)\..*$/;
+    ($sample)=$fname=~/^(.*)\.eej/;
     $head_PSIs.="\t$sample\t$sample-Q";
     $head_ReadCounts.="\t$sample-Re\t$sample-Ri1\t$sample-Ri2\t$sample-ReC\t$sample-Ri1C\t$sample-Ri2C\t$sample-Q";
 
     die "[vast combine combi error]: The file $file seems empty; vast-tools align may have not worked properly (e.g. RAM issue)\n" if (-z $file);
     
-    unless(-e "to_combine/${sample}.info"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
+    unless(-e "to_combine/${sample}.info" || -e "to_combine/${sample}.info.gz"){ verbPrint "   $sample: do not find to_combine/${sample}.info. Sample will be treated as being not strand-specific.";
     }else{
-    	open(my $fh_info,"to_combine/${sample}.info") or die "$!"; my $line=<$fh_info>; close($fh_info);
+	my $fh_info;
+	if (-e "to_combine/${sample}.info.gz"){
+	    open($fh_info, "gunzip -c to_combine/${sample}.info.gz | ") or die "$!";
+	} else {
+	    open($fh_info, "to_combine/${sample}.info") or die "$!";
+	}
+	my $line=<$fh_info>; close($fh_info);
     	my @fs=split("\t",$line);
     	if($fs[@fs-2] eq "-SS"){
 	    $is_ss{$sample}=1;
@@ -114,7 +123,12 @@ foreach $file (@EEJ){
 	}
     }
     
-    open (EEJ, $file);
+    ### Analyzing the file
+    if ($file=~/\.gz$/){
+	open (EEJ, "gunzip -c $file | ") || die"It cannot open the $file\n";
+    } else {
+        open (EEJ, $file);
+    }
     while (<EEJ>){
 	chomp;
 	@t=split(/\t/);
@@ -202,7 +216,7 @@ foreach $event (sort (keys %ALL)){
     foreach $file (@EEJ){
 	my $fname = $file;
 	$fname =~ s/^.*\///;
-	($sample)=$fname=~/^(.*)\..*$/;
+	($sample)=$fname=~/^(.*)\.eej/;
 	$length = $samLen;
 	$exc=$inc1=$inc2=$Rexc=$Rinc1=$Rinc2=0; # empty temporary variables for read counts
 	
