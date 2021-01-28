@@ -757,6 +757,10 @@ Torres-Méndez, A., Bonnal, S., Marquez, Y., Roth, J., Iglesias, M., Permanyer, 
 
 Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). [Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians](https://dx.doi.org/10.7554%2FeLife.16797). *Elife*, 5:e16797. 
 
+* Arabidopsis database:
+
+Martín, G., Márquez, Y., Duque, P., Irimia, M. (2021). [Alternative splicing landscapes in <i>Arabidopsis thaliana</i> across tissues and stress conditions highlight major functional differences with animals](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-02258-y). *Genome Biol*, 22:35.
+
 
 References
 ----------
