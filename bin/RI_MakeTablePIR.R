@@ -81,10 +81,10 @@ if (is.na(opt$BALthresh) || opt$BALthresh > 1)   {stop("Invalid value for BALthr
 
 ## Check which samples are there and load template
 if (opt$IR_version == 1) {
-   sampleFiles <- Sys.glob(paste(countDir, "*\\.IR", sep=""))
+   sampleFiles <- c(Sys.glob(paste(countDir, "*\\.IR", sep="")), Sys.glob(paste(countDir, "*\\.IR.gz", sep=""))) #Fede modified
    fileExt <- "\\.IR$"
 } else {
-   sampleFiles <- Sys.glob(paste(countDir, "*\\.IR2", sep=""))
+   sampleFiles <- c(Sys.glob(paste(countDir, "*\\.IR2", sep="")), Sys.glob(paste(countDir, "*\\.IR2.gz", sep=""))) #Fede modified
    fileExt <- "\\.IR2$"
 }
 
@@ -94,7 +94,7 @@ if (is.na(sampleFiles[1])) {
 } else {
     if (verb) {cat("Merging IR of", length(sampleFiles), "sample(s)...\n")}
 }
-samples <- data.frame(Sample = basename(sub(fileExt, "", sampleFiles)),
+samples <- data.frame(Sample = basename(sub(fileExt, "", sub("\\.gz$", "", sampleFiles))),
                       File   = sampleFiles,
                       stringsAsFactors=FALSE)
 samples <- samples[order(samples$Sample),]  #  temporary fix --UB
@@ -111,9 +111,14 @@ names(pir) <- paste(rep(samples$Sample, each=2), c("","-Q"), sep="")
 for (i in 1:nrow(samples)) {
     ## Read data for one sample
     if (verb) {cat(samples$Sample[i], "\n")}
-    dat <- read.delim(samples$File[i])
+    if (grepl(".gz$", samples$File[i])) { #Fede added
+      dat <- read.delim(gzfile(samples$File[i])) } else { #Fede added
+        dat <- read.delim(samples$File[i]) #Fede modified
+      }
     if (names(dat)[1] != "Event") {
-        dat <- read.delim(paste(countDir, samples$File[i], sep=""), header=F)
+        if (grepl("\\.gz$", samples$File[i])) { #Fede added
+          dat <- read.delim(gzfile(paste(countDir, samples$File[i], sep="")), header=F) } else { #Fede modified
+          dat <- read.delim(paste(countDir, samples$File[i], sep=""), header=F) } #Fede modified
         names(dat) <- c("Event","EIJ1","EIJ2","EEJ","I")
     }
     dat <- dat[dat$Event %in% template$juncID,]
