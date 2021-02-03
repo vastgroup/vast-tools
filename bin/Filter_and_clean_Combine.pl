@@ -291,7 +291,7 @@ while (<I>){
 	foreach my $i (6..$#t){
 	    if ($i%2==0){
 		next if !$valid_sample[$i];
-		if ($t[$i+1]=~/$Q/){
+		if ($t[$i+1]=~/$Q/ && $t[$i]=~/\d/){
 		    ### For IR
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 			my ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
@@ -378,7 +378,7 @@ while (<I>){
 	    foreach my $sample (@{$group_samples{$group}}){
 		my $i=$sample_index{$sample};
 		
-		if ($t[$i+1]=~/$Q/){
+		if ($t[$i+1]=~/$Q/ && $t[$i]=~/\d/){
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 			my ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
