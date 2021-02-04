@@ -464,6 +464,8 @@ while (<I>){
     }
     $done{$event}=1;
 }
+close I;
+close O;
 
 ### this scores the number of events missing in each sample
 my $total_events=0;
@@ -508,8 +510,21 @@ foreach my $tis (sort (keys %TISSUES)){
 }
 print LOG "\n";
 print "\n";
+close LOG;
 
-
+### Extra check of output to see if number of columns is consistent across lines
+open (TEST, $output_file) || die "Cannot open $output_file for testing\n";
+my $t_head=<TEST>;
+chomp($t_head);
+my @t_head=split(/\t/,$t_head);
+my $row_counter=1;
+while (<TEST>){
+   chomp;
+   my @t=split(/\t/);
+   $row_counter++;
+   errPrintDie "Number of columns per row is not the same for all rows (Row: $row_counter). Please report issue on github\n" if $#t != $#t_head;
+}
+close TEST;
 
 ########################
 sub average {
