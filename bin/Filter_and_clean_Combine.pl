@@ -481,8 +481,8 @@ $min_N="NA" if (!defined $min_N);
 $min_Fraction="NA" if (!defined $min_Fraction);
 
 ### Print summary and LOG
-open (LOG, ">$log_file") if $log;
-print LOG "OPTIONS: $command_line\n\n";
+open (LOG2, ">$log_file") if $log;
+print LOG2 "OPTIONS: $command_line\n\n" if $log;
 
 my $extras;
 $extras.= " -noVOW" if $noVLOW;
@@ -492,25 +492,31 @@ $extras.= " -min_ALT_use $min_ALT_use";
 $extras.= " -p_IR" if $p_IR;
 $extras.= " GROUPS" if $group_file;
 
-print LOG "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
+print LOG2 "\nSettings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n" if $log;
 verbPrint "Settings: -Min_N $min_N -Min_Fr $min_Fraction -Min_SD $min_SD$extras\n";
-print LOG "TOTAL # of Events: $total_events\n";
+print LOG2 "TOTAL # of Events: $total_events\n" if $log;
 print "\t\tTOTAL # of Events: $total_events\n";
 foreach my  $type (@TYPES){
-    print LOG "$type\t$tally_type{$type}\n";
-    print "\t\t$type\t$tally_type{$type}\n";
+    if ($type eq "AltEx" || $type eq "MIC"){
+        print LOG2 "$type\t$tally_type{$type}\n" if $log;
+        print "\t\t$type\t$tally_type{$type}\n";
+    }
+    elsif (!defined $onlyEXSK){
+        print LOG2 "$type\t$tally_type{$type}\n" if $log;
+        print "\t\t$type\t$tally_type{$type}\n";
+    }
 }
-print LOG "\nTISSUE\tMISSING\t\%\n";
+print LOG2 "\nTISSUE\tMISSING\t\%\n" if $log;
 print "\n\t\tTISSUE\tMISSING\t\%\n";
 foreach my $tis (sort (keys %TISSUES)){
     $CUENTA{$tis}=0 if !$CUENTA{$tis};
     my $perc=sprintf("%.2f",100*$CUENTA{$tis}/$total_events);
-    print LOG "$tis\t$CUENTA{$tis}\t$perc\n";
+    print LOG2 "$tis\t$CUENTA{$tis}\t$perc\n" if $log;
     print "\t\t$tis\t$CUENTA{$tis}\t$perc\n";
 }
-print LOG "\n";
+print LOG2 "\n" if $log;
 print "\n";
-close LOG;
+close LOG2 if $log;
 
 ### Extra check of output to see if number of columns is consistent across lines
 open (TEST, $output_file) || die "Cannot open $output_file for testing\n";
