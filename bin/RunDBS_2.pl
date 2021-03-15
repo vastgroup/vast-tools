@@ -496,7 +496,7 @@ unless ($noGEflag){
 	verbPrint "Final normalized cRPKM table saved as: " . abs_path($cRPKMOutput_c) . "\n" if $normalize;
 	verbPrint "Final TPM table saved as: " . abs_path($TPMOutput) . "\n" if $get_TPMs;
 	verbPrint "Final TPM and COUNTS table saved as: " . abs_path($TPMOutput_b) . "\n" if $cRPKMCounts && $get_TPMs;
-	verbPrint "Final normalized TPM table saved as: " . abs_path($TPMOutput_c) . "\n" if $normalize && $get_TPMs;
+#	verbPrint "Final normalized TPM table saved as: " . abs_path($TPMOutput_c) . "\n" if $normalize && $get_TPMs;
     }
 }
 
