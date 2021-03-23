@@ -191,6 +191,10 @@ while (<GROUPS>){
     if(length($chk_line)==0){next;} 
     
     my @temp = split(/\t/,$_);
+
+    if (defined $temp[0]){
+	errPrintDie "Found an empty string as group for $temp[0]\n" if (!$temp[1]);
+    }
     
     if(!defined($file_2_groups{$temp[0]})){$file_2_groups{$temp[0]}=[];}  # for each file stores the groups it should get merged into 
     push(@{$file_2_groups{$temp[0]}},$temp[1]);                           # if a file should get merged several times into the same group, we store this group several times
