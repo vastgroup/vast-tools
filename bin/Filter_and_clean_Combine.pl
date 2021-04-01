@@ -498,10 +498,12 @@ print LOG2 "TOTAL # of Events: $total_events\n" if $log;
 print "\t\tTOTAL # of Events: $total_events\n";
 foreach my  $type (@TYPES){
     if ($type eq "AltEx" || $type eq "MIC"){
+        $tally_type{$type}=0 if !defined $tally_type{$type};
         print LOG2 "$type\t$tally_type{$type}\n" if $log;
         print "\t\t$type\t$tally_type{$type}\n";
     }
     elsif (!defined $onlyEXSK){
+        $tally_type{$type}=0 if !defined $tally_type{$type};
         print LOG2 "$type\t$tally_type{$type}\n" if $log;
         print "\t\t$type\t$tally_type{$type}\n";
     }
