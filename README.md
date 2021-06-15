@@ -135,83 +135,83 @@ For manual, install each species or all of them to any location by, e.g. for Hsa
 Available libraries and species (assembly, species_key):
 
 Human (hg38, Hs2):
-- Current version:   [vastdb.hs2.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.hs2.23.06.20.tar.gz) (5.0G).
-- Previous versions: [vastdb.hs2.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.hs2.20.12.19.tar.gz) (4.8G).
+- Current version:   [vastdb.hs2.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.hs2.23.06.20.tar.gz) (5.0G).
+- Previous versions: [vastdb.hs2.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.hs2.20.12.19.tar.gz) (4.8G).
 
 Human (hg19, Hsa):
-- Current version:   [vastdb.hsa.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.23.06.20.tar.gz) (6.3G).
-- Previous versions: [vastdb.hsa.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.20.12.19.tar.gz) (6.3G),
-  	   	     [vastdb.hsa.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz) (6.3G).
+- Current version:   [vastdb.hsa.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.hsa.23.06.20.tar.gz) (6.3G).
+- Previous versions: [vastdb.hsa.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.hsa.20.12.19.tar.gz) (6.3G),
+  	   	     [vastdb.hsa.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz) (6.3G).
 
 Mouse (mm10, Mm2):
-- Current version:   [vastdb.mm2.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.mm2.23.06.20.tar.gz) (4.0G).
-- Previous versions: [vastdb.mm2.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.mm2.20.12.19.tar.gz) (3.9G).
+- Current version:   [vastdb.mm2.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.mm2.23.06.20.tar.gz) (4.0G).
+- Previous versions: [vastdb.mm2.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.mm2.20.12.19.tar.gz) (3.9G).
 
 Mouse (mm9, Mmu): 
-- Current version:   [vastdb.mmu.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.23.06.20.tar.gz) (5.7G).
-- Previous versions: [vastdb.mmu.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.20.12.19.tar.gz) (5.7G),
-		     [vastdb.mmu.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz) (5.7G).
+- Current version:   [vastdb.mmu.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.23.06.20.tar.gz) (5.7G).
+- Previous versions: [vastdb.mmu.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.20.12.19.tar.gz) (5.7G),
+		     [vastdb.mmu.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz) (5.7G).
 
 Cow (bosTau6, Bta): 
-- Current version:   [vastdb.bta.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.bta.23.06.20.tar.gz) (3.4G).
-- Previous versions: [vastdb.bta.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.bta.20.12.19.tar.gz) (3.3G).
+- Current version:   [vastdb.bta.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.bta.23.06.20.tar.gz) (3.4G).
+- Previous versions: [vastdb.bta.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.bta.20.12.19.tar.gz) (3.3G).
 
 Chicken (galGal4, Gg4): 
-- Current version:   [vastdb.gg4.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg4.23.06.20.tar.gz) (2.0G).
-- Previous versions: [vastdb.gg4.06.04.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg4.06.04.20.tar.gz) (1.9G).
+- Current version:   [vastdb.gg4.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg4.23.06.20.tar.gz) (2.0G).
+- Previous versions: [vastdb.gg4.06.04.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg4.06.04.20.tar.gz) (1.9G).
 
 Chicken (galGal3, Gg3): 
-- Current version:   [vastdb.gg3.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg3.23.06.20.tar.gz) (1.7G).
-- Previous versions: [vastdb.gg3.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg3.20.12.19.tar.gz) (1.7G),
-  	   	     [vastdb.gg3.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.gg3.16.02.18.tar.gz) (1.6G).
+- Current version:   [vastdb.gg3.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg3.23.06.20.tar.gz) (1.7G).
+- Previous versions: [vastdb.gg3.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg3.20.12.19.tar.gz) (1.7G),
+  	   	     [vastdb.gg3.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg3.16.02.18.tar.gz) (1.6G).
 
 Xenopus (xenTro3, Xt1): 
-- Current version:   [vastdb.xt1.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.xt1.23.06.20.tar.gz) (2.1G).
-- Previous versions: [vastdb.xt1.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.xt1.20.12.19.tar.gz) (2.1G).
+- Current version:   [vastdb.xt1.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.xt1.23.06.20.tar.gz) (2.1G).
+- Previous versions: [vastdb.xt1.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.xt1.20.12.19.tar.gz) (2.1G).
 
 Zebrafish (Dre, danRer10):
-- Current version:   [vastdb.dre.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.23.06.20.tar.gz) (2.2G).
-- Previous versions: [vastdb.dre.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.20.12.19.tar.gz) (2.2G),
-  	   	     [vastdb.dre.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz) (2.2G).
+- Current version:   [vastdb.dre.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.dre.23.06.20.tar.gz) (2.2G).
+- Previous versions: [vastdb.dre.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.dre.20.12.19.tar.gz) (2.2G),
+  	   	     [vastdb.dre.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.dre.01.12.18.tar.gz) (2.2G).
 
 Amphioxus (braLan2, Bl1):
-- Current version:   [vastdb.bl1.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.bl1.23.06.20.tar.gz) (1.5G).
-- Previous versions: [vastdb.bl1.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.bl1.20.12.19.tar.gz) (1.5G).
+- Current version:   [vastdb.bl1.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.bl1.23.06.20.tar.gz) (1.5G).
+- Previous versions: [vastdb.bl1.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.bl1.20.12.19.tar.gz) (1.5G).
 - Previous versions with species key "Bla" deprecated (a new assembly is being prepared for amphioxus).
 
 Sea urchin (strPur4, Spu):
-- Current version:   [vastdb.spu.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.23.06.20.tar.gz) (1.2G).
-- Previous versions: [vastdb.spu.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.20.12.19.tar.gz) (1.2G),
-  	   	     [vastdb.spu.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz) (1.2G).
+- Current version:   [vastdb.spu.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.spu.23.06.20.tar.gz) (1.2G).
+- Previous versions: [vastdb.spu.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.spu.20.12.19.tar.gz) (1.2G),
+  	   	     [vastdb.spu.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.spu.01.12.18.tar.gz) (1.2G).
 
 Fruitfly (dm6, Dme):
-- Current version:   [vastdb.dme.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.23.06.20.tar.gz) (325M).
-- Previous versions: [vastdb.dme.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.20.12.19.tar.gz) (319M),
-		     [vastdb.dme.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz) (317M).
+- Current version:   [vastdb.dme.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.dme.23.06.20.tar.gz) (325M).
+- Previous versions: [vastdb.dme.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.dme.20.12.19.tar.gz) (319M),
+		     [vastdb.dme.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz) (317M).
 
 Centipede (strMar1, Sma): 
-- Current version:   [vastdb.sma.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.23.06.20.tar.gz) (601M).
-- Previous versions: [vastdb.sma.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.20.12.19.tar.gz) (585M),
-  	   	     [vastdb.sma.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz) (585M).
+- Current version:   [vastdb.sma.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.sma.23.06.20.tar.gz) (601M).
+- Previous versions: [vastdb.sma.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.sma.20.12.19.tar.gz) (585M),
+  	   	     [vastdb.sma.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz) (585M).
 
 C. elegans (ce11, Cel):
-- Current version:   [vastdb.cel.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.23.06.20.tar.gz) (404M).
-- Previous versions: [vastdb.cel.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.20.12.19.tar.gz) (395M),
-  	   	     [vastdb.cel.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz) (395M).
+- Current version:   [vastdb.cel.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.cel.23.06.20.tar.gz) (404M).
+- Previous versions: [vastdb.cel.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.cel.20.12.19.tar.gz) (395M),
+  	   	     [vastdb.cel.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.cel.01.12.18.tar.gz) (395M).
 
 Planarian (schMed31, Sme):
-- Current version:   [vastdb.sme.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.23.06.20.tar.gz) (959M).
-- Previous versions: [vastdb.sme.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.20.12.19.tar.gz) (952M),
-  	   	     [vastdb.sme.16.02.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz) (952M).
+- Current version:   [vastdb.sme.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.sme.23.06.20.tar.gz) (959M).
+- Previous versions: [vastdb.sme.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.sme.20.12.19.tar.gz) (952M),
+  	   	     [vastdb.sme.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.sme.16.02.18.tar.gz) (952M).
 
 Sea anemone (nemVec1, Nve):
-- Current version:   [vastdb.nve.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.23.06.20.tar.gz) (692M).
-- Previous versions: [vastdb.nve.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.20.12.19.tar.gz) (679M),
-  	   	     [vastdb.nve.01.12.18.tar.gz](http://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz) (679M).
+- Current version:   [vastdb.nve.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.nve.23.06.20.tar.gz) (692M).
+- Previous versions: [vastdb.nve.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.nve.20.12.19.tar.gz) (679M),
+  	   	     [vastdb.nve.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.nve.01.12.18.tar.gz) (679M).
 
 Arabidopsis thaliana (araTha10, Ath):
-- Current version:   [vastdb.ath.23.06.20.tar.gz](http://vastdb.crg.eu/libs/vastdb.ath.23.06.20.tar.gz) (586M).
-- Previous versions: [vastdb.ath.20.12.19.tar.gz](http://vastdb.crg.eu/libs/vastdb.ath.20.12.19.tar.gz) (568M).
+- Current version:   [vastdb.ath.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.ath.23.06.20.tar.gz) (586M).
+- Previous versions: [vastdb.ath.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.ath.20.12.19.tar.gz) (568M).
 
 
 ** NOTE: from release v2.0.0, new VASTDB libraries are needed for all species.
