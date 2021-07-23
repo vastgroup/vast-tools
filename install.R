@@ -104,7 +104,7 @@ if ( opt$prompt ) {
     dbs<-as.numeric(strsplit(db,"\\s*,\\s*",perl=TRUE)[[1]])
     for (db in dbs){
       if (db<1 || db>length(vastdbFiles)) {stop("Input ",db," is out of range.")}
-      Url <- paste("http://vastdb.crg.eu/libs/", vastdbFiles[db], sep = "")
+      Url <- paste("https://vastdb.crg.eu/libs/", vastdbFiles[db], sep = "")
       downloadDb(Url, vastdbFiles[db])
     }
   }
