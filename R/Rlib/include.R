@@ -11,8 +11,11 @@ loadPackages <- function(toLoad, local.lib="Rlib/") {
     writeLines(sprintf("Trying to load required package: %s", toString(i)), stderr())
     if(!suppressWarnings(require(toString(i), character.only=T, quietly=T)) &&
 		 !suppressWarnings(require(toString(i), character.only=T, lib.loc=local.lib, quietly=T))){
-        writeLines(sprintf("%s did not load correctly! Now trying to install..", i), stderr()) 
-        install.packages(i, dependencies=TRUE, repos='http://cran.us.r-project.org', lib=local.lib)
+        writeLines(sprintf("%s did not load correctly! Now trying to install..", i), stderr())
+	if (!requireNamespace("BiocManager", quietly = TRUE)) #Fede added
+		install.packages("BiocManager") #Fede added
+	BiocManager::install(i) #Fede added
+        #install.packages(i, dependencies=TRUE, repos='http://cran.us.r-project.org', lib=local.lib)
         if(require(toString(i), character.only=T, lib.loc=local.lib)) {
           writeLines(sprintf("%s has been installed locally in R/Rlib!", i), stderr())
         } else {
