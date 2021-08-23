@@ -778,4 +778,4 @@ Labbé, R.M., Irimia, M., Currie, K.W., Lin, A., Zhu, S.J., Brown, D.D., Ross, E
 Langmead, B., Trapnell, C., Pop, M., Salzberg, S.L. (2009). [Ultrafast and memory-efficient alignment of short DNA sequences to the human genome](https://doi.org/10.1186/gb-2009-10-3-r25). *Genome Biology*, 10:R25.
 
 [VastDB]: http://vastdb.crg.eu/
-[Matt]: http://matt.crg.eu
+[Matt]: https://gitlab.com/aghr/matt
