@@ -1,7 +1,7 @@
 VAST-TOOLS
 ==========
 
-[![Build Status](https://travis-ci.org/vastgroup/vast-tools.svg?branch=master)](https://travis-ci.org/vastgroup/vast-tools)
+[![Build Status](https://api.travis-ci.com/vastgroup/vast-tools.svg?branch=master)](https://app.travis-ci.com/github/vastgroup/vast-tools)
 
 Table of Contents:
 
@@ -34,7 +34,7 @@ Table of Contents:
 - [Citation](#citations)
 - [Species databases](#species-databases)
 - [References](#references)
-	
+
 Summary
 -------
 Vertebrate Alternative Splicing and Transcription Tools (VAST-TOOLS) is a toolset for profiling and comparing alternative splicing events in RNA-Seq data. It is particularly suited for evolutionary comparisons. It works synergistically with the [VastDB][] web server, and [Matt][], a toolkit for downstream analyses of alternative splicing.
@@ -54,7 +54,7 @@ VAST-TOOLS requires the following software:
    * [psiplot](https://github.com/kcha/psiplot)
  * Perl 5.10.1 or higher
  * GNU coreutils `sort` (all versions)
- 
+
 VAST-TOOLS also requires species-specific library files (collectively known as
 VASTDB), which must be downloaded separately. VASTDB consists of pre-made Bowtie
 indices, annotation, and template files. See below for installation instructions.
@@ -76,11 +76,11 @@ for the latest release or to get the latest development version, simply clone th
 
 ### VASTDB Libraries
 
-VASTDB libraries must be downloaded separately and can be saved in the VAST-TOOLS 
-directory, or in an external location. If the latter, the path of VASTDB 
-must be supplied to `vast-tools` via `--dbDir` or alternatively, a symbolic 
-link can be created in the root of VAST-TOOLS directory. By default, 
-VAST-TOOLS looks for VASTDB inside its own directory 
+VASTDB libraries must be downloaded separately and can be saved in the VAST-TOOLS
+directory, or in an external location. If the latter, the path of VASTDB
+must be supplied to `vast-tools` via `--dbDir` or alternatively, a symbolic
+link can be created in the root of VAST-TOOLS directory. By default,
+VAST-TOOLS looks for VASTDB inside its own directory
 (e.g. `~/bin/vast-tools/VASTDB`).
 
 In addition to these libraries, [VastDB][] also refers to a web server
@@ -147,25 +147,25 @@ Mouse (mm10, Mm2):
 - Current version:   [vastdb.mm2.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.mm2.23.06.20.tar.gz) (4.0G).
 - Previous versions: [vastdb.mm2.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.mm2.20.12.19.tar.gz) (3.9G).
 
-Mouse (mm9, Mmu): 
+Mouse (mm9, Mmu):
 - Current version:   [vastdb.mmu.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.23.06.20.tar.gz) (5.7G).
 - Previous versions: [vastdb.mmu.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.20.12.19.tar.gz) (5.7G),
 		     [vastdb.mmu.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz) (5.7G).
 
-Cow (bosTau6, Bta): 
+Cow (bosTau6, Bta):
 - Current version:   [vastdb.bta.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.bta.23.06.20.tar.gz) (3.4G).
 - Previous versions: [vastdb.bta.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.bta.20.12.19.tar.gz) (3.3G).
 
-Chicken (galGal4, Gg4): 
+Chicken (galGal4, Gg4):
 - Current version:   [vastdb.gg4.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg4.23.06.20.tar.gz) (2.0G).
 - Previous versions: [vastdb.gg4.06.04.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg4.06.04.20.tar.gz) (1.9G).
 
-Chicken (galGal3, Gg3): 
+Chicken (galGal3, Gg3):
 - Current version:   [vastdb.gg3.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg3.23.06.20.tar.gz) (1.7G).
 - Previous versions: [vastdb.gg3.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg3.20.12.19.tar.gz) (1.7G),
   	   	     [vastdb.gg3.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.gg3.16.02.18.tar.gz) (1.6G).
 
-Xenopus (xenTro3, Xt1): 
+Xenopus (xenTro3, Xt1):
 - Current version:   [vastdb.xt1.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.xt1.23.06.20.tar.gz) (2.1G).
 - Previous versions: [vastdb.xt1.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.xt1.20.12.19.tar.gz) (2.1G).
 
@@ -189,7 +189,7 @@ Fruitfly (dm6, Dme):
 - Previous versions: [vastdb.dme.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.dme.20.12.19.tar.gz) (319M),
 		     [vastdb.dme.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.dme.01.12.18.tar.gz) (317M).
 
-Centipede (strMar1, Sma): 
+Centipede (strMar1, Sma):
 - Current version:   [vastdb.sma.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.sma.23.06.20.tar.gz) (601M).
 - Previous versions: [vastdb.sma.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.sma.20.12.19.tar.gz) (585M),
   	   	     [vastdb.sma.01.12.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.sma.01.12.18.tar.gz) (585M).
@@ -225,8 +225,8 @@ If manually installed to central location, link the database files to vast-tools
 > ln -s <path to VASTDB> VASTDB
 ~~~~
 
-If you did a manual install, you can test and see if you have everything that is 
-necessary to run all of vast-tools, OR vast-tools will try and install R packages 
+If you did a manual install, you can test and see if you have everything that is
+necessary to run all of vast-tools, OR vast-tools will try and install R packages
 on the fly when necessary.
 
 ~~~~
@@ -261,8 +261,8 @@ Command usage can be retrieved through the -h (--help) flag to any sub-command:
 ### Quick Usage
 
 NOTE: Unless specified, all options are default, for example the output
-directory is assumed to be 'vast_out', the database to be ``<path>/vast-tools/VASTDB``. 
-To change these use the ``--output`` and ``-dbDir`` flags! 
+directory is assumed to be 'vast_out', the database to be ``<path>/vast-tools/VASTDB``.
+To change these use the ``--output`` and ``-dbDir`` flags!
 * NOTE: From v2.4.0, human is not the default species, which need to be provided.
 
 
@@ -288,7 +288,7 @@ by running it on a cluster.  The ``-c`` flag can be passed to both ``align`` and
 
 ~~~~
 > vast-tools align tissueA_rep1.fq.gz -sp hg38 -c 8
-~~~~ 
+~~~~
 AND
 ~~~~
 > vast-tools diff -a tissueA_rep1,tissueA_rep2 -b tissueB_rep1,tissueB_rep2
@@ -361,7 +361,7 @@ For paired-end RNAseq data, the subsample name is defined by the first RNAseq fi
 
 To merge cRPKM files from gene expression analysis, the option ``--expr`` needs to be provided. If so, ``vast-tools merge`` needs the species key (``--sp``) to upload the file with effective mappable positions per gene to recalculate cRPKMs. It is also possible to merge only cRPKM files by activating the option flag ``--exprONLY``.
 
-Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`) by using the option ``--move_to_PARTS``. 
+Finally, the subsample files can be moved to a subfolder (`output_folder/PARTS`) by using the option ``--move_to_PARTS``.
 
 
 ### Strand-specific RNAseq data
@@ -370,7 +370,7 @@ From release v2.0.0, ``align`` recognizes automatically if RNAseq data are stran
 Strand-unspecific RNAseq data will be aligned strand-unspecifically (equivalent to previous versions of VAST-TOOLS). This information will be gathered in a new file, SAMPLE.info, which will be generated together with the rest of outputs from ``align``. This file will subsequently be used by other VAST-TOOLS modules. If the file is absent, VAST-TOOLS will assume an old version of VAST-TOOLS ``align`` was used and that the sample was thus mapped strand-unspecifically. Several samples with strand-specific/strand-unspecific RNAseq data can be merged into a new strand-specific/strand-unspecific sample with ``merge``. Although it is also possible to merge samples with strand-specific **and** strand-unspecific RNAseq data **into one new sample**, it is not recommended to do so, as in this case the mappability correction will be applied in strand-unspecific mode which may introduce a bias to the final PSI/PIR values. It is possible to combine samples with strand-specific and strand-unspecific RNAseq data into a final output table with ``combine``.
 
 
-### Combining Results 
+### Combining Results
 
 ``vast-tools combine`` will join all of the files sent to the same output directory found in <output_dir>/to_combine/, to form one final table in the main <output_dir> folder.  This is the file you give to ``compare`` or ``diff`` in the case that you
 intend to compare multiple samples.  This output file contains a value for the percent of sequence inclusion (PSI/PSU/PIR) and a qual column for each sample. Details on the output format are provided below. In addition, the version of intron retention used in ``align`` can be specified using ``--IR_version`` (version 2 is used by default).
@@ -379,7 +379,7 @@ intend to compare multiple samples.  This output file contains a value for the p
 > vast-tools combine -o output_dir -sp [hg38|mm10|galGal4|etc] [Options]
 ~~~~
 
-From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This needs to be provided using the ``-a`` option. 
+From release v1.0.0-beta.3, it is possible to get the output in mm10 and hg38 coordinates. vast-tools will still work on mm9 and hg19, respectively, but all output coordinates are then lifted to the newer assemblies. This needs to be provided using the ``-a`` option.
 
 From release v2.0.0, VAST-TOOLS includes a new module to identify and profile annotated exons (including constitutive exons). This is referred to as ANNOT, and it conceptually works as the splice-site based (aka COMBI) module (see Tapial et al, 2017 for details). Exons from the reference GTF annotation used to build VAST-TOOLS are quantified based on exon-exon junction reads and assigned a fixed ID (e.g. HsaEX6000001; exons from this module are labeled as "ANN" in the "COMPLEX" column of the output of ``combine``, see [below](#combine-output-format)). Some annotated events are not present, as they are filtered for mappability and read imbalance. First and last exons are excluded. To obtain the legacy INCLUSION table, it is possible to use the option ``--noANNOT``. NOTE: This module has not been as thouroughly tested and validated as the other exon skipping modules; therefore, lower validation rates for these events might be expected. This module requires new templates in VASTDB as well as an additional script (automatically provided in v2.0.0).
 
@@ -388,7 +388,7 @@ From release v2.0.0, VAST-TOOLS includes a new module to identify and profile an
 
 #### Introduction
 
-``vast-tools`` provides two alternative modules (``compare`` and ``diff``) to perform differential splicing analyses on a reduced number of samples per group. Each module gives different functionalities. 
+``vast-tools`` provides two alternative modules (``compare`` and ``diff``) to perform differential splicing analyses on a reduced number of samples per group. Each module gives different functionalities.
 
 - ``compare``: pre-filters the events based on read coverage, imbalance and other features, and simply compares average and individual dPSIs. That is, it looks for non-overlapping PSI distributions based on fixed dPSI cut-offs. For more than 3 replicates, it is likely to be too stringent.
 - ``diff``: performs a statistical test to assess whether the PSI distributions of the two compared groups are signficantly different. It is possible to pre-filter the events based on the minimum number of reads per sample, but subsequent filtering is highly recommended (e.g. overlapping the results with the output of ``tidy``). For more than 5 samples per group it may also be over stringent.
@@ -396,19 +396,19 @@ From release v2.0.0, VAST-TOOLS includes a new module to identify and profile an
 
 #### *compare*: Comparing PSIs Between Samples
 
-``vast-tools compare`` identifies differentially spliced AS events between two groups (A and B) based mainly on the difference in their average inclusion levels (i.e. ΔPSI = average_PSI_B - average_PSI_A). 
+``vast-tools compare`` identifies differentially spliced AS events between two groups (A and B) based mainly on the difference in their average inclusion levels (i.e. ΔPSI = average_PSI_B - average_PSI_A).
 
-``vast-tools compare`` takes any number of replicates for each group, provided either as sample names or column numbers (0-based) in the INCLUSION table. Then, it first filters out those AS events that do not have enough read coverage in *ALL* replicates (see [Combine Output Format](#combine-output-format) below for information on coverage thresholds). For intron retention, it is possible to filter out introns also based on a binomial test to assess appropriate balance of reads at the two exon-intron junctions by using ``--p_IR`` (see Braunschweig *et al* 2014 for details). 
+``vast-tools compare`` takes any number of replicates for each group, provided either as sample names or column numbers (0-based) in the INCLUSION table. Then, it first filters out those AS events that do not have enough read coverage in *ALL* replicates (see [Combine Output Format](#combine-output-format) below for information on coverage thresholds). For intron retention, it is possible to filter out introns also based on a binomial test to assess appropriate balance of reads at the two exon-intron junctions by using ``--p_IR`` (see Braunschweig *et al* 2014 for details).
 
-For valid AS events, ``vast-tools compare`` then requires that the absolute value of ΔPSI is higher than a threshold provided as ``--min_dPSI``. In addition, it requires that the PSI distribution of the two groups do not overlap. This can be modified with the ``--min_range`` option, to provide higher or lower stringency. For example: 
+For valid AS events, ``vast-tools compare`` then requires that the absolute value of ΔPSI is higher than a threshold provided as ``--min_dPSI``. In addition, it requires that the PSI distribution of the two groups do not overlap. This can be modified with the ``--min_range`` option, to provide higher or lower stringency. For example:
 
 ~~~~
 > vast-tools compare INCLUSION_TABLE.tab -a sampleA1,sampleA2 -b sampleB1,sampleB2 --min_dPSI 25 --min_range 5
 ~~~~
- 
+
 will identify those AS events with an absolute ΔPSI between A and B higher than 25 and a minimum difference between the ranges of 5 (i.e. the maximum PSI value of group A and the minimum value of group B, if ΔPSI is positive, and the minimum PSI value of group A and the maximum value of group B, if ΔPSI is negative). ``--min_range`` can also take negative values to allow the PSI distributions of groups A and B to overlap to a defined extent (e.g. if ``--min_range -100``, events will be called as differentially spliced as long as |ΔPSI| > N when ``--min_dPSI N``).
 
-By default, the comparison is not paired. A paired analysis can be done using the option ``--paired``. If provided, each A replicate is compared with the corresponding one in group B. In this case, ``--min_dPSI`` is the minimum threshold for the average between each pair's ΔPSI, and ``--min_range`` is the minimum value *any* individual pair's ΔPSI can be (i.e. all individual ΔPSI's absolute values have to be larger than the value provided as ``--min_range`` and they all have to have the same sign [positive or negative]). 
+By default, the comparison is not paired. A paired analysis can be done using the option ``--paired``. If provided, each A replicate is compared with the corresponding one in group B. In this case, ``--min_dPSI`` is the minimum threshold for the average between each pair's ΔPSI, and ``--min_range`` is the minimum value *any* individual pair's ΔPSI can be (i.e. all individual ΔPSI's absolute values have to be larger than the value provided as ``--min_range`` and they all have to have the same sign [positive or negative]).
 
 From v2.2.1, `compare` also requires that Alt3 (ALTA) and Alt5 (ALTD) events with differential splice site usage have a predicted significant overall impact in the transcript pool. Therefore, `compare` requires that the alternative splice sites being compared belong to an exon with a minimum inclusion level (~PSI) across ALL compared samples. This minimum PSI for the host exon is set to 25 by default, and can be modified using the `--min_ALT_use` option. The equivalent value to previous versions is `--min_ALT_use  0`. The PSI-like value is shown as the third value of the quality score (see [Combine Output Format](#combine-output-format)).
 
@@ -426,11 +426,11 @@ Finally, ``vast-tools compare`` can also produce list of gene IDs for the select
 #### *diff*: Bayesian Inference Followed by Differential Analysis
 
 ``vast-tools diff`` provides functionality to test for differential AS based on
-replicates and read depth for each event, but will also give reasonable estimates 
+replicates and read depth for each event, but will also give reasonable estimates
 if replicates are not available (Han, Braunschweig et al., 2017).
 
 Bayesian inference followed by differential analysis of posterior distributions with respect to
-PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample are estimated from 
+PSI/PSU/PIR.  With replicate data, joint posterior distributions for a sample are estimated from
 empirical posterior distributions of the replicates using maximum-likelihood (MLE) fitting.
 
 ~~~~
@@ -442,8 +442,8 @@ Note: Sample names do not have to follow any specific convention as long as they
 *Statistics Options*
 
 Probably the most important extra options to consider are ``-r PROB (--prob)``,
-``-m MINDIFF (--minDiff)``, ``-e MINREADS (--minReads)``, and `-S MINSAMPLES (--minSamples)` 
-These represent the stringency criterion for filtering of visual output and textual 
+``-m MINDIFF (--minDiff)``, ``-e MINREADS (--minReads)``, and `-S MINSAMPLES (--minSamples)`
+These represent the stringency criterion for filtering of visual output and textual
 data sent to file.  `-S` is the minimum number of samples for each set `-a` and `-b`
 that have to have at least `-e` reads each to be considered in the downstream
 statistical comparison.
@@ -453,16 +453,16 @@ minimal probability of acceptance that is required to consider a comparison to
 be 'believable'.  By default this is 0.95, but it can be altered depending on
 stringency requirements.  
 
-The ``-m`` flag represents the minimum value of difference (`MV`, see example below) 
-between PSI in group A and PSI in group B that you will accept, such that we are are sure with at least 
-probability ``-r`` that there is a difference of at least ``-m``.  `-m` does not 
+The ``-m`` flag represents the minimum value of difference (`MV`, see example below)
+between PSI in group A and PSI in group B that you will accept, such that we are are sure with at least
+probability ``-r`` that there is a difference of at least ``-m``.  `-m` does not
 currently alter the output sent to STDOUT, but does filter what is plotted to PDF
 and printed to file.
 
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
 and/or is believable beyond an uninformative prior (like the uniform default),
-this may not be necessary, however it is still highly recommended.  The default 
+this may not be necessary, however it is still highly recommended.  The default
 value for ``-e`` is 10, though this could easily be higher.
 
 Additionally, ``diff`` allows you to alter the parameters of the conjugate beta
@@ -470,7 +470,7 @@ prior distribution, which is set as a uniform beta with shape parameters
 ``--alpha`` and ``--beta`` as 1 and 1 respectively.
 Beta shape parameters greater than one alter this probability distribution, and
 may be more or less applicable to certain uses, see: [beta
-distribution](http://www.wolframalpha.com/input/?i=beta+distribution) 
+distribution](http://www.wolframalpha.com/input/?i=beta+distribution)
 NOTE: When considering differential analysis of event types like intron retention
 it may be more appropriate to use a custom prior model that is able to more accurately
 reflect the lower expectation of inclusion levels.
@@ -485,7 +485,7 @@ is compared to PerturbationB.  No MLE fitting is used in this case.
 In all multireplicate cases where `--paired=FALSE`, the posterior distributions
 of the individual replicates are used to estimate a 'best fit joint posterior' distribution
 over PSI for each sample.
- 
+
 *Performance Options*
 
 The ``-s`` flag can be used to specify the ``-s SIZE`` of the emperical
@@ -522,15 +522,15 @@ The text output of diff looks like:
 Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
 for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
 PSI (dPsi/ΔPSI) between SampleA and SampleB of -0.57, the minimum value (`MV`) for |ΔPSI| at 0.95 is
-0.3, meaning that there is a 0.95 probability that |ΔPSI| is greater than 0.3. Use this value 
-to filter for events that are statistically likely to have at least a minimal difference of some 
+0.3, meaning that there is a 0.95 probability that |ΔPSI| is greater than 0.3. Use this value
+to filter for events that are statistically likely to have at least a minimal difference of some
 magnitude that you deem to be biologically relevant.  The `-m` argument (default 0.1) provides a
 lower bound for events that will be plotted to PDF and printed to file based on `MV`.  As a cutoff,
 the default is meant to provide a reasonably stringent baseline, however you could relax this if you
 would rather view more events that may have significant but modest changes.
 
 
-![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example") 
+![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/DiffExample.png "Example")
 
 The output plot above shows in the left panel the two joint posterior distributions over PSI, and the
 point estimates for each replicate plotted as points below the histograms.  In the right panel,
@@ -547,9 +547,9 @@ Using a similar logic to ``compare``, ``vast-tools compare_expr`` identifies dif
 > vast-tools compare_expr cRPKMS_AND_COUNTS-SpN.tab -a sample_a1,sample_a2 -b sample_b1,sample_b2 [options]
 ~~~~
 
-It requires an expression table with cRPKMs and read counts, which can be obtained in ``combine`` providing the option ``--C``. ``vast-tools compare_expr`` performs several filters before doing the comparisons to discard lowly expressed genes across all samples or supported by too few reads overall. In particular, the default requires that all samples in at least one of the compared groups have a minimum cRPKM of 2. This can be modified using ``--min_cRPKM``. Additionally, using ``--min_cRPKM_loose`` it is possible to allow only one sample across the comparison to have a minimum level of expression. With regards to the minimum number of reads to ensure an statistically sound cRPKM calculation, this is set to 50 by default, and can be modified using ``--min_reads``. 
+It requires an expression table with cRPKMs and read counts, which can be obtained in ``combine`` providing the option ``--C``. ``vast-tools compare_expr`` performs several filters before doing the comparisons to discard lowly expressed genes across all samples or supported by too few reads overall. In particular, the default requires that all samples in at least one of the compared groups have a minimum cRPKM of 2. This can be modified using ``--min_cRPKM``. Additionally, using ``--min_cRPKM_loose`` it is possible to allow only one sample across the comparison to have a minimum level of expression. With regards to the minimum number of reads to ensure an statistically sound cRPKM calculation, this is set to 50 by default, and can be modified using ``--min_reads``.
 
-By default, raw cRPKM values are compared. However, it is recommended the values are normalized. For this, the option ``--norm`` is provided, which using `normalizeBetweenArrays` from the `limma` R package. If this package is not installed in your computer, this can be done the first time you run ``vast-tools compare_expr`` by using the option ``--install_limma``. 
+By default, raw cRPKM values are compared. However, it is recommended the values are normalized. For this, the option ``--norm`` is provided, which using `normalizeBetweenArrays` from the `limma` R package. If this package is not installed in your computer, this can be done the first time you run ``vast-tools compare_expr`` by using the option ``--install_limma``.
 
 Finally, ``vast-tools compare_expr`` also provides an option to output files to perform Gene Ontology analyses (``--GO``). By defult, Ensembl GeneIDs are provided, but gene symbols can be retrieved instead using the option ``--use_names``. The files provided are: (i) upregulated genes in B compared to A; (ii) downregulated genes in B compared to A; (iii) background set, after the expression and read count filters; (iv) the log2 (B/A fold change) values for all genes in the background set, which can be used for GSEA analyses.
 
@@ -571,7 +571,7 @@ To execute from VAST-TOOLS, use the subcommand ``plot``:
 
 It is recommended to filter the input file to a subset of events of interest
 before plotting, such as those obtained from ``diff``. Otherwise, the
-resulting pdf file will be very large. 
+resulting pdf file will be very large.
 
 Plot customizations such as coloring and ordering of samples can be applied
 using a configuration file. For more details on this advanced usage, see the
@@ -584,7 +584,7 @@ configuration file template can be found under ``R/sample_data``:
 > vast-tools plot -c R/sample_data/sample_psi_data.config R/sample_data/sample_psi_data.tab
 ~~~~
 
-![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/PsiExample.png "Example") 
+![Diff](https://raw.githubusercontent.com/vastgroup/vast-tools/master/R/sample_data/PsiExample.png "Example")
 
 ``plot`` can also plot cRPKMs for gene expression by using the option `--expr=TRUE`. The options are similar as per AS plots, but you need to provide a cRPKM-only file (as generated in `combine`).
 
@@ -603,29 +603,29 @@ In this case, ``tidy`` will apply the defined filters to each group independentl
 
 Combine output format
 ---------------------
-The output of ``combine`` is a tab-separated table with an entry (row) for each predefined alternative splicing event. For each event, there are six columns with basic information about it, and then a pair of columns for each sample from ``align`` that is combined. 
+The output of ``combine`` is a tab-separated table with an entry (row) for each predefined alternative splicing event. For each event, there are six columns with basic information about it, and then a pair of columns for each sample from ``align`` that is combined.
 
  * **Column 1**: Official gene symbol.
- * **Column 2**: VAST-DB event ID. Formed by: 
+ * **Column 2**: VAST-DB event ID. Formed by:
 	* Species identifier: Hsa (Human), Mmu (Mouse), or Gga (Chicken);
 	* Type of alternative splicing event: alternative exon skipping (EX), retained intron (INT), alternative splice site donor choice (ALTD), or alternative splice site acceptor choice (ALTA). In the case of ALTD/ALTA, each splice site within the event is indicated (from exonic internal to external) over the total number of alternative splice sites in the event (e.g. HsaALTA0000011-1/2).
   	* Numerical identifier.
  * **Column 3**: Genomic coordinate of the alternative sequence.
  * **Column 4**: Length of the alternative sequence. In ALTD/ALTA events, the first splice site within each event has a length of 0 nt, by definition.
- * **Column 5**: Full set of genomic coordinates of the alternative splicing event. 
+ * **Column 5**: Full set of genomic coordinates of the alternative splicing event.
  	* For EX: *chromosome:C1donor,Aexon,C2acceptor*. Where C1donor is the "reference" upstream exon's donor, C2acceptor the "reference" downstream exon's acceptor, and A the alternative exon. Strand is "+" if C1donor < C2acceptor. If multiple acceptor/donors exist in any of the exons, they are shown separated by "+". **NOTE**: The "reference" upstream and downstream C1/C2 coordinates are not necessarily the closest upstream and downstream C1/C2 exons, but the most external ones with sufficient support (to facilitate primer design, etc). If you wish to perform analyses of exon features and/or draw RNA binding maps, you are recommended to use [Matt][].
  	* For ALTD: *chromosome:Aexon,C2acceptor*. Multiple donors of the event are separated by "+".
  	* For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
  	* For INT: *chromosome:C1exon=C2exon:strand*.
  * **Column 6**: Type of event.
- 	* S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information). 
+ 	* S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information).
  	* ANN: exon skipping (EX) events quantified by the ANNOTATION module. Their IDs also start by ≥ 6 (e.g. HsaEX6000001).
  	* MIC: exon skipping (EX) events quantified by the microexon pipeline.
  	* IR: intron retention event.  
  	* Alt3: ALTA events.
  	* Alt5: ALTD events.
 
-Then, for each combined sample, a pair of columns: 
+Then, for each combined sample, a pair of columns:
  * **Column 7**: Estimated percent of sequence inclusion (PSI/PSU/PIR). PSI: percent spliced in (for EX). PSU: percent splice site usage (for ALTD and ALTA). PIR: percent intron retention (for INT).
  * **Column 8**: Quality scores, and number of corrected inclusion and exclusion reads (qual@inc,exc).
  	* *Score 1*: Read coverage, based on actual reads (as used in Irimia *et al*, Cell 2014). This is the only coverage score used by `compare`, `tidy` and `plot`:
@@ -637,12 +637,12 @@ Then, for each combined sample, a pair of columns:
 		- For any type of event: N: does not meet the minimum threshold (VLOW).
 
  	* *Score 2*: Read coverage, based on corrected reads (similar values as per *Score 1*).
- 	* *Score 3*: This score has been recicled to contain different information from release v2.2.2: 
+ 	* *Score 3*: This score has been recicled to contain different information from release v2.2.2:
 		- EX (except microexon module): raw total read counts supporting upstream inclusion, downstream inclusion and skipping (format INC1=INC2=EXC).
 		- EX (microexon module):  raw total read counts supporting inclusion and exclusion (format INC=EXC).
 		- ALTD and ALTA: PSI-like value of the exon hosting the ALTD/ALTA event. This score is used to filter out events in `compare` based on the option `--min_ALT_use`.
 		- IR (from v2.1.3): corrected number of intron body reads (in a sample of 200bp in the middle of the intron, or the whole intron if shorter), and the number of mappable position in that sample (maximum 151 positions) (format READS=POSITIONS).
-		- Before v2.1.3: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*). 
+		- Before v2.1.3: Read coverage, based on uncorrected reads mapping only to the reference C1A, AC2 or C1C2 splice junctions (similar values as per *Score 1*).
  	* *Score 4*: This score has different meaning depending on the type of AS event:
 		- EX (except for microexon module): Imbalance of reads mapping to the inclusion splice junctions.
 			- OK: the ratio between the total number of corrected reads supporting inclusion for splice junctions upstream and downstream the alternative exon is < 2.
@@ -651,7 +651,7 @@ Then, for each combined sample, a pair of columns:
 			- B3: when the corrected reads for inclusion from one side is at least 15 and 0 for the other. Used to filter out events in `compare` when the option `--noB3` is activated.
 			- Bl/Bn: low (between 10 and 14)/no read coverage (between 1 and 9) for splice junctions supporting inclusion.
 		- EX (microexon module): "na" (no information provided).
-		- ALTD and ALTA: raw read counts for the specific splice site, for the all the splice sites of the event together (=total reads) and for those supporting skipping of the host exon. In versions early than v2.2.2: total reads for the event for all combinations or only for the reference acceptor (for ALTD) or donor (for ALTA). 
+		- ALTD and ALTA: raw read counts for the specific splice site, for the all the splice sites of the event together (=total reads) and for those supporting skipping of the host exon. In versions early than v2.2.2: total reads for the event for all combinations or only for the reference acceptor (for ALTD) or donor (for ALTA).
 		- IR: raw read counts mapping to the upstream exon-intron junction, downstream intron-exon junction, and exon-exon junction in the format EIJ=IEJ=EEJ). In versions earlier than v2.2.2, corrected counts were shown instead of raw read counts.
  	* *Score 5*: This score has different meaning depending on the event type:
 		- EX (except for microexon module): Complexity of the event. The score refers to the number of reads that come from the "reference" C1A, AC2 and C1C2 junctions. Complexity increases as: S < C1 < C2 < C3.
@@ -675,7 +675,7 @@ Interconnection with VastDB Web
 
 Interconnection with Matt
 -------------------------------
-[Matt][] is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables. 
+[Matt][] is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables.
 
 Running as a container
 ----------------------
@@ -753,9 +753,9 @@ Burguera, D., Marquez, Y., Racioppi, C., Permanyer, J., Torres-Mendez, T., Espos
 
 Torres-Méndez, A., Bonnal, S., Marquez, Y., Roth, J., Iglesias, M., Permanyer, J., Almudí, I., O’Hanlon, D., Guitart, T., Soller, M., Gingras, A.-C., Gebauer, F., Rentzsch, F., Blencowe, B.J.B., Valcárcel, J., Irimia, M. (2019). [A novel protein domain in an ancestral splicing factor drove the evolution of neural microexons](https://doi.org/10.1038/s41559-019-0813-6). *Nature Ecol Evol*, 3:691-701.
 
-* Planarian database: 
+* Planarian database:
 
-Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). [Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians](https://dx.doi.org/10.7554%2FeLife.16797). *Elife*, 5:e16797. 
+Solana, J., Irimia, M., Ayoub, S., Orejuela, M.R., Zywitza, V., Jens, M., Tapial, J., Ray, D., Morris, Q.D., Hughes, T.R., Blencowe, B.J., Rajewsky, N. (2016). [Conserved functional antagonism between CELF and MBNL proteins regulates stem cell-specific alternative splicing and regeneration in planarians](https://dx.doi.org/10.7554%2FeLife.16797). *Elife*, 5:e16797.
 
 * Arabidopsis database:
 
