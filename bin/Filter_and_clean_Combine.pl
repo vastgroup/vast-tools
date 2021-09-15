@@ -96,23 +96,6 @@ if (defined $min_N && defined $samples){
     errPrintDie "min_N ($min_N) cannot be higher than N of samples ($N_samples)\n" if $min_N > $N_samples && $samples;
 }
 
-# defining default output file name
-my ($root)=$input_file=~/(.+)\./;
-my $root_out=$root;
-$root_out.="-minN_$min_N" if defined $min_N;
-$root_out.="-minFr_$min_Fraction" if defined $min_Fraction;
-$root_out.="-minSD_$min_SD";
-$root_out.="-noVLOW" if $noVLOW;
-$root_out.="-noB3" if $noB3;
-$root_out.="-p_IR" if $p_IR;
-$root_out.="-min_ALT_use$min_ALT_use";
-$root_out.="-onlyEX" if $onlyEXSK;
-$root_out.="-samples$N_samples" if $samples;
-$root_out.="-groups" if $group_file;
-
-$output_file="$root_out-Tidy.tab" unless $output_file;
-my $log_file="$root_out-Tidy.log" if $log;
-
 ### Gets the version
 my $version;
 open (VERSION, "$binPath/../VERSION");
@@ -141,8 +124,8 @@ Prepares and filters a vast-tools output for general analyses.
         --noVLOW                Do not use samples with VLOW coverage (default OFF)
         --noB3                   Does not use AltEx events with B3 imbalance (default OFF)
         --p_IR                  Filter IR by the p-value of the binomial test (default OFF)
-        --min_ALT_use i          Minimum inclusion of the exon in which the Alt3/Alt5 is located across all 
-                                   compared samples (default 25) (combine >= v2.2.1)
+        --min_ALT_use i          Minimum inclusion of the exon in which the Alt3\/Alt5 is located across all 
+                                   compared samples (default 25) (combine \>\= v2.2.1)
         --onlyEX                Outputs only EXSK events (default OFF)
         --add_names             Adds gene name to the event_ID. E.g. Mta1\=MmuEX0029874 (default OFF)
         --log                   Print the summary stats into a file (default OFF)
@@ -158,6 +141,23 @@ errPrintDie "*** If groups are provided, you cannot provide samples\n" if $sampl
 
 # prints version (05/05/19)
 verbPrint "VAST-TOOLS v$version";
+
+# defining default output file name (changed location 15/09/21)
+my ($root)=$input_file=~/(.+)\./;
+my $root_out=$root;
+$root_out.="-minN_$min_N" if defined $min_N;
+$root_out.="-minFr_$min_Fraction" if defined $min_Fraction;
+$root_out.="-minSD_$min_SD";
+$root_out.="-noVLOW" if $noVLOW;
+$root_out.="-noB3" if $noB3;
+$root_out.="-p_IR" if $p_IR;
+$root_out.="-min_ALT_use$min_ALT_use";
+$root_out.="-onlyEX" if $onlyEXSK;
+$root_out.="-samples$N_samples" if $samples;
+$root_out.="-groups" if $group_file;
+$output_file="$root_out-Tidy.tab" unless $output_file;
+my $log_file="$root_out-Tidy.log" if $log;
+
 
 ### Creates the LOG
 my ($folder)=$root=~/(.+)\//;
@@ -248,8 +248,11 @@ print O "\n";
 
 ### Processing events
 my %done; # avoid repeated eventIDs
-my (%tallyNA, %PRINT, %total_N, %tally_type, %OK);
-my (%SD);
+my (%tally_type); # needed throughout for stats
+### to score the number of events missing in each sample
+my $total_events=0;
+my %CUENTA;
+
 while (<I>){
     s/VLOW/N/g if $noVLOW;
     chomp($_);
@@ -282,7 +285,8 @@ while (<I>){
     $event_ID="$gene_name=$event" if $AddName;
     $event_ID=$event if !$AddName;
 
-    my %PRINT=();
+    my ($PRINT, $SD);
+    my (%total_N,%tallyNA);
     next if $done{$event}; # to avoid possible repeated IDs (in preliminary tables)
     
     #### STANDARD TIDY
@@ -296,7 +300,7 @@ while (<I>){
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 			my ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
-			    $PRINT{$event}.="\tNA"; # storages the PSIs
+			    $PRINT.="\tNA"; # storages the PSIs
 			    $tallyNA{$event}{$H[$i]}=1; # for summary stats 
 			}
 			next if $p_i<0.05;
@@ -307,7 +311,7 @@ while (<I>){
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
 			if (defined $temp_ALT && $temp_ALT=~/\d/){
 			    if ($temp_ALT < $min_ALT_use){
-				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$PRINT.="\tNA"; # storages the PSIs
 				$tallyNA{$event}{$H[$i]}=1; 
 				$kill_ALT = 1;
 			    }
@@ -324,7 +328,7 @@ while (<I>){
 			if ($score3 =~ /\=/ && defined $score3){ # i.e. from v2.2.2 onwards
 			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
 			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
-				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$PRINT.="\tNA"; # storages the PSIs
 				$tallyNA{$event}{$H[$i]}=1; # for summary stats
 				$kill_B3 = 1;
 			    }
@@ -338,11 +342,11 @@ while (<I>){
 		    $total_N{$event}++;
 		    push(@PSIs,$t[$i]);
 		    
-		    $PRINT{$event}.="\t$t[$i]"; # storages the PSIs
+		    $PRINT.="\t$t[$i]"; # storages the PSIs
 		    $tallyNA{$event}{$H[$i]}=0; # for summary stats
 		}
 		else {
-		    $PRINT{$event}.="\tNA"; # storages the PSIs
+		    $PRINT.="\tNA"; # storages the PSIs
 		    $tallyNA{$event}{$H[$i]}=1; # for summary stats
 		}
 	    }
@@ -352,18 +356,23 @@ while (<I>){
 	next if (defined $min_Fraction) && ($total_N{$event}/$max_N) < $min_Fraction; # check for fraction
 	
 	if ($total_N{$event}>0){
-	    $SD{$event}=&std_dev(@PSIs);
+	    $SD=&std_dev(@PSIs);
 	}
 	else {
-	    $SD{$event}="NA";
+	    $SD="NA";
 	}
-	next if $SD{$event} < $min_SD && $SD{$event} ne "NA";
+	next if $SD < $min_SD && $SD ne "NA";
 	
-        my @temp_check=split(/\t/,$PRINT{$event}); # it comes with a first empty tab
+        my @temp_check=split(/\t/,$PRINT); # it comes with a first empty tab
         if ($#temp_check == $max_N){
-            print O "$event_ID"."$PRINT{$event}\n";
+            print O "$event_ID"."$PRINT\n";
 	    $tally_type{$type}++;
-	    $OK{$event}=1;
+
+            ### keeps info for stats
+            $total_events++;
+            foreach my $temp_tis (sort (keys %TISSUES)){
+                $CUENTA{$temp_tis}++ if $tallyNA{$event}{$temp_tis};
+            }
         }
         else {
             verbPrint "WARNING: Skipping $event (too few valid samples)\n";
@@ -382,7 +391,7 @@ while (<I>){
 		    if ($type=~/IR/ && $p_IR){ # only checks the p if the p_IR is active
 			my ($p_i)=$t[$i+1]=~/O[KW]\,.+?\,.+?\,.+?\,(.+?)\@/;
 			if ($p_i<0.05){
-			    $PRINT{$event}.="\tNA"; # storages the PSIs
+			    $PRINT.="\tNA"; # storages the PSIs
 			    $tallyNA{$event}{$H[$i]}=1; # for summary stats 
 			}
 			next if $p_i<0.05;
@@ -393,7 +402,7 @@ while (<I>){
 			my ($temp_ALT)=$t[$i+1]=~/O[KW]\,.+?\,(.+?)\,.+?\,.+?\@/;
 			if ($temp_ALT=~/\d/ && defined $temp_ALT){
 			    if ($temp_ALT < $min_ALT_use){
-				$PRINT{$event}.="\tNA"; # storages the PSIs
+				$PRINT.="\tNA"; # storages the PSIs
 				$tallyNA{$event}{$H[$i]}=1;
                                 $kill_ALT = 1;
                             }
@@ -411,7 +420,7 @@ while (<I>){
 			    my ($t_i1,$t_i2)=$score3=~/(\d+?)\=(\d+?)\=/;
 
 			    if ($temp_B3 eq "B3" && $t_i1+$t_i2 > 15){
-				$PRINT{$event}.="\tNA"; # storages the PSIs 
+				$PRINT.="\tNA"; # storages the PSIs 
 				$tallyNA{$event}{$H[$i]}=1; # for summary stats 
 				$kill_B3 = 1;
 			    }
@@ -425,18 +434,18 @@ while (<I>){
 		    $total_N{$event}{$group}++;
 		    push(@{$PSIs{$group}},$t[$i]);
 		    
-		    $PRINT{$event}.="\t$t[$i]"; # storages the PSIs
+		    $PRINT.="\t$t[$i]"; # storages the PSIs
 		    $tallyNA{$event}{$H[$i]}=0; # for summary stats
 		}
 		else {
-		    $PRINT{$event}.="\tNA"; # storages the PSIs
+		    $PRINT.="\tNA"; # storages the PSIs
 		    $tallyNA{$event}{$H[$i]}=1; # for summary stats
 		}
 	    }
 	    ### At the level of group
             next if (!defined $total_N{$event}{$group});
-	    next if $min_N && $total_N{$event}{$group} < $min_N; # check for absolute number in each group
-	    next if $min_Fraction && $total_N{$event}{$group}/$max_N_groups{$group} < $min_Fraction; # check for fraction
+	    next if (defined $min_N) && $total_N{$event}{$group} < $min_N; # check for absolute number in each group
+	    next if (defined $min_Fraction) && $total_N{$event}{$group}/$max_N_groups{$group} < $min_Fraction; # check for fraction
 
             ### This would test SD PER GROUP	    
 #	    $SD{$event}{$group}=&std_dev(@{$PSIs{$group}});
@@ -447,13 +456,18 @@ while (<I>){
 	}
         if (defined $OK_group){
 	    if ($OK_group==2){
-	        $SD{$event}=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
-	        if ($SD{$event} >= $min_SD){
-                    my @temp_check=split(/\t/,$PRINT{$event}); # it comes with a first empty tab
+	        $SD=&std_dev(@PSIs_both_groups); # SD of both sets of PSIs
+	        if ($SD >= $min_SD){
+                    my @temp_check=split(/\t/,$PRINT); # it comes with a first empty tab
                     if ($#temp_check == $max_N){
-     		         print O "$event_ID"."$PRINT{$event}\n";
+     		         print O "$event_ID"."$PRINT\n";
 	                 $tally_type{$type}++;
-       	                 $OK{$event}=1;
+
+                         ### keeps info for stats
+                         $total_events++;
+                         foreach my $temp_tis (sort (keys %TISSUES)){
+                             $CUENTA{$temp_tis}++ if $tallyNA{$event}{$temp_tis};
+                         }
                     }
                     else {
                          verbPrint "WARNING: Skipping $event (too few valid samples)\n";
@@ -467,15 +481,6 @@ while (<I>){
 close I;
 close O;
 
-### this scores the number of events missing in each sample
-my $total_events=0;
-my %CUENTA;
-foreach my $ev (sort keys %OK){
-    $total_events++;
-    foreach my $tis (sort (keys %TISSUES)){
-	$CUENTA{$tis}++ if $tallyNA{$ev}{$tis};
-    }
-}
 
 $min_N="NA" if (!defined $min_N);
 $min_Fraction="NA" if (!defined $min_Fraction);
