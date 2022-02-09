@@ -329,7 +329,7 @@ if (defined $get_GO){
     open (BG_FOLD, ">$folder/GE_BG_FOLD-$out_root.rnk.txt") or errPrintDie "Can't open GO output files";
     open (UP, ">$folder/GE_UP-$out_root.txt") or errPrintDie "Can't open GO output files";
     open (DOWN, ">$folder/GE_DOWN-$out_root.txt") or errPrintDie "Can't open GO output files";
-    print BG_FOLD "Feature Name\tScore\n";
+    print BG_FOLD "#Feature Name\tScore\n";
 }
 
 # Global variables for PSI analysis & GO
