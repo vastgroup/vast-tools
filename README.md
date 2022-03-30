@@ -94,19 +94,20 @@ These are the `vast-tools` assemblies available in v2.4.0:
     2 - Homo sapiens (hg38, Hs2). Scaffold annotation: Ensembl v88.
     3 - Mus musculus (mm9, Mmu). Scaffold annotation: Ensembl v62.
     4 - Mus musculus (mm10, Mm2). Scaffold annotation: Ensembl v88.
-    5 - Bos taurus (bosTau6, Bta). Scaffold annotation: Ensembl v76.
-    6 - Gallus gallus (galGal3, Gg3). Scaffold annotation: Ensembl v65.
-    7 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
-    8 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
-    9 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
-   10 - Branchiostoma lanceolatum (braLan2, Bl1). Bl71nemr. Scaffold annotation: Ensembl Metazoa v46.
-   11 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
-   12 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
-   13 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
-   14 - Caenorhabditis elegans (ce11, Cel). Scaffold annotation: Ensembl v87.
-   15 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
-   16 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
-   17 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
+    5 - Rattus norvegicus (rn6, Rno). Scaffold annotation: Ensembl v93.
+    6 - Bos taurus (bosTau6, Bta). Scaffold annotation: Ensembl v76.
+    7 - Gallus gallus (galGal3, Gg3). Scaffold annotation: Ensembl v65.
+    8 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
+    9 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
+   10 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
+   11 - Branchiostoma lanceolatum (braLan2, Bl1). Bl71nemr. Scaffold annotation: Ensembl Metazoa v46.
+   12 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
+   13 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
+   14 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
+   15 - Caenorhabditis elegans (ce11, Cel). Scaffold annotation: Ensembl v87.
+   16 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
+   17 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
+   18 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
 ~~~~
 
 **Automatic DB Installation:**
@@ -151,6 +152,9 @@ Mouse (mm9, Mmu):
 - Current version:   [vastdb.mmu.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.23.06.20.tar.gz) (5.7G).
 - Previous versions: [vastdb.mmu.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.20.12.19.tar.gz) (5.7G),
 		     [vastdb.mmu.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz) (5.7G).
+
+Rat (rn6, Rno):
+- Current version:   [vastdb.rno.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.rno.23.06.20.tar.gz) (3.7G).
 
 Cow (bosTau6, Bta):
 - Current version:   [vastdb.bta.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.bta.23.06.20.tar.gz) (3.4G).
