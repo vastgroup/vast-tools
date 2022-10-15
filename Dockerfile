@@ -21,7 +21,7 @@ RUN cd /usr/local/bin; ln -s ../bowtie-${BOWTIE_VERSION}/bowtie* .
 
 COPY deps.R /usr/local
 
-RUN Rscript /usr/local/deps.R &> /tmp/deps.log
+RUN Rscript /usr/local/deps.R > /tmp/deps.log
 
 # Psiplot
 RUN cd /usr/local/; curl --fail --silent --show-error --location --remote-name https://github.com/kcha/psiplot/archive/v${PSIPLOT_VERSION}.tar.gz
