@@ -42,7 +42,25 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: false
           tags: |
             ${{ secrets.DOCKERHUB_ACCOUNT }}/vast-tools:latest
             ghcr.io/${{ github.repository_owner }}/vast-tools:latest
+      - 
+        name: Testing Docker image
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ghcr.io/${{ github.repository_owner }}/vast-tools:latest
+          options: -v ${{ github.workspace }}/db:/VASTDB -v ${{ github.workspace }}/share:/share -v ${{ github.workspace }}/tests:/tests
+          run: |
+            echo "Download DB"
+            cd /VASTDB
+            wget -c -t0 -o /dev/null http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
+            tar zxf vastdb.hsa.16.02.18.tar.gz
+            rm vastdb.hsa.16.02.18.tar.gz
+            echo "Running test"
+            mkdir -p /share/reads
+            mkdir -p /share/out
+            cp /tests/data/NewFQ_Test_Hsa-51/NewFQ_Test_Hsa-51.fq.gz /share/reads
+            vast-tools align /share/reads/NewFQ_Test_Hsa-51.fq.gz -sp Hsa --expr -o /share/out/test
+            bash /tests/tests.sh /tests/data /share/out/test
