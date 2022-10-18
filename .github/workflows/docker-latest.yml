@@ -55,7 +55,7 @@ jobs:
           run: |
             echo "Download DB"
             cd /VASTDB
-            wget -c -t0 -o /dev/null http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
+            curl http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz -o vastdb.hsa.16.02.18.tar.gz -s
             tar zxf vastdb.hsa.16.02.18.tar.gz
             rm vastdb.hsa.16.02.18.tar.gz
             echo "Running test"
