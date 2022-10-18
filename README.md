@@ -1,8 +1,6 @@
 VAST-TOOLS
 ==========
 
-[![Build Status](https://api.travis-ci.com/vastgroup/vast-tools.svg?branch=master)](https://app.travis-ci.com/github/vastgroup/vast-tools)
-
 Table of Contents:
 
 - [Summary](#summary)

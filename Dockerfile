@@ -35,6 +35,7 @@ COPY install.R /usr/local/vast-tools
 COPY lib /usr/local/vast-tools/lib
 COPY bin /usr/local/vast-tools/bin
 COPY R /usr/local/vast-tools/R
+COPY VERSION /usr/local/vast-tools/VERSION
 
 VOLUME /VASTDB
 
