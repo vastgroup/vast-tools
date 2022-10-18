@@ -41,7 +41,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          #platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: false
           tags: |
             ${{ secrets.DOCKERHUB_ACCOUNT }}/vast-tools:latest
@@ -55,7 +56,7 @@ jobs:
           run: |
             echo "Download DB"
             cd /VASTDB
-            curl http://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz -o vastdb.hsa.16.02.18.tar.gz -s
+            curl --silent --remote-name https://vastdb.crg.eu/libs/vastdb.hsa.16.02.18.tar.gz
             tar zxf vastdb.hsa.16.02.18.tar.gz
             rm vastdb.hsa.16.02.18.tar.gz
             echo "Running test"
