@@ -2,10 +2,10 @@ name: Publish Docker image (latest)
 on:
   workflow_dispatch:
   push:
-     branches:
-     # Default branches below
-       - main
-       - master
+    branches:
+    # Default branches below
+      - main
+      - master
 jobs:
   push_to_registries:
     name: Push Docker image to multiple registries
@@ -37,12 +37,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
-        name: Build and push
+        name: Build Docker
         uses: docker/build-push-action@v3
         with:
           context: .
-          #platforms: linux/amd64,linux/arm64
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: false
           tags: |
             ${{ secrets.DOCKERHUB_ACCOUNT }}/vast-tools:latest
@@ -65,3 +64,13 @@ jobs:
             cp /tests/data/NewFQ_Test_Hsa-51/NewFQ_Test_Hsa-51.fq.gz /share/reads
             vast-tools align /share/reads/NewFQ_Test_Hsa-51.fq.gz -sp Hsa --expr -o /share/out/test
             bash /tests/tests.sh /tests/data /share/out/test
+      -
+        name: Push Docker
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_ACCOUNT }}/vast-tools:latest
+            ghcr.io/${{ github.repository_owner }}/vast-tools:latest
