@@ -42,14 +42,13 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/vast-tools:latest
+          push: false
+          tags: vast:latest
       - 
         name: Testing Docker image
         uses: addnab/docker-run-action@v3
         with:
-          image: ghcr.io/${{ github.repository_owner }}/vast-tools:latest
+          image: vast:latest
           options: -v ${{ github.workspace }}/db:/VASTDB -v ${{ github.workspace }}/share:/share -v ${{ github.workspace }}/tests:/tests
           run: |
             echo "Download DB"
