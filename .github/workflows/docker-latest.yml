@@ -13,11 +13,6 @@ jobs:
     permissions:
       packages: write
       contents: read
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
     steps:
       -
         name: Checkout
@@ -48,12 +43,17 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: localhost:5000/${{ github.repository_owner }}/vast-tools:latest
+          tags: ghcr.io/${{ github.repository_owner }}/vast-tools:latest
       - 
+        name: Sleep for 30 seconds
+        uses: whatnick/wait-action@master
+        with:
+          time: '30s'
+      -
         name: Testing Docker image
         uses: addnab/docker-run-action@v3
         with:
-          image: localhost:5000/${{ github.repository_owner }}/vast-tools:latest
+          image: ghcr.io/${{ github.repository_owner }}/vast-tools:latest
           options: -v ${{ github.workspace }}/db:/VASTDB -v ${{ github.workspace }}/share:/share -v ${{ github.workspace }}/tests:/tests
           run: |
             echo "Download DB"
@@ -74,7 +74,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          cache-from: type=registry,ref=localhost:5000/${{ github.repository_owner }}/vast-tools:latest
           tags: |
             ${{ secrets.DOCKERHUB_ACCOUNT }}/vast-tools:latest
             ghcr.io/${{ github.repository_owner }}/vast-tools:latest
