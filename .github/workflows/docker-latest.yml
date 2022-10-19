@@ -13,6 +13,11 @@ jobs:
     permissions:
       packages: write
       contents: read
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
       -
         name: Checkout
@@ -42,13 +47,13 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: false
-          tags: vast:latest
+          push: true
+          tags: localhost:5000/${{ github.repository_owner }}/vast-tools:latest
       - 
         name: Testing Docker image
         uses: addnab/docker-run-action@v3
         with:
-          image: vast:latest
+          image: localhost:5000/${{ github.repository_owner }}/vast-tools:latest
           options: -v ${{ github.workspace }}/db:/VASTDB -v ${{ github.workspace }}/share:/share -v ${{ github.workspace }}/tests:/tests
           run: |
             echo "Download DB"
@@ -69,6 +74,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          cache-from: type=registry,ref=localhost:5000/${{ github.repository_owner }}/vast-tools:latest
           tags: |
             ${{ secrets.DOCKERHUB_ACCOUNT }}/vast-tools:latest
             ghcr.io/${{ github.repository_owner }}/vast-tools:latest
