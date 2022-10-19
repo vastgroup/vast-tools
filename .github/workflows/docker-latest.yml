@@ -43,9 +43,13 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/vast-tools:latest
+          tags: ghcr.io/${{ github.repository_owner }}/vast-tools:latest
       - 
+        name: Sleep for 30 seconds
+        uses: whatnick/wait-action@master
+        with:
+          time: '30s'
+      -
         name: Testing Docker image
         uses: addnab/docker-run-action@v3
         with:
