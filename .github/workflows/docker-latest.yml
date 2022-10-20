@@ -53,6 +53,8 @@ jobs:
         name: Testing Docker image
         uses: addnab/docker-run-action@v3
         with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           image: ghcr.io/${{ github.repository_owner }}/vast-tools:latest
           options: -v ${{ github.workspace }}/db:/VASTDB -v ${{ github.workspace }}/share:/share -v ${{ github.workspace }}/tests:/tests
           run: |
