@@ -1,8 +1,6 @@
 VAST-TOOLS
 ==========
 
-[![Build Status](https://api.travis-ci.com/vastgroup/vast-tools.svg?branch=master)](https://app.travis-ci.com/github/vastgroup/vast-tools)
-
 Table of Contents:
 
 - [Summary](#summary)
@@ -94,19 +92,20 @@ These are the `vast-tools` assemblies available in v2.4.0:
     2 - Homo sapiens (hg38, Hs2). Scaffold annotation: Ensembl v88.
     3 - Mus musculus (mm9, Mmu). Scaffold annotation: Ensembl v62.
     4 - Mus musculus (mm10, Mm2). Scaffold annotation: Ensembl v88.
-    5 - Bos taurus (bosTau6, Bta). Scaffold annotation: Ensembl v76.
-    6 - Gallus gallus (galGal3, Gg3). Scaffold annotation: Ensembl v65.
-    7 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
-    8 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
-    9 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
-   10 - Branchiostoma lanceolatum (braLan2, Bl1). Bl71nemr. Scaffold annotation: Ensembl Metazoa v46.
-   11 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
-   12 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
-   13 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
-   14 - Caenorhabditis elegans (ce11, Cel). Scaffold annotation: Ensembl v87.
-   15 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
-   16 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
-   17 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
+    5 - Rattus norvegicus (rn6, Rno). Scaffold annotation: Ensembl v93.
+    6 - Bos taurus (bosTau6, Bta). Scaffold annotation: Ensembl v76.
+    7 - Gallus gallus (galGal3, Gg3). Scaffold annotation: Ensembl v65.
+    8 - Gallus gallus (galGal4, Gg4). Scaffold annotation: Ensembl v83.
+    9 - Xenopus tropicalis (xenTro3, Xt1). JGI_4.2. Scaffold annotation: Ensembl v84.
+   10 - Danio rerio (danRer10, Dre). Zv10. Scaffold annotation: Ensembl v80.
+   11 - Branchiostoma lanceolatum (braLan2, Bl1). Bl71nemr. Scaffold annotation: Ensembl Metazoa v46.
+   12 - Strongylocentrotus purpuratus (strPur4, Spu). Spur3.1. Scaffold annotation: SpBase.
+   13 - Drosophila melanogaster (dm6, Dme). Scaffold annotation: Ensembl Metazoa v26.
+   14 - Strigamia maritima (strMar1, Sma). Smar1. Scaffold annotation: Ensembl Metazoa v26.
+   15 - Caenorhabditis elegans (ce11, Cel). Scaffold annotation: Ensembl v87.
+   16 - Schmidtea mediterranea (schMed31, Sme). v31. Scaffold annotation: Dresden transcriptome & transdecoder.
+   17 - Nematostella vectensis (nemVec1, Nve). ASM20922v1/GCA_000209225.1.  Scaffold annotation: Ensembl Metazoa v36.
+   18 - Arabidopsis thaliana (araTha10, Ath). TAIR10.  Scaffold annotation: Ensembl  Plants v31.
 ~~~~
 
 **Automatic DB Installation:**
@@ -151,6 +150,9 @@ Mouse (mm9, Mmu):
 - Current version:   [vastdb.mmu.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.23.06.20.tar.gz) (5.7G).
 - Previous versions: [vastdb.mmu.20.12.19.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.20.12.19.tar.gz) (5.7G),
 		     [vastdb.mmu.16.02.18.tar.gz](https://vastdb.crg.eu/libs/vastdb.mmu.16.02.18.tar.gz) (5.7G).
+
+Rat (rn6, Rno):
+- Current version:   [vastdb.rno.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.rno.23.06.20.tar.gz) (3.7G).
 
 Cow (bosTau6, Bta):
 - Current version:   [vastdb.bta.23.06.20.tar.gz](https://vastdb.crg.eu/libs/vastdb.bta.23.06.20.tar.gz) (3.4G).
@@ -667,15 +669,15 @@ Then, for each combined sample, a pair of columns:
 
 Investigating event-level conservation
 --------------------------------------
-A major feature of VAST-TOOLS event IDs is that they are fixed for each species (similar to Ensembl gene IDs, for example). This facilitates PSI comparisons across multiple samples and conditions (see next section) and evolutionary comparisons at the event level. Files with the correspondence for a given event ID between species are available for download in [VastDB](http://vastdb.crg.eu/wiki/Downloads). For instance, for each event ID in Hsa, the corresponding orthologous event ID in Mmu (if available) can be found in this [file](http://vastdb.crg.eu/downloads/Human/VASTDB_CONSERVATION_Hsa108_hg19_to_Mmu139_mm9.tab.gz). This unique feature allows to readily interconnect VAST-TOOLS results for different species.
+A major feature of VAST-TOOLS event IDs is that they are fixed for each species (similar to Ensembl gene IDs, for example). This facilitates PSI comparisons across multiple samples and conditions (see next section) and evolutionary comparisons at the event level. A file with pre-computed correspondences for event IDs among various species are available for download in [VastDB](https://vastdb.crg.eu/downloads/general/EVENT_CONSERVATION.tab.gz). Moreover, using the software [Exorthist](https://github.com/biocorecrg/ExOrthist), any user can obtain exon orthology and paralogy relationships among any group of species (with or without VAST-TOOLS libraries). This unique feature allows to readily interconnect VAST-TOOLS results for different species.
 
 Interconnection with VastDB Web
 -------------------------------
-[VastDB][] is a web server that is tightly interconnected with VAST-TOOLS. [VastDB][] contains information about AS events profiled by VAST-TOOLS for several species. It contains basic information about the events (including sequences, splice site strength, overlap with protein domains and disordered regions) and PSI quantifications for a large range of cell and tissue types and developmental stages, as profiled by VAST-TOOLS. Events have stable IDs that are identical in VAST-TOOLS and [VastDB][]. Therefore, results obtained using VAST-TOOLS can be directly checked in [VastDB][] to obtain physiological information about the AS events of interest. Moreover, [VastDB][] provides event-level orthology information, allowing to compare information across the different species included in [VastDB][] and VAST-TOOLS. Finally, general gene-level information is also provided, including quantifications of expression using cRPKMs.
+[VastDB](http://vastdb.crg.eu) is a web server that is tightly interconnected with VAST-TOOLS. [VastDB](http://vastdb.crg.eu) contains information about AS events profiled by VAST-TOOLS for several species. It contains basic information about the events (including sequences, splice site strength, overlap with protein domains and disordered regions) and PSI quantifications for a large range of cell and tissue types and developmental stages, as profiled by VAST-TOOLS. Events have stable IDs that are identical in VAST-TOOLS and [VastDB](http://vastdb.crg.eu). Therefore, results obtained using VAST-TOOLS can be directly checked in [VastDB](http://vastdb.crg.eu) to obtain physiological information about the AS events of interest. Moreover, [VastDB](http://vastdb.crg.eu) provides event-level orthology information, allowing to compare information across the different species included in [VastDB][] and VAST-TOOLS. Finally, general gene-level information is also provided, including quantifications of expression using cRPKMs.
 
 Interconnection with Matt
 -------------------------------
-[Matt][] is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables.
+[Matt](https://gitlab.com/aghr/matt) is a a toolkit for analyzing genomic sequences with focus on downstream analyses of AS events. It can be used to analyze the output of most tools to profile AS, but it has a specific module to facilitate the processing VAST-TOOLS tables.
 
 Running as a container
 ----------------------
