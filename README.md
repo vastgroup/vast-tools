@@ -619,7 +619,7 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
  	* For ALTD: *chromosome:Aexon,C2acceptor*. Multiple donors of the event are separated by "+".
  	* For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
  	* For INT: *chromosome:C1exon=C2exon:strand*.
- * **Column 6**: Type of event.
+ * **Column 6**: Type of event. NOTE: it is recomended that this column is not used for downstream analyses, and the users only use the EventID to define the type of AS: Cassette exons/exon skipping events (EX), Intron retention (INT), Alternative splice donors (ALTD) and Alternative splice acceptors (ALTA). Further info: 
  	* S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information).
  	* ANN: exon skipping (EX) events quantified by the ANNOTATION module. Their IDs also start by ≥ 6 (e.g. HsaEX6000001).
  	* MIC: exon skipping (EX) events quantified by the microexon pipeline.
