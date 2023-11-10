@@ -236,7 +236,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
     plotListed <- mclapply(1:length(lines), diffBeta, lines=lines, opt=opt,
                            shapeFirst, shapeSecond,
                            totalFirst, totalSecond,
-                           firstShapeAve, secondShapeAve,
+                           shapeFirstAve, shapeSecondAve,
                            expFirst, expSecond,
                            repA.qualInd=repA.qualInd, repB.qualInd=repB.qualInd,
                            mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE) #End For
