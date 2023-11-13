@@ -1,10 +1,9 @@
 #!/usr/bin/env Rscript
 
-# Author: Tim Sterne-Weiler, 2014
-# tim.sterne.weiler@utoronto.ca
-# Modifications Ulrich Braunschweig 2018-2019
+# Author: Tim Sterne-Weiler, Ulrich Braunschweig 2014-2023
+# u.braunschweig@utoronto.ca
 
-# Copyright (C) 2014 Tim Sterne-Weiler
+# Copyright (C) 2014 Tim Sterne-Weiler, Ulrich Braunschweig
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the "Software"), 
@@ -111,7 +110,7 @@ if (opt$minDiff < 0 | opt$minDiff >= 1) {
 }	
 
 
-loadPackages(c("MASS", "RColorBrewer", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
+loadPackages(c("MASS", "reshape2", "ggplot2", "grid", "parallel"), local.lib=paste(c(scriptPath,"/Rlib"), collapse=""))
 
 ## move to output directory
 setwd(opt$output)
@@ -145,47 +144,41 @@ if( length(firstRepSet) <= 0 ||
   stop("[vast diff error]: No replicate sample names given! -a sampA,sampB -b sampC,sampD")
 }
 
-# Set number of replicates
+## Set number of replicates
 firstRepN <- length(firstRepSet)
 secondRepN <- length(secondRepSet)
 
-# Make sure there are sample names
+## Make sure there are sample names
 if(is.null( opt$sampleNameA ) ) {
   opt$sampleNameA <- firstRepSet[1]
 }
 if(is.null( opt$sampleNameB ) ) {
   opt$sampleNameB <- secondRepSet[1]
 }
-# Set output sample names for plot
+## Set output sample names for plot
 sampOneName <- substr(opt$sampleNameA, 1, 9)
 sampTwoName <- substr(opt$sampleNameB, 1, 9)
 
 
-# Get header
+## Get header
 head_n <- unlist(strsplit(readLines( inputFile, n=1 ), "\t"))
 
-# check if header is correct..  TODO
+## Check if header is correct
+checkHeader(head_n, firstRepSet, secondRepSet)
+if (opt$verbose) {cat("[vast diff]: Input table format OK.")}
 
-# Indexes of samples of interest
+## Indexes of samples of interest
 repAind <- which( head_n %in% firstRepSet  )
 repBind <- which( head_n %in% secondRepSet )
 
-if(length(repAind) == 0 ||
-   length(repBind) == 0) { 
-   print_help(parser)
-   stop("[vast diff error]: Incorrect sampleNames given, one or more do not exist!\n") 
-}
-
-# Indexes of Quals
+## Indexes of Quals
 repA.qualInd <- repAind + 1
 repB.qualInd <- repBind + 1
 
-# make sure this succeeded TODO
-
-# CONST
+## CONST
 alphaList <- seq(0,1,0.01)
 
-### TMP OUT
+## TMP OUT
 if(opt$baseName == "input.DIFF") {
   pdfname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_plots.pdf", basename(opt$input))
   outname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF.txt", basename(opt$input))
@@ -204,7 +197,7 @@ writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[dPsi]\tMV[dPsi]_at_%s", opt$sampleNam
 
 
 ### BEGIN READ INPUT ###
-# Iterate through input, 'nLines' at a time to reduce overhead/memory
+## Iterate through input, 'nLines' at a time to reduce overhead/memory
 while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) { 
     lines <- strsplit(lines, split="\t")
     ## use parallel computing to store plots in plotListed
@@ -253,7 +246,7 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
         plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
     }
 
-} #End While
+} # End While
 
 if (!opt$noPDF) {garbage <- dev.off()}
 
