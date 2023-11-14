@@ -119,9 +119,9 @@ setwd(opt$output)
 set.seed(opt$seed)
 
 ## try and find the input file if they aren't exact
-if(!file.exists(opt$input)) {
+if (!file.exists(opt$input)) {
   potentialFiles <- Sys.glob( paste(c("*",opt$input,"*"), collapse="") )
-  if( length( potentialFiles ) >= 1) { 
+  if (length( potentialFiles ) >= 1) { 
     # now sort and take the one with the 'biggest' number of samples
     potentialFiles_sort <- rev( sort( potentialFiles ) )
     opt$input <- potentialFiles_sort[1]
@@ -138,7 +138,7 @@ inputFile <- file( opt$input, 'r' )
 firstRepSet <- unlist(strsplit( as.character(opt$replicateA) , "," ))
 secondRepSet <- unlist(strsplit( as.character(opt$replicateB), "," ))
 
-if( length(firstRepSet) <= 0 || 
+if (length(firstRepSet) <= 0 || 
   length(secondRepSet) <= 0) { 
   print_help(parser) 
   stop("[vast diff error]: No replicate sample names given! -a sampA,sampB -b sampC,sampD")
@@ -198,7 +198,7 @@ writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[dPsi]\tMV[dPsi]_at_%s", opt$sampleNam
 
 ### BEGIN READ INPUT ###
 ## Iterate through input, 'nLines' at a time to reduce overhead/memory
-while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) { 
+while (length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) { 
     lines <- strsplit(lines, split="\t")
     ## use parallel computing to store plots in plotListed
     ## then print them to the pdf afterwards before next chunk of nLines from file.
@@ -221,28 +221,42 @@ while(length( lines <- readLines(inputFile, n=opt$nLines) ) > 0) {
     shapeFirstAve  <- apply(shapeFirst,  MAR=3, rowMeans)
     shapeSecondAve <- apply(shapeSecond, MAR=3, rowMeans)
 
+
     ## Expected PSI for each replicate
     expFirst  <- sapply(1:(dim(shapeFirst)[2]), FUN=function(x)  {shapeFirst[,x,1] / totalFirst[,x]})
     expSecond <- sapply(1:(dim(shapeSecond)[2]), FUN=function(x) {shapeSecond[,x,1] / totalSecond[,x]})
 
-    ## Simulate distributions and score overlap, create plot data
-    plotListed <- mclapply(1:length(lines), diffBeta, lines=lines, opt=opt,
-                           shapeFirst, shapeSecond,
-                           totalFirst, totalSecond,
-                           shapeFirstAve, shapeSecondAve,
-                           expFirst, expSecond,
-                           repA.qualInd=repA.qualInd, repB.qualInd=repB.qualInd,
-                           mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE) #End For
+    ## Figure out which lines to skip
+    if (opt$paired) {
+        skip <- rowSums(
+                    totalFirst  < opt$minReads + opt$alpha + opt$beta |
+                    totalSecond < opt$minReads + opt$alpha + opt$beta
+                ) < opt$minSamples
+    } else {
+        badFirst  <- rowSums(totalFirst  > opt$minReads - 1) < opt$minSamples
+        badSecond <- rowSums(totalSecond > opt$minReads - 1) < opt$minSamples
+        skip <- badFirst | badSecond
+    }
 
-    for(it in 1:length(lines)) {
-        if(is.null(plotListed[[it]])) { next }
+    ## Simulate distributions and score overlap, create plot data
+    plotListed <- replicate(length(lines), NULL)
+    plotListed[!skip] <- mclapply(which(!skip), diffBeta, lines=lines, opt=opt,
+                         shapeFirst, shapeSecond,
+                         totalFirst, totalSecond,
+                         shapeFirstAve, shapeSecondAve,
+                         expFirst, expSecond,
+                         repA.qualInd=repA.qualInd, repB.qualInd=repB.qualInd,
+                         mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE)
+
+    for (it in 1:length(lines)) {
+        if (is.null(plotListed[[it]])) { next }
         ## PRINT MAIN OUTPUT
-        if(!is.null(plotListed[[it]][[5]])) {
+        if (!is.null(plotListed[[it]][[5]])) {
             write( plotListed[[it]][[5]], outhandle )
         }
         
         ## PRINT LIST OF PLOTS
-        if(opt$noPDF || is.null(plotListed[[it]][[1]])) { next }
+        if (opt$noPDF || is.null(plotListed[[it]][[1]])) { next }
         plotPrint(plotListed[[it]][[2]], plotListed[[it]][[3]], plotListed[[it]][[1]])
     }
 
@@ -252,5 +266,4 @@ if (!opt$noPDF) {garbage <- dev.off()}
 
 flush(outhandle)
 close(outhandle)
-
 q(status=0)

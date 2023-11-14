@@ -8,11 +8,11 @@ checkHeader <- function(x, replicateA, replicateB) {
     reps <- c(replicateA, replicateB)
     sampInd <- unlist(sapply(reps, FUN=function(y) {which(x == y)}))
     if (length(sampInd) != length(reps)) {
-        stop("[vast diff error]: Not all sampleNames found in input header!")
+        stop("[vast diff error]: Not all sampleNames found in input header!\n")
     }
     namesOK <- all(paste0(reps, "-Q") == x[sampInd + 1])
     if (!namesOK |  !all(x[1:3] == c("GENE", "EVENT", "COORD"))) {
-        stop("[vast diff error]: Input table does not have expected format!")
+        stop("[vast diff error]: Input table does not have expected format!\n")
     }
 }
 
@@ -56,7 +56,7 @@ maxDiff <- function(firstDist, secondDist, acceptProb=0.9) {
 
 ##  Return the beta variance
 betaVar <- function(alpha, beta) {
-    var <- alpha*beta / (
+    var <- alpha * beta / (
 	 ((alpha + beta) ** 2) * (alpha + beta + 1)
     )
     var
@@ -92,23 +92,23 @@ plotDiff <- function(inpOne, inpTwo, expOne, expTwo, maxD, medOne, medTwo, sampO
   two <- data.frame(x=expTwo, y=-0.5)
 
   distPlot <- ggplot(melt(as.data.frame(
-         do.call(cbind,list(inpOne, inpTwo))
-         ), measure.vars=c("V1","V2")), aes(fill=variable, x=value))+
-         geom_histogram(aes(y=..density..), binwidth=0.03333,alpha=0.5, col="grey", position="identity")+
-         theme_bw()+xlim(c(0,1))+xlab(expression(hat(Psi)))+
-         scale_fill_manual(values=curCol, labels=c(sampOneName, sampTwoName), name="Samples")+
-         geom_point(data=one, mapping=aes(x=x, y=y), col=cbb[2], fill=cbb[2], alpha=0.85, inherit.aes = FALSE)+
+         do.call(cbind, list(inpOne, inpTwo))
+         ), measure.vars=c("V1","V2")), aes(fill=variable, x=value)) +
+         geom_histogram(aes(y=after_stat(density)), binwidth=0.03333, alpha=0.5, col="grey", position="identity") +
+         theme_bw() + scale_x_continuous(limits = c(0, 1), oob = scales::oob_keep) + xlab(expression(hat(Psi))) +
+         scale_fill_manual(values=curCol, labels=c(sampOneName, sampTwoName), name="Samples") +
+         geom_point(data=one, mapping=aes(x=x, y=y), col=cbb[2], fill=cbb[2], alpha=0.85, inherit.aes = FALSE) +
          geom_point(data=two, mapping=aes(x=x, y=y), col=cbb[3], fill=cbb[3], alpha=0.85, inherit.aes = FALSE)
 
   probPlot <- ggplot(as.data.frame(cbind(seq(0,1,0.01),
             unlist(lapply(alphaList, function(x) {
                pDiff(inpOne, inpTwo, x)
-            })))), aes(x=V1, y=V2))+
-            geom_line()+theme_bw()+
-            geom_vline(xintercept=maxD, lty="dashed", col=cbb[7])+
-            ylab(expression(P((hat(Psi)[1]-hat(Psi)[2]) > x)))+
-            xlab(expression(x))+ylim(c(0,1))+
-            annotate("text", x=(maxD+0.08), y=0.05, label=maxD, col=cbb[7])
+            })))), aes(x=V1, y=V2)) +
+            geom_line() + theme_bw() +
+            geom_vline(xintercept=maxD, lty="dashed", col=cbb[7]) +
+            ylab(expression(P((hat(Psi)[1] - hat(Psi)[2]) > x))) +
+            xlab(expression(x)) + ylim(c(0,1)) +
+            annotate("text", x=(maxD + 0.08), y=0.05, label=maxD, col=cbb[7])
 
   return(list(distPlot, probPlot))
 }
@@ -132,12 +132,6 @@ diffBeta <- function(i, lines, opt,
 ## Main diff functionality; fit beta distributions to sample groups for one event and compare
 ## Is applied to each line of the current nLines of the INCLUSION... table
 
-    ## if no data, next; # adapted from @lpantano's fork  7/22/2015
-    if ((sum(totalFirst[i,] > (opt$minReads + opt$alpha + opt$beta)) < opt$minSamples) ||
-        (sum(totalSecond[i,] > (opt$minReads + opt$alpha + opt$beta)) < opt$minSamples) ) {
-              return(NULL)
-    }
-
     ## Sample Posterior Distributions
     psiFirst <- lapply(1:(dim(shapeFirst)[2]), function(x) {
       ## sample here from rbeta(N, alpha, beta) if > -e
@@ -152,7 +146,7 @@ diffBeta <- function(i, lines, opt,
     })
 
     if (opt$paired) { 
-        ## make sure both samples have a non-NULL replicate
+        ## Set matched samples to null in both if absent in one type
         pairedNull <- sapply(psiFirst, is.null) & sapply(psiSecond, is.null)
         psiFirst[pairedNull] <- NULL
         psiSecond[pairedNull] <- NULL
@@ -200,7 +194,7 @@ diffBeta <- function(i, lines, opt,
     filtOut <- sprintf("%s\t%s\t%f\t%f\t%f\t%s", lines[[i]][1], lines[[i]][2], medOne, medTwo, medOne - medTwo, round(max,2))
 
     ## check for significant difference
-    if (max < opt$minDiff) {
+    if (opt$noPDF || max < opt$minDiff) {
       ## non-sig, return null plots and text output
       return(list(NULL, NULL, NULL, NULL, filtOut))
     } else { 
