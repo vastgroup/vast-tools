@@ -119,8 +119,8 @@ Follow the command prompt to install automatically, and that should be it!
 
 Of course you should add the vast-tools directory (e.g. ~/bin/vast-tools) to your PATH:
 ~~~~
-$ export PATH=~/bin/vast-tools:$PATH
-$ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
+> export PATH=~/bin/vast-tools:$PATH
+> echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 ~~~~
 **Manual DB Installation:**
 
