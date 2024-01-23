@@ -130,63 +130,68 @@ diffBeta <- function(i, lines, opt,
                      shapeFirstAve, shapeSecondAve,
                      expFirst, expSecond,
                      repA.qualInd, repB.qualInd,
-                     badFirst, badSecond,
+                     okFirst, okSecond, skip, 
                      alphaSet) {
 ## Main diff functionality; fit beta distributions to sample groups for one event and compare
 ## Is applied to each line of the current nLines of the INCLUSION... table
 
     ## Sample Posterior Distributions
     psiFirst <- lapply(1:(dim(shapeFirst)[2]), function(x) {
-      ## sample here from rbeta(N, alpha, beta) if > -e
-      if (badFirst[i,x]) {return(NULL)}
-      rbeta(opt$size, shape1=shapeFirst[i,x,1], shape2=shapeFirst[i,x,2])
+        ## sample here from rbeta(N, alpha, beta) if > -e
+        if (!okFirst[i,x]) {return(NULL)}
+        rbeta(opt$size, shape1=shapeFirst[i,x,1], shape2=shapeFirst[i,x,2])
     })
 
     psiSecond <- lapply(1:(dim(shapeSecond)[2]), function(x) {
-      ## sample here from rbeta(N, alpha, beta) if > -e
-      if (badSecond[i,x]) {return(NULL)}
-      rbeta(opt$size, shape1=shapeSecond[i,x,1], shape2=shapeSecond[i,x,2])
+        ## sample here from rbeta(N, alpha, beta) if > -e
+        if (!okSecond[i,x]) {return(NULL)}
+        rbeta(opt$size, shape1=shapeSecond[i,x,1], shape2=shapeSecond[i,x,2])
     })
-
-    if (opt$paired) { 
-        ## Set matched samples to null in both if absent in one type
-        pairedNull <- badFirst[i,] | badSecond[i,]
-        psiFirst[pairedNull] <- NULL
-        psiSecond[pairedNull] <- NULL
-    }
 
     ## Create non-parametric Joint Distributions
     psiFirstComb  <- do.call(c, psiFirst)
     psiSecondComb <- do.call(c, psiSecond)
 
-    if (length(psiFirstComb) <= 0 || length(psiSecondComb) <= 0 ) {return(NULL)}
-
     ## Try to to fit a beta distribution on the replicates' parameter estimates.
-    if (!opt$paired ) {
-      paramFirst <- try(suppressWarnings(
-                              fitdistr(psiFirstComb,
-                                      "beta",
-                                      list(shape1=shapeFirstAve[i,1], shape2=shapeFirstAve[i,2])
-                              )$estimate ), TRUE )
-      paramSecond <- try(suppressWarnings(
-                              fitdistr(psiSecondComb,
-                                      "beta",
-                                      list(shape1=shapeSecondAve[i,1], shape2=shapeSecondAve[i,2])
-                              )$estimate ), TRUE )
-      ## If optimization fails it's because the distribution is too narrow
-      ## in which case our starting shapes should already be good enough.
-      ## Shuffle since not paired, and downsample to size of smaller number
-      minSample <- min(length(psiFirstComb), length(psiSecondComb))
-      if (!inherits(paramFirst, "try-error")) {
-          psiFirstComb <- rbeta(opt$size, shape1=paramFirst[1], shape2=paramFirst[2])
-      } else {
-          psiFirstComb <- sample(psiFirstComb, minSample)
-      }
-      if (!inherits(paramSecond, "try-error")) {
-          psiSecondComb <- rbeta(opt$size, shape1=paramSecond[1], shape2=paramSecond[2])
-      } else {
-          psiSecondComb <- sample(psiSecondComb, minSample)
-      }
+    if (!opt$paired) {
+        if (length(psiFirstComb) > 0) {
+            paramFirst <- try(suppressWarnings(
+                                    fitdistr(psiFirstComb,
+                                            "beta",
+                                            list(shape1=shapeFirstAve[i,1], shape2=shapeFirstAve[i,2])
+                                   )$estimate ), TRUE )
+        }
+        if (length(psiSecondComb)) {
+            paramSecond <- try(suppressWarnings(
+                                    fitdistr(psiSecondComb,
+                                            "beta",
+                                            list(shape1=shapeSecondAve[i,1], shape2=shapeSecondAve[i,2])
+                                    )$estimate ), TRUE )
+        }
+        ## If optimization fails it's because the distribution is too narrow
+        ## in which case our starting shapes should already be good enough.
+        ## Shuffle since not paired, and downsample to size of smaller number
+        ## but don't downsize if the other sample type is absent anyway.
+        minSample <- min(c(length(psiFirstComb), length(psiSecondComb)))
+      
+        if (length(psiFirstComb) > 0) {
+            if (!inherits(paramFirst, "try-error")) {
+                psiFirstComb <- rbeta(opt$size, shape1=paramFirst[1], shape2=paramFirst[2])
+            } else {
+                if (length(psiSecondComb) > 0) {
+                    psiFirstComb <- sample(psiFirstComb, minSample)
+                }
+            }
+        }
+        if (length(psiSecondComb) > 0) {
+            if (!inherits(paramSecond, "try-error")) {
+                psiSecondComb <- rbeta(opt$size, shape1=paramSecond[1], shape2=paramSecond[2])
+            } else {
+                if (length(psiFirstComb) > 0) {
+                    psiSecondComb <- sample(psiSecondComb, minSample)
+                }
+            }
+        }
     }
 
     ## get empirical posterior median of psi
@@ -194,49 +199,45 @@ diffBeta <- function(i, lines, opt,
     medTwo <- median(psiSecondComb)
 
     ## look for a max difference given prob cutoff...
-    if (medOne > medTwo) {
-      max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob, alphaSet)
+    if (skip[i]) {
+        if (is.null(medOne)) {medOne <- NA}
+        if (is.null(medTwo)) {medTwo <- NA}
+        max <- NA
     } else {
-      max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob, alphaSet)
+        if (medOne > medTwo) {
+            max <- maxDiff(psiFirstComb, psiSecondComb, opt$prob, alphaSet)
+        } else {
+            max <- maxDiff(psiSecondComb, psiFirstComb, opt$prob, alphaSet)
+        }
     }
 
-    filtOut <- sprintf("%s\t%s\t%f\t%f\t%f\t%s", lines[[i]][1], lines[[i]][2], medOne, medTwo, medOne - medTwo, round(max,2))
+    filtOut <- sprintf("%s\t%s\t%f\t%f\t%f\t%s", 
+                   lines[[i]][1], lines[[i]][2], medOne, medTwo, medOne-medTwo, round(max,2))
 
     ## check for significant difference
-    if (opt$noPDF || max < opt$minDiff) {
-      ## non-sig, return null plots and text output
-      return(list(NULL, NULL, NULL, NULL, filtOut))
+    if (opt$noPDF || (is.na(max) || max < opt$minDiff)) {
+        ## non-sig, return null plots and text output
+        return(list(NULL, NULL, NULL, NULL, filtOut))
     } else { 
-      ## significant; plot
-      sigInd <- i
-      eventTitle <- paste(c("Gene: ", lines[[i]][1], "  Event: ", lines[[i]][2]), collapse="")
-      eventCoord <- paste(c("Coordinates: ", lines[[i]][3]), collapse="")
+        ## significant; plot
+        sigInd <- i
+        eventTitle <- paste(c("Gene: ", lines[[i]][1], "  Event: ", lines[[i]][2]), collapse="")
+        eventCoord <- paste(c("Coordinates: ", lines[[i]][3]), collapse="")
 
-      ## Store visual output to be printed to pdf
-      if (medOne > medTwo) {
-          retPlot <- plotDiff(psiFirstComb, psiSecondComb,
-                              expFirst[i,][!badFirst[i,]], expSecond[i,][!badSecond[i,]], 
-                              max, medOne, medTwo, sampOneName, sampTwoName, alphaSet, FALSE)
-      } else {
-          retPlot <- plotDiff(psiSecondComb, psiFirstComb,
-                              expFirst[i,][!badFirst[i,]], expSecond[i,][!badSecond[i,]],
-                              max, medTwo, medOne, sampTwoName, sampOneName, alphaSet, TRUE)
-      }
+        ## Store visual output to be printed to pdf
+        if (medOne > medTwo) {
+            retPlot <- plotDiff(psiFirstComb, psiSecondComb,
+                                expFirst[i,][okFirst[i,]], expSecond[i,][okSecond[i,]], 
+                                max, medOne, medTwo, sampOneName, sampTwoName, alphaSet, FALSE)
+        } else {
+            retPlot <- plotDiff(psiSecondComb, psiFirstComb,
+                                expFirst[i,][okFirst[i,]], expSecond[i,][okSecond[i,]],
+                                max, medTwo, medOne, sampTwoName, sampOneName, alphaSet, TRUE)
+        }
       
-      ## sig event return
-      return(list(retPlot, eventTitle, eventCoord, sigInd, filtOut))
+        ## sig event return
+        return(list(retPlot, eventTitle, eventCoord, sigInd, filtOut))
     }
-}
-
-dummyBeta <- function(i, lines) {
-### Pruduce dummy text output for lines that fail -e and/or -S criteria
-
-    dummyOut <- sprintf("%s\t%s\t%f\t%f\t%f\t%s", 
-                        lines[[i]][1],
-                        lines[[i]][2],
-                        NA, NA, NA, NA)
-    return(list(NULL, NULL, NULL, NULL, dummyOut))
-
 }
 
 writeLog <- function(vastPath, opt) {

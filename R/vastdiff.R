@@ -52,7 +52,7 @@ option.list <- list(
     make_option(c("-n", "--nLines"), type = "integer", default = "5000",
         help = "Number of lines to read/process in parallel at a time... 
                 lower number = less memory = greater overhead [default %default]"),
-    make_option(c("-p", "--paired"), type = "logical", default = FALSE,
+    make_option(c("-p", "--paired"), action="store_true", default = FALSE,
         help = "Samples are paired, -a pairOneA,pairTwoA,.. -b pairOneB,pairTwoB,.. [default %default]\n
 
 [output options]"),
@@ -123,16 +123,16 @@ set.seed(opt$seed)
 
 ## try and find the input file if they aren't exact
 if (!file.exists(opt$input)) {
-  potentialFiles <- Sys.glob(paste(c("*", opt$input, "*"), collapse=""))
-  if (length(potentialFiles) >= 1) { 
-    # now sort and take the one with the 'biggest' number of samples
-    potentialFiles_sort <- rev(sort(potentialFiles))
-    opt$input <- potentialFiles_sort[1]
-  } else {
-    # Still can't find input after searching...
-	print_help(parser)
-    stop("[vast diff error]: No input file given!")
-  }
+    potentialFiles <- Sys.glob(paste(c("*", opt$input, "*"), collapse=""))
+    if (length(potentialFiles) >= 1) { 
+        # now sort and take the one with the 'biggest' number of samples
+        potentialFiles_sort <- rev(sort(potentialFiles))
+        opt$input <- potentialFiles_sort[1]
+    } else {
+        # Still can't find input after searching...
+	    print_help(parser)
+        stop("[vast diff error]: No input file given!")
+    }
 }
 
 ## Setting input files
@@ -140,23 +140,25 @@ inputFile <- file(opt$input, 'r')
 
 firstRepSet  <- unlist(strsplit(as.character(opt$replicateA), ","))
 secondRepSet <- unlist(strsplit(as.character(opt$replicateB), ","))
+firstRepN  <- length(firstRepSet)
+secondRepN <- length(secondRepSet)
 
-if (length(firstRepSet) <= 0 || 
-  length(secondRepSet) <= 0) { 
-  print_help(parser) 
-  stop("[vast diff error]: No replicate sample names given! -a sampA,sampB -b sampC,sampD")
+if (firstRepN <= 0 || secondRepN <= 0) { 
+    print_help(parser) 
+    stop("[vast diff error]: No replicate sample names given! -a sampA,sampB -b sampC,sampD")
 }
 
 ## Set number of replicates
-firstRepN <- length(firstRepSet)
-secondRepN <- length(secondRepSet)
+if (opt$paired && firstRepN != secondRepN) {
+    stop("Paired samples but unequal numbers")
+}
 
 ## Make sure there are sample names
 if (is.null(opt$sampleNameA)) {
-  opt$sampleNameA <- firstRepSet[1]
+    opt$sampleNameA <- firstRepSet[1]
 }
 if (is.null(opt$sampleNameB)) {
-  opt$sampleNameB <- secondRepSet[1]
+    opt$sampleNameB <- secondRepSet[1]
 }
 ## Set output sample names for plot
 sampOneName <- substr(opt$sampleNameA, 1, 9)
@@ -186,17 +188,17 @@ alphaSet <- seq(0, 1, 0.01)
 
 ## TMP OUT
 if (opt$baseName == "input.DIFF") {
-  pdfname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_plots.pdf", basename(opt$input))
-  outname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF.txt", basename(opt$input))
+    pdfname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF_plots.pdf", basename(opt$input))
+    outname <- sub("\\.[^.]*(\\.gz)?$", ".DIFF.txt", basename(opt$input))
 } else {
-  pdfname <- paste0(opt$baseName, ".pdf")
-  outname <- paste0(opt$baseName, ".tab")
+    pdfname <- paste0(opt$baseName, ".pdf")
+    outname <- paste0(opt$baseName, ".tab")
 }
 
 outhandle <- file(outname, "w")
 
 if (!opt$noPDF) {
-  pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
+    pdf(pdfname, width=7, height=3.5, family="sans", compress=FALSE)
 }
 writeLines(sprintf("GENE\tEVENT\t%s\t%s\tE[dPsi]\tMV[dPsi]_at_%s", opt$sampleNameA, opt$sampleNameB, opt$prob), 
   outhandle)
@@ -233,37 +235,35 @@ while (length(lines <- readLines(inputFile, n=opt$nLines)) > 0) {
     expSecond <- sapply(1:(dim(shapeSecond)[2]), FUN=function(x) {shapeSecond[,x,1] / totalSecond[,x]})
 
     ## Figure out which lines to skip
-    badFirst  <- totalFirst < opt$minReads + opt$alpha + opt$beta
-    badSecond <- totalSecond < opt$minReads + opt$alpha + opt$beta
+    okFirst  <- totalFirst  > opt$minReads + opt$alpha + opt$beta - 1
+    okSecond <- totalSecond > opt$minReads + opt$alpha + opt$beta - 1
 
     if (opt$paired) {
-        skip <- rowSums(!badFirst & !badSecond) < opt$minSamples
+        skip <- rowSums(okFirst & okSecond) < opt$minSamples
+        ## Flag matched samples in both if absent in one type
+        pairedBad <- !okFirst | !okSecond
+        okFirst[pairedBad]  <- FALSE
+        okSecond[pairedBad] <- FALSE
     } else {
-        skipFirst  <- rowSums(!badFirst)  < opt$minSamples
-        skipSecond <- rowSums(!badSecond) < opt$minSamples
+        skipFirst  <- rowSums(okFirst)  < opt$minSamples
+        skipSecond <- rowSums(okSecond) < opt$minSamples
         skip <- skipFirst | skipSecond
     }
 
     ## Simulate distributions and score overlap, create plot data
-    plotListed <- replicate(length(lines), NULL, simplify=FALSE)
-    plotListed[!skip] <- mclapply(which(!skip), diffBeta, lines=lines, opt=opt,
-                         shapeFirst, shapeSecond,
-                         totalFirst, totalSecond,
-                         shapeFirstAve, shapeSecondAve,
-                         expFirst, expSecond,
-                         repA.qualInd, repB.qualInd,
-                         badFirst, badSecond,
-                         alphaSet,
-                         mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE)
-    plotListed[skip]  <- lapply(which(skip), dummyBeta, lines=lines)
+    plotListed <- mclapply(1:length(lines), diffBeta, lines=lines, opt=opt,
+                        shapeFirst, shapeSecond,
+                        totalFirst, totalSecond,
+                        shapeFirstAve, shapeSecondAve,
+                        expFirst, expSecond,
+                        repA.qualInd, repB.qualInd,
+                        okFirst, okSecond, skip,
+                        alphaSet,
+                        mc.cores=opt$cores, mc.preschedule=TRUE, mc.cleanup=TRUE)
     
 
     for (it in 1:length(lines)) {
-        if (is.null(plotListed[[it]])) {next}
-        ## PRINT MAIN OUTPUT
-        if (!is.null(plotListed[[it]][[5]])) {
-            write(plotListed[[it]][[5]], outhandle)
-        }
+        write(plotListed[[it]][[5]], outhandle)
         
         ## PRINT LIST OF PLOTS
         if (opt$noPDF || is.null(plotListed[[it]][[1]])) {next}
