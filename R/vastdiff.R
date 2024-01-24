@@ -49,9 +49,6 @@ option.list <- list(
         help = "Name of the replicate set B, [default is first element of --replicateB]"),
     make_option(c("-i", "--input"), type = "character", default = "INCLUSION_LEVELS",
         help = "Exact or Partial match to PSI table in output directory [default %default]"),
-    make_option(c("-n", "--nLines"), type = "integer", default = "5000",
-        help = "Number of lines to read/process in parallel at a time... 
-                lower number = less memory = greater overhead [default %default]"),
     make_option(c("-p", "--paired"), action="store_true", default = FALSE,
         help = "Samples are paired, -a pairOneA,pairTwoA,.. -b pairOneB,pairTwoB,.. [default %default]\n
 
@@ -83,6 +80,9 @@ option.list <- list(
 [general options]"),
     make_option(c("-c", "--cores"), type = "integer", default = 1, metavar="int",
         help="Number of cores to use for plot processing.. [default %default]"),
+    make_option(c("-n", "--nLines"), type = "integer", default = "5000",
+        help = "Number of lines to read/process in parallel at a time... 
+                lower number = less memory = greater overhead [default %default]"),
     make_option(c("-z", "--seed"), type = "integer", default = 10, metavar="int",
         help="Seed the RNG for a deterministic result.. [default %default]"),
     make_option(c("-v", "--verbose"), type = "logical", default = TRUE, metavar=NULL,
