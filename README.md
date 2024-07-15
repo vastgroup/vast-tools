@@ -119,8 +119,8 @@ Follow the command prompt to install automatically, and that should be it!
 
 Of course you should add the vast-tools directory (e.g. ~/bin/vast-tools) to your PATH:
 ~~~~
-$ export PATH=~/bin/vast-tools:$PATH
-$ echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
+> export PATH=~/bin/vast-tools:$PATH
+> echo 'export PATH=~/bin/vast-tools:$PATH' >> ~/.bashrc
 ~~~~
 **Manual DB Installation:**
 
@@ -299,7 +299,7 @@ AND
 
 ### Alignment
 
-In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. VAST-TOOLS ``align`` can also be used with pre-trimmed reads (``--pretrimmed`` option), but *only* if reads have been trimmed by VAST-TOOLS. (Read headings need a special format so that they are properly recognized by VAST-TOOLS subscripts, and these are generated during the trimming process). Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length (legacy) or specify the reads have been genome substracted; see below).
+In this step, to increase the fraction of mapping junction reads within each RNA-Seq sample, each read is first split automatically by vast-tools into 50-nucleotide (nt) read groups, using by default a sliding window of 25 nt (``--stepSize`` option). For example, a 100-nt read would produce 3 overlapping reads (from positons 1-50, 26-75, and 51-100). In addition, both read mates from the paired-end sequencing are pooled, if available. For quantification, only one random count per read group (i.e. all sub-reads coming from the same original read) is considered to avoid multiple counting of the same original sequenced molecule. Also, it is highly recommended that special characters ('-', '.', etc.) are not part of the fastq file names as this may cause unforeseen problems; use '_' instead. (The use of '-' is reserved for providing the read length (legacy) or specify the reads have been genome substracted; see below).
 
 Next, these 50-nt split reads are aligned against a reference genome to obtain
 unmapped reads, and these are then aligned to predefined splice junction libraries. Unmapped reads are saved
@@ -393,7 +393,7 @@ From release v2.0.0, VAST-TOOLS includes a new module to identify and profile an
 ``vast-tools`` provides two alternative modules (``compare`` and ``diff``) to perform differential splicing analyses on a reduced number of samples per group. Each module gives different functionalities.
 
 - ``compare``: pre-filters the events based on read coverage, imbalance and other features, and simply compares average and individual dPSIs. That is, it looks for non-overlapping PSI distributions based on fixed dPSI cut-offs. For more than 3 replicates, it is likely to be too stringent.
-- ``diff``: performs a statistical test to assess whether the PSI distributions of the two compared groups are signficantly different. It is possible to pre-filter the events based on the minimum number of reads per sample, but subsequent filtering is highly recommended (e.g. overlapping the results with the output of ``tidy``). For more than 5 samples per group it may also be over stringent.
+- ``diff``: performs a statistical test to assess whether the PSI distributions of the two compared groups are signficantly different. It is possible to pre-filter the events based on the minimum number of reads per sample, but subsequent filtering is highly recommended (e.g. overlapping the results with the output of ``tidy``). For more than 5 samples per group it may also be overly stringent.
 - When comparing multiple samples per group, an alternative approach is recommended. First, events should be pre-filtered using ``tidy`` (see [Simplifying Combine Table](#simplifying-combine-table)). This module allows to select events for which a minimum number of samples per group pass the quality controls. Then, a Mann-Whitney U-test or similar can be used to identify differentially spliced events. Finally, average dPSI per group should be calculated and a minimum difference (usually |dPSI| > 15) should be requested.
 
 #### *compare*: Comparing PSIs Between Samples
@@ -446,9 +446,10 @@ Note: Sample names do not have to follow any specific convention as long as they
 Probably the most important extra options to consider are ``-r PROB (--prob)``,
 ``-m MINDIFF (--minDiff)``, ``-e MINREADS (--minReads)``, and `-S MINSAMPLES (--minSamples)`
 These represent the stringency criterion for filtering of visual output and textual
-data sent to file.  `-S` is the minimum number of samples for each set `-a` and `-b`
+output.  `-S` is the minimum number of samples for each set `-a` and `-b`
 that have to have at least `-e` reads each to be considered in the downstream
-statistical comparison.
+statistical comparison. Values in a sample group that do not survive these setting are
+set to NA in the output table and not represented in the PDF.
 
 The ``-r`` flag represents the
 minimal probability of acceptance that is required to consider a comparison to
@@ -458,13 +459,12 @@ stringency requirements.
 The ``-m`` flag represents the minimum value of difference (`MV`, see example below)
 between PSI in group A and PSI in group B that you will accept, such that we are are sure with at least
 probability ``-r`` that there is a difference of at least ``-m``.  `-m` does not
-currently alter the output sent to STDOUT, but does filter what is plotted to PDF
-and printed to file.
+alter the output table, but does filter what is plotted to PDF.
 
 The ``-e`` flag specifies the minimum number of reads for a sample/event to be
 compared.  In cases where the prior distribution has been methodically calculated
 and/or is believable beyond an uninformative prior (like the uniform default),
-this may not be necessary, however it is still highly recommended.  The default
+this may not be necessary, however it is still highly recommended. The default
 value for ``-e`` is 10, though this could easily be higher.
 
 Additionally, ``diff`` allows you to alter the parameters of the conjugate beta
@@ -478,8 +478,8 @@ it may be more appropriate to use a custom prior model that is able to more accu
 reflect the lower expectation of inclusion levels.
 
 In the case that you have paired samples, where NormalA is dependent on
-PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag.  For
-example when considering NormalA and NormalB, to compare to PerturbationA and
+PerturbationA, it is appropriate to use the ``--paired=TRUE`` flag. For
+example, when considering NormalA and NormalB, to compare to PerturbationA and
 PerturbationB, the probability that P( joint_psi1 - joint_psi2 > ``-m`` ) is
 calculated such that NormalA is only compared to PerturbationA, and then NormalB
 is compared to PerturbationB.  No MLE fitting is used in this case.
@@ -495,16 +495,13 @@ posterior distribution to sample, lower numbers decrease accuracy but increase
 performance.
 
 The ``diff`` command is also able to run in parallel. Specify the number of
-cores to use with ``-c INT``
-Obviously more cores will increase the speed of ``diff``, at the cost of increased
-RAM usage.
+cores to use with ``-c INT``. Obviously more cores will increase the speed of ``diff``,
+at the cost of increased memory.
 
 Using the ``-n`` flag to specify the number of lines to read/process at a time,
 will set a max threshold to the RAM used by parallel processing with the ``-c``
 flag.  A lower number means that ``diff`` will use significantly less memory,
-however by decreasing ``-n`` you have increased the number of times that the
-``mclapply`` function must calculate the parallel processing overhead.  The
-default is 100, which works well.
+however, decreasing ``-n`` increases parallelization overhead and extends run time.
 
 *Output Format*
 
@@ -522,7 +519,7 @@ The text output of diff looks like:
  BCORL1	| HsaEX0007940	| 0.213452	| 0.500425	| -0.286973	| 0.05		   
 
 Where for example the first event HsaEX0008312 in the BOD1L gene has multireplicate point estimate
-for SampleA of 0.12 and 0.7 for SampleB.  While this gives an expected value for the difference of
+for SampleA of 0.12 and 0.7 for SampleB. While this gives an expected value for the difference of
 PSI (dPsi/ΔPSI) between SampleA and SampleB of -0.57, the minimum value (`MV`) for |ΔPSI| at 0.95 is
 0.3, meaning that there is a 0.95 probability that |ΔPSI| is greater than 0.3. Use this value
 to filter for events that are statistically likely to have at least a minimal difference of some
@@ -619,7 +616,7 @@ The output of ``combine`` is a tab-separated table with an entry (row) for each 
  	* For ALTD: *chromosome:Aexon,C2acceptor*. Multiple donors of the event are separated by "+".
  	* For ALTA: *chromosome:C1donor,Aexon*. Multiple acceptors of the event are separated by "+".
  	* For INT: *chromosome:C1exon=C2exon:strand*.
- * **Column 6**: Type of event.
+ * **Column 6**: Type of event. NOTE: it is recomended that this column is not used for downstream analyses, and the users only use the EventID to define the type of AS: Cassette exons/exon skipping events (EX), Intron retention (INT), Alternative splice donors (ALTD) and Alternative splice acceptors (ALTA). Further info: 
  	* S, C1, C2, C3: exon skipping (EX) events quantified by the *splice site-based* or *transcript-based* modules, with increasing degrees of complexity (based on *Score 5* for a wide panel of RNA-seq samples; see below and Irimia *et al.* 2014 for further information).
  	* ANN: exon skipping (EX) events quantified by the ANNOTATION module. Their IDs also start by ≥ 6 (e.g. HsaEX6000001).
  	* MIC: exon skipping (EX) events quantified by the microexon pipeline.

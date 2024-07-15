@@ -423,8 +423,8 @@ if($pairedEnd){
 	$N_fq2=`gzip -dc $fq2 \| wc -l`;
     }
     else {
-	$N_fq1=`wc -l $fq1`;
-	$N_fq2=`wc -l $fq2`;
+	$N_fq1=`wc -l $fq1 \| awk '{print \$1}'`;
+	$N_fq2=`wc -l $fq2 \| awk '{print \$1}'`;
     }
     chomp($N_fq1);
     chomp($N_fq2);
