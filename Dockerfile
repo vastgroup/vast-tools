@@ -37,12 +37,17 @@ COPY bin /usr/local/vast-tools/bin
 COPY R /usr/local/vast-tools/R
 COPY VERSION /usr/local/vast-tools/VERSION
 
-VOLUME /VASTDB
 
 RUN cd /usr/local/vast-tools; ln -s /VASTDB .
 
 RUN cd /usr/local/vast-tools; chmod +x ./automatic_Hsa_Mmus_install.R
 RUN cd /usr/local/vast-tools; ./automatic_Hsa_Mmus_install.R --quiet
+
+# Create a symlink for VASTDB to allow for mounting in the future
+RUN cd /usr/local/vast-tools; ln -s /VASTDB .
+
+# Declare the VOLUME *after* downloading the data to prevent overwriting
+VOLUME /VASTDB
 
 # Let's put in PATH
 RUN cd /usr/local/bin; ln -s ../vast-tools/vast-tools .
