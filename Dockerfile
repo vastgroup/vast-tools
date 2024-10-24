@@ -41,6 +41,7 @@ VOLUME /VASTDB
 
 RUN cd /usr/local/vast-tools; ln -s /VASTDB .
 
+RUN chmod +x ./automatic_Hsa_Mmus_install.R
 RUN cd /usr/local/vast-tools; ./automatic_Hsa_Mmus_install.R --quiet
 
 # Let's put in PATH
