@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.6.3
+FROM rocker/r-ver:4.0
 
 # File Author / Maintainer
 MAINTAINER Toni Hermoso Pulido <toni.hermoso@crg.eu>
