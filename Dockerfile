@@ -31,7 +31,7 @@ RUN rm /usr/local/v${PSIPLOT_VERSION}.tar.gz
 # Install Vast-tools
 RUN mkdir -p /usr/local/vast-tools
 COPY vast-tools /usr/local/vast-tools
-COPY install.R /usr/local/vast-tools
+COPY automatic_Hsa_Mmus_install.R /usr/local/vast-tools
 COPY lib /usr/local/vast-tools/lib
 COPY bin /usr/local/vast-tools/bin
 COPY R /usr/local/vast-tools/R
