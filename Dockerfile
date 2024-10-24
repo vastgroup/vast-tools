@@ -8,7 +8,7 @@ ARG PSIPLOT_VERSION=2.3.0
 
 # Install external dependencies 
 RUN apt-get update -qq && apt-get upgrade -y && apt-get install -y --no-install-recommends python curl libcurl4-openssl-dev libssl-dev libsqlite3-dev libxml2-dev qpdf git
-RUN apt-get install -y build-essential libharfbuzz-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libfribidi-dev
+RUN apt-get install -y build-essential libharfbuzz-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libfribidi-dev wget
 
 # Install bowtie 
 RUN cd /usr/local; curl --fail --silent --show-error --location --remote-name https://github.com/BenLangmead/bowtie/releases/download/v$BOWTIE_VERSION/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip
@@ -31,7 +31,7 @@ RUN rm /usr/local/v${PSIPLOT_VERSION}.tar.gz
 # Install Vast-tools
 RUN mkdir -p /usr/local/vast-tools
 COPY vast-tools /usr/local/vast-tools
-COPY automatic_Hsa_Mmus_install.R /usr/local/vast-tools
+COPY ./automatic_Hsa_Mmus_install.R /usr/local/vast-tools/
 COPY lib /usr/local/vast-tools/lib
 COPY bin /usr/local/vast-tools/bin
 COPY R /usr/local/vast-tools/R
@@ -41,7 +41,7 @@ VOLUME /VASTDB
 
 RUN cd /usr/local/vast-tools; ln -s /VASTDB .
 
-RUN chmod +x ./automatic_Hsa_Mmus_install.R
+RUN cd /usr/local/vast-tools; chmod +x ./automatic_Hsa_Mmus_install.R
 RUN cd /usr/local/vast-tools; ./automatic_Hsa_Mmus_install.R --quiet
 
 # Let's put in PATH
