@@ -55,5 +55,6 @@ RUN set -x; rm -rf /var/lib/apt/lists/*
 
 # Shared mounting
 VOLUME /share
-
+# Set the default command
+CMD ["bash"]
 
