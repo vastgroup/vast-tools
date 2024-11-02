@@ -34,7 +34,7 @@ RUN curl -fsSL https://github.com/kcha/psiplot/archive/v${PSIPLOT_VERSION}.tar.g
     rm /tmp/psiplot.tar.gz
 
 # Copy and install Vast-tools
-COPY vast-tools /usr/local/vast-tools
+COPY . /usr/local/vast-tools/
 RUN chmod +x /usr/local/vast-tools/*.R && \
     ln -s /usr/local/vast-tools/vast-tools /usr/local/bin/vast-tools
 
@@ -42,7 +42,7 @@ RUN chmod +x /usr/local/vast-tools/*.R && \
 RUN mkdir -p /usr/local/vast-tools/VASTDB
 
 # Run VAST-TOOLS setup script
-COPY ./automatic_Hsa_Mmus_install.R /usr/local/vast-tools/
+WORKDIR /usr/local/vast-tools
 RUN /usr/local/vast-tools/automatic_Hsa_Mmus_install.R --quiet
 
 # Define shared volume and set default command
