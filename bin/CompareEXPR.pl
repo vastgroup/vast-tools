@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 ### General script to get differentially spliced events based on dPSI differences 
 
 ## LOG:
@@ -235,9 +235,30 @@ if (defined $normalize){
     close TEMP;
     close GE_2;
 
+    ### added for installation
+    my $install_method;
+    
+    if (defined $install_limma){
+	my $Rcall = `R --version`;
+	my $Rversion;
+	if (defined $Rcall){
+	    ($Rversion) = $Rcall =~ /R version (.+?\..+?)\..+? /;
+	}
+
+	if ($Rversion !~ /\d/){print "R version not identified: $Rversion\n";}
+	elsif ($Rversion >= 3.5){
+	    print "R version $Rversion identified\n";
+	    $install_method = "if (!require(\"BiocManager\", quietly = TRUE))\n    install.packages(\"BiocManager\", repos = \"http://cran.us.r-project.org\")\n".
+		"     BiocManager::install(\"limma\")\n";
+	}
+	else {
+	    print "R version $Rversion identified\n";
+	    $install_method = "source(\"https://bioconductor.org/biocLite.R\")\n   biocLite(\"limma\")\n";
+	}
+    }
+    
     open (Temp_R, ">$input_path/temp.R");
-    print Temp_R "source(\"https://bioconductor.org/biocLite.R\")
-biocLite(\"limma\")\n" if (defined $install_limma);
+    print Temp_R "$install_method" if (defined $install_limma);
 
     print Temp_R "
 library(limma)
