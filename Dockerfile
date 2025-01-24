@@ -6,7 +6,7 @@ ARG BOWTIE_VERSION=1.2.1.1
 ARG PSIPLOT_VERSION=2.3.0
 
 # Install external dependencies 
-RUN apt-get update -qq && apt-get upgrade -y && apt-get install -y --no-install-recommends python curl libcurl4-openssl-dev libssl-dev libsqlite3-dev libxml2-dev qpdf git
+RUN apt-get update --allow-releaseinfo-change && apt-get upgrade -y && apt-get install -y --no-install-recommends python curl libcurl4-openssl-dev libssl-dev libsqlite3-dev libxml2-dev qpdf git
 RUN apt-get install -y build-essential libharfbuzz-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libfribidi-dev
 
 # Install bowtie 
