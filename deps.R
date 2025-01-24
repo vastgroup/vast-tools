@@ -1,4 +1,4 @@
-install.packages('devtools', dependencies=TRUE, version='2.4.5', repos='cran.rstudio.com/');
+install.packages('devtools', version='2.4.5', repos='cran.rstudio.com/');
 
 require(devtools)
 install_version('getopt',dependencies=TRUE, version='1.20.3', repos='cran.rstudio.com/');
