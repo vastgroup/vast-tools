@@ -20,10 +20,10 @@ RUN cd /usr/local; rm bowtie-${BOWTIE_VERSION}-linux-x86_64.zip
 # Let's put in PATH
 RUN cd /usr/local/bin; ln -s ../bowtie-${BOWTIE_VERSION}/bowtie* .
 
+# Not used anymore
 # COPY deps.R /usr/local
-#
 # RUN Rscript /usr/local/deps.R > /tmp/deps.log
-#
+
 # Github packages
 RUN cd /usr/local/; curl --fail --silent --show-error --location --remote-name https://github.com/trevorld/r-getopt/archive/v${GETOPT_VERSION}.tar.gz
 RUN cd /usr/local/; curl --fail --silent --show-error --location --remote-name https://github.com/trevorld/r-optparse/archive/v${OPTPARSE_VERSION}.tar.gz
