@@ -1,7 +1,6 @@
-FROM rocker/r-ver:3.6.3
+FROM rocker/r-tidyverse:3.6.3
 
-# File Author / Maintainer
-MAINTAINER Toni Hermoso Pulido <toni.hermoso@crg.eu>
+LABEL maintainer="Toni Hermoso Pulido <toni.hermoso@crg.eu>"
 
 ARG BOWTIE_VERSION=1.2.1.1
 ARG PSIPLOT_VERSION=2.3.0
