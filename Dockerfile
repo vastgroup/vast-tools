@@ -1,4 +1,4 @@
-FROM rocker/r-tidyverse:3.6.3
+FROM rocker/tidyverse:3.6.3
 
 LABEL maintainer="Toni Hermoso Pulido <toni.hermoso@crg.eu>"
 
