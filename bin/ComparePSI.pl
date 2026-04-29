@@ -592,18 +592,18 @@ while (<PSI>){
 		    unless ($use_names){
 			if (defined $ID_gene{$t[1]}){
 			    print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
-			    $doneIR_UP{$ID_gene{$t[1]}}=1;
+			    $doneIR_UP{$ID_gene{$t[1]}}=1 if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			    $doneEXSK{$ID_gene{$t[1]}}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    print ALL_EV "$ID_gene{$t[1]}\n" if !defined $doneALL{$ID_gene{$t[1]}};
 			    $doneALL{$ID_gene{$t[1]}}=1;
 			}
 		    }
 		    else {
 			print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
-			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
+			$doneIR_UP{$t[0]}=1 if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
 			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
@@ -621,22 +621,22 @@ while (<PSI>){
 		}
 		
 		#print for GO
-		if (defined$get_GO){
+		if (defined $get_GO){
 		    unless ($use_names){
 			if (defined $ID_gene{$t[1]}){
 			    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
-			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
+			    $doneIR_DOWN{$ID_gene{$t[1]}}=1 if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			    $doneEXSK{$ID_gene{$t[1]}}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
 			    $doneALL{$ID_gene{$t[1]}}=1;	
 			}
 		    }
 		    else {
 			print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
-			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
+			$doneIR_DOWN{$t[0]}=1 if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
 			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
@@ -723,18 +723,18 @@ while (<PSI>){
 		    unless ($use_names){
 			if (defined $ID_gene{$t[1]}){
 			    print IR_UP "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
-			    $doneIR_UP{$ID_gene{$t[1]}}=1;
+			    $doneIR_UP{$ID_gene{$t[1]}}=1 if ($type eq "IR") && (!defined $doneIR_UP{$ID_gene{$t[1]}});
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			    $doneEXSK{$ID_gene{$t[1]}}=1;
+			    $doneEXSK{$ID_gene{$t[1]}}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
 			    $doneALL{$ID_gene{$t[1]}}=1;
 			}
 		    }
 		    else {
 			print IR_UP "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
-			$doneIR_UP{$t[0]}=1 if (defined $t[0]);
+			$doneIR_UP{$t[0]}=1 if ($type eq "IR") && (!defined $doneIR_UP{$t[0]}) && (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
 			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
@@ -756,18 +756,18 @@ while (<PSI>){
 		    unless ($use_names){
 			if (defined $ID_gene{$t[1]}){
 			    print IR_DOWN "$ID_gene{$t[1]}\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
-			    $doneIR_DOWN{$ID_gene{$t[1]}}=1;
+			    $doneIR_DOWN{$ID_gene{$t[1]}}=1 if ($type eq "IR") && (!defined $doneIR_DOWN{$ID_gene{$t[1]}});
 			    print EXSK "$ID_gene{$t[1]}\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
-			    $doneEXSK{$ID_gene{$t[1]}}=1;	
+			    $doneEXSK{$ID_gene{$t[1]}}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$ID_gene{$t[1]}});
 			    print ALL_EV "$ID_gene{$t[1]}\n" if (!defined $doneALL{$ID_gene{$t[1]}});
 			    $doneALL{$ID_gene{$t[1]}}=1;	
 			}	
 		    }
 		    else {
 			print IR_DOWN "$t[0]\n" if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
-			$doneIR_DOWN{$t[0]}=1 if (defined $t[0]);
+			$doneIR_DOWN{$t[0]}=1 if ($type eq "IR") && (!defined $doneIR_DOWN{$t[0]}) && (defined $t[0]);
 			print EXSK "$t[0]\n" if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
-			$doneEXSK{$t[0]}=1 if (defined $t[0]);
+			$doneEXSK{$t[0]}=1 if ($type eq "AltEx" || $type eq "MIC") && (!defined $doneEXSK{$t[0]}) && (defined $t[0]);
 			print ALL_EV "$t[0]\n" if (!defined $doneALL{$t[0]}) && (defined $t[0]);
 			$doneALL{$t[0]}=1 if (defined $t[0]);
 		    }
